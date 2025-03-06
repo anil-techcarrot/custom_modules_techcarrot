@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="rental_subscription_quotation_tree_view" model="ir.ui.view">
+        <field name="name">sale.subscription.quotation.list</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale_subscription.sale_subscription_view_tree"/>
+        <field name="arch" type="xml">
+            <field name="user_id" position="before">
+                <field name="tag_ids"
+                       widget="many2many_tags"
+                       options="{'color_field': 'color'}"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="techcarret_rental_order_view_tree" model="ir.ui.view">
+        <field name="name">rental.order.list</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale_renting.rental_order_view_tree"/>
+        <field name="arch" type="xml">
+            <field name="date_order" position="before">
+                <field name="tag_ids"
+                       widget="many2many_tags"
+                       options="{'color_field': 'color'}"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_tec_move_form" model="ir.ui.view">
+    <field name="name">account.move.form</field>
+    <field name="model">account.move</field>
+    <field name="inherit_id" ref="account.view_move_form"/>
+    <field name="arch" type="xml">
+        <xpath expr="//field[@name='invoice_line_ids']/list/field[@name='analytic_distribution']" position='replace'>
+            <field name="analytic_distribution" widget="analytic_distribution"
+                   string="Analytic"
+                   groups="analytic.group_analytic_accounting"
+                   options="{'product_field': 'product_id', 'account_field': 'account_id', 'amount_field': 'price_subtotal'}"
+                   business_domain_compute="parent.move_type in ['out_invoice', 'out_refund', 'out_receipt'] and 'invoice' or parent.move_type in ['in_invoice', 'in_refund', 'in_receipt'] and 'bill' or 'general'"/>
+        </xpath>
+    </field>
+    </record>
+
+    <record id="techcarret_all_so_order_view_form" model="ir.ui.view">
+    <field name="name">rental.order.form</field>
+    <field name="model">sale.order</field>
+    <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='order_line']/list/field[@name='analytic_distribution']" position='replace'>
+                <field name="analytic_distribution" widget="analytic_distribution"
+                       groups="analytic.group_analytic_accounting"
+                       options="{'product_field': 'product_id', 'business_domain': 'sale_order', 'amount_field': 'price_subtotal'}"/>
+            </xpath>
+            <xpath expr="//field[@name='partner_shipping_id']" position='after'>
+                <field name="r_analytic_plan_id" invisible="is_rental_order != True" options="{'no_quick_create': True, 'no_create_edit': True, 'no_open': True}"/>
+                <field name="r_analytic_sub_plan_id" invisible="is_rental_order != True" options="{'no_quick_create': True, 'no_create_edit': True, 'no_open': True}"/>
+                <field name="s_analytic_plan_id" invisible="is_rental_order == True or is_tec_subscription == True" options="{'no_quick_create': True, 'no_create_edit': True, 'no_open': True}"/>
+                <field name="s_analytic_sub_plan_id" invisible="is_rental_order == True or is_tec_subscription == True" options="{'no_quick_create': True, 'no_create_edit': True, 'no_open': True}"/>
+                <field name="ss_analytic_plan_id" invisible="is_tec_subscription != True" options="{'no_quick_create': True, 'no_create_edit': True, 'no_open': True}"/>
+                <field name="ss_analytic_sub_plan_id" invisible="is_tec_subscription != True" options="{'no_quick_create': True, 'no_create_edit': True, 'no_open': True}"/>
+                <field name="practice_id" invisible="is_rental_order==True"  required="is_rental_order != True"/>
+                <field name="is_tec_subscription" invisible="1"/>
+                <field name="project_type_id" required="is_rental_order != True or is_tec_subscription != True" invisible="is_rental_order == True or is_tec_subscription == True"/>
+                <field name="project_code" required="is_rental_order != True or is_tec_subscription != True" invisible="is_rental_order == True or is_tec_subscription == True"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="tec_sale_subscription_view_search" model="ir.ui.view">
+        <field name="name">sale.order.search</field>
+        <field name="model">sale.order</field>
+        <field name="arch" type="xml">
+            <search string="Subscriptions">
+                <field name="name" string="Order" filter_domain="['|', ('name', 'ilike', self), ('client_order_ref', 'ilike', self)]"/>
+                <field name="partner_id" operator="child_of"/>
+                <field name="user_id"/>
+                <field name="team_id"/>
+                <field name="order_line" string="Product" filter_domain="[('order_line.product_id', 'ilike', self)]"/>
+                <field name="sale_order_template_id" groups="sales_team.group_sale_manager"/>
+                <filter name="my_subscriptions" string="My Subscriptions" domain="[('user_id','=',uid), ('subscription_state', '!=', False)]"/>
+                <filter string="Unassigned" name="contracts_not_assigned" help="Subscriptions that are not assigned to an account manager." domain="[('user_id', '=', False)]"/>
+                <separator/>
+                <filter name="quotations" string="Quotations" domain="[('subscription_state','in', ['1_draft', '2_renewal'])]"/>
+                <filter name="progress" string="In Progress" domain="[('subscription_state','=', '3_progress')]"/>
+                <filter name="paused" string="Paused" domain="[('subscription_state','=', '4_paused')]"/>
+                <filter name="churned" string="Churned" domain="[('subscription_state','=', '6_churn')]"/>
+                <separator/>
+                <filter name="to_renew" string="To Invoice" domain="[('next_invoice_date', '&lt;=', context_today().strftime('%Y-%m-%d')), ('subscription_state', 'in', ('3_progress', '4_paused'))]"/>
+                <separator/>
+                <filter name="payment_exception" string="Failed Payments" domain="[('payment_exception','=', True)]" help="Contracts whose payment has failed"/>
+                <separator/>
+                <filter name="good" string="Good Health" domain="[('health', '=', 'done')]"/>
+                <filter name="bad" string="Bad Health" domain="[('health', '=', 'bad')]"/>
+                <separator/>
+                <filter name="first_contract_date" date="first_contract_date"/>
+                <separator/>
+                <filter name="recurring_next_date" string="Next invoice Date" date="next_invoice_date"/>
+                <separator/>
+                <filter name="end_date" date="end_date"/>
+                <separator/>
+                <filter invisible="1" string="Late Activities" name="activities_overdue"
+                        domain="[('my_activity_date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"
+                        help="Show all records which has next action date is before today"/>
+                <filter invisible="1" string="Today Activities" name="activities_today"
+                        domain="[('my_activity_date_deadline', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter invisible="1" string="Future Activities" name="activities_upcoming_all"
+                        domain="[('my_activity_date_deadline', '&gt;', context_today().strftime('%Y-%m-%d'))
+                        ]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Salesperson" name="sales_person" domain="[]" context="{'group_by':'user_id'}"/>
+                    <filter string="Sales Team" name="sales_team" domain="[]" context="{'group_by':'team_id'}"/>
+                    <filter string="Subscription Status" name="subscription_state" domain="[]" context="{'group_by':'subscription_state'}"/>
+                    <filter string="Template" name="template" domain="[]" context="{'group_by':'sale_order_template_id'}" groups="sales_team.group_sale_manager"/>
+                    <filter string="Recurring Plan" name="plan" domain="[]" context="{'group_by' : 'plan_id'}" />
+                    <filter string="Customer" name="customer" domain="[]" context="{'group_by':'partner_id'}"/>
+                    <filter string="First Contract Date" name="first_contract_month" domain="[]" context="{'group_by' : 'first_contract_date'}"/>
+                    <filter string="End Date" name="end_month" domain="[]" context="{'group_by' : 'end_date'}" />
+                    <filter string="Next Invoice Date" name="next_invoice_date" domain="[]" context="{'group_by' : 'next_invoice_date'}" />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="sale_subscription.sale_subscription_action" model="ir.actions.act_window">
+        <field name="name">Subscriptions</field>
+        <field name="path">subscriptions</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,kanban,form,pivot,graph,cohort,activity</field>
+        <field name="context">{
+            'default_is_tec_subscription': '1',
+            'default_subscription_state': '1_draft',
+            'search_default_progress': 1,
+            'search_default_paused': 1,
+            }</field>
+        <field name="domain">[('subscription_state', 'not in', ['2_renewal', '5_renewed', '7_upsell', False])]</field>
+        <field name="search_view_id" eval='tec_sale_subscription_view_search'/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_subscription_graph">
+                Create a new subscription
+            </p><p>
+            Automate invoices and payments, simplify upsell quotes, reduce churn and get insights (MRR, churn, CLTV, ...)
+        </p>
+        </field>
+    </record>
+
+    <record id="view_rental_history_filter" model="ir.ui.view">
+        <field name="name">rental.invoice.history.list.select</field>
+        <field name="model">rental.invoice.history</field>
+        <field name="arch" type="xml">
+            <search string="Search modules">
+                <field name="rental_sale_id"/>
+                <field name="partner_id"/>
+                <group expand="0" string="Group By">
+                    <filter string="Rental Order" name="rsale" domain="[]" context="{'group_by':'rental_sale_id'}"/>
+                    <filter string="Partner" name="rpartner" domain="[]" context="{'group_by':'partner_id'}"/>
+                    <filter string="Rental Status" name="state" domain="[]" context="{'group_by':'state'}"/>
+                    <filter string="Company" name="company_id" domain="[]" context="{'group_by':'company_id'}"/>
+                </group>
+                <searchpanel>
+                    <field name="rental_sale_id" string="Rental Order"/>
+                    <field name="partner_id" string="Partner"/>
+                    <field name="company_id" string="Company"/>
+                </searchpanel>
+            </search>
+        </field>
+    </record>
+
+    <record id="rental_price_order_tree" model="ir.ui.view">
+        <field name="name">rental.invoice.history.list</field>
+        <field name="model">rental.invoice.history</field>
+        <field name="arch" type="xml">
+            <list class="o_sale_order" string="Sales Orders" delete="false" edit="false" create="false">
+                <field name="rentalnext_invoice_date"/>
+                <field name="rental_sale_id"/>
+                <field name="company_id"/>
+                <field name="partner_id"/>
+                <field name="sale_state" string="Rental Status"/>
+                <field name="inv_ref_id"/>
+                <field name="invoice_state" string="Invoice Status"/>
+                <field name="state" column_invisible="1"/>
+                <field name="is_ready_to_invoice" column_invisible="1"/>
+                <button type="object" invisible="is_ready_to_invoice !=True or sale_state !='sale' or state != 'draft'" name="create_invoice" string="Create Invoice" class="btn-primary"/>
+                <button type="object" invisible="is_ready_to_invoice==True or sale_state !='sale' or state != 'draft'" name="create_invoice" string="Create Invoice" class="btn-secondary"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="tech_rental_invoices" model="ir.actions.act_window">
+        <field name="name">Invoice to create</field>
+        <field name="res_model">rental.invoice.history</field>
+        <field name="view_mode">list</field>
+        <field name="search_view_id" ref="view_rental_history_filter"/>
+        <field name="path">tech-rental-invoice</field>
+    </record>
+
+    <menuitem id="menu_tech_rental_schedule_invoices"
+              name="Rental Invoices"
+              parent="sale_renting.rental_menu_root"
+              action="tech_rental_invoices"
+              sequence="2"/>
+
+    <record id="product_template_form_techcarret_view" model="ir.ui.view">
+    <field name="name">product.template.common.form</field>
+    <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='type']" position="after">
+                <field name="employee_id"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="rental_form_view_inherit_so_origin" model="ir.ui.view">
+        <field name="name">rental.order.form.inherit</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale_renting.rental_order_primary_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='order_lines']" position='after'>
+                <page string="Rental Invoices" name="rental_inv_history">
+                    <field name="rental_inv_line_ids" mode="list">
+                        <list editable="bottom">
+                            <field name="rental_sale_id" column_invisible="1"/>
+                            <field name="employee_id" readonly="parent.state!='draft'" force_save="1"/>
+                            <field name="rentalnext_invoice_date" readonly="parent.state!='draft'" force_save="1" column_invisible="parent.recurring_period_interval in ['hour']"/>
+                            <field name="rentalnext_invoice_date_time" readonly="parent.state!='draft'" force_save="1" column_invisible="parent.recurring_period_interval not in ['hour']"/>
+                            <field name="work_entry_ids" column_invisible="1" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                            <field name="planned_days" readonly="1" force_save="1"/>
+                            <field name="worked_days"/>
+                            <field name="planned_hours" readonly="parent.state!='draft'" force_save="1" column_invisible="1"/>
+                            <field name="worked_hours" readonly="parent.state!='draft'" force_save="1" column_invisible="1"/>
+                            <!--<field name="planned_days" column_invisible="parent.recurring_period_interval in ['hour']"/>
+                            <field name="worked_days" column_invisible="parent.recurring_period_interval in ['hour']"/>
+                            <field name="planned_hours" column_invisible="parent.recurring_period_interval not in ['hour']" widget="float_time"/>
+                            <field name="worked_hours" column_invisible="parent.recurring_period_interval not in ['hour']" widget="float_time"/>-->
+                            <field name="inv_ref_id" readonly="parent.state!='draft'" force_save="1"/>
+                            <field name="state" string="Status" column_invisible="1"/>
+                            <field name="invoice_state" column_invisible="1"/>
+                            <field name="is_ready_to_invoice" column_invisible="1"/>
+                            <button type="object" invisible="is_ready_to_invoice !=True or sale_state !='sale' or state != 'draft'" name="create_invoice" string="Create Invoice" class="btn-primary"/>
+                            <button type="object" invisible="is_ready_to_invoice==True or sale_state !='sale' or state != 'draft'" name="create_invoice" string="Create Invoice" class="btn-secondary"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+            <xpath expr="//button[@name='action_update_rental_prices']" position='replace'>
+                <button name="action_update_rental_prices" type="object"
+                        string="Update Rental Prices"
+                        help="Recompute all prices based on this duration"
+                        class="btn-link mb-1 px-0" icon="fa-refresh"
+                        confirm="This will update the unit price of all rental products based on the new period."
+                        invisible="1"/>
+            </xpath>
+            <xpath expr="//label[@for='duration_days']" position='before'>
+                <field name="recurring_period_interval" invisible="1"/>
+                <field name="invoice_freequency" readonly="1" force_save="1"/>
+                <!--<field name="invoice_freequency" widget="selection" invisible="is_rental_order == False"
+                       required="is_rental_order == True" readonly="state not in ['draft']"/>-->
+                <field name="rentalfirst_invoice_date"
+                       invisible="is_rental_order == False or recurring_period_interval == 'hour'"
+                       required="recurring_period_interval != 'hour'" readonly="state not in ['draft']"/>
+                <field name="rentalnext_invoice_date" readonly="1"
+                       invisible="not rentalnext_invoice_date or recurring_period_interval == 'hour'" force_save="1"/>
+                <field name="do_create_invoice_schedule" invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='rental_start_date']" position='replace'>
+                <field name="rental_start_date"
+                       string="Rental period"
+                       widget="daterange"
+                       readonly="state not in ['draft']" force_save="1"
+                       options="{'end_date_field': 'rental_return_date'}"
+                       invisible="not is_rental_order"
+                       required="has_rented_products"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!--Cron job for creating invoices-->
+    <record id="rental_invoice_automation_month_cron" model="ir.cron">
+        <field name="name">Rental invoice month automation</field>
+        <field name="model_id" ref="model_sale_order"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_create_rental_month_invoices()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">months</field>
+        <field name="active" eval="True"/>
+    </record>
+
+    <record id="rental_invoice_automation_daily_cron" model="ir.cron">
+        <field name="name">Rental invoice daily automation</field>
+        <field name="model_id" ref="model_sale_order"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_create_rental_daily_invoices()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active" eval="True"/>
+    </record>
+
+</odoo>

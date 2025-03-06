@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<data>
+		<record id="import_tech_attendance_tree_view" model="ir.ui.view">
+			<field name="name">import.attendance.tree.view</field>
+			<field name="model">import.attendance</field>
+			<field name="arch" type="xml">
+				<list string="Import Attendance">
+					<field name="date_start"/>
+					<field name="date_end"/>
+					<field name="no_employee"/>
+					<field name="state"/>
+				</list>
+			</field>
+		</record>
+
+		<record id="import_tech_attendance_form_view" model="ir.ui.view">
+			<field name="name">import.attendance.form.view</field>
+			<field name="model">import.attendance</field>
+			<field name="arch" type="xml">
+			<form string="Import Attendance">
+				<header>
+					<button name="rollback_data" invisible="state in ('draft')" string="Rollback Import" type="object" class="oe_highlight"/>
+					<button name="import_attendance" invisible="state in ('imported')" string="Import" type="object" class="oe_highlight"/>
+					<field name="state" widget="statusbar" statusbar_visible="draft,imported"/>
+				</header>
+				<sheet>
+					<group>
+						<group>
+							<field name="date_start" invisible="1"/>
+							<field name="date_end" invisible="1"/>
+							<field name="no_employee" invisible="1"/>
+						</group>
+						<group>
+							<field name="file_type" widget="radio" invisible="1"/>
+							<field name="no_employee" invisible="1"/>
+						</group>
+					</group>
+					<notebook>
+						<page string="Attendance Data">
+							<group>
+								<group><field name="file" placeholder="Upload File" nolabel="1" readonly="state in ('imported')"/></group>
+								<group></group>
+							</group>
+							<group>
+								<group>
+									<field name="attendance_data_ids" nolabel="1" string="Stock Data" readonly="state in ('imported')">
+										<list editable="top">
+											<field name="employee_id"/>
+											<field name="date_start"/>
+											<field name="date_end"/>
+											<field name="worked_days"/>
+											<field name="d_m_y" column_invisible="1"/>
+											<field name="sale_id" readonly="1" force_save="1"/>
+										</list>
+									</field>
+								</group>
+							</group>
+						</page>
+					</notebook>
+				</sheet>
+			</form>
+			</field>
+		</record>
+
+		<record id="import_tech_attendance_action" model="ir.actions.act_window">
+            <field name="name">Import Attendance</field>
+            <field name="res_model">import.attendance</field>
+            <field name="view_mode">list,form</field>
+        </record>
+
+		<menuitem id="menu_gt_import_attendance_main" name="Import Attendance" action="import_tech_attendance_action" parent="sale_renting.rental_menu_root" sequence="2"/>
+
+	</data>
+</odoo>
