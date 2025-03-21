@@ -138,7 +138,7 @@ class Rentals(models.Model):
         inverse_name='rental_sale_id',
         string="Rental History",
         copy=True, auto_join=True)
-    rentalfirst_invoice_date = fields.Date(string='First Invoice Date', default=fields.Date.today())
+    rentalfirst_invoice_date = fields.Date(string='First Invoice Date', default=fields.Date.context_today)
     rentalnext_invoice_date = fields.Date(string='Next Invoice Date', copy=False)
     recurring_period_interval = fields.Selection([
         ('hour', 'Hours'),
@@ -841,6 +841,11 @@ class RentalInvoiceHistory(models.Model):
     planned_days = fields.Integer("Planned QTY")
     worked_days = fields.Integer("Worked QTY")
     company_id = fields.Many2one('res.company', required=True, default=lambda self: self.env.company)
+
+    @api.constrains('worked_days')
+    def _check_worked_days(self):
+        if self.worked_days <0 or self.worked_days >31:
+            raise UserError(_('Worked days must be between 1-31 days.'))
 
     def create_invoice(self):
         for line in self:

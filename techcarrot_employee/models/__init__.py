@@ -8,3 +8,4 @@ from . import tec_exit_type
 from . import tec_exit_reason
 from . import tec_employee_practice
 from . import tec_sub_practice
+from . import tec_employee_category

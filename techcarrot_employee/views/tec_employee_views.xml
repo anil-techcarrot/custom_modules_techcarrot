@@ -17,6 +17,15 @@
             <xpath expr="//field[@name='department_id']" position="before">
                 <field name="emp_code"/>
             </xpath>
+            <xpath expr="//field[@name='mobile_phone']" position="after">
+                <field name="country_code_for_work_mobile_id"/>
+            </xpath>
+            <xpath expr="//field[@name='next_appraisal_date']" position="after">
+                <field name="billable"/>
+                <field name="billing_amt"/>
+                <field name="billing_currency_id"/>
+                <field name="emp_category_id" options="{'no_open': True, 'no_create': True}"/>
+            </xpath>
         </field>
     </record>
 
@@ -64,6 +73,7 @@
                                 <field name="iban_no" placeholder="IBAN Number" class="o_address_iban_no"/>
                                 <field name="ifsc_code" placeholder="Bank SWIFT / IFSC Code" class="o_address_ifsc_code"/>
                             </div>
+                            <field name="bank_name"/>
                         </group>
 
                         <group string="Document and Personal Details">
@@ -72,6 +82,7 @@
                             <field name="uan" string="UAN"/>
                             <field name="pf_number" string="PF Number"/>
                             <field name="country_residences_id" string="Country of Residence"/>
+                            <field name="country_code_for_personal_mob_no" string="Country Code"/>
                             <field name="whatsapp" string="WhatsApp"/>
                             <field name="doj" string="DOJ"/>
                             <field name="original_hire_date" string="Original Hire Date"/>
@@ -160,6 +171,7 @@
                             <field name="issue_countries_id" string="Passport Issuing Country"/>
                             <field name="entry_exit_date" string="First Entry Date / Exit Date"/>
                             <field name="visa_sponsor" string="Visa Sponsor"/>
+                            <field name="visa_issue_date" string="Visa Issue Date"/>
                             <field name="emirates_id_number" string="Emirates ID Number"/>
                             <field name="emirates_issue_date" string="Emirates ID Issue Date"/>
                             <field name="emirates_expiry_date" string="Emirates ID Expiry Date"/>
@@ -235,6 +247,7 @@
                             <field name="industry_ref_name" string="Reference Name"/>
                             <field name="industry_ref_email" string="Reference Email"/>
                             <field name="industry_ref_mob_no" string="Reference Mobile Number"/>
+                            <field name="country_code_for_industry_id" string="Country Code"/>
                             <field name="previous_company_name" string="Previous Company Name"/>
                             <field name="designation" string="Designation"/>
                             <field name="period_in_company" string="Period in Company"/>
@@ -267,6 +280,18 @@
                     </group>
                 </page>
             </page>
+        </field>
+    </record>
+    <!--Inherit the Private Information tab and Inherit the emergency group and adding a field-->
+    <record id="view_employee_form_private_info_tab_inherit" model="ir.ui.view">
+        <field name="name">hr.employee.private.info.form.inherit</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='emergency']/separator" position="before">
+                <!-- Adding country code field -->
+                <field name="country_code_for_emergency_contact_person_phone_no" string="Country Code"/>
+            </xpath>
         </field>
     </record>
 </odoo>

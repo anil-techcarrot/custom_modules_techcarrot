@@ -257,16 +257,16 @@
                        options="{'product_field': 'product_id', 'business_domain': 'sale_order', 'amount_field': 'price_subtotal'}"/>
             </xpath>
             <xpath expr="//field[@name='partner_shipping_id']" position='after'>
-                <field name="r_analytic_plan_id" invisible="is_rental_order != True" options="{'no_quick_create': True, 'no_create_edit': True, 'no_open': True}"/>
-                <field name="r_analytic_sub_plan_id" invisible="is_rental_order != True" options="{'no_quick_create': True, 'no_create_edit': True, 'no_open': True}"/>
-                <field name="s_analytic_plan_id" invisible="is_rental_order == True or is_tec_subscription == True" options="{'no_quick_create': True, 'no_create_edit': True, 'no_open': True}"/>
-                <field name="s_analytic_sub_plan_id" invisible="is_rental_order == True or is_tec_subscription == True" options="{'no_quick_create': True, 'no_create_edit': True, 'no_open': True}"/>
-                <field name="ss_analytic_plan_id" invisible="is_tec_subscription != True" options="{'no_quick_create': True, 'no_create_edit': True, 'no_open': True}"/>
-                <field name="ss_analytic_sub_plan_id" invisible="is_tec_subscription != True" options="{'no_quick_create': True, 'no_create_edit': True, 'no_open': True}"/>
-                <field name="practice_id" invisible="is_rental_order==True"  required="is_rental_order != True"/>
+                <field name="r_analytic_plan_id" readonly="state!='draft'" invisible="is_rental_order != True" options="{'no_quick_create': True, 'no_create_edit': True, 'no_open': True}"/>
+                <field name="r_analytic_sub_plan_id" readonly="state!='draft'" invisible="is_rental_order != True" options="{'no_quick_create': True, 'no_create_edit': True, 'no_open': True}"/>
+                <field name="s_analytic_plan_id" readonly="state!='draft'" invisible="is_rental_order == True or is_tec_subscription == True" options="{'no_quick_create': True, 'no_create_edit': True, 'no_open': True}"/>
+                <field name="s_analytic_sub_plan_id" readonly="state!='draft'" invisible="is_rental_order == True or is_tec_subscription == True" options="{'no_quick_create': True, 'no_create_edit': True, 'no_open': True}"/>
+                <field name="ss_analytic_plan_id" readonly="state!='draft'" invisible="is_tec_subscription != True" options="{'no_quick_create': True, 'no_create_edit': True, 'no_open': True}"/>
+                <field name="ss_analytic_sub_plan_id" readonly="state!='draft'" invisible="is_tec_subscription != True" options="{'no_quick_create': True, 'no_create_edit': True, 'no_open': True}"/>
+                <field name="practice_id" readonly="state!='draft'" invisible="is_rental_order==True"  required="is_rental_order != True"/>
                 <field name="is_tec_subscription" invisible="1"/>
-                <field name="project_type_id" required="is_rental_order != True or is_tec_subscription != True" invisible="is_rental_order == True or is_tec_subscription == True"/>
-                <field name="project_code" required="is_tec_subscription != True" invisible="is_tec_subscription == True"/>
+                <field name="project_type_id" readonly="state!='draft'" required="is_rental_order != True or is_tec_subscription != True" invisible="is_rental_order == True or is_tec_subscription == True"/>
+                <field name="project_code" required="is_tec_subscription != True" invisible="is_tec_subscription == True" readonly="state!='draft'"/>
             </xpath>
         </field>
     </record>

@@ -7,3 +7,4 @@ access_exit_reason,exit.reason,model_exit_reason,base.group_user,1,1,1,1
 access_tec_religion,tec.religion,model_tec_religion,base.group_user,1,1,1,1
 access_employee_practice,employee.practice,model_employee_practice,base.group_user,1,1,1,1
 access_sub_practice,sub.practice,model_sub_practice,base.group_user,1,1,1,1
+access_employee_category,employee.category,model_employee_category,base.group_user,1,1,1,1

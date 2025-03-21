@@ -19,7 +19,8 @@
              'views/tec_exit_reason_views.xml',
              'views/tec_religion_views.xml',
              'views/tec_employee_practice_views.xml',
-             'views/tec_sub_practice_views.xml',],
+             'views/tec_sub_practice_views.xml',
+             'views/tec_employee_category_views.xml',],
     "application": True,
     "installable": True,
     "auto_install": False

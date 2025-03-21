@@ -31,6 +31,7 @@ class HrEmployeeInherit(models.Model):
     issue_countries_id = fields.Many2one('res.country', string="Passport Issuing Country", copy=False)
     entry_exit_date = fields.Date('First Entry Date / Exit Date', copy=False)
     visa_sponsor = fields.Char('Visa Sponsor', copy=False)
+    visa_issue_date = fields.Date('Visa Issue Date', copy=False)
     emirates_id_number = fields.Char('Emirates ID Number', copy=False)
     emirates_issue_date = fields.Date('Emirates ID Issue Date', copy=False)
     emirates_expiry_date = fields.Date('Emirates ID Expiry Date', copy=False)
@@ -39,6 +40,7 @@ class HrEmployeeInherit(models.Model):
     uan = fields.Char('UAN', copy=False)
     pf_number = fields.Char('PF Number', copy=False)
     country_residences_id = fields.Many2one('res.country', string="Country of Residence", copy=False)
+    country_code_for_personal_mob_no = fields.Integer(string='Country Code', related='country_residences_id.phone_code', copy=False)
     whatsapp = fields.Char('WhatsApp', copy=False)
     doj = fields.Date('DOJ', copy=False)
     original_hire_date = fields.Date('Original Hire Date', copy=False)
@@ -142,7 +144,7 @@ class HrEmployeeInherit(models.Model):
     last_report_manager_name = fields.Char('Last Reporting Manager Name', copy=False)
     last_report_manager_designation = fields.Char('Last Reporting Manager Designation', copy=False)
     last_report_manager_mail = fields.Char('Last Reporting Manager Email-ID', copy=False)
-    phone_code_2 = fields.Integer(string="Country Code for Mobile Number", related='private_country_id.phone_code', copy=False)
+    phone_code_2 = fields.Integer(string="Country Code for Mobile Number", related='e_private_country_id.phone_code', copy=False)
     last_report_manager_mob_no = fields.Char('Last Reporting Manager Mobile Number', copy=False)
     industry_ref_name = fields.Char('Industry Reference Name', copy=False)
     industry_ref_email = fields.Char('Industry Reference Email', copy=False)
@@ -156,6 +158,16 @@ class HrEmployeeInherit(models.Model):
     home_country_id_name = fields.Char('Home Country ID Name', copy=False)
     home_country_id_number = fields.Char('Home Country ID Number', copy=False)
     is_expiry_today = fields.Boolean(compute='_compute_is_expiry_today', string="Expiry Today")
+    country_code_for_emergency_contact_person_phone_no = fields.Integer(string='Country Code', related='private_country_id.phone_code', copy=False)
+    country_code_for_work_mobile_id = fields.Many2one('res.country', string='Country ISD Code', copy=False)
+    country_code_for_industry_id = fields.Many2one('res.country', string='Country Code', copy=False)
+    bank_name = fields.Text('Bank Name', copy=False)
+    billable = fields.Selection([
+        ('yes', 'Yes'),
+        ('no', 'No')], string='Billable', copy=False)
+    billing_amt = fields.Char('Billing Amount', copy=False)
+    billing_currency_id = fields.Many2one('res.currency', string='Billing Currency', copy=False)
+    emp_category_id = fields.Many2one('employee.category', string='Employee Category', copy=False)
 
     # Emergency contact person address fields
     e_private_street = fields.Char(string="Private Street", copy=False)
@@ -166,7 +178,7 @@ class HrEmployeeInherit(models.Model):
         domain="[('country_id', '=', e_private_country_id)]", copy=False)
     e_private_zip = fields.Char(string="Private Zip", copy=False)
     e_private_country_id = fields.Many2one("res.country", string="Private Country", copy=False)
-    phone_code = fields.Integer(string="Countrycode", related='private_country_id.phone_code', copy=False)
+    phone_code = fields.Integer(string="Countrycode", related='u_private_country_id.phone_code', copy=False)
 
     #Bank Details
     branch_name = fields.Char('Branch Name / Branch Code', copy=False)
@@ -296,3 +308,16 @@ class HrEmployeeInherit(models.Model):
         vals['last_modified_by'] = self.env.uid
         vals['modify_date_time'] = fields.Datetime.now()
         return super(HrEmployeeInherit, self).write(vals)
+
+    #For billing validation
+    @api.constrains('billable', 'billing_amt', 'billing_currency_id')
+    def _check_billing_fields(self):
+        for record in self:
+            # Check if billable is 'yes' and if the necessary fields are filled
+            if record.billable == 'yes':
+                if not record.billing_amt:
+                    raise ValidationError("Billing Amount is required when Billable is 'Yes'.")
+                if not record.billing_currency_id:
+                    raise ValidationError("Billing Currency is required when Billable is 'Yes'.")
+            elif record.billable == 'no':
+                pass
