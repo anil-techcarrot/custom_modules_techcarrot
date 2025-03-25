@@ -18,7 +18,7 @@
                 <field name="emp_code"/>
             </xpath>
             <xpath expr="//field[@name='mobile_phone']" position="after">
-                <field name="country_code_for_work_mobile_id"/>
+                <field name="country_code_for_work_mobile"/>
             </xpath>
             <xpath expr="//field[@name='next_appraisal_date']" position="after">
                 <field name="billable"/>
@@ -154,13 +154,16 @@
                             <field name="employment_status_id" string="Employment Status"/>
                             <field name="notice_period" string="Notice Period(in days)"/>
                             <field name="resign_date" string="Resignation Date"/>
+                            <field name="end_date" string="End Date"/>
                             <field name="lwd" string="LWD"/>
                         </group>
 
                         <group string="Emergency Contact Person Address Inside UAE">
                             <field name="emergency_contact_person_name" string="Contact Person Name"/>
+                            <field name="emergency_contact_person_name_1" string="Contact Person Name(1)"/>
                             <field name="relationship_with_emp_id" string="Relationship with Employee"/>
                             <field name="emergency_contact_person_phone" string="Contact Person Phone Number"/>
+                            <field name="emergency_contact_person_phone_1" string="Contact Person Phone Number(1)"/>
                             <field name="phone_code" string="Countrycode"/>
                             <field name="home_land_line_no" string="Home Land Line Number"/>
                         </group>
@@ -205,6 +208,7 @@
                             <field name="employee_nominee_name" string="Nominee Name"/>
                             <field name="employee_nominee_contact_no" string="Nominee Contact Number"/>
                             <field name="domain_worked" string="Domains Worked"/>
+                            <field name="primary_skill" string="Primary Skills"/>
                             <field name="secondary_skill" string="Secondary Skills"/>
                             <field name="tool_used" string="Tools Used"/>
                         </group>
@@ -247,7 +251,7 @@
                             <field name="industry_ref_name" string="Reference Name"/>
                             <field name="industry_ref_email" string="Reference Email"/>
                             <field name="industry_ref_mob_no" string="Reference Mobile Number"/>
-                            <field name="country_code_for_industry_id" string="Country Code"/>
+                            <field name="country_code_for_industry" string="Country Code"/>
                             <field name="previous_company_name" string="Previous Company Name"/>
                             <field name="designation" string="Designation"/>
                             <field name="period_in_company" string="Period in Company"/>

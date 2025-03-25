@@ -4,6 +4,7 @@ from odoo import api, models, _, fields
 from odoo.exceptions import ValidationError
 from datetime import datetime
 import re
+import phonenumbers
 
 class HrEmployeeInherit(models.Model):
     _inherit = 'hr.employee'
@@ -20,7 +21,9 @@ class HrEmployeeInherit(models.Model):
     home_land_line_no = fields.Char('Home Land Line Number', copy=False)
     relationship_with_emp_id = fields.Many2one('employee.relationship', string= "Relationship with Employee", copy=False)
     emergency_contact_person_name = fields.Char('Emergency Contact Person Name', copy=False)
+    emergency_contact_person_name_1 = fields.Char('Emergency Contact Person Name(1)', copy=False)
     emergency_contact_person_phone = fields.Char('Emergency Contact Person Phone Number', copy=False)
+    emergency_contact_person_phone_1 = fields.Char('Emergency Contact Person Phone Number(1)', copy=False)
     linkedin = fields.Char('LinkedIn', copy=False)
     industry_start_date = fields.Date('Industry Start Date', copy=False)
     experience = fields.Char('Experience', copy=False)
@@ -40,7 +43,7 @@ class HrEmployeeInherit(models.Model):
     uan = fields.Char('UAN', copy=False)
     pf_number = fields.Char('PF Number', copy=False)
     country_residences_id = fields.Many2one('res.country', string="Country of Residence", copy=False)
-    country_code_for_personal_mob_no = fields.Integer(string='Country Code', related='country_residences_id.phone_code', copy=False)
+    # country_code_for_personal_mob_no = fields.Integer(string='Country Code', related='country_residences_id.phone_code', copy=False)
     whatsapp = fields.Char('WhatsApp', copy=False)
     doj = fields.Date('DOJ', copy=False)
     original_hire_date = fields.Date('Original Hire Date', copy=False)
@@ -48,10 +51,11 @@ class HrEmployeeInherit(models.Model):
     mentor_names_id = fields.Many2one('hr.employee', string="Mentor Name", copy=False)
     current_role = fields.Char('Current / Additional Role', copy=False)
     current_address = fields.Char('Current Work Address', copy=False)
-    phone_code_1 = fields.Integer(string="ISD Code", related='private_country_id.phone_code', copy=False)
+    # phone_code_1 = fields.Integer(string="ISD Code", related='private_country_id.phone_code', copy=False)
     employment_status_id = fields.Many2one('employment.status', string='Employment Status', copy=False)
     notice_period = fields.Char('Notice Period(in days)', copy=False)
     resign_date = fields.Date('Resignation Date', copy=False)
+    end_date = fields.Date('End Date', copy=False)
     lwd = fields.Date('LWD', copy=False)
     house_no = fields.Text('House Number and Building Name', copy=False)
     area_name = fields.Char('Area / Town Name', copy=False)
@@ -100,6 +104,7 @@ class HrEmployeeInherit(models.Model):
     employee_nominee_name = fields.Char('Employee Nominee Name', copy=False)
     employee_nominee_contact_no = fields.Char('Employee Nominee Contact Number', copy=False)
     domain_worked = fields.Char('Domains Worked', copy=False)
+    primary_skill = fields.Char('Primary Skills', copy=False)
     secondary_skill = fields.Char('Secondary Skills', copy=False)
     tool_used = fields.Char('Tools Used', copy=False)
     institute_name = fields.Char('Institution Name', copy=False)
@@ -144,7 +149,7 @@ class HrEmployeeInherit(models.Model):
     last_report_manager_name = fields.Char('Last Reporting Manager Name', copy=False)
     last_report_manager_designation = fields.Char('Last Reporting Manager Designation', copy=False)
     last_report_manager_mail = fields.Char('Last Reporting Manager Email-ID', copy=False)
-    phone_code_2 = fields.Integer(string="Country Code for Mobile Number", related='e_private_country_id.phone_code', copy=False)
+    # phone_code_2 = fields.Integer(string="Country Code for Mobile Number", related='e_private_country_id.phone_code', copy=False)
     last_report_manager_mob_no = fields.Char('Last Reporting Manager Mobile Number', copy=False)
     industry_ref_name = fields.Char('Industry Reference Name', copy=False)
     industry_ref_email = fields.Char('Industry Reference Email', copy=False)
@@ -158,9 +163,9 @@ class HrEmployeeInherit(models.Model):
     home_country_id_name = fields.Char('Home Country ID Name', copy=False)
     home_country_id_number = fields.Char('Home Country ID Number', copy=False)
     is_expiry_today = fields.Boolean(compute='_compute_is_expiry_today', string="Expiry Today")
-    country_code_for_emergency_contact_person_phone_no = fields.Integer(string='Country Code', related='private_country_id.phone_code', copy=False)
-    country_code_for_work_mobile_id = fields.Many2one('res.country', string='Country ISD Code', copy=False)
-    country_code_for_industry_id = fields.Many2one('res.country', string='Country Code', copy=False)
+    # country_code_for_emergency_contact_person_phone_no = fields.Integer(string='Country Code', related='private_country_id.phone_code', copy=False)
+    # country_code_for_work_mobile = fields.Selection(selection=_country_code_get, string='Country ISD Code', copy=False)
+    # country_code_for_industry_id = fields.Many2one('res.country', string='Country Code', copy=False)
     bank_name = fields.Text('Bank Name', copy=False)
     billable = fields.Selection([
         ('yes', 'Yes'),
@@ -178,7 +183,7 @@ class HrEmployeeInherit(models.Model):
         domain="[('country_id', '=', e_private_country_id)]", copy=False)
     e_private_zip = fields.Char(string="Private Zip", copy=False)
     e_private_country_id = fields.Many2one("res.country", string="Private Country", copy=False)
-    phone_code = fields.Integer(string="Countrycode", related='u_private_country_id.phone_code', copy=False)
+    # phone_code = fields.Integer(string="Countrycode", related='u_private_country_id.phone_code', copy=False)
 
     #Bank Details
     branch_name = fields.Char('Branch Name / Branch Code', copy=False)
@@ -321,3 +326,37 @@ class HrEmployeeInherit(models.Model):
                     raise ValidationError("Billing Currency is required when Billable is 'Yes'.")
             elif record.billable == 'no':
                 pass
+
+    @api.model
+    def _country_code_get(self):
+        # Using phonenumbers library to get all country calling codes
+        country_calling_codes = []
+
+        # Loop over all countries provided by phonenumbers
+        for region_code in phonenumbers.SUPPORTED_REGIONS:
+            try:
+                # Get the country calling code for each region
+                country_code = phonenumbers.country_code_for_region(region_code)
+                if country_code:
+                    country_calling_codes.append((f"+{country_code}", f"+{country_code}"))
+            except Exception as e:
+                # In case of any issues, just skip that region
+                continue
+
+        return country_calling_codes
+
+    # Define the country_code_for_work_mobile field
+    country_code_for_work_mobile = fields.Selection(
+        selection=_country_code_get,
+        string='Country ISD Code',
+        copy=False,
+    )
+    country_code_for_personal_mob_no = fields.Selection(string='Country Code', selection=_country_code_get, copy=False)
+    phone_code_2 = fields.Selection(string="Country Code for Mobile Number", selection=_country_code_get, copy=False)
+    country_code_for_emergency_contact_person_phone_no = fields.Selection(string='Country Code', selection=_country_code_get, copy=False)
+    country_code_for_industry = fields.Selection(string='Country Code', selection=_country_code_get, copy=False)
+    phone_code = fields.Selection(string="Countrycode", selection=_country_code_get, copy=False)
+    phone_code_1 = fields.Selection(string="ISD Code", selection=_country_code_get, copy=False)
+
+
+
