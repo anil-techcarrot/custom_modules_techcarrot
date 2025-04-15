@@ -41,6 +41,35 @@
     </field>
     </record>
 
+    <record id="sale_stock_renting.rental_order_form_view_inherit_stock" model="ir.ui.view">
+        <field name="name">rental.order.form.inherit.stock</field>
+        <field name="model">sale.order</field>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook/page[@name='order_lines']/field/list/field[@name='is_product_rentable']" position='after'>
+                <field name="tracking" column_invisible="True"/>
+                <field name="available_reserved_lots" column_invisible="True"/>
+                <field name="reserved_lot_ids" optional="hide" widget="many2many_tags" groups="sale_stock_renting.group_rental_stock_picking"/>
+            </xpath>
+            <xpath expr="//notebook/page[@name='order_lines']/field/list/field[@name='qty_returned']" position="attributes">
+                <attribute name="column_invisible">parent.state != 'sale' or not parent.is_rental_order</attribute>
+                <attribute name="invisible">not is_rental or not is_product_rentable</attribute>
+                <attribute name="readonly">not is_rental or tracking != 'none'</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="rental_order_form_view_inherit_stock_1" model="ir.ui.view">
+        <field name="name">rental.order.form.inherit.stock</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale_renting.rental_order_primary_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook/page[@name='order_lines']/field/list/field[@name='qty_delivered']" position="attributes">
+                <attribute name="column_invisible">parent.is_rental_order==True or parent.state != 'sale'</attribute>
+                <attribute name="readonly">qty_delivered_method != 'manual' or is_rental and tracking != 'none'</attribute>
+            </xpath>
+        </field>
+    </record>
+
     <record id="sale_subscription.sale_subscription_order_view_form" model="ir.ui.view">
         <field name="name">sale.subscription.order.form</field>
         <field name="model">sale.order</field>
@@ -428,7 +457,7 @@
             <xpath expr="//page[@name='order_lines']" position='after'>
                 <page string="Rental Invoices" name="rental_inv_history">
                     <field name="rental_inv_line_ids" mode="list">
-                        <list editable="bottom">
+                        <list editable="bottom" create="0" delete="0">
                             <field name="rental_sale_id" column_invisible="1"/>
                             <field name="employee_id" readonly="parent.state!='draft'" force_save="1"/>
                             <field name="rentalnext_invoice_date" readonly="parent.state!='draft'" force_save="1" column_invisible="parent.recurring_period_interval in ['hour']"/>
@@ -436,12 +465,13 @@
                             <field name="work_entry_ids" column_invisible="1" widget="many2many_tags" options="{'color_field': 'color'}"/>
                             <field name="planned_days" readonly="1" force_save="1"/>
                             <field name="worked_days" readonly="inv_ref_id"/>
+                            <field name="uom" readonly="1" force_save="1"/>
                             <field name="inv_ref_id" readonly="parent.state!='draft'" force_save="1"/>
                             <field name="state" string="Status" column_invisible="1"/>
                             <field name="invoice_state" column_invisible="1"/>
                             <field name="is_ready_to_invoice" column_invisible="1"/>
-                            <button type="object" invisible="is_ready_to_invoice !=True or sale_state !='sale' or state != 'draft'" name="create_invoice" string="Create Invoice" class="btn-primary"/>
-                            <button type="object" invisible="is_ready_to_invoice==True or sale_state !='sale' or state != 'draft'" name="create_invoice" string="Create Invoice" class="btn-secondary"/>
+                            <button type="object" invisible="worked_days==0 or is_ready_to_invoice !=True or sale_state !='sale' or state != 'draft'" name="create_invoice" string="Create Invoice" class="btn-primary"/>
+                            <button type="object" invisible="worked_days==0 or is_ready_to_invoice==True or sale_state !='sale' or state != 'draft'" name="create_invoice" string="Create Invoice" class="btn-secondary"/>
                         </list>
                     </field>
                 </page>

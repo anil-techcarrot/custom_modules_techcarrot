@@ -6,10 +6,13 @@
 			<field name="model">import.attendance</field>
 			<field name="arch" type="xml">
 				<list string="Import Attendance">
+					<field name="date"/>
 					<field name="month"/>
 					<field name="year"/>
 					<field name="no_employee"/>
-					<field name="state"/>
+					<field name="state" decoration-info="state in ('imported')"
+                       decoration-success="state == 'draft'"
+                       decoration-muted="state == 'validate'" widget="badge"/>
 				</list>
 			</field>
 		</record>
@@ -28,8 +31,11 @@
 				<sheet>
 					<group>
 						<group>
-							<field name="file" placeholder="Upload File" nolabel="1" readonly="state in ('imported')"/>
+							<field name="file" placeholder="Upload File" nolabel="1" readonly="state in ('validate','imported')"/>
 							<field name="no_employee" invisible="1"/>
+						</group>
+						<group>
+							<field name="date" readonly="1" force_save="1"/>
 						</group>
 					</group>
 					<group>
@@ -43,8 +49,8 @@
 					<group>
 						<field name="attendance_data_ids" nolabel="1" readonly="1" force_save="1" string="Stock Data">
 							<list editable="top">
-								<!--<field name="month" readonly="1" force_save="1"/>
-								<field name="year" readonly="1" force_save="1"/>-->
+								<field name="month" column_invisible="1" force_save="1"/>
+								<field name="year" column_invisible="1" force_save="1"/>
 								<field name="sale_id"/>
 								<field name="employee_id"/>
 								<field name="worked_qty"/>
@@ -53,6 +59,7 @@
 						</field>
 					</group>
 				</sheet>
+				<chatter/>
 			</form>
 			</field>
 		</record>

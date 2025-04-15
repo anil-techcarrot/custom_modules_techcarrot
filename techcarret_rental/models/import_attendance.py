@@ -26,7 +26,10 @@ except ImportError:
 class ImportAttendance(models.Model):
 	_name = 'import.attendance'
 	_description = 'Import Attendance'
+	_inherit = ['portal.mixin', 'product.catalog.mixin', 'mail.thread', 'mail.activity.mixin', 'utm.mixin']
 	_order = 'id desc'
+	_rec_name ='date'
+
 
 	def _get_year_selection(self):
 		current_year = datetime.now().year
@@ -35,9 +38,10 @@ class ImportAttendance(models.Model):
 	file_type = fields.Selection([('XLS', 'XLS File')],string='File Type', default='XLS')
 	file = fields.Binary(string="Upload File", required=True)
 	month = fields.Integer("Month")
+	date= fields.Datetime("Imported On", default=fields.Datetime.now)
 	year = fields.Selection(selection='_get_year_selection', string='Year')
 	no_employee = fields.Integer('NO. Employees', compute='get_num_employee')
-	state = fields.Selection([("draft", "New"), ("validate", "Validated"), ("imported", "Imported")], required=True, default="draft")
+	state = fields.Selection([("draft", "New"), ("validate", "Validated"), ("imported", "Imported")], required=True, default="draft", tracking=1)
 	attendance_data_ids = fields.One2many('import.attendance.line', 'import_attendance_id', string='Stock Data')
 
 	def get_eployee(self, emp_code):
@@ -58,13 +62,20 @@ class ImportAttendance(models.Model):
 
 	def import_attendance(self):
 		for line in self.attendance_data_ids:
-			history_objs = self.env['rental.invoice.history'].search([('rental_sale_id','=', line.sale_id.id),('state','=','draft'),('employee_id', '=', line.employee_id.id)], limit=1)
-			if history_objs:
+			so_inv_line_objs = self.env['rental.invoice.history'].search([('rental_sale_id','=', line.sale_id.id),('state','=','draft'),('employee_id', '=', line.employee_id.id)], limit=1)
+			if so_inv_line_objs:
 				count=0
-				for history_obj in history_objs:
-					history_obj.worked_days = history_obj.worked_days + line.worked_qty
-					line.history_line_id=history_obj.id
-					history_obj.is_ready_to_invoice=True
+				for so_inv_line_obj in so_inv_line_objs:
+					if so_inv_line_obj.uom == line.uom:
+						worked_qty = line.worked_qty
+					else:
+						if so_inv_line_obj.uom == 'days' and line.uom=='hours':
+							worked_qty = line.worked_qty/8
+						else:
+							worked_qty = line.worked_qty * 8
+					so_inv_line_obj.worked_days = so_inv_line_obj.worked_days + worked_qty
+					line.history_line_id=so_inv_line_obj.id
+					so_inv_line_obj.is_ready_to_invoice=True
 					#MOSES TOLD TO IMPORT DIRECTLY NO NEED TO VALIDATE DATE-15-04-2025
 					# if history_obj.rental_sale_id.is_rental_order == True and history_obj.rental_sale_id.state=='sale':
 					# 	m = line.month
@@ -105,9 +116,18 @@ class ImportAttendance(models.Model):
 			imp_record.no_employee=len(no_employee)
 
 	def validate_data(self):
-		#Moses told to hold this process
-		# for line in self.attendance_data_ids:
-		# 	attendace_import_objs = self.env['import.attendance.line'].sudo().search([('import_attendance_id', '=', 'self.id'), ('employee_id', '=', line.employee_id), ('sale_id', '=', line.sale_id.id),('is_consolidated', '=', False)])
+		for line in self.attendance_data_ids:
+			emp_attendace_objs = self.env['import.attendance.line'].search([
+				('employee_id', '=', line.employee_id.id),
+				('month', '=', int(line.month)),
+				('state', '=', 'imported'),
+				('year', '=', str(line.year)),
+				('sale_id', '=', line.sale_id.id)
+			])
+			if emp_attendace_objs:
+				raise UserError(_('Employee timesheet already imported. Employee %s', line.employee_id.emp_code))
+
+			# attendace_import_objs = self.env['import.attendance.line'].sudo().search([('import_attendance_id', '=', 'self.id'), ('employee_id', '=', line.employee_id), ('sale_id', '=', line.sale_id.id),('is_consolidated', '=', False)])
 		# 	hours=0
 		# 	for attendace_import_obj in attendace_import_objs:
 		# 		attendace_import_obj.is_consolidated=True
@@ -183,12 +203,14 @@ class ImportAttendance(models.Model):
 							('employee_id', '=', employee_obj.id),
 							('month', '=', int(month)),
 							('state', '=', 'imported'),
-							('year', '=', int(year))])
+							('year', '=', str(year)),
+							('sale_id', '=', so_obj.id)
+						])
 						if emp_attendace_objs:
 							raise UserError(_('Employee timesheet already imported. Employee %s', employee_obj.emp_code))
 						values.append((0, 0, {
 									'month': int(month),
-									'year': year,
+									'year': str(year),
 									'employee_id': employee_obj.id,
 									'worked_qty': int(float(line[2])),
 									'sale_id':so_obj.id,
@@ -219,7 +241,7 @@ class ImportStockLine(models.Model):
 	month = fields.Integer("Month")
 	year = fields.Selection(selection='_get_year_selection', string='Year')
 	state = fields.Selection([("draft", "New"), ("imported", "Imported")], required=True, default="draft")
-	uom = fields.Selection([("hours", "hours"), ("days", "Days")], string="UOM", required=True, default="days")
+	uom = fields.Selection([("hours", "Hours"), ("days", "Days")], string="UOM", required=True, default="days")
 	sale_id = fields.Many2one('sale.order', 'Rental Ref#', copy=False)
 	history_line_id = fields.Many2one('rental.invoice.history', copy=False)
 	is_consolidated = fields.Boolean('Is Consolidated', defualt=False)

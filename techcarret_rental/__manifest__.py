@@ -6,7 +6,7 @@
     'author': 'Ifensys',
     'category': 'Sales',
     'version': '18.1',
-    'depends': ['product', 'sale_management', 'sale', 'stock', 'sale_renting', 'hr', 'hr_work_entry', 'account', 'analytic', 'sale_subscription', 'techcarrot_employee'],
+    'depends': ['product', 'sale_management', 'sale', 'stock', 'sale_renting', 'hr', 'hr_work_entry', 'account', 'analytic', 'sale_subscription', 'sale_stock_renting', 'techcarrot_employee'],
     'data': [
         'security/ir.model.access.csv',
         'security/rental_security.xml',

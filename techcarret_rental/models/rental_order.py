@@ -170,26 +170,26 @@ class Rentals(models.Model):
     @api.depends('order_line.price_unit')
     def _do_create_invoice_schedule(self):
         for order in self:
-            for order_line in order.order_line:
-                if order_line.product_uom.name == 'Hours':
-                    order_line.product_uom_qty = order.duration_days * 8
-                else:
-                    order_line.product_uom_qty = order.duration_days
-                if order_line.product_id.product_pricing_ids:
-                    for product_pricing_id in order_line.product_id.product_pricing_ids:
-                        if order_line.product_uom.name == 'Hours' and product_pricing_id.recurrence_id.unit == 'hour':
-                            order_line.price_unit= product_pricing_id.price
-                        elif order_line.product_uom.name == 'Days'and product_pricing_id.recurrence_id.unit == 'day':
-                            order_line.price_unit=product_pricing_id.price
-                        elif order_line.product_uom.name == 'Week'and product_pricing_id.recurrence_id.unit == 'week':
-                            order_line.price_unit=product_pricing_id.price
-                        elif order_line.product_uom.name == 'Months'and product_pricing_id.recurrence_id.unit == 'month':
-                            order_line.price_unit=product_pricing_id.price
-                        elif order_line.product_uom.name == 'Years' and product_pricing_id.recurrence_id.unit == 'year':
-                            order_line.price_unit=product_pricing_id.price
-                else:
-                    if order_line.price_unit==0.00:
-                        order_line.price_unit = order_line.product_id.with_company(order_line.company_id.id).lst_price or 0.00
+            # for order_line in order.order_line:
+            #     if order_line.product_uom.name == 'Hours':
+            #         order_line.product_uom_qty = order.duration_days * 8
+            #     else:
+            #         order_line.product_uom_qty = order.duration_days
+            #     if order_line.product_id.product_pricing_ids:
+            #         for product_pricing_id in order_line.product_id.product_pricing_ids:
+            #             if order_line.product_uom.name == 'Hours' and product_pricing_id.recurrence_id.unit == 'hour':
+            #                 order_line.price_unit= product_pricing_id.price
+            #             elif order_line.product_uom.name == 'Days'and product_pricing_id.recurrence_id.unit == 'day':
+            #                 order_line.price_unit=product_pricing_id.price
+            #             elif order_line.product_uom.name == 'Week'and product_pricing_id.recurrence_id.unit == 'week':
+            #                 order_line.price_unit=product_pricing_id.price
+            #             elif order_line.product_uom.name == 'Months'and product_pricing_id.recurrence_id.unit == 'month':
+            #                 order_line.price_unit=product_pricing_id.price
+            #             elif order_line.product_uom.name == 'Years' and product_pricing_id.recurrence_id.unit == 'year':
+            #                 order_line.price_unit=product_pricing_id.price
+            #     else:
+            #         if order_line.price_unit==0.00:
+            #             order_line.price_unit = order_line.product_id.with_company(order_line.company_id.id).lst_price or 0.00
             order.do_create_invoice_schedule=True
 
     @api.depends('order_line', 'order_line.recurring_invoice')
@@ -258,16 +258,12 @@ class Rentals(models.Model):
             planned_days=0
             if order.rental_start_date and order.rental_return_date:
                 duration = order.rental_return_date - order.rental_start_date
-                count=0
-                for order_line in order.order_line:
-                    if count==0:
-                        if order_line.product_id:
-                            if order_line.product_id.employee_id:
-                                if order_line.product_id.employee_id.resource_calendar_id:
-                                    planned_days = order_line.product_id.employee_id._get_work_days_data_batch(order.rental_start_date, order.rental_return_date,
-                                                                                                                 calendar=order_line.product_id.employee_id.resource_calendar_id) \
-                                        [order_line.product_id.employee_id.id]['days']
-                                    count = count +1
+                for order_line in order.rental_inv_line_ids:
+                    if order_line.uom == 'days':
+                        planned_days = planned_days + order_line.planned_days
+                    else:
+                        days=order_line.planned_days/8
+                        planned_days = planned_days + days
                 if planned_days>0:
                     order.duration_days = planned_days
                 else:
@@ -277,14 +273,8 @@ class Rentals(models.Model):
     @api.onchange('rental_start_date')
     def _onchange_finvoice(self):
         if self.invoice_freequency:
-            if self.invoice_freequency.unit == 'day':
-                next_invoice_date = self.rental_start_date + relativedelta(days=1)
-            elif self.invoice_freequency.unit == 'week':
-                next_invoice_date = self.rental_start_date + relativedelta(weeks=1)
-            elif self.invoice_freequency.unit == 'month':
-                next_invoice_date = self.rental_start_date + relativedelta(months=1)
-            else:
-                next_invoice_date = self.rental_start_date + relativedelta(years=1)
+            rental_start_date = self.rental_start_date + relativedelta(hours=7)
+            next_invoice_date = rental_start_date + relativedelta(months=1)
         else:
             next_invoice_date = self.rental_start_date
         self.rentalfirst_invoice_date=next_invoice_date
@@ -342,8 +332,9 @@ class Rentals(models.Model):
                                     aa_dict.update({key:value})
                             o_line.analytic_distribution=aa_dict
 
-    @api.onchange('invoice_freequency', 'rentalfirst_invoice_date','rental_start_date','rental_return_date','order_line')
-    def _onchange_inv_freeqency(self):
+
+    @api.onchange('rental_start_date','rental_return_date')
+    def _onchange_rental_dates(self):
         if self.is_rental_order == True:
             for order in self:
                 for order_line in order.order_line:
@@ -351,6 +342,16 @@ class Rentals(models.Model):
                         order_line.product_uom_qty = order.duration_days * 8
                     else:
                         order_line.product_uom_qty = order.duration_days
+
+    @api.onchange('invoice_freequency', 'rentalfirst_invoice_date','rental_start_date','rental_return_date','order_line')
+    def _onchange_inv_freeqency(self):
+        if self.is_rental_order == True:
+            for order in self:
+                for order_line in order.order_line:
+                    # if order_line.product_uom.name == 'Hours':
+                    #     order_line.product_uom_qty = order.duration_days * 8
+                    # else:
+                    #     order_line.product_uom_qty = order.duration_days
                     if order_line.product_id.product_pricing_ids:
                         for product_pricing_id in order_line.product_id.product_pricing_ids:
                             if order_line.product_uom.name == 'Hours' and product_pricing_id.recurrence_id.unit == 'hour':
@@ -388,10 +389,10 @@ class Rentals(models.Model):
                 if order.rental_start_date and order.rental_return_date and order.rentalfirst_invoice_date:
                     inv_dates=[]
                     for order_line in order.order_line:
-                        if order_line.product_uom.name == 'Hours':
-                            order_line.product_uom_qty = order.duration_days * 8
-                        else:
-                            order_line.product_uom_qty = order.duration_days
+                        # if order_line.product_uom.name == 'Hours':
+                        #     order_line.product_uom_qty = order.duration_days * 8
+                        # else:
+                        #     order_line.product_uom_qty = order.duration_days
                         invoice_start_date=order.rental_start_date.date()
                         last_invoiced_date=order.rentalfirst_invoice_date
                         if order_line.product_id and order_line.product_id.employee_id:
@@ -456,7 +457,7 @@ class Rentals(models.Model):
                                 #add one more day to get final day in accounting
                                 end_dt = upcoming_invoice_date - relativedelta(days=1)
                                 if next_invoice_date >= order.rental_return_date.date():
-                                    end_dt = order.rental_return_date.date()
+                                    end_dt = order.rental_return_date.date()+relativedelta(days=1)
                                 start_dt = datetime.combine(start_dt, datetime_min_time)
                                 end_dt = datetime.combine(end_dt, datetime_max_time)
                                 planned_worked = \
@@ -500,16 +501,26 @@ class Rentals(models.Model):
         return False
 
     def create_rental_invoice(self, rental_obj):
-        old_rental_objs = self.env['rental.invoice.history'].search([('rental_sale_id','=',rental_obj.rental_sale_id.id),('id', '=', int(rental_obj.id-1)),('state','in',['confirmed','done'])], limit=1)
-        if old_rental_objs:
-            rental_start_date = old_rental_objs.rentalnext_invoice_date
-        else:
-            rental_start_date = rental_obj.rental_sale_id.rentalfirst_invoice_date
         invoice_line_ids=[]
         for line in rental_obj.rental_sale_id.order_line:
             for rental_line in rental_obj.rental_sale_id.rental_inv_line_ids:
                 if not rental_line.inv_ref_id and rental_line.worked_days>0.00:
                     if line.product_id.employee_id.id == rental_line.employee_id.id:
+                        old_rental_objs = self.env['rental.invoice.history'].search(
+                            [('rental_sale_id', '=', rental_obj.rental_sale_id.id),('employee_id', '=', rental_line.employee_id.id),
+                             ('state', 'in', ['confirmed', 'done'])], limit=1, order='id desc')
+                        if old_rental_objs:
+                            old_inv_date = old_rental_objs.rentalnext_invoice_date
+                        else:
+                            old_inv_date = rental_obj.rental_sale_id.rental_start_date
+                        upcoming_rental_objs = self.env['rental.invoice.history'].search(
+                            [('rental_sale_id', '=', rental_obj.rental_sale_id.id),
+                             ('employee_id', '=', rental_line.employee_id.id),
+                             ('state', 'in', ['draft'])], limit=1)
+                        if upcoming_rental_objs:
+                            new_inv_date = upcoming_rental_objs.rentalnext_invoice_date
+                        else:
+                            new_inv_date = rental_obj.rental_sale_id.rental_return_date
                         distribution = line.env['account.analytic.distribution.model']._get_distribution({
                             "product_id": line.product_id.id,
                             "partner_id": line.order_id.partner_id.id,
@@ -526,14 +537,15 @@ class Rentals(models.Model):
                                 'tax_ids': line.tax_id,
                                 'discount': line.discount,
                                 'sale_line_ids': [Command.link(line.id)],
-                                'rental_start_date': rental_start_date,
-                                'rental_return_date': rental_obj.rental_sale_id.rentalnext_invoice_date,
+                                'rental_start_date': old_inv_date,
+                                'rental_return_date': new_inv_date,
                             }
                             if analytic_distribution:
                                 inv_line.update({'analytic_distribution':analytic_distribution})
                             invoice_line_ids.append((0, 0, inv_line))
                         # line.qty_delivered = line.qty_delivered + rental_line.worked_days
                         rental_line.is_ready_to_invoice=False
+                        rental_line.state='done'
         if invoice_line_ids:
             inv_obj = self.env['account.move'].create({
                 'move_type': 'out_invoice',
@@ -749,8 +761,8 @@ class RentalOrdersLine(models.Model):
                 "\n%(from_date)s to %(to_date)s", from_date=start_date_part, to_date=return_date_part
             )
 
-    @api.onchange('product_id', 'product_uom', 'product_uom_qty')
-    def _onchange_rentalproduct(self):
+    @api.onchange('product_id')
+    def _onchange_rent_product(self):
         for order in self:
             if order.order_id.is_rental_order == True:
                 # if order.product_id and not order.product_id.employee_id:
@@ -759,11 +771,16 @@ class RentalOrdersLine(models.Model):
                 #     for line in order.product_id.employee_id.work_log_ids:
                 #         if line.state == 'active':
                 #             raise UserError(_("Employee is not available for rental."))
-                if order.order_id.duration_days>0:
+                if order.order_id.duration_days>0 and order.product_uom_qty<=1:
                     if order.product_uom.name == 'Hours':
                         order.product_uom_qty = order.order_id.duration_days * 8
                     else:
                         order.product_uom_qty = order.order_id.duration_days
+
+    @api.onchange('product_id', 'product_uom', 'product_uom_qty')
+    def _onchange_rentalproduct(self):
+        for order in self:
+            if order.order_id.is_rental_order == True:
                 if order.product_id.product_pricing_ids:
                     for product_pricing_id in order.product_id.product_pricing_ids:
                         if order.product_uom.name == 'Hours' and product_pricing_id.recurrence_id.unit == 'hour':
@@ -807,7 +824,7 @@ class RentalInvoiceHistory(models.Model):
                               ('sale', "Sales Order"),
                               ('cancel', "Cancelled"),], default='draft')
     state = fields.Selection([('draft', 'Draft'), ('done', 'Invoiced'),('confirmed','Confirmed'),('cancel','Cancel')], default='draft')
-    uom = fields.Selection([("hours", "hours"), ("days", "Days")], string="UOM", required=True, default="days")
+    uom = fields.Selection([("hours", "Hours"), ("days", "Days")], string="UOM", required=True, default="days")
     work_entry_ids = fields.Many2many('hr.work.entry', string='Work Entries')
     planned_days = fields.Integer("Planned QTY")
     worked_days = fields.Integer("Worked QTY")
