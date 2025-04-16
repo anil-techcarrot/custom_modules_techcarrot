@@ -127,6 +127,20 @@ class Rentals(models.Model):
             defaults['ss_analytic_plan_id'] = company.ss_analytic_plan_id.id
         if company.ss_analytic_sub_plan_id:
             defaults['ss_analytic_sub_plan_id'] = company.ss_analytic_sub_plan_id.id
+
+        user_tz = self.env.user.tz or self.env.context.get('tz')
+        user_pytz = pytz.timezone(user_tz) if user_tz else pytz.utc
+        now_dt = datetime.now().astimezone(user_pytz).replace(tzinfo=None)
+        now_dt = now_dt.replace(hour=00, minute=00, second=1)
+        now_dt = now_dt - relativedelta(hours=5)
+        now_dt = now_dt - relativedelta(minutes=30)
+        defaults['rental_start_date'] = now_dt
+
+        now_dt = datetime.now().astimezone(user_pytz).replace(tzinfo=None)
+        now_dt = now_dt.replace(hour=23, minute=59, second=59)
+        now_dt = now_dt - relativedelta(hours=5)
+        now_dt = now_dt - relativedelta(minutes=30)
+        defaults['rental_return_date'] =now_dt
         return defaults
 
     def _default_freequency(self):
@@ -258,6 +272,7 @@ class Rentals(models.Model):
             planned_days=0
             if order.rental_start_date and order.rental_return_date:
                 duration = order.rental_return_date - order.rental_start_date
+                remaining_hours = ceil(duration.seconds / 3600)
                 for order_line in order.rental_inv_line_ids:
                     if order_line.uom == 'days':
                         planned_days = planned_days + order_line.planned_days
@@ -267,8 +282,11 @@ class Rentals(models.Model):
                 if planned_days>0:
                     order.duration_days = planned_days
                 else:
-                    order.duration_days = duration.days
-                order.remaining_hours = ceil(duration.seconds / 3600)
+                    if remaining_hours>12:
+                        order.duration_days = duration.days + 1
+                    else:
+                        order.duration_days = duration.days
+                order.remaining_hours = 0
 
     @api.onchange('rental_start_date')
     def _onchange_finvoice(self):
