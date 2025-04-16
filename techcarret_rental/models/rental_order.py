@@ -320,11 +320,6 @@ class Rentals(models.Model):
     def _onchange_set_aa(self):
         for sale in self:
             for o_line in sale.order_line:
-                user_tz = self.env.user.tz or self.env.context.get('tz')
-                user_pytz = pytz.timezone(user_tz) if user_tz else pytz.utc
-                now_dt =o_line.order_id.rental_start_date.astimezone(user_pytz).replace(tzinfo=None)
-                now_dt = now_dt + relativedelta(hours=10)
-                o_line.start_date =  now_dt
                 aa_name=''
                 if sale.is_rental_order==True:
                     if o_line.product_id and sale.project_code:
@@ -771,6 +766,12 @@ class RentalOrdersLine(models.Model):
         if self.order_id.is_rental_order == True:
             start_date = self.order_id.rental_start_date
             return_date = self.order_id.rental_return_date
+            user_tz = self.env.user.tz or self.env.context.get('tz')
+            user_pytz = pytz.timezone(user_tz) if user_tz else pytz.utc
+            now_dt = start_date.astimezone(user_pytz).replace(tzinfo=None)
+            now_dt = now_dt + relativedelta(hours=10)
+            self.start_date = now_dt
+            start_date = now_dt
             if self.order_id.recurring_period_interval in ['month','week','year']:
                 s_date = datetime.strptime(str(start_date), "%Y-%m-%d %H:%M:%S").date()
                 r_date = datetime.strptime(str(return_date), "%Y-%m-%d %H:%M:%S").date()
