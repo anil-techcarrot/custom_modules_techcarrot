@@ -1,6 +1,24 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
+    <record id="sale_renting.rental_order_action" model="ir.actions.act_window">
+        <field name="name">Rental Orders</field>
+        <field name="path">rental</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,kanban,form,calendar,pivot,graph,activity</field>
+        <field name="search_view_id" ref="sale_renting.rental_order_view_search"/>
+        <field name="context">{'in_rental_app': 1, 'search_default_from_rental': 1}</field>
+        <field name="domain">[('is_rental_order', '!=', False)]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new quotation, the first step of a new rental!
+            </p>
+            <p>
+                Once the quotation is confirmed, it becomes a rental order.<br/> You will be able to create an invoice and collect the payment.
+            </p>
+        </field>
+    </record>
+
     <record id="sale_subscription.sale_subscription_action_quotes" model="ir.actions.act_window">
         <field name="name">Quotations</field>
         <field name="res_model">sale.order</field>
