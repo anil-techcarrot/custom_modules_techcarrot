@@ -7,7 +7,7 @@
         <field name="default" eval="True"/>
         <field name="format">A4</field>
         <field name="orientation">Portrait</field>
-        <field name="margin_top">8</field>
+        <field name="margin_top">10</field>
         <field name="margin_bottom">8</field>
         <field name="margin_left">8</field>
         <field name="margin_right">8</field>
@@ -19,7 +19,7 @@
 
     <!--Generate the pdf report-->
     <record id="action_generate_techcarrot_invoice_report" model="ir.actions.report">
-        <field name="name">Techcarrot invoices</field>
+        <field name="name">Techcarrot Invoices/Bills</field>
         <field name="model">account.move</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">techcarrot_invoice.report_techcarrot_invoices</field>

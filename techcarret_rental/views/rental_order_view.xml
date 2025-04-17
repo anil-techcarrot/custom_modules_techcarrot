@@ -309,7 +309,8 @@
                 <field name="practice_id" readonly="state!='draft'" invisible="is_rental_order==True"  required="is_rental_order != True"/>
                 <field name="is_tec_subscription" invisible="1"/>
                 <field name="project_type_id" readonly="state!='draft'" required="is_rental_order != True or is_tec_subscription != True" invisible="is_rental_order == True or is_tec_subscription == True"/>
-                <field name="project_code" required="is_tec_subscription != True" invisible="is_tec_subscription == True" readonly="state!='draft'"/>
+<!--                <field name="project_code" required="is_tec_subscription != True" invisible="is_tec_subscription == True" readonly="state!='draft'"/>-->
+                <field name="project_code" required="is_tec_subscription != True" readonly="state!='draft'"/>
                 <field name="client_order_ref"/>
             </xpath>
         </field>

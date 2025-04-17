@@ -15,6 +15,7 @@
         'reports/invoice_ir_actions.xml',
         'views/res_bank_view.xml',
         'views/sale_order_view.xml',
+        'views/account_move_view.xml',
     ],
 
     # 'license': "AGPL-1",

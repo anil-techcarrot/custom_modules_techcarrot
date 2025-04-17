@@ -10,7 +10,7 @@
             'search_default_my_subscriptions': 1,
         }</field>
         <!-- All kind of subscription except upsell -->
-        <field name="domain">[('subscription_state', 'in', ['1_draft', '2_renewal', '3_progress', '4_paused', '5_renewed', '6_churn'])]</field>
+        <field name="domain">[('is_subscription', '!=', False),('subscription_state', 'in', ['1_draft', '2_renewal', '3_progress', '4_paused', '5_renewed', '6_churn'])]</field>
         <field name="view_ids" eval="[(5, 0, 0),
                 (0, 0, {'view_mode': 'list', 'view_id': ref('sale_subscription.sale_subscription_quotation_tree_view'), 'sequence': 1}),
                 (0, 0, {'view_mode': 'kanban', 'sequence': 2}),
@@ -36,7 +36,7 @@
             'search_default_progress': 1,
             'search_default_paused': 1,
         }</field>
-        <field name="domain">[('subscription_state', 'not in', ['2_renewal', '5_renewed', '7_upsell', False])]</field>
+        <field name="domain">[('is_subscription', '!=', False),('subscription_state', 'not in', ['2_renewal', '5_renewed', '7_upsell', False])]</field>
         <field name="search_view_id" ref='sale_subscription.sale_subscription_view_search'/>
         <field name="help" type="html">
             <p class="o_view_nocontent_subscription_graph">
@@ -57,6 +57,7 @@
             'default_sale_order_template_id': active_id,
         }
         </field>
+        <field name="domain">[('is_subscription', '!=', False)]</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Create a new subscription
@@ -76,7 +77,7 @@
             'search_default_to_renew':1,
             'default_subscription_state': '1_draft',
         }</field>
-        <field name="domain">[('subscription_state', '!=', False)]</field>
+        <field name="domain">[('is_subscription', '!=', False),('subscription_state', '!=', False)]</field>
         <field name="search_view_id" ref='sale_subscription.sale_subscription_view_search'/>
         <field name="help" type="html">
           <p class="o_view_nocontent_smiling_face">
@@ -101,7 +102,7 @@
             'search_default_progress': 1,
             'search_default_paused': 1,
             }</field>
-        <field name="domain">[('subscription_state', 'not in', ['2_renewal', '5_renewed', '7_upsell', False])]</field>
+        <field name="domain">[('is_subscription', '!=', False),('subscription_state', 'not in', ['2_renewal', '5_renewed', '7_upsell', False])]</field>
         <field name="search_view_id" eval='tec_sale_subscription_view_search'/>
         <field name="help" type="html">
             <p class="o_view_nocontent_subscription_graph">

@@ -637,6 +637,9 @@ class Rentals(models.Model):
                     #     raise UserError(_("Employee profile not mapped in product master"))
                 for r_invoice in so_line.rental_inv_line_ids:
                     r_invoice.sale_state='sale'
+            if not so_line.order_line:
+                raise UserError(("Please add some Products in Order lines."))
+            project = so_line.order_line[0]._timesheet_create_project()
         return res
 
     def action_cancel(self):
@@ -658,6 +661,26 @@ class Rentals(models.Model):
                     r_invoice.sale_state='draft'
                     r_invoice.state='draft'
         return res
+
+    def _prepare_analytic_account_data(self, prefix=None):
+        """ Prepare SO analytic account creation values.
+
+        :return: `account.analytic.account` creation values
+        :rtype: dict
+        """
+        self.ensure_one()
+        name = self.name
+        if prefix:
+            name = prefix + ": " + self.name
+        project_plan, _other_plans = self.env['account.analytic.plan']._get_all_plans()
+        return {
+            'name': self.project_code,
+            'code': self.client_order_ref,
+            'company_id': self.company_id.id,
+            'plan_id': project_plan.id,
+            'partner_id': self.partner_id.id,
+        }
+
 
 class RentalOrdersLine(models.Model):
     _inherit = 'sale.order.line'
@@ -740,6 +763,16 @@ class RentalOrdersLine(models.Model):
             return _(
                 "\n%(from_date)s to %(to_date)s", from_date=start_date_part, to_date=return_date_part
             )
+
+    def _timesheet_create_project_prepare_values(self):
+        res = super(RentalOrdersLine, self)._timesheet_create_project_prepare_values()
+        res['name'] = self.order_id.project_code
+        today_date = fields.Datetime.now()
+        pro_end_date = today_date.date() + timedelta(days=30)
+        res['date_start'] = today_date.date()
+        res['date'] = pro_end_date
+        print('DESSSSSSSSSSSS',res)
+        return res
 
     @api.onchange('product_id')
     def _onchange_rent_product(self):
@@ -835,3 +868,22 @@ class RentalInvoiceHistory(models.Model):
         self.is_ready_to_invoice=False
         if self.worked_days>0.0:
             self.is_ready_to_invoice=True
+
+class ProjectProject(models.Model):
+    _inherit = 'project.project'
+
+    _sql_constraints = [
+        ('name_uniq', 'unique (name)', 'Project must be unique.')
+    ]
+
+    @api.constrains('sale_line_id')
+    def _check_sale_line_type(self):
+        for project in self.filtered(lambda project: project.sale_line_id):
+            break
+            # if not project.sale_line_id.is_service:
+            #     raise ValidationError(
+            #         _("You cannot link a billable project to a sales order item that is not a service."))
+            # if project.sale_line_id.is_expense:
+            #     raise ValidationError(
+            #         _("You cannot link a billable project to a sales order item that comes from an expense or a vendor bill."))
+
