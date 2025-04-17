@@ -17,7 +17,7 @@
                 </setting>
             </setting>
             <setting id="rental_sign" position="after">
-                <setting string="Default Analytic Plans">
+                <setting id="rental_aa_plan" string="Default Analytic Plans">
                     <div class="content-group">
                         <div class="row mt16 o_light_label">
                             <label for="r_analytic_plan_id" class="col-lg-3"/>
@@ -29,9 +29,17 @@
                         </div>
                     </div>
                 </setting>
+                <setting id="rental_default_journal" string="Default Journal">
+                    <div class="content-group">
+                        <div class="row mt16 o_light_label">
+                            <label for="rental_journal_id" class="col-lg-3"/>
+                            <field name="rental_journal_id" class="col-lg-2"/>
+                        </div>
+                    </div>
+                </setting>
             </setting>
             <setting id="setting_commission" position="after">
-                <setting string="Default Analytic Plans">
+                <setting id="sale_aa_plan" string="Default Analytic Plans">
                     <div class="content-group">
                         <div class="row mt16 o_light_label">
                             <label for="s_analytic_plan_id" class="col-lg-3"/>
@@ -40,6 +48,14 @@
                         <div class="row mt16 o_light_label">
                             <label for="s_analytic_sub_plan_id" class="col-lg-3"/>
                             <field name="s_analytic_sub_plan_id" class="col-lg-2"/>
+                        </div>
+                    </div>
+                </setting>
+                <setting id="sale_default_journal" string="Default Journal">
+                    <div class="content-group">
+                        <div class="row mt16 o_light_label">
+                            <label for="sales_journal_id" class="col-lg-3"/>
+                            <field name="sales_journal_id" class="col-lg-2"/>
                         </div>
                     </div>
                 </setting>
@@ -67,6 +83,14 @@
                                         <field name="ss_analytic_sub_plan_id" class="col-lg-2"/>
                                     </div>
                                 </div>
+                        </setting>
+                        <setting id="setting_subscription_journal" string="Default Journal">
+                            <div class="content-group">
+                                <div class="row mt16 o_light_label">
+                                    <label for="subscription_journal_id" class="col-lg-3"/>
+                                    <field name="subscription_journal_id" class="col-lg-2"/>
+                                </div>
+                            </div>
                         </setting>
                     </block>
                 </app>

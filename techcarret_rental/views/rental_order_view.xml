@@ -37,7 +37,6 @@
         </field>
     </record>
 
-
     <record id="view_tec_move_form" model="ir.ui.view">
     <field name="name">account.move.form</field>
     <field name="model">account.move</field>
@@ -372,28 +371,6 @@
         </field>
     </record>
 
-    <record id="sale_subscription.sale_subscription_action" model="ir.actions.act_window">
-        <field name="name">Subscriptions</field>
-        <field name="path">subscriptions</field>
-        <field name="res_model">sale.order</field>
-        <field name="view_mode">list,kanban,form,pivot,graph,cohort,activity</field>
-        <field name="context">{
-            'default_is_tec_subscription': '1',
-            'default_subscription_state': '1_draft',
-            'search_default_progress': 1,
-            'search_default_paused': 1,
-            }</field>
-        <field name="domain">[('subscription_state', 'not in', ['2_renewal', '5_renewed', '7_upsell', False])]</field>
-        <field name="search_view_id" eval='tec_sale_subscription_view_search'/>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_subscription_graph">
-                Create a new subscription
-            </p><p>
-            Automate invoices and payments, simplify upsell quotes, reduce churn and get insights (MRR, churn, CLTV, ...)
-        </p>
-        </field>
-    </record>
-
     <record id="view_rental_history_filter" model="ir.ui.view">
         <field name="name">rental.invoice.history.list.select</field>
         <field name="model">rental.invoice.history</field>
@@ -435,20 +412,6 @@
             </list>
         </field>
     </record>
-
-    <record id="tech_rental_invoices" model="ir.actions.act_window">
-        <field name="name">Invoice to create</field>
-        <field name="res_model">rental.invoice.history</field>
-        <field name="view_mode">list</field>
-        <field name="search_view_id" ref="view_rental_history_filter"/>
-        <field name="path">tech-rental-invoice</field>
-    </record>
-
-    <menuitem id="menu_tech_rental_schedule_invoices"
-              name="Rental Invoices"
-              parent="sale_renting.rental_menu_root"
-              action="tech_rental_invoices"
-              sequence="2"/>
 
     <record id="product_template_form_techcarret_view" model="ir.ui.view">
     <field name="name">product.template.common.form</field>
@@ -521,107 +484,5 @@
             </xpath>
         </field>
     </record>
-
-    <!--Cron job for creating invoices-->
-    <record id="rental_invoice_automation_month_cron" model="ir.cron">
-        <field name="name">Rental invoice month automation</field>
-        <field name="model_id" ref="model_sale_order"/>
-        <field name="state">code</field>
-        <field name="code">model._cron_create_rental_month_invoices()</field>
-        <field name="interval_number">1</field>
-        <field name="interval_type">months</field>
-        <field name="active" eval="True"/>
-    </record>
-
-
-    <record id="sale_subscription.sale_subscription_action_quotes" model="ir.actions.act_window">
-        <field name="name">Quotations</field>
-        <field name="res_model">sale.order</field>
-        <field name="view_mode">list,kanban,form,pivot,graph,cohort,activity</field>
-        <field name="context">{
-            'default_has_recurring_line':True,
-            'search_default_my_subscriptions': 1,
-        }</field>
-        <!-- All kind of subscription except upsell -->
-        <field name="domain">[('subscription_state', 'in', ['1_draft', '2_renewal', '3_progress', '4_paused', '5_renewed', '6_churn'])]</field>
-        <field name="view_ids" eval="[(5, 0, 0),
-                (0, 0, {'view_mode': 'list', 'view_id': ref('sale_subscription.sale_subscription_quotation_tree_view'), 'sequence': 1}),
-                (0, 0, {'view_mode': 'kanban', 'sequence': 2}),
-            ]"/>
-        <field name="search_view_id" ref='sale_subscription.sale_subscription_view_search'/>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                Create a subscription quotation
-            </p><p>
-                Create subscriptions to manage recurring invoicing and payments from your customers.
-            </p>
-        </field>
-    </record>
-
-    <record id="sale_subscription.sale_subscription_action" model="ir.actions.act_window">
-        <field name="name">Subscriptions</field>
-        <field name="path">subscriptions</field>
-        <field name="res_model">sale.order</field>
-        <field name="view_mode">list,kanban,form,pivot,graph,cohort,activity</field>
-        <field name="context">{
-            'default_has_recurring_line':True,
-            'default_subscription_state': '1_draft',
-            'search_default_progress': 1,
-            'search_default_paused': 1,
-        }</field>
-        <field name="domain">[('subscription_state', 'not in', ['2_renewal', '5_renewed', '7_upsell', False])]</field>
-        <field name="search_view_id" ref='sale_subscription.sale_subscription_view_search'/>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_subscription_graph">
-                Create a new subscription
-            </p><p>
-                Automate invoices and payments, simplify upsell quotes, reduce churn and get insights (MRR, churn, CLTV, ...)
-            </p>
-        </field>
-    </record>
-
-    <record id="sale_subscription.sale_subscription_action_filtered" model="ir.actions.act_window">
-        <field name="name">Subscriptions</field>
-        <field name="res_model">sale.order</field>
-        <field name="view_mode">list,form,kanban,pivot,graph,activity</field>
-        <field name="context">{
-            'default_has_recurring_line':True,
-            'search_default_sale_order_template_id': [active_id],
-            'default_sale_order_template_id': active_id,
-        }
-        </field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                Create a new subscription
-            </p><p>
-                Automate invoices and payments, simplify upsell quotes, reduce churn and get insights (MRR, churn, CLTV, ...)
-            </p>
-        </field>
-    </record>
-
-    <record id="sale_subscription.sale_subscription_action_pending" model="ir.actions.act_window">
-        <field name="name">To Renew</field>
-        <field name="res_model">sale.order</field>
-        <field name="view_mode">list,form,pivot,graph,kanban,cohort,activity</field>
-        <field name="context">{
-            'default_has_recurring_line':True,
-            'search_default_my_subscription':1,
-            'search_default_to_renew':1,
-            'default_subscription_state': '1_draft',
-        }</field>
-        <field name="domain">[('subscription_state', '!=', False)]</field>
-        <field name="search_view_id" ref='sale_subscription.sale_subscription_view_search'/>
-        <field name="help" type="html">
-          <p class="o_view_nocontent_smiling_face">
-            Great, there are no subscriptions to renew!
-          </p><p>
-            Here you will find subscriptions overdue for renewal.
-          </p><p>
-            It could be due to the fail of the automatic payment
-            or because the new invoice has not yet been issued.
-          </p>
-        </field>
-    </record>
-
 
 </odoo>

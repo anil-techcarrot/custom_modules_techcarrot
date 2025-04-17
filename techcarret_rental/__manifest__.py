@@ -15,6 +15,8 @@
         'views/rental_order_view.xml',
         'views/employee_view.xml',
         'views/import_attendance_view.xml',
+        'views/cron_view.xml',
+        'views/menu_view.xml'
     ],
     'auto_install': False,
     'installable': True,

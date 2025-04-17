@@ -17,86 +17,6 @@ class TecprojectType(models.Model):
 
     _sql_constraints = [('unique_tecproject', 'unique (name)', 'Name must be unique.')]
 
-
-class SaleAdvancePaymentInv(models.TransientModel):
-    _inherit = 'sale.advance.payment.inv'
-
-    def create_invoices(self):
-        self._check_amount_is_positive()
-        has_rental_order=False
-        has_invoice_lines=False
-        for sale in self.sale_order_ids:
-            if sale.is_rental_order == True:
-                has_rental_order=True
-            if sale.rental_inv_line_ids:
-                has_invoice_lines=True
-        if has_rental_order==True and has_invoice_lines==True:
-            for sale in self.sale_order_ids:
-                count=0
-                for rental in sale.rental_inv_line_ids:
-                    if count==0 and rental.state=='draft':
-                        sale._cron_create_rental_month_invoices(rental)
-                    count = count + 1
-        else:
-            invoices = self._create_invoices(self.sale_order_ids)
-            return self.sale_order_ids.action_view_invoice(invoices=invoices)
-
-class AccountMoveLine(models.Model):
-    _inherit = "account.move.line"
-
-    rental_start_date = fields.Datetime('Rental Start Date')
-    rental_return_date = fields.Datetime('Rental Return Date')
-
-    @api.depends('product_id', 'move_id.ref', 'move_id.payment_reference', 'rental_start_date', 'rental_return_date')
-    def _compute_name(self):
-        def get_name(line):
-            values = []
-            if line.partner_id.lang:
-                product = line.product_id.with_context(lang=line.partner_id.lang)
-            else:
-                product = line.product_id
-            if not product:
-                return False
-            if line.journal_id.type == 'sale':
-                values.append(product.display_name)
-                if product.description_sale:
-                    values.append(product.description_sale)
-                if line.rental_start_date and line.rental_return_date:
-                    s_date = datetime.strptime(str(line.rental_start_date), "%Y-%m-%d %H:%M:%S").date()
-                    r_date = datetime.strptime(str(line.rental_return_date), "%Y-%m-%d %H:%M:%S").date()
-                    s_date = str(s_date) +' TO '+str(r_date)
-                    values.append(s_date)
-            elif line.journal_id.type == 'purchase':
-                values.append(product.display_name)
-                if product.description_purchase:
-                    values.append(product.description_purchase)
-            return '\n'.join(values)
-        term_by_move = (self.move_id.line_ids | self).filtered(lambda l: l.display_type == 'payment_term').sorted(lambda l: l.date_maturity or date.max).grouped('move_id')
-        for line in self.filtered(lambda l: l.move_id.inalterable_hash is False):
-            if line.rental_start_date and line.rental_return_date:
-                if line.display_type == 'product':
-                    line.name = get_name(line)
-            else:
-                if line.display_type == 'payment_term':
-                    term_lines = term_by_move.get(line.move_id, self.env['account.move.line'])
-                    n_terms = len(line.move_id.invoice_payment_term_id.line_ids)
-                    if line.move_id.payment_reference and line.move_id.ref:
-                        name = f'{line.move_id.ref} - {line.move_id.payment_reference}'
-                    else:
-                        name = line.move_id.payment_reference or ''
-                    if n_terms > 1:
-                        index = term_lines._ids.index(line.id) if line in term_lines else len(term_lines)
-                        name = _('%(name)s installment #%(number)s', name=name, number=index + 1).lstrip()
-                    if n_terms > 1 or not line.name or line._origin.name == line._origin.move_id.payment_reference or (
-                            line._origin.move_id.payment_reference and line._origin.move_id.ref
-                            and line._origin.name == f'{line._origin.move_id.ref} - {line._origin.move_id.payment_reference}'
-                    ):
-                        line.name = name
-                if not line.product_id or line.display_type in ('line_section', 'line_note'):
-                    continue
-                if not line.name or line._origin.name == get_name(line._origin):
-                    line.name = get_name(line)
-
 class ProductTemplate(models.Model):
     _inherit = "product.template"
 
@@ -317,44 +237,45 @@ class Rentals(models.Model):
     def _onchange_set_aa(self):
         for sale in self:
             for o_line in sale.order_line:
-                aa_name=''
-                if sale.is_rental_order==True:
-                    if o_line.product_id and sale.project_code:
-                        aa_name=o_line.product_id.name+'/'+sale.project_code
-                elif sale.is_tec_subscription==True:
-                    # PRJ/CLIENTCODE/LC/Practice/SO no.
-                    if sale.partner_id and sale.partner_id.customer_code and sale.practice_id and sale.name:
-                        aa_name="PRJ/"+str(sale.partner_id.customer_code)+"LC/"+sale.practice_id.name+"/"+sale.name
-                else:
-                    # PRJ/CLIENTCODE/PROJECT TYPE/Practice/Project Code
-                    if sale.partner_id and sale.partner_id.customer_code and sale.project_type_id and sale.practice_id and sale.name and sale.project_code:
-                        aa_name = "PRJ/"+str(sale.partner_id.customer_code)+"/"+str(sale.project_type_id.name)+"/"+str(sale.practice_id.name)+"/"+sale.project_code
-                if aa_name !='':
-                    analytic_plan_id=''
-                    if sale.r_analytic_sub_plan_id and sale.is_rental_order==True:
-                        analytic_plan_id=sale.r_analytic_sub_plan_id
-                    elif sale.ss_analytic_sub_plan_id and sale.is_tec_subscription==True:
-                        analytic_plan_id=sale.ss_analytic_sub_plan_id
-                    elif sale.s_analytic_sub_plan_id:
-                        analytic_plan_id=sale.s_analytic_sub_plan_id
-                    if analytic_plan_id:
-                        aa_objs = self.env['account.analytic.account'].search([('company_id', '=', sale.company_id.id),('plan_id', '=', analytic_plan_id.id),('name', '=', aa_name)], limit=1)
-                        if not aa_objs:
-                            aa_dict ={aa_objs.id: 100}
-                            aa_objs = self.env['account.analytic.account'].create({
-                                'plan_id': analytic_plan_id.id,
-                                'name': aa_name,
-                                'company_id':sale.company_id.id,
-                                'partner_id': sale.partner_id.id,
-                            })
-                            if aa_objs:
+                if o_line.product_id:
+                    aa_name=''
+                    if sale.is_rental_order==True:
+                        if o_line.product_id and sale.project_code:
+                            aa_name=o_line.product_id.name+'/'+sale.project_code
+                    elif sale.is_tec_subscription==True:
+                        # PRJ/CLIENTCODE/LC/Practice/SO no.
+                        if sale.partner_id and sale.partner_id.customer_code and sale.practice_id and sale.name:
+                            aa_name="PRJ/"+str(sale.partner_id.customer_code)+"LC/"+sale.practice_id.name+"/"+sale.name
+                    else:
+                        # PRJ/CLIENTCODE/PROJECT TYPE/Practice/Project Code
+                        if sale.partner_id and sale.partner_id.customer_code and sale.project_type_id and sale.practice_id and sale.name and sale.project_code:
+                            aa_name = "PRJ/"+str(sale.partner_id.customer_code)+"/"+str(sale.project_type_id.name)+"/"+str(sale.practice_id.name)+"/"+sale.project_code
+                    if aa_name !='':
+                        analytic_plan_id=''
+                        if sale.r_analytic_sub_plan_id and sale.is_rental_order==True:
+                            analytic_plan_id=sale.r_analytic_sub_plan_id
+                        elif sale.ss_analytic_sub_plan_id and sale.is_tec_subscription==True:
+                            analytic_plan_id=sale.ss_analytic_sub_plan_id
+                        elif sale.s_analytic_sub_plan_id:
+                            analytic_plan_id=sale.s_analytic_sub_plan_id
+                        if analytic_plan_id:
+                            aa_objs = self.env['account.analytic.account'].search([('company_id', '=', sale.company_id.id),('plan_id', '=', analytic_plan_id.id),('name', '=', aa_name)], limit=1)
+                            if not aa_objs:
+                                aa_dict ={aa_objs.id: 100}
+                                aa_objs = self.env['account.analytic.account'].create({
+                                    'plan_id': analytic_plan_id.id,
+                                    'name': aa_name,
+                                    'company_id':sale.company_id.id,
+                                    'partner_id': sale.partner_id.id,
+                                })
+                                if aa_objs:
+                                    o_line.analytic_distribution=aa_dict
+                            else:
+                                aa_dict ={aa_objs.id: 100}
+                                if o_line.analytic_distribution:
+                                    for key, value in o_line.analytic_distribution.items():
+                                        aa_dict.update({key:value})
                                 o_line.analytic_distribution=aa_dict
-                        else:
-                            aa_dict ={aa_objs.id: 100}
-                            if o_line.analytic_distribution:
-                                for key, value in o_line.analytic_distribution.items():
-                                    aa_dict.update({key:value})
-                            o_line.analytic_distribution=aa_dict
 
 
     @api.onchange('rental_start_date','rental_return_date')
