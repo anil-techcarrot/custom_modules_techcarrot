@@ -67,7 +67,7 @@
                                 <thead>
                                     <tr style="background-color:#d6d6d6;">
                                         <th name="inv_date" width="30%" class="  text-start">Invoice Date</th>
-<!--                                        <th name="terms" width="25%" class="  text-start">Terms</th>-->
+                                        <th name="terms" width="25%" class="  text-start">Terms</th>
                                         <th name="due_date" width="30%" class="  text-start">Due Date</th>
                                         <th name="due_date" width="30%" class="  text-start">P.O.#</th>
                                     </tr>
@@ -77,9 +77,9 @@
                                         <td name="inv_dt" style="border-bottom:none;border-top:none">
                                             <span t-field="o.invoice_date"></span>
                                         </td>
-<!--                                        <td name="inv_dt" style="border-bottom:none;border-top:none">-->
-<!--                                            <span t-field="o.invoice_payment_term_id.note"></span>-->
-<!--                                        </td>-->
+                                        <td name="inv_dt" style="border-bottom:none;border-top:none">
+                                            <span t-field="o.invoice_payment_term_id.name"></span>
+                                        </td>
                                         <td name="inv_dt" style="border-bottom:none;border-top:none">
                                             <span t-field="o.invoice_date_due"></span>
                                         </td>
@@ -393,7 +393,7 @@
                                             <tr>
                                                 <td >Terms</td>
                                                 <td >:</td>
-                                                <td ><span t-field="o.name"></span></td>
+                                                <td ><span t-field="o.invoice_payment_term_id.name"></span></td>
                                             </tr>
                                             <tr>
                                                 <td >Doc #</td>

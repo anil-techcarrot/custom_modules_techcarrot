@@ -11,6 +11,7 @@ from odoo.fields import Command
 from odoo.tools import format_datetime, format_time, date_utils
 from pytz import timezone, UTC
 from odoo.exceptions import UserError
+from odoo.tools import format_list
 
 class TecprojectType(models.Model):
     _name = 'tecproject.type'
@@ -628,18 +629,18 @@ class Rentals(models.Model):
 
     def action_confirm(self):
         res = super(Rentals, self).action_confirm()
-        for so_line in self:
-            if so_line.is_rental_order == True:
-                for rental_in in so_line.rental_inv_line_ids:
+        for order in self:
+            if order.is_rental_order == True:
+                for rental_in in order.rental_inv_line_ids:
                     rental_in.state ='draft'
                 # for o_line in so_line.order_line:
                     # if o_line.product_id and not o_line.product_id.employee_id:
                     #     raise UserError(_("Employee profile not mapped in product master"))
-                for r_invoice in so_line.rental_inv_line_ids:
+                for r_invoice in order.rental_inv_line_ids:
                     r_invoice.sale_state='sale'
-            if not so_line.order_line:
-                raise UserError(("Please add some Products in Order lines."))
-            project = so_line.order_line[0]._timesheet_create_project()
+            project = order.order_line[0]._timesheet_create_project()
+            order.project_id = project.id
+            project.allocated_hours = 0.0
         return res
 
     def action_cancel(self):
@@ -764,15 +765,105 @@ class RentalOrdersLine(models.Model):
                 "\n%(from_date)s to %(to_date)s", from_date=start_date_part, to_date=return_date_part
             )
 
+
     def _timesheet_create_project_prepare_values(self):
-        res = super(RentalOrdersLine, self)._timesheet_create_project_prepare_values()
-        res['name'] = self.order_id.project_code
-        today_date = fields.Datetime.now()
-        pro_end_date = today_date.date() + timedelta(days=30)
-        res['date_start'] = today_date.date()
-        res['date'] = pro_end_date
-        print('DESSSSSSSSSSSS',res)
-        return res
+        """Generate project values"""
+        # create the project or duplicate one
+        return {
+            'name': self.order_id.project_code,
+            'partner_id': self.order_id.partner_id.id,
+            'sale_line_id': self.id,
+            'active': True,
+            'company_id': self.company_id.id,
+            'allow_billable': True,
+            'date_start': self.order_id.rental_start_date,
+            'date': self.order_id.rental_return_date,
+            'user_id': self.product_id.project_template_id.user_id.id,
+        }
+
+    def _timesheet_service_generation(self):
+        """ For service lines, create the task or the project. If already exists, it simply links
+            the existing one to the line.
+            Note: If the SO was confirmed, cancelled, set to draft then confirmed, avoid creating a
+            new project/task. This explains the searches on 'sale_line_id' on project/task. This also
+            implied if so line of generated task has been modified, we may regenerate it.
+        """
+        so_line_task_global_project = self._get_so_lines_task_global_project()
+        products_no_project = so_line_task_global_project.filtered(
+            lambda sol: not (sol.product_id.project_id or sol.order_id.project_id)
+        ).product_id
+        if products_no_project:
+            raise UserError(_(
+                "A project must be defined on the quotation or on the form of products creating a task on order.\n"
+                "The following products need a project in which to put their task: %(product_names)s",
+                product_names=format_list(self.env, products_no_project.mapped('name')),
+            ))
+        so_line_new_project = self._get_so_lines_new_project()
+
+        # search so lines from SO of current so lines having their project generated, in order to check if the current one can
+        # create its own project, or reuse the one of its order.
+        map_so_project = {}
+        if so_line_new_project:
+            order_ids = self.mapped('order_id').ids
+            so_lines_with_project = self.search([('order_id', 'in', order_ids), ('project_id', '!=', False), ('product_id.service_tracking', 'in', ['project_only', 'task_in_project']), ('product_id.project_template_id', '=', False)])
+            map_so_project = {sol.order_id.id: sol.project_id for sol in so_lines_with_project}
+            so_lines_with_project_templates = self.search([('order_id', 'in', order_ids), ('project_id', '!=', False), ('product_id.service_tracking', 'in', ['project_only', 'task_in_project']), ('product_id.project_template_id', '!=', False)])
+            map_so_project_templates = {(sol.order_id.id, sol.product_id.project_template_id.id): sol.project_id for sol in so_lines_with_project_templates}
+
+        # search the global project of current SO lines, in which create their task
+        map_sol_project = {}
+        if so_line_task_global_project:
+            map_sol_project = {sol.id: sol.product_id.with_company(sol.company_id).project_id for sol in so_line_task_global_project}
+
+        def _can_create_project(sol):
+            if not sol.project_id:
+                if sol.product_id.project_template_id:
+                    return (sol.order_id.id, sol.product_id.project_template_id.id) not in map_so_project_templates
+                elif sol.order_id.id not in map_so_project:
+                    return True
+            return False
+
+        # task_global_project: create task in global project
+        # for so_line in so_line_task_global_project:
+        #     if not so_line.task_id:
+        #         project = map_sol_project.get(so_line.id) or so_line.order_id.project_id
+        #         if project and so_line.product_uom_qty > 0:
+        #             so_line._timesheet_create_task(project)
+
+        # project_only, task_in_project: create a new project, based or not on a template (1 per SO). May be create a task too.
+        # if 'task_in_project' and project_id configured on SO, use that one instead
+        for so_line in so_line_new_project:
+            project = False
+            if so_line.product_id.service_tracking in ['project_only', 'task_in_project']:
+                project = so_line.project_id
+            if not project and _can_create_project(so_line):
+                # project = so_line._timesheet_create_project()
+                if so_line.product_id.project_template_id:
+                    map_so_project_templates[(so_line.order_id.id, so_line.product_id.project_template_id.id)] = project
+                else:
+                    map_so_project[so_line.order_id.id] = project
+            elif not project:
+                # Attach subsequent SO lines to the created project
+                so_line.project_id = (
+                    map_so_project_templates.get((so_line.order_id.id, so_line.product_id.project_template_id.id))
+                    or map_so_project.get(so_line.order_id.id)
+                )
+            if so_line.product_id.service_tracking == 'task_in_project':
+                if not project:
+                    if so_line.product_id.project_template_id:
+                        project = map_so_project_templates[(so_line.order_id.id, so_line.product_id.project_template_id.id)]
+                    else:
+                        project = map_so_project[so_line.order_id.id]
+                # if not so_line.task_id:
+                #     so_line._timesheet_create_task(project=project)
+            so_line._handle_milestones(project)
+
+        # If the SO generates projects or create task in project on confirmation and the project of the SO is not set, set it to the project with the lowest sequence
+        so_lines = so_line_task_global_project + so_line_new_project
+        so = so_lines.order_id
+        sol_projects = so_lines.project_id | so_lines.task_id.project_id
+        if not so.project_id and sol_projects:
+            so.project_id = sol_projects.sorted('sequence')[0]
 
     @api.onchange('product_id')
     def _onchange_rent_product(self):
@@ -868,6 +959,8 @@ class RentalInvoiceHistory(models.Model):
         self.is_ready_to_invoice=False
         if self.worked_days>0.0:
             self.is_ready_to_invoice=True
+
+
 
 class ProjectProject(models.Model):
     _inherit = 'project.project'
