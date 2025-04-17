@@ -638,7 +638,10 @@ class Rentals(models.Model):
                     #     raise UserError(_("Employee profile not mapped in product master"))
                 for r_invoice in order.rental_inv_line_ids:
                     r_invoice.sale_state='sale'
+            if not self.order_line:
+                raise UserError(("Please add some Products in Order lines."))
             project = order.order_line[0]._timesheet_create_project()
+            milestone = order.order_line[0]._handle_milestones(project)
             order.project_id = project.id
             project.allocated_hours = 0.0
         return res
@@ -856,7 +859,7 @@ class RentalOrdersLine(models.Model):
                         project = map_so_project[so_line.order_id.id]
                 # if not so_line.task_id:
                 #     so_line._timesheet_create_task(project=project)
-            so_line._handle_milestones(project)
+            # so_line._handle_milestones(project)
 
         # If the SO generates projects or create task in project on confirmation and the project of the SO is not set, set it to the project with the lowest sequence
         so_lines = so_line_task_global_project + so_line_new_project
