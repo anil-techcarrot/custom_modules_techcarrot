@@ -581,8 +581,6 @@ class Rentals(models.Model):
                         y = rh.rentalnext_invoice_date.year
                         str_m_y = str(m)+'_'+str(y)
                         pending_month.append(str_m_y)
-                history_obj = self.env['rental.invoice.history'].search([('id', '=', int(rental_obj.id)+1)], limit=1)
-                rental_obj.rental_sale_id.rentalnext_invoice_date = history_obj.rentalnext_invoice_date
                 timesheet_months=[]
                 if rental_obj.worked_days<=0:
                     old_rental_objs = self.env['rental.invoice.history'].search([('rental_sale_id','=',rental_obj.rental_sale_id.id),('id', '=', int(rental_obj.id-1)),('state','in',['confirmed','done'])], limit=1)
@@ -617,6 +615,7 @@ class Rentals(models.Model):
                             rental_obj.is_ready_to_invoice=False
                             if future_rental_objs:
                                 future_rental_objs.is_ready_to_invoice=True
+                                rental_obj.rental_sale_id.rentalnext_invoice_date = future_rental_objs.rentalnext_invoice_date
                 else:
                     #CREATE RENTAL INVOICE
                     self.create_rental_invoice(rental_obj)
@@ -625,6 +624,7 @@ class Rentals(models.Model):
                     future_rental_objs = self.env['rental.invoice.history'].search([('rental_sale_id','=',rental_obj.rental_sale_id.id),('id', '=', int(rental_obj.id+1)),('state','in',['draft'])], limit=1)
                     if future_rental_objs:
                         future_rental_objs.is_ready_to_invoice=True
+                        rental_obj.rental_sale_id.rentalnext_invoice_date = future_rental_objs.rentalnext_invoice_date
 
     def action_confirm(self):
         res = super(Rentals, self).action_confirm()
