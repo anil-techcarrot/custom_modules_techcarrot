@@ -5,3 +5,4 @@ from . import sale
 from . import rental_order
 from . import employee
 from . import import_attendance
+from . import res_partner
