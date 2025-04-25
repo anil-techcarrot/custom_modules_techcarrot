@@ -234,16 +234,12 @@ class Rentals(models.Model):
 
     @api.onchange('rental_start_date')
     def _onchange_finvoice(self):
-        user_tz = self.env.user.tz or self.env.context.get('tz')
-        user_pytz = pytz.timezone(user_tz) if user_tz else pytz.utc
-        now_dt = self.rental_start_date.astimezone(user_pytz).replace(tzinfo=None)
-        now_dt = now_dt.replace(hour=00, minute=00, second=1)
+        start_date = self.rental_start_date + relativedelta(hours=8)
         if self.invoice_freequency:
-            next_invoice_date = now_dt + relativedelta(months=1)
+            self.rentalfirst_invoice_date = start_date + relativedelta(months=1)
         else:
-            next_invoice_date = self.rental_start_date
-        # self.rental_start_date=now_dt
-        self.rentalfirst_invoice_date = next_invoice_date
+            if self.rental_start_date:
+                self.rentalfirst_invoice_date = self.rental_start_date + relativedelta(months=1)
 
     @api.onchange('r_analytic_plan_id','s_analytic_plan_id','ss_analytic_plan_id')
     def _onchange_set_aa1(self):
@@ -305,7 +301,6 @@ class Rentals(models.Model):
         if self.is_rental_order == True:
             for order in self:
                 for order_line in order.order_line:
-                    print('SWWWWWWQQQQQQQ1111111167676767', order)
                     if order_line.product_uom.name == 'Hours':
                         order_line.product_uom_qty = order.duration_days * 8
                     elif order_line.product_uom.name == 'Days':
@@ -382,9 +377,9 @@ class Rentals(models.Model):
                                     if order_line.product_uom.name=='Hours':
                                         planned_worked = planned_worked*8
                                         uom = 'hours'
-                                    # if order_line.product_uom.name=='Months':
-                                    #     planned_worked = order_line.product_uom_qty
-                                    #     uom = 'months'
+                                    if order_line.product_uom.name=='Months':
+                                        planned_worked = 1
+                                        uom = 'months'
                                     dummy_start_dt = start_dt + relativedelta(days=5)
                                     inv_dates.append((0, 0, {'sale_state':order.state,
                                                              'planned_days':planned_worked,
@@ -418,6 +413,9 @@ class Rentals(models.Model):
                                         if order_line.product_uom.name == 'Hours':
                                             planned_worked = planned_worked * 8
                                             uom = 'hours'
+                                        if order_line.product_uom.name == 'Months':
+                                            planned_worked = 1
+                                            uom = 'months'
                                         dummy_start_dt = start_dt + relativedelta(days=5)
                                         inv_dates.append((0, 0, {'sale_state':order.state,
                                                              'planned_days':planned_worked,
@@ -455,6 +453,9 @@ class Rentals(models.Model):
                                     if order_line.product_uom.name=='Hours':
                                         planned_worked = planned_worked*8
                                         uom='hours'
+                                    if order_line.product_uom.name=='Months':
+                                        planned_worked = 1
+                                        uom = 'months'
                                     dummy_start_dt = start_dt + relativedelta(days=5)
                                     inv_dates.append((0, 0, {'sale_state': order.state,
                                                              'planned_days': planned_worked,
@@ -476,7 +477,6 @@ class Rentals(models.Model):
                         order.duration_days = no_working_days
                         order.rental_inv_line_ids=inv_dates
                         for order_line in order.order_line:
-                            print('SWWWWWWQQQQQQQ11111111222222', order)
                             if order_line.product_uom.name == 'Hours' and not order_line.manually_edited:
                                 order_line.product_uom_qty = order.duration_days * 8
                             elif order_line.product_uom.name == 'Days' and not order_line.manually_edited:
@@ -521,7 +521,7 @@ class Rentals(models.Model):
                         if old_rental_objs:
                             old_inv_date = old_rental_objs.rentalnext_invoice_date
                         else:
-                            old_inv_date = rental_obj.rental_sale_id.rental_start_date
+                            old_inv_date = rental_obj.rental_sale_id.rental_start_date + relativedelta(hours=8)
                         upcoming_rental_objs = self.env['rental.invoice.history'].search(
                             [('rental_sale_id', '=', rental_obj.rental_sale_id.id),
                              ('employee_id', '=', rental_line.employee_id.id),
@@ -909,14 +909,14 @@ class RentalOrdersLine(models.Model):
                 #         if line.state == 'active':
                 #             raise UserError(_("Employee is not available for rental."))
                 if order.order_id.duration_days>0 and order.product_uom_qty<=1:
-                    print('SWWWWWWQQQQQQQ11111111',order)
                     if order.product_uom.name == 'Hours':
                         order.product_uom_qty = order.order_id.duration_days * 8
-                    elif order.product_uom.name == 'Days':
-                        order.product_uom_qty = order.order_id.duration_days
-                    else:
-                        months = (order.order_id.rental_return_date.year - order.order_id.rental_start_date.year) * 12 + (order.order_id.rental_return_date.month - order.order_id.rental_start_date.month)
+                    elif order.product_uom.name == 'Months':
+                        months = (order.order_id.rental_return_date.year - order.order_id.rental_start_date.year) * 12 + (
+                                             order.order_id.rental_return_date.month - order.order_id.rental_start_date.month)
                         order.product_uom_qty = months
+                    else:
+                        order.product_uom_qty = order.order_id.duration_days
 
     @api.onchange('product_id', 'product_uom', 'product_uom_qty')
     def _onchange_rentalproduct(self):

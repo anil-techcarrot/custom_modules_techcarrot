@@ -29,6 +29,17 @@
         </field>
     </record>
 
+    <record id="techcarrot_employee_contract_button_form_view" model="ir.ui.view">
+        <field name="name">hr.employee.form</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr_contract.hr_hr_employee_view_form3"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_open_contract']" position="attributes">
+                <attribute name="invisible">employee_type not in ['employee', 'student', 'trainee', 'permanent']</attribute>
+            </xpath>
+        </field>
+    </record>
+
     <record id="techcarrot_employee_inherit_tree_view" model="ir.ui.view">
     <field name="name">hr.employee.list</field>
     <field name="model">hr.employee</field>

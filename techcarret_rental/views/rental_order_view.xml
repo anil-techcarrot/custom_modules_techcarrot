@@ -32,7 +32,10 @@
         <field name="inherit_id" ref="sale_renting.rental_order_form_view"/>
         <field name="arch" type="xml">
             <xpath expr="//label[@for='duration_days']" position='replace'>
-                <label for="duration_days" string="Duration" invisible="duration_days == 0"/>
+                <label for="duration_days" string="Duration" invisible="True"/>
+            </xpath>
+            <xpath expr="//div[@invisible='not is_rental_order and not rental_start_date']" position='attributes'>
+                    <attribute name="invisible">True</attribute>
             </xpath>
         </field>
     </record>
@@ -312,7 +315,7 @@
                 <field name="project_type_id" readonly="state!='draft'" required="is_rental_order != True or is_tec_subscription != True" invisible="is_rental_order == True or is_tec_subscription == True"/>
 <!--                <field name="project_code" required="is_tec_subscription != True" invisible="is_tec_subscription == True" readonly="state!='draft'"/>-->
                 <field name="project_id" required="True" readonly="state!='draft'"/>
-                <field name="project_code"  readonly="True" />
+                <field name="project_code"  readonly="True" invisible="True"/>
                 <field name="client_order_ref"/>
             </xpath>
             <xpath expr="//field[@name='sale_order_template_id']" position="after">
@@ -465,8 +468,8 @@
                             <field name="state" string="Status" column_invisible="1"/>
                             <field name="invoice_state" column_invisible="1"/>
                             <field name="is_ready_to_invoice" column_invisible="1"/>
-                            <button type="object" invisible="worked_days==0 or is_ready_to_invoice !=True or sale_state !='sale' or state != 'draft'" name="create_invoice" string="Create Invoice" class="btn-primary"/>
-                            <button type="object" invisible="worked_days==0 or is_ready_to_invoice==True or sale_state !='sale' or state != 'draft'" name="create_invoice" string="Create Invoice" class="btn-secondary"/>
+                            <button type="object" invisible="worked_days==0 or is_ready_to_invoice !=True or sale_state !='sale' or state != 'draft' or is_selected != True" name="create_invoice" string="Create Invoice" class="btn-primary"/>
+                            <button type="object" invisible="worked_days==0 or is_ready_to_invoice==True or sale_state !='sale' or state != 'draft' or is_selected != True" name="create_invoice" string="Create Invoice" class="btn-secondary"/>
                         </list>
                     </field>
                 </page>

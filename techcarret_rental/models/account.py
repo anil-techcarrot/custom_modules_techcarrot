@@ -87,8 +87,9 @@ class AccountMoveLine(models.Model):
                 if product.description_sale:
                     values.append(product.description_sale)
                 if line.rental_start_date and line.rental_return_date:
+                    retrun_datetime = line.rental_return_date - timedelta(days=1)
                     s_date = datetime.strptime(str(line.rental_start_date), "%Y-%m-%d %H:%M:%S").date()
-                    r_date = datetime.strptime(str(line.rental_return_date), "%Y-%m-%d %H:%M:%S").date()
+                    r_date = datetime.strptime(str(retrun_datetime), "%Y-%m-%d %H:%M:%S").date()
                     s_date = str(s_date) +' TO '+str(r_date)
                     values.append(s_date)
             elif line.journal_id.type == 'purchase':
