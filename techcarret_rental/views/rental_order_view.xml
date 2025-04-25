@@ -58,6 +58,7 @@
         <field name="arch" type="xml">
             <xpath expr="//notebook/page[@name='order_lines']/field/list/field[@name='is_product_rentable']" position='after'>
                 <field name="tracking" column_invisible="True"/>
+                <field name="manually_edited" column_invisible="True"/>
                 <field name="available_reserved_lots" column_invisible="True"/>
                 <field name="reserved_lot_ids" optional="hide" widget="many2many_tags" groups="sale_stock_renting.group_rental_stock_picking"/>
             </xpath>
@@ -310,11 +311,27 @@
                 <field name="is_tec_subscription" invisible="1"/>
                 <field name="project_type_id" readonly="state!='draft'" required="is_rental_order != True or is_tec_subscription != True" invisible="is_rental_order == True or is_tec_subscription == True"/>
 <!--                <field name="project_code" required="is_tec_subscription != True" invisible="is_tec_subscription == True" readonly="state!='draft'"/>-->
-                <field name="project_code" required="is_tec_subscription != True" readonly="state!='draft'"/>
+                <field name="project_id" required="True" readonly="state!='draft'"/>
+                <field name="project_code"  readonly="True" />
                 <field name="client_order_ref"/>
+            </xpath>
+            <xpath expr="//field[@name='sale_order_template_id']" position="after">
+                <field name="employee_id" readonly="state!='draft'"/>
             </xpath>
         </field>
     </record>
+
+    <record id="techcarret_project_code_inherit_form" model="ir.ui.view">
+        <field name="name">project.project.form</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position='before'>
+                <field name="project_code"/>
+            </xpath>
+        </field>
+    </record>
+
 
     <record id="tec_sale_subscription_view_search" model="ir.ui.view">
         <field name="name">sale.order.search</field>
@@ -432,8 +449,9 @@
         <field name="arch" type="xml">
             <xpath expr="//page[@name='order_lines']" position='after'>
                 <page string="Rental Invoices" name="rental_inv_history">
-                    <field name="rental_inv_line_ids" mode="list">
-                        <list editable="bottom" create="0" delete="0">
+                    <field name="rental_inv_line_ids" >
+                        <list editable="bottom" create="0" delete="0" >
+                            <field name="is_selected" widget="checkbox_widget" />
                             <field name="rental_sale_id" column_invisible="1"/>
                             <field name="employee_id" readonly="parent.state!='draft'" force_save="1"/>
                             <field name="rental_month" readonly="parent.state!='draft'"/>

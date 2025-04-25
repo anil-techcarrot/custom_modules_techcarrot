@@ -6,7 +6,8 @@
     'author': 'Ifensys',
     'category': 'Sales',
     'version': '18.1',
-    'depends': ['product', 'sale_management', 'sale', 'stock', 'sale_renting', 'hr', 'hr_work_entry', 'account', 'analytic', 'sale_subscription', 'sale_stock_renting', 'techcarrot_employee', 'techcarrot_contacts', 'sale_project'],
+    'depends': ['product', 'sale_management', 'sale', 'stock', 'sale_renting', 'hr', 'hr_work_entry', 'account', 'analytic', 'sale_subscription', 'sale_stock_renting',
+                'techcarrot_employee', 'techcarrot_contacts', 'sale_project', 'one2many_mass_select_delete'],
     'data': [
         'security/ir.model.access.csv',
         'security/rental_security.xml',
@@ -19,6 +20,14 @@
         'views/cron_view.xml',
         'views/menu_view.xml'
     ],
+
+    'assets': {
+        'web.assets_backend': [
+            # 'techcarret_rental/static/src/css/widget.css',
+            'techcarret_rental/static/src/xml/one2many_delete_templates.xml',
+            'techcarret_rental/static/src/js/list_renderer.js',
+        ],
+    },
     'auto_install': False,
     'installable': True,
 }

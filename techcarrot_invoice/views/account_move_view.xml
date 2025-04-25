@@ -11,7 +11,28 @@
                 <field name="doc_no" invisible="move_type != 'in_invoice'"/>
                 <field name="cust_inv_date" invisible="move_type != 'in_invoice'"/>
             </xpath>
+            <xpath expr="//button[@name='preview_invoice']" position="attributes">
+                <attribute name="invisible">True</attribute>
+            </xpath>
         </field>
     </record>
+
+
+<!--    <record id="account_move_deferred_entry_inherit_view" model="ir.ui.view">-->
+<!--        <field name="name">account.move.form</field>-->
+<!--        <field name="model">account.move</field>-->
+<!--        <field name="inherit_id" ref="account_accountant.view_move_form_inherit" />-->
+<!--        <field name="arch" type="xml">-->
+<!--            <xpath expr="//button[@name='open_deferred_entries']" position="replace">-->
+<!--                <button name="open_deferred_entries"-->
+<!--                        class="oe_stat_button"-->
+<!--                        icon="fa-bars"-->
+<!--                        type="object"-->
+<!--                        invisible="True"-->
+<!--                        string="Deferred Entries123">-->
+<!--                </button>-->
+<!--            </xpath>-->
+<!--        </field>-->
+<!--    </record>-->
 
 </odoo>

@@ -8,7 +8,7 @@
 
     'category': 'Account',
     'version': '18.0.0.1.0',
-    'depends': ['sale_management', 'stock', 'sale_renting', 'account', 'sale'],
+    'depends': ['sale_management', 'stock', 'sale_renting', 'account', 'account_accountant', 'sale'],
 
     'data': [
         'reports/invoice_report_template.xml',
