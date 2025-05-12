@@ -1,6 +1,18 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models, _
 
+class SaleOrderLine(models.Model):
+    _inherit = 'sale.order.line'
+
+    _sql_constraints = [
+        ('accountable_required_fields',
+            "CHECK(display_type IS NOT NULL OR is_downpayment OR (product_id IS NOT NULL AND product_uom IS NOT NULL))",
+            "Missing required fields on accountable sale order line."),
+        ('non_accountable_null_fields',
+            "CHECK((product_id IS NULL AND price_unit = 0 AND product_uom_qty = 0 AND product_uom IS NULL AND customer_lead = 0))",
+            "Forbidden values on non-accountable sale order line"),
+    ]
+
 class SaleAdvancePaymentInv(models.TransientModel):
     _inherit = 'sale.advance.payment.inv'
 

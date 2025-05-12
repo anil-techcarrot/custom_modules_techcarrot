@@ -1163,6 +1163,23 @@ class RentalInvoiceHistory(models.Model):
 class ProjectProject(models.Model):
     _inherit = 'project.project'
 
+    allow_billable = fields.Boolean("Billable", default=True)
+
+    def unlinkaa(self):
+        # Delete the empty related analytic account
+        analytic_accounts_to_delete = self.env['account.analytic.account']
+        for project in self:
+            if project.account_id:
+                analytic_accounts_to_delete |= project.account_id
+        analytic_accounts_to_delete.unlink()
+        return True
+
+    def write(self, vals):
+        res = super(ProjectProject, self).write(vals) if vals else True
+        for line in self:
+            line.unlinkaa()
+        return res
+
     # _sql_constraints = [
     #     ('name_uniq', 'unique (name)', 'Project must be unique.')
     # ]
