@@ -173,7 +173,7 @@ class HrEmployeeInherit(models.Model):
     billing_amt = fields.Char('Billing Amount', copy=False)
     billing_currency_id = fields.Many2one('res.currency', string='Billing Currency', copy=False)
     emp_category_id = fields.Many2one('employee.category', string='Employee Category', copy=False)
-    employee_type = fields.Selection(selection_add=[('bootcamp', 'Bootcamp'),('permanent', 'Permanent'), ('temporary', 'Temporary')], ondelete={'bootcamp': 'cascade', 'permanent': 'cascade', 'temporary': 'cascade'})
+    employee_type = fields.Selection(selection_add=[('bootcamp', 'Bootcamp'),('permanent', 'Permanent'), ('temporary', 'Temporary'), ('seconded', 'Seconded')], ondelete={'bootcamp': 'cascade', 'permanent': 'cascade', 'temporary': 'cascade', 'seconded': 'cascade'})
     
     # Emergency contact person address fields
     e_private_street = fields.Char(string="Private Street", copy=False)
