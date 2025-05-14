@@ -1043,7 +1043,7 @@ class ProjectProject(models.Model):
         # if 'name' in vals and self.search([('name', '=', vals['name'])]):
         #     raise ValidationError(_('Name must be unique.'))
         for create_val in vals:
-            if 'project_code' in create_val and self.search([('project_code', '=', create_val['project_code'])]):
+            if 'project_code' in create_val and self.search([('project_code', 'ilike', create_val['project_code'])]):
                 raise ValidationError(_('Project code must be unique.'))
         return super().create(vals)
 
@@ -1055,7 +1055,7 @@ class ProjectProject(models.Model):
         #             raise ValidationError(_('Name must be unique.'))
         if 'project_code' in vals:
             for record in self:
-                existing = self.search([('project_code', '=', vals['project_code']), ('id', '!=', record.id)])
+                existing = self.search([('project_code', 'ilike', vals['project_code']), ('id', '!=', record.id)])
                 if existing:
                     raise ValidationError(_('Project code must be unique.'))
         res = super(ProjectProject, self).write(vals) if vals else True
