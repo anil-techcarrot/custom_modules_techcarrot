@@ -196,6 +196,18 @@ class Rentals(models.Model):
         res = super(Rentals, self).write(vals)
         return res
 
+    @api.onchange('partner_id')
+    def _onchange_partner_payment_term_id(self):
+        if self.partner_id:
+            self.payment_term_id = self.partner_id.property_payment_term_id
+
+    def _prepare_invoice(self):
+        vals = super()._prepare_invoice()
+        if self.payment_term_id:
+            vals['invoice_payment_term_id'] = self.property_payment_term_id.id
+        return vals
+
+
     @api.onchange('project_id')
     def _onchange_project_id(self):
         if self.project_id:
