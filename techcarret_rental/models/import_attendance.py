@@ -62,7 +62,7 @@ class ImportAttendance(models.Model):
 						continue
 					for line in so_obj.order_line:
 						employee_id = getattr(line.product_id.employee_id, 'id', None)
-						if employee_id == employee.id:
+						if employee_id and employee_id == employee.id:
 							is_so_available = True
 							return so_obj
 				if is_so_available == False:
@@ -152,7 +152,7 @@ class ImportAttendance(models.Model):
 				if is_data_available == False:
 					raise UserError(_('Rental not available. Project %s Employee %s',  line.sale_id.project_code, line.employee_id.emp_code))
 
-			# attendace_import_objs = self.env['import.attendance.line'].sudo().search([('import_attendance_id', '=', 'self.id'), ('employee_id', '=', line.employee_id), ('sale_id', '=', line.sale_id.id),('is_consolidated', '=', False)])
+		# attendace_import_objs = self.env['import.attendance.line'].sudo().search([('import_attendance_id', '=', 'self.id'), ('employee_id', '=', line.employee_id), ('sale_id', '=', line.sale_id.id),('is_consolidated', '=', False)])
 		# 	hours=0
 		# 	for attendace_import_obj in attendace_import_objs:
 		# 		attendace_import_obj.is_consolidated=True
@@ -237,13 +237,13 @@ class ImportAttendance(models.Model):
 							if emp_attendace_objs:
 								raise UserError(_('Employee timesheet already imported. Employee %s', employee_obj.emp_code))
 							values.append((0, 0, {
-										'month': int(month),
-										'year': str(year),
-										'employee_id': employee_obj.id,
-										'worked_qty': int(float(line[2])),
-										'sale_id':so_obj.id,
-										'uom':uom
-										}))
+								'month': int(month),
+								'year': str(year),
+								'employee_id': employee_obj.id,
+								'worked_qty': int(float(line[2])),
+								'sale_id':so_obj.id,
+								'uom':uom
+							}))
 			if values:
 				self.attendance_data_ids= values
 				self.no_employee=len(no_employee)
