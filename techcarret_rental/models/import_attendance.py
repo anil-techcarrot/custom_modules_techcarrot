@@ -218,6 +218,8 @@ class ImportAttendance(models.Model):
 							emp_code = str(line[0])
 						if line[3] == 'Hours':
 							uom='hours'
+						if line[3] == 'Month':
+							uom='month'
 						else:
 							uom = 'days'
 						employee_obj = self.get_eployee(emp_code)
@@ -266,7 +268,7 @@ class ImportStockLine(models.Model):
 	month = fields.Integer("Month")
 	year = fields.Selection(selection='_get_year_selection', string='Year')
 	state = fields.Selection([("draft", "New"), ("imported", "Imported")], required=True, default="draft")
-	uom = fields.Selection([("hours", "Hours"), ("days", "Days")], string="UOM", required=True, default="days")
+	uom = fields.Selection([("hours", "Hours"), ("month", "Month"), ("days", "Days")], string="UOM", required=True, default="days")
 	sale_id = fields.Many2one('sale.order', 'Rental Ref#', copy=False)
 	history_line_id = fields.Many2one('rental.invoice.history', copy=False)
 	is_consolidated = fields.Boolean('Is Consolidated', defualt=False)
