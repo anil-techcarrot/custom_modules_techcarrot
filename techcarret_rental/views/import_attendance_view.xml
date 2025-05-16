@@ -47,12 +47,14 @@
 						</group>
 					</group>
 					<group>
-						<field name="attendance_data_ids" nolabel="1" readonly="1" force_save="1" string="Stock Data">
+						<field name="attendance_data_ids" nolabel="1" readonly="state in ('validate','imported')" force_save="1" string="Stock Data">
 							<list editable="top">
-								<field name="month" column_invisible="1" force_save="1"/>
-								<field name="year" column_invisible="1" force_save="1"/>
-								<field name="sale_id"/>
-								<field name="employee_id"/>
+								<field name="month" column_invisible="1" readonly="0" force_save="1"/>
+								<field name="year" column_invisible="1" readonly="0" force_save="1"/>
+								<field name="rental_order"/>
+								<field name="sale_id" column_invisible="0" readonly="0" force_save="1"/>
+								<field name="emp_code"/>
+								<field name="employee_id" column_invisible="0" readonly="0" force_save="1"/>
 								<field name="worked_qty"/>
 								<field name="uom"/>
 							</list>

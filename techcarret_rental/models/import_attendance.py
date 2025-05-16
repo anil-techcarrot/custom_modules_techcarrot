@@ -66,11 +66,11 @@ class ImportAttendance(models.Model):
 							is_so_available = True
 							return so_obj
 				if is_so_available == False:
-					raise UserError(_('Employee code not found in this project: %s, Employee: %s', code, employee.emp_code))
+					raise UserError(_('Employee code is not found in this project: %s, Employee: %s', code, employee.emp_code))
 			else:
-				raise UserError(_('Project not assigned to any of rental order: %s', code))
+				raise UserError(_('Project is not assigned to any of rental order: %s', code))
 		else:
-			raise UserError(_('Project code not found: %s', code))
+			raise UserError(_('Project code is not found: %s', code))
 
 	def import_attendance(self):
 		for line in self.attendance_data_ids:
@@ -128,6 +128,12 @@ class ImportAttendance(models.Model):
 
 	def validate_data(self):
 		for line in self.attendance_data_ids:
+			employee_obj = self.get_eployee(line.emp_code)
+			if employee_obj.id:
+				line.employee_id = employee_obj.id
+			so_obj = self.get_project(line.rental_order, employee_obj)
+			if so_obj:
+				line.sale_id = so_obj.id
 			emp_attendace_objs = self.env['import.attendance.line'].search([
 				('employee_id', '=', line.employee_id.id),
 				('month', '=', int(line.month)),
@@ -151,28 +157,6 @@ class ImportAttendance(models.Model):
 						is_data_available = True
 				if is_data_available == False:
 					raise UserError(_('Rental not available. Project %s Employee %s',  line.sale_id.project_code, line.employee_id.emp_code))
-
-		# attendace_import_objs = self.env['import.attendance.line'].sudo().search([('import_attendance_id', '=', 'self.id'), ('employee_id', '=', line.employee_id), ('sale_id', '=', line.sale_id.id),('is_consolidated', '=', False)])
-		# 	hours=0
-		# 	for attendace_import_obj in attendace_import_objs:
-		# 		attendace_import_obj.is_consolidated=True
-		# 		if attendace_import_obj.uom == 'hours':
-		# 			hours = hours + attendace_import_obj.worked_qty
-		# 		else:
-		# 			#TODO: get avg hours from employee calendar
-		# 			d_hours= attendace_import_obj.worked_qty*8
-		# 			hours = hours + d_hours
-		#
-		# 	# self.env['employee.workentry'].create({
-		# 	# 	'employee_id': line.employee_id.id,
-		# 	# 	'month': line.month,
-		# 	# 	'year': line.year,
-		# 	# 	'worked_qty': line.worked_qty,
-		# 	# 	'import_id': line.id,
-		# 	# 	'rental_sale_id': line.sale_id.id,
-		# 	# 	'percent':2,
-		# 	# 	'analytic_account_id':''
-		# 	# })
 		self.state='validate'
 
 	@api.onchange('file')
@@ -222,28 +206,14 @@ class ImportAttendance(models.Model):
 							uom='months'
 						else:
 							uom = 'days'
-						employee_obj = self.get_eployee(emp_code)
-						if employee_obj.id:
-							no_employee.append(employee_obj.id)
-						so_obj = self.get_project(project_code, employee_obj)
-						if so_obj:
-							emp_attendace_objs = self.env['import.attendance.line'].search([
-								('employee_id', '=', employee_obj.id),
-								('month', '=', int(month)),
-								('state', '=', 'imported'),
-								('year', '=', str(year)),
-								('sale_id', '=', so_obj.id)
-							])
-							if emp_attendace_objs:
-								raise UserError(_('Employee timesheet already imported. Employee %s', employee_obj.emp_code))
-							values.append((0, 0, {
-								'month': int(month),
-								'year': str(year),
-								'employee_id': employee_obj.id,
-								'worked_qty': int(float(line[2])),
-								'sale_id':so_obj.id,
-								'uom':uom
-							}))
+						values.append((0, 0, {
+									'month': int(month),
+									'year': str(year),
+									'worked_qty': int(float(line[2])),
+									'uom':uom,
+									'rental_order':project_code,
+									'emp_code':emp_code
+									}))
 			if values:
 				self.attendance_data_ids= values
 				self.no_employee=len(no_employee)
@@ -253,7 +223,6 @@ class ImportAttendance(models.Model):
 			if rec.state == 'imported':
 				raise UserError(_('Imported data can not be deleted.'))
 		return super(ImportAttendance, self).unlink()
-
 
 class ImportStockLine(models.Model):
 	_name = 'import.attendance.line'
@@ -265,12 +234,14 @@ class ImportStockLine(models.Model):
 
 	import_attendance_id = fields.Many2one("import.attendance", 'Stock Data', required=True, ondelete='cascade', index=True, copy=False)
 	employee_id = fields.Many2one('hr.employee', string="Employee")
+	emp_code = fields.Char("Employee Code")
 	worked_qty = fields.Integer("Worked QTY")
 	month = fields.Integer("Month")
 	year = fields.Selection(selection='_get_year_selection', string='Year')
 	state = fields.Selection([("draft", "New"), ("imported", "Imported")], required=True, default="draft")
 	uom = fields.Selection([("hours", "Hours"), ("days", "Days"), ("months", "Months")], string="UOM", required=True, default="days")
-	sale_id = fields.Many2one('sale.order', 'Rental Ref#', copy=False)
+	rental_order = fields.Char('Project', copy=False)
+	sale_id = fields.Many2one('sale.order', 'Rental Order', copy=False)
 	history_line_id = fields.Many2one('rental.invoice.history', copy=False)
 	is_consolidated = fields.Boolean('Is Consolidated', defualt=False)
 
