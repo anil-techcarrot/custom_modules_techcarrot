@@ -195,7 +195,7 @@
                                                         <td class="text-end o_price_total">
                                                             <t t-set="amount_total" t-value="'{:,.2f}'.format(o.amount_total)"/>
                                                             <t t-if="o.company_id.currency_id != o.currency_id">
-                                                                <b><span t-esc="o.currency_id.symbol"/>
+                                                                <b><span t-esc="o.currency_id.name"/>
                                                                 <span class="text-nowrap" t-esc="amount_total" >31.05</span></b>
                                                             </t>
                                                             <t t-else="">
@@ -213,7 +213,7 @@
                                             <div class="mb-3">
                                                 <div class="mb-2">
                                                     <p class="text-muted text-end lh-sm" >
-                                                        Total In Words:<b><span t-field="o.amount_total_words"></span></b>
+                                                        Total In Words:<b><span t-field="o.currency_id.name"></span> <span t-field="o.amount_total_words"></span></b>
                                                     </p>
                                                 </div>
                                             </div>
@@ -226,7 +226,7 @@
                         <div class="page mb-4">
                             <t t-if="o.company_id.currency_id != o.currency_id">
                                 <t t-set="invoice_currency_rate" t-value="1/o.invoice_currency_rate"/>
-                                <strong><span>Tax Summary</span>( 1<span t-field="o.currency_id.symbol"></span>=<span t-esc="invoice_currency_rate"></span> AED)</strong>
+                                <strong><span>Tax Summary</span>( 1<span t-field="o.currency_id.name"></span>=<span t-esc="invoice_currency_rate"></span> AED)</strong>
                             </t>
                             <t t-else="">
                                 <h3>Tax Summary</h3>

@@ -811,7 +811,7 @@ class RentalOrdersLine(models.Model):
             # s_date = start_date.strftime("%m-%d-%Y")
             # r_date = return_date.strftime("%m-%d-%Y")
             return _(
-                "\n%(from_date)s to %(to_date)s", from_date=start_date, to_date=return_date
+                " ", from_date=start_date, to_date=return_date
             )
         else:
             start_date = self.order_id.rental_start_date
@@ -828,29 +828,29 @@ class RentalOrdersLine(models.Model):
             return _(
                 "\n%(from_date)s to %(to_date)s", from_date=start_date_part, to_date=return_date_part
             )
-    #
-    # @api.depends('product_id', 'linked_line_id', 'linked_line_ids')
-    # def _compute_name(self):
-    #     for line in self:
-    #         if not line.product_id and not line.is_downpayment:
-    #             continue
-    #
-    #         lang = line.order_id._get_lang()
-    #         if lang != self.env.lang:
-    #             line = line.with_context(lang=lang)
-    #
-    #         if line.product_id and line.order_id.is_rental_order:
-    #             if line.name:
-    #                 line.name = line.name
-    #             else:
-    #                 line.name = "Desc"
-    #             continue
-    #         elif line.product_id:
-    #             line.name = line._get_sale_order_line_multiline_description_sale()
-    #             continue
-    #
-    #         if line.is_downpayment:
-    #             line.name = line._get_downpayment_description()
+
+    @api.depends('product_id', 'linked_line_id', 'linked_line_ids')
+    def _compute_name(self):
+        for line in self:
+            if not line.product_id and not line.is_downpayment:
+                continue
+
+            lang = line.order_id._get_lang()
+            if lang != self.env.lang:
+                line = line.with_context(lang=lang)
+
+            if line.product_id and line.order_id.is_rental_order:
+                if line.name:
+                    line.name = line.name
+                else:
+                    line.name = " "
+                continue
+            elif line.product_id:
+                line.name = line._get_sale_order_line_multiline_description_sale()
+                continue
+
+            if line.is_downpayment:
+                line.name = line._get_downpayment_description()
 
 
 
