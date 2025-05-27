@@ -23,6 +23,7 @@
         'views/import_attendance_view.xml',
         # 'views/project_milestone_view.xml',
         'views/cron_view.xml',
+        'views/purchase_view.xml',
         'wizard/edit_prod_desc_view.xml',
         'views/menu_view.xml'
     ],
