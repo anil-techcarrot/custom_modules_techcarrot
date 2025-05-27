@@ -10,4 +10,5 @@ from . import tec_employee_practice
 from . import tec_sub_practice
 from . import tec_employee_category
 from . import tec_contract
+from . import tec_expense
 

@@ -37,15 +37,16 @@ class AccountMoveSend(models.AbstractModel):
 class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
 
-    project_id = fields.Many2one('project.project', 'Project', domain="[('id', 'in', domain_project_ids)]",)
-    domain_project_ids = fields.Many2many('project.project', compute='_compute_project_ids')
+    project_code = fields.Char('Project Code', copy=False)
+    employee_id = fields.Many2one('hr.employee', string="Employee")
+    # domain_project_ids = fields.Many2many('project.project', compute='_compute_project_ids')
 
-    @api.depends('account_id')
-    def _compute_project_ids(self):
-        for rec in self:
-            domain = [('stage_id.name', 'not in', ['To Do', 'Cancelled'])]
-            domain_project_ids = self.env['project.project'].search(domain)
-            rec.domain_project_ids = domain_project_ids.ids
+    # @api.depends('account_id')
+    # def _compute_project_ids(self):
+    #     for rec in self:
+    #         domain = [('stage_id.name', 'not in', ['To Do', 'Cancelled'])]
+    #         domain_project_ids = self.env['project.project'].search(domain)
+    #         rec.domain_project_ids = domain_project_ids.ids
 
     def _check_qty_whole_fraction(self):
         qty = self.quantity
