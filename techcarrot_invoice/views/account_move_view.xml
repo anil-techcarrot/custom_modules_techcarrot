@@ -15,7 +15,7 @@
                 <attribute name="invisible">True</attribute>
             </xpath>
             <xpath expr="//page[@id='aml_tab']/field/list/field[@name='partner_id']" position="after">
-                <field name="employee_id"/>
+                <field name="employee_id" invisible="1"/>
                 <field name="project_code"/>
 <!--                <field name="domain_project_ids" widget="many2many_tags" column_invisible="1"></field>-->
             </xpath>
