@@ -10,7 +10,9 @@
     "author": "Ifensys",
     "website": "https://www.Ifensys.com",
     "depends": ['base', 'hr','hr_payroll','contacts', 'l10n_ae_hr_payroll', 'hr_expense'],
-    "data": ['security/ir.model.access.csv',
+    "data": [
+            'security/ir.model.access.csv',
+            'report/payslip_report_template.xml',
             'views/tec_employee_views.xml',
              'views/tec_employee_relationship_views.xml',
              'views/tec_employment_status_views.xml',

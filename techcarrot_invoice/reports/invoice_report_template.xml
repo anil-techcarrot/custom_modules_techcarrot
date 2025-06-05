@@ -482,7 +482,7 @@
                                 <thead>
                                     <tr style="background-color:#404040;border:none;">
                                         <th name="th_description" width="6%" class="text-center" style="color: white;border:none;"><span >#</span></th>
-                                        <th name="th_description" width="25%" class="text-center" style="color: white;border:none;"><span>Item &amp; Description</span></th>
+                                        <th name="th_description" width="25%" style="color: white;border:none;"><span>Item &amp; Description</span></th>
                                         <th name="th_quantity" width="18%"  class="text-center" style="color: white;border:none;"><span>Account</span></th>
                                         <th name="th_quantity" width="9%"  class="text-center" style="color: white;border:none;"><span>Qty</span></th>
                                         <th name="th_quantity" width="9%" class="text-end" style="color: white;border:none;"><span>Rate</span></th>
@@ -501,7 +501,7 @@
                                                 <td class="text-center text-nowrap" style="border:none">
                                                     <span t-out="count"></span>
                                                 </td>
-                                                <td name="account_invoice_line_name" class="text-center text-nowrap" style="border:none">
+                                                <td name="account_invoice_line_name" class="text-nowrap" style="border:none">
                                                     <span t-if="line.name" t-field="line.name" t-options="{'widget': 'text'}">Bacon Burger</span>
 <!--                                                    <span t-if="line.name" t-field="line.name" t-options="{'widget': 'text'}">Bacon Burger</span>-->
                                                 </td>

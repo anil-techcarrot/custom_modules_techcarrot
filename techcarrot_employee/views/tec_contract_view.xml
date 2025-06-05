@@ -11,7 +11,7 @@
                 <field name="sub_total"/>
             </xpath>
             <xpath expr="//field[@name='employee_id']" position="after">
-                <field name="emp_code"/>
+                <field name="emp_code" invisible="1"/>
             </xpath>
         </field>
     </record>
@@ -23,7 +23,7 @@
         <field name="inherit_id" ref="hr_payroll.hr_salary_attachment_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='employee_ids']" position="after">
-                <field name="emp_code"/>
+                <field name="emp_code" invisible="1"/>
             </xpath>
         </field>
     </record>
@@ -35,7 +35,7 @@
         <field name="inherit_id" ref="hr_holidays.hr_leave_view_form_manager"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='company_id']" position="before">
-                <field name="emp_code"/>
+                <field name="emp_code" invisible="1"/>
             </xpath>
         </field>
     </record>

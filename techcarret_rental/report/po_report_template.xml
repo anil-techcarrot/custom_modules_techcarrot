@@ -6,9 +6,6 @@
             <t t-call="web.html_container">
                 <t t-call="web.basic_layout">
                     <style>
-<!--                        body {-->
-<!--                            font-size: 18px; /* Set the base font size for the report */-->
-<!--                        }-->
                         table, th, td {
                             border:1px solid black;
                             padding-left:10px;
@@ -20,6 +17,9 @@
                         }
                         .text-right {
                             text-align: end;
+                        }
+                        * {
+                            font-size: 18px !important;
                         }
                     </style>
                     <div class="page">
@@ -96,11 +96,11 @@
                                 <thead>
                                     <tr style="background-color:#404040;border:none;">
                                         <th name="th_description" width="5%" class="text-center" style="color: white;border:none;"><span >#</span></th>
-                                        <th name="th_description" width="23%" style="color: white;border:none;"><span>Item &amp; Description</span></th>
-                                        <th name="th_quantity" width="9%"  class="text-end" style="color: white;border:none;"><span>Qty</span></th>
-                                        <th name="th_quantity" width="9%" class="text-end" style="color: white;border:none;"><span>Rate</span></th>
-                                        <th name="th_quantity" width="9%" class="text-end" style="color: white;border:none;"><span>Tax %</span></th>
-                                        <th name="th_quantity" width="10%" class="text-end" style="color: white;border:none;"><span>Tax</span></th>
+                                        <th name="th_description" width="30%" style="color: white;border:none;"><span>Item &amp; Description</span></th>
+                                        <th name="th_quantity" width="12%"  class="text-end" style="color: white;border:none;"><span>Qty</span></th>
+                                        <th name="th_quantity" width="12%" class="text-end" style="color: white;border:none;"><span>Rate</span></th>
+                                        <th name="th_quantity" width="12%" class="text-end" style="color: white;border:none;"><span>Tax %</span></th>
+                                        <th name="th_quantity" width="12%" class="text-end" style="color: white;border:none;"><span>Tax</span></th>
                                         <th name="th_quantity" width="17%" class="text-end" style="color: white;border:none;"><span>Amount</span></th>
                                     </tr>
                                 </thead>
@@ -162,25 +162,25 @@
                                             <td style="color: #ffffff;border:none" >SKU</td>
                                         </tr>
                                     <tr style="border-top:1px solid #000;border-bottom:none;border-left:none;border-right:none;">
-                                        <td colspan="6" class="text-end" style="border:none;"><b>Sub Total</b></td>
-                                        <td class="text-end" style="border:none;">
+                                        <td colspan="5" class="text-end" style="border:none;"><b>Sub Total</b></td>
+                                        <td colspan="2" class="text-end" style="border:none;">
                                             <t t-set="amount_untaxed" t-value="'{:,.2f}'.format(o.amount_untaxed)"/>
                                             <span t-esc="amount_untaxed"></span>
                                         </td>
                                     </tr>
                                     <tr style="border:none;">
-                                        <td colspan="6" class="text-end" style="border:none;"><b>Standard Rate(5%)</b></td>
-                                        <td class="text-end" style="border:none;">
+                                        <td colspan="5" class="text-end" style="border:none;"><b>Standard Rate(5%)</b></td>
+                                        <td colspan="2" class="text-end" style="border:none;">
                                             <t t-set="amount_tax" t-value="'{:,.2f}'.format(o.amount_tax)"/>
                                             <span t-esc="amount_tax"></span>
                                         </td>
                                     </tr>
                                     <tr style="border:none;">
                                         <td colspan="4" class="text-end" style="border:none;"></td>
-                                        <td colspan="2" class="text-end" style="background-color:#F5F5F5;border:none;"><b>Total</b></td>
+                                        <td class="text-end" style="background-color:#F5F5F5;border:none;"><b>Total</b></td>
                                         <t t-set="amount_total" t-value="'{:,.2f}'.format(o.amount_total)"/>
-                                        <td class="text-end" style="background-color:#F5F5F5;border:none;">
-                                            <b><span t-esc="o.currency_id.name"/> <span t-esc="amount_total"></span></b>
+                                        <td colspan="2" class="text-end" style="border:none;">
+                                            <b><span t-esc="o.currency_id.name"/>  <span t-esc="amount_total"></span></b>
                                         </td>
                                     </tr>
                                 </tbody>
