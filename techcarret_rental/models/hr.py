@@ -17,10 +17,10 @@ class HrSalaryAttachment(models.Model):
         help='Approximated end date.',
     )
 
-    @api.constrains('currency_id')
-    def _check_currency(self):
-        if any(attachment.currency_id != attachment.employee_ids[0].contract_id.currency_id for attachment in self.filtered(lambda x: x.employee_count == 1)):
-            raise ValidationError(_("Salary attachment currency not match employee current contract currency."))
+    # @api.constrains('currency_id')
+    # def _check_currency(self):
+    #     if any(attachment.currency_id != attachment.employee_ids[0].contract_id.currency_id for attachment in self.filtered(lambda x: x.employee_count == 1)):
+    #         raise ValidationError(_("Salary attachment currency not match employee current contract currency."))
 
     @api.depends('state', 'total_amount', 'monthly_amount', 'date_start')
     def _compute_estimated_end(self):
