@@ -22,7 +22,7 @@ class HrSalaryAttachment(models.Model):
     #     if any(attachment.currency_id != attachment.employee_ids[0].contract_id.currency_id for attachment in self.filtered(lambda x: x.employee_count == 1)):
     #         raise ValidationError(_("Salary attachment currency not match employee current contract currency."))
 
-    @api.depends('state', 'total_amount', 'monthly_amount', 'date_start')
+    @api.depends('state', 'total_amount', 'monthly_amount', 'date_start', 'no_end_date')
     def _compute_estimated_end(self):
         for record in self:
             if record.state not in ['close', 'cancel'] and record.has_total_amount and record.monthly_amount:
@@ -31,6 +31,9 @@ class HrSalaryAttachment(models.Model):
                 date_end = start_of(record.date_start + relativedelta(months=ceil(record.remaining_amount / record.monthly_amount)),'month')
                 record.date_end = date_end - relativedelta(days=1)
             else:
+                record.date_estimated_end = False
+                record.date_end = False
+            if record.no_end_date == False:
                 record.date_estimated_end = False
                 record.date_end = False
 
