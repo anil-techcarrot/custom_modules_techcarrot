@@ -19,6 +19,15 @@ class HrEmployeePrivate(models.Model):
         required=False,
         tracking=True)
 
+    def _get_marital_status_selection(self):
+        return [
+            ('single', _('Single')),
+            ('married', _('Married')),
+            ('cohabitant', _('Legal Cohabitant')),
+            ('widower', _('Widower')),
+            ('divorced', _('Divorced')),
+        ]
+
     @api.model_create_multi
     def create(self, vals_list):
         employees = super(HrEmployeePrivate, self).create(vals_list)
