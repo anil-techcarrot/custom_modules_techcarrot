@@ -718,12 +718,12 @@ class Rentals(models.Model):
 class RentalOrdersLine(models.Model):
     _inherit = 'sale.order.line'
 
-    qty_delivered = fields.Float(
-        string="Delivery Quantity",
-        compute='_compute_qty_delivered',
-        default=0.0,
-        digits='Product Unit of Measure',
-        store=True, readonly=False, copy=False)
+    # qty_delivered = fields.Float(
+    #     string="Delivery Quantity",
+    #     compute='_compute_qty_delivered',
+    #     default=0.0,
+    #     digits='Product Unit of Measure',
+    #     store=True, readonly=False, copy=False)
     start_date = fields.Datetime()
     return_date = fields.Datetime()
     manually_edited = fields.Boolean('Manually Edited', default=False)

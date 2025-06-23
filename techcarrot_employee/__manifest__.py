@@ -9,7 +9,7 @@
     "sequence": 2,
     "author": "Ifensys",
     "website": "https://www.Ifensys.com",
-    "depends": ['base', 'hr','hr_payroll','contacts', 'l10n_ae_hr_payroll', 'hr_expense'],
+    "depends": ['base', 'hr','hr_payroll','contacts', 'l10n_ae_hr_payroll', 'hr_expense', 'web'],
     "data": [
             'security/ir.model.access.csv',
             'report/payslip_report_template.xml',

@@ -78,11 +78,21 @@ class AccountMoveLine(models.Model):
     @api.model_create_multi
     def create(self, vals):
         for val in vals:
-            if 'emp_code' in val and not val.get('employee_id') and val['emp_code'] != False:
+            if 'emp_code' in val and not val.get('product_id') and val['emp_code'] != False:
                 emp_code = val['emp_code']
+
+                # query = """
+                #             SELECT p.id from product_template p,hr_employee e where e.emp_code =%s and p.employee_id=e.id;
+                #         """
+                #
+                # self.env.cr.execute(query, (emp_code))
+                # emp_product = self.env.cr.fetchall()
+
                 employee = self.env['hr.employee'].sudo().search([('emp_code', '=', str(emp_code))], limit=1)
-                if employee:
-                    val['employee_id'] = employee.id
+                emp_product = self.env['product.product'].sudo().search([('employee_id', '=', employee.id)], limit=1)
+                print('rrrrrrrrrrrrr',emp_product)
+                if emp_product:
+                    val['product_id'] = emp_product.id
                 else:
                     raise ValidationError(_('Employee master not found. Employee ID: %s', emp_code))
 
