@@ -779,8 +779,8 @@ class RentalOrdersLine(models.Model):
                         r_end = order.order_id.rental_return_date.astimezone(timezone(tz)).date()
                         difference = relativedelta(r_end, m_start)
                         month_qty = difference.months + (r_end.day - m_start.day) / 30
-                        if order.product_uom_qty != month_qty:
-                            order.manually_edited = True
+                        # if order.product_uom_qty != month_qty:
+                        order.manually_edited = True
 
     @api.onchange('product_uom')
     def _onchange_product_uom_manual(self):
