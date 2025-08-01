@@ -17,6 +17,7 @@
                 <field name="partner_dob"/>
                 <field name="reporting_to_id"/>
                 <field name="role_id" options="{'no_open': True, 'no_create': True}"/>
+                <field name="mapping_to_id" options="{'no_create': True}"/>
             </xpath>
             <xpath expr="//field[@name='function']" position="before">
                 <field name="first_name"/>

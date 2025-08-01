@@ -19,6 +19,8 @@ class ResPartner(models.Model):
     secondary_email = fields.Char('Secondary Email', copy=False)
     tec_title = fields.Char('Title', copy=False)
     customer_code = fields.Char('Customer Code', copy=False)
+    mapping_to_id = fields.Many2one('res.partner', string='Mapping To', copy=False, 
+                                    help="Partner that this contact is mapped to")
 
     @api.constrains('secondary_email')
     def _check_email_validity(self):

@@ -5,7 +5,7 @@
     "name": "TechCarrot Contacts Customization",
     "summary": "Development for TechCarrot",
     "category": "Sales",
-    "version": "15.0.1",
+    "version": "15.0.2",
     "sequence": 2,
     "author": "Ifensys",
     "website": "https://www.Ifensys.com",
