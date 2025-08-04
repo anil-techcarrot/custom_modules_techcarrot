@@ -151,14 +151,72 @@ class HrPayslip(models.Model):
         return report_name
 
 
+    def action_payslip_draft(self):
+        res = super(HrPayslip, self).action_payslip_draft()
+        work_entries = self.env['hr.work.entry'].search([
+                            ('employee_id', '=', self.employee_id.id),
+                            ('date_start', '>=', self.date_from),
+                            ('date_stop', '<=', self.date_to),
+                            ('state', '=', 'validated'),
+                        ])
+        work_entries.sudo().write({'state': 'draft'})
+        return res
+
+    def action_payslip_done(self):
+        invalid_payslips = self._filter_out_of_contracts_payslips()
+        if invalid_payslips:
+            raise ValidationError(_('The following employees have a contract outside of the payslip period:\n%s',
+                                    '\n'.join(invalid_payslips.mapped('employee_id.name'))))
+        if any(slip.contract_id.state == 'cancel' for slip in self):
+            raise ValidationError(_('You cannot validate a payslip on which the contract is cancelled'))
+        if any(slip.state == 'cancel' for slip in self):
+            raise ValidationError(_("You can't validate a cancelled payslip."))
+        self.write({'state': 'done'})
+
+        line_values = self._get_line_values(['NET'])
+
+        self.filtered(lambda p: not p.credit_note and line_values['NET'][p.id]['total'] < 0).write(
+            {'has_negative_net_to_report': True})
+        self.mapped('payslip_run_id').action_close()
+        # Validate work entries for regular payslips (exclude end of year bonus, ...)
+        regular_payslips = self.filtered(lambda p: p.struct_id.type_id.default_struct_id == p.struct_id)
+        work_entries = self.env['hr.work.entry']
+        for regular_payslip in regular_payslips:
+            work_entries |= self.env['hr.work.entry'].search([
+                ('date_start', '<=', regular_payslip.date_to),
+                ('date_stop', '>=', regular_payslip.date_from),
+                ('employee_id', '=', regular_payslip.employee_id.id),
+            ])
+        if work_entries:
+            work_entries.action_validate()
+
+        # print('rrrrrrrrrrrr', self.env.context)
+        # if self.env.context.get('payslip_generate_pdf'):
+        #     if self.env.context.get('payslip_generate_pdf_direct'):
+        #         self._generate_pdf()
+        #     else:
+        #         self.write({'queued_for_pdf': True})
+        #         payslip_cron = self.env.ref('hr_payroll.ir_cron_generate_payslip_pdfs', raise_if_not_found=False)
+        #         if payslip_cron:
+        #             payslip_cron._trigger()
+
+
 class HrPayslipRun(models.Model):
     _inherit = 'hr.payslip.run'
 
-    def _are_payslips_ready(self):
-        to_process = self.env["hr.payroll"]
-        # self.env.cr.commit()
-        for slip in self.mapped('slip_ids'):
-            if slip.state in ['done'] and not slip.entry_id:
-                to_process += slip
-        return all(to_process)
+
+    def action_draft(self):
+        res = super(HrPayslipRun, self).action_draft()
+        for payslip in self.slip_ids:
+            work_entries = self.env['hr.work.entry'].search([
+                                ('employee_id', '=', payslip.employee_id.id),
+                                ('date_start', '>=', payslip.date_from),
+                                ('date_stop', '<=', payslip.date_to),
+                                ('state', '=', 'validated'),
+                            ])
+            work_entries.sudo().write({'state': 'draft'})
+        return res
+
+
+
 
