@@ -9,7 +9,7 @@
     "sequence": 2,
     "author": "Ifensys",
     "website": "https://www.Ifensys.com",
-    "depends": ['base','contacts'],
+    "depends": ['base','contacts','hr'],
     "data": ['security/ir.model.access.csv',
              'views/tec_partner_views.xml',
              'views/tec_reporting_views.xml',
