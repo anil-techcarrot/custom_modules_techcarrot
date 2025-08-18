@@ -337,13 +337,13 @@ class PortalEmployee(http.Controller):
             # Always update tag_ids, even if empty (to allow clearing all tags)
             lead.sudo().write({'tag_ids': [(6, 0, tag_id_list)]})
             return request.redirect(CRM_REDIRECT_URL)
-        partners = request.env['res.partner'].sudo().search([], limit=50)
+        partners = request.env['res.partner'].sudo().search([])
         # Get contacts for point of contact field
-        contacts = request.env['res.partner'].sudo().search([('is_company', '=', False)], limit=100)
+        contacts = request.env['res.partner'].sudo().search([('is_company', '=', False)])
         stages = request.env['crm.stage'].sudo().search([])
         all_tags = request.env[CRM_TAG_MODEL].sudo().search([])
         # Show all users (internal and portal) as salespersons
-        salespersons = request.env['res.users'].sudo().search([('active', '=', True)], limit=100)
+        salespersons = request.env['res.users'].sudo().search([('active', '=', True)])
         # Get TechCarrot CRM MLR related data
         practices = request.env['crm.practice'].sudo().search([('active', '=', True)])
         industries = request.env['crm.industry'].sudo().search([('active', '=', True)])
@@ -417,11 +417,11 @@ class PortalEmployee(http.Controller):
             lead.sudo().write({'tag_ids': [(6, 0, tag_id_list)]})
             return request.redirect(CRM_REDIRECT_URL)
         stages = request.env[CRM_STAGE_MODEL].sudo().search([])
-        partners = request.env['res.partner'].sudo().search([], limit=50)
+        partners = request.env['res.partner'].sudo().search([])
         # Get contacts for point of contact field
-        contacts = request.env['res.partner'].sudo().search([('is_company', '=', False)], limit=100)
+        contacts = request.env['res.partner'].sudo().search([('is_company', '=', False)])
         all_tags = request.env[CRM_TAG_MODEL].sudo().search([])
-        salespersons = request.env['res.users'].sudo().search([('active', '=', True)], limit=100)
+        salespersons = request.env['res.users'].sudo().search([('active', '=', True)])
         # Get TechCarrot CRM MLR related data
         practices = request.env['crm.practice'].sudo().search([('active', '=', True)])
         industries = request.env['crm.industry'].sudo().search([('active', '=', True)])
@@ -583,7 +583,7 @@ class PortalEmployee(http.Controller):
             return request.redirect(f'/my/employee/crm/edit/{lead_id}')
         # GET: render a simple edit form (reuse activity_types and salespersons from lead edit)
         activity_types = request.env['mail.activity.type'].sudo().search([])
-        salespersons = request.env['res.users'].sudo().search([('active', '=', True)], limit=100)
+        salespersons = request.env['res.users'].sudo().search([('active', '=', True)])
         return request.render('employee_self_service_portal.portal_employee_crm_activity_edit', {
             'activity': activity,
             'lead': lead,
@@ -630,7 +630,7 @@ class PortalEmployee(http.Controller):
         date = kwargs.get('date')
         if date:
             domain += [('date', '=', date)]
-        expenses = request.env['hr.expense'].sudo().search(domain, order='date desc', limit=50)
+        expenses = request.env['hr.expense'].sudo().search(domain, order='date desc')
         categories = request.env['product.product'].sudo().search([('can_be_expensed', '=', True)])
         return request.render('employee_self_service_portal.portal_expense', {
             'expenses': expenses,
