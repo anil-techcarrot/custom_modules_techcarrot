@@ -5,6 +5,8 @@ from odoo.exceptions import ValidationError
 from datetime import datetime
 import re
 import phonenumbers
+from odoo.tools.safe_eval import safe_eval, datetime as safe_eval_datetime, dateutil as safe_eval_dateutil
+
 
 
 class HrPayslipEmployees(models.TransientModel):
@@ -161,6 +163,58 @@ class HrPayslip(models.Model):
                         ])
         work_entries.sudo().write({'state': 'draft'})
         return res
+
+    @api.model
+    def _cron_generate_pdf(self, batch_size=False):
+        payslips = self.search([
+            ('state', 'in', ['done', 'paid']),
+            ('queued_for_pdf', '=', True),
+        ])
+        if payslips:
+            BATCH_SIZE = batch_size or 50
+            payslips_batch = payslips[:BATCH_SIZE]
+            payslips_batch._generate_pdf()
+            payslips_batch.write({'queued_for_pdf': False})
+            # if necessary, retrigger the cron to generate more pdfs
+            # if len(payslips) > BATCH_SIZE:
+            #     self.env.ref('hr_payroll.ir_cron_generate_payslip_pdfs')._trigger()
+            #     return True
+
+        lines = self.env['hr.payroll.employee.declaration'].search([('pdf_to_generate', '=', True)])
+        if lines:
+            BATCH_SIZE = batch_size or 30
+            lines_batch = lines[:BATCH_SIZE]
+            # lines_batch._generate_pdf()
+            lines_batch.write({'pdf_to_generate': False})
+            # if necessary, retrigger the cron to generate more pdfs
+            # if len(lines) > BATCH_SIZE:
+            #     self.env.ref('hr_payroll.ir_cron_generate_payslip_pdfs')._trigger()
+            #     return True
+        return False
+
+    def _generate_pdf(self):
+        mapped_reports = self._get_pdf_reports()
+        attachments_vals_list = []
+        generic_name = _("Payslip")
+        template = self._get_email_template()
+        for report, payslips in mapped_reports.items():
+            for payslip in payslips:
+                pdf_content, dummy = self.env['ir.actions.report'].sudo().with_context(lang=payslip.employee_id.lang or self.env.lang)._render_qweb_pdf(report, payslip.id)
+                if report.print_report_name:
+                    pdf_name = safe_eval(report.print_report_name, {'object': payslip})
+                else:
+                    pdf_name = generic_name
+                attachments_vals_list.append({
+                    'name': pdf_name,
+                    'type': 'binary',
+                    'raw': pdf_content,
+                    'res_model': payslip._name,
+                    'res_id': payslip.id
+                })
+                # Send email to employees
+                # if template:
+                #     template.send_mail(payslip.id)
+        self.env['ir.attachment'].sudo().create(attachments_vals_list)
 
 
 class HrPayslipRun(models.Model):
