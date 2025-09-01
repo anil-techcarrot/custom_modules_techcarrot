@@ -47,7 +47,16 @@ Built as a cost-effective alternative to paid ESS modules, this solution provide
 - **History & Reporting**: Complete expense history with filtering options
 - **Withdrawal Capability**: Withdraw submitted expenses when needed
 
-### 📊 **Dashboard & Analytics**
+### � **Payslip Download & Management**
+- **Payslip Viewing**: Browse and view all personal payslips
+- **Advanced Filtering**: Filter by status, month, year for easy navigation
+- **PDF Downloads**: Download confirmed payslips in PDF format
+- **Detailed Breakdown**: View earnings, deductions, and net salary components
+- **Payment Summary**: Quick overview of gross pay, deductions, and net pay
+- **Historical Access**: Complete payslip history with secure access controls
+- **Dashboard Integration**: Latest payslip information on main dashboard
+
+### �📊 **Dashboard & Analytics**
 - **Personal Dashboard**: Centralized view of all employee activities
 - **Quick Actions**: Fast access to common tasks and functions
 - **Status Indicators**: Real-time status of various activities
