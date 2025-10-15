@@ -103,13 +103,13 @@ def _process_partner_field(field_value, field_name='partner_id'):
         # partner_vals = {'name': partner_name}
         
         # For point of contact, set as individual (not company)
-        if field_name == 'point_of_contact_id':
-            partner_vals['is_company'] = False
-        else:
+        # if field_name == 'point_of_contact_id':
+        #   partner_vals['is_company'] = False
+        # else:
             # For main customer, default to company
-            partner_vals['is_company'] = True
+        #    partner_vals['is_company'] = True
             
-        new_partner = request.env['res.partner'].sudo().create(partner_vals)
+        # new_partner = request.env['res.partner'].sudo().create(partner_vals)
         
         import logging
         _logger = logging.getLogger(__name__)
