@@ -93,7 +93,9 @@ def _process_partner_field(field_value, field_name='partner_id'):
         
         # Check if partner already exists by name
         existing_partner = request.env['res.partner'].sudo().search([
-            ('name', '=ilike', partner_name)
+            ('name', '=ilike', partner_name),
+               ('is_company', '=', True),
+                ('company_id', '=', company_id)
         ], limit=1)
         
         if existing_partner:
