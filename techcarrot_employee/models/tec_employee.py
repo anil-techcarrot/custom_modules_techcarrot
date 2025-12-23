@@ -203,19 +203,8 @@ class HrEmployeeInherit(models.Model):
     u_private_zip = fields.Char(string="Private Zip", copy=False)
     u_private_country_id = fields.Many2one("res.country", string="Private Country", copy=False)
 
-   #_sql_constraints = [('unique_emp_code', 'unique (emp_code)', 'Employee Code must be unique.')]
-    @api.constrains('emp_code')
-    def _check_unique_emp_code(self):
-        for rec in self:
-            if rec.emp_code:
-                # Search for another employee with the same emp_code
-                existing = self.search([
-                    ('emp_code', '=', rec.emp_code),
-                    ('id', '!=', rec.id)
-                ], limit=1)
-                if existing:
-                    raise ValidationError(_("Employee Code must be unique."))
-                
+   _sql_constraints = [('unique_emp_code', 'unique (emp_code)', 'Employee Code must be unique.')]
+    
     # @api.constrains('issue_date')
     # def _onchange_date(self):
     #     if self.issue_date:
