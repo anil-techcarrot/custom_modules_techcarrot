@@ -207,10 +207,10 @@ class HrEmployeeInherit(models.Model):
 
     # _sql_constraints = [('unique_emp_code', 'unique (emp_code)', 'Employee Code must be unique.')]
     # code change by sriman
-    _emp_code_unique = models.Constraint(
-        'unique (emp_code)',
-        'Employee code must be unique!'
-    )
+    #_emp_code_unique = models.Constraint(
+    #    'unique (emp_code)',
+    #    'Employee code must be unique!'
+    #)
 
 
 
