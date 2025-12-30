@@ -29,7 +29,7 @@
         'views/hr_payroll_report_views.xml',
     ],
     'images': ['static/description/main_screenshot.png'],
-    'installable': True,
+    'installable': False,
     'auto_install': False,
     
 }
