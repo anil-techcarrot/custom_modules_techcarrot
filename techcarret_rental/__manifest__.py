@@ -5,7 +5,7 @@
     'description': "Techcarret Rental Orders",
     'author': 'Ifensys',
     'category': 'Sales',
-    'version': '18.1',
+    'version': '19.1',
     'depends': ['product', 'sale_management', 'sale', 'stock', 'sale_renting', 'sale_project', 'hr', 'hr_payroll', 'hr_work_entry', 'account', 'analytic', 'sale_subscription', 'sale_stock_renting',
                 'techcarrot_employee', 'techcarrot_contacts', 'sale_project', 'purchase', 'sale_fixed_discount'],
     'data': [

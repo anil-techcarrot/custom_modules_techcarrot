@@ -16,7 +16,7 @@
                     </div>
                 </setting>
             </setting>
-            <setting id="rental_sign" position="after">
+            <setting name="rental_delay_costs" position="after">
                 <setting id="rental_aa_plan" string="Default Analytic Plans">
                     <div class="content-group">
                         <div class="row mt16 o_light_label">

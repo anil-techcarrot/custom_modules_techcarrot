@@ -21,7 +21,14 @@ class TecprojectType(models.Model):
 
     name = fields.Char('Name', copy=False, required=True)
 
-    _sql_constraints = [('unique_tecproject', 'unique (name)', 'Name must be unique.')]
+    # _sql_constraints = [('unique_tecproject', 'unique (name)', 'Name must be unique.')]
+    _name_unique = models.Constraint(
+        'unique (name)',
+        'Name must be unique.'
+    )
+
+
+
 
 class ProductTemplate(models.Model):
     _inherit = "product.template"
@@ -110,13 +117,23 @@ class Rentals(models.Model):
     has_recurring_line = fields.Boolean(compute='_compute_has_recurring_line')
     employee_id = fields.Many2one('hr.employee', 'Owner', copy=False)
     po_no = fields.Char('PO No', copy=False)
+    # fields added by sriman
+    x_studio_po_date=fields.Date("PO Date", copy=False)
+    x_studio_so_period_1=fields.Char("SO Details", copy=False)
 
-    _sql_constraints = [
-        ('date_order_conditional_required',
-         "CHECK((state = 'sale' AND date_order IS NOT NULL) OR state != 'sale')",
-         "A confirmed sales order requires a confirmation date."),
-        # ('so_po_no_unique', 'UNIQUE(po_no)', 'The PO No must be unique')
-    ]
+
+    #
+    # _sql_constraints = [
+    #     ('date_order_conditional_required',
+    #      "CHECK((state = 'sale' AND date_order IS NOT NULL) OR state != 'sale')",
+    #      "A confirmed sales order requires a confirmation date."),
+    #     # ('so_po_no_unique', 'UNIQUE(po_no)', 'The PO No must be unique')
+    # ]
+
+    _date_order_required_on_sale = models.Constraint(
+        "CHECK((state = 'sale' AND date_order IS NOT NULL) OR state != 'sale')",
+        "A confirmed sales order requires a confirmation date."
+    )
 
 
     @api.depends('order_line.price_unit')
@@ -320,15 +337,15 @@ class Rentals(models.Model):
                 for order_line in order.order_line:
                     if order_line.product_id.product_pricing_ids:
                         for product_pricing_id in order_line.product_id.product_pricing_ids:
-                            if order_line.product_uom.name == 'Hours' and product_pricing_id.recurrence_id.unit == 'hour':
+                            if order_line.product_uom_id.name == 'Hours' and product_pricing_id.recurrence_id.unit == 'hour':
                                 order_line.price_unit= product_pricing_id.price
-                            elif order_line.product_uom.name == 'Days'and product_pricing_id.recurrence_id.unit == 'day':
+                            elif order_line.product_uom_id.name == 'Days'and product_pricing_id.recurrence_id.unit == 'day':
                                 order_line.price_unit=product_pricing_id.price
-                            elif order_line.product_uom.name == 'Week'and product_pricing_id.recurrence_id.unit == 'week':
+                            elif order_line.product_uom_id.name == 'Week'and product_pricing_id.recurrence_id.unit == 'week':
                                 order_line.price_unit=product_pricing_id.price
-                            elif order_line.product_uom.name == 'Months'and product_pricing_id.recurrence_id.unit == 'month':
+                            elif order_line.product_uom_id.name == 'Months'and product_pricing_id.recurrence_id.unit == 'month':
                                 order_line.price_unit=product_pricing_id.price
-                            elif order_line.product_uom.name == 'Years' and product_pricing_id.recurrence_id.unit == 'year':
+                            elif order_line.product_uom_id.name == 'Years' and product_pricing_id.recurrence_id.unit == 'year':
                                 order_line.price_unit=product_pricing_id.price
                     else:
                         if order_line.price_unit == 0.00:
@@ -371,13 +388,13 @@ class Rentals(models.Model):
                                                         [line.product_id.sudo().employee_id.id]['days']
                                 if planned_worked > 0:
                                     uom = 'days'
-                                    if line.product_uom.name == 'Days':
+                                    if line.product_uom_id.name == 'Days':
                                         planned_data = planned_worked
                                         uom = 'days'
-                                    if line.product_uom.name == 'Hours':
+                                    if line.product_uom_id.name == 'Hours':
                                         planned_data = planned_worked * 8
                                         uom = 'hours'
-                                    if line.product_uom.name == 'Months':
+                                    if line.product_uom_id.name == 'Months':
                                         tz = self.env.user.tz
                                         m_start = range_start
                                         r_end = range_end_actual.astimezone(timezone(tz)).date()
@@ -438,11 +455,11 @@ class Rentals(models.Model):
                             sl_line.product_uom_qty = sl_line.product_uom_qty
                             # sl_line.manually_edited = False
                         else:
-                            if sl_line.product_uom.name == 'Hours':
+                            if sl_line.product_uom_id.name == 'Hours':
                                 sl_line.product_uom_qty = order.duration_days * 8
-                            if sl_line.product_uom.name == 'Days':
+                            if sl_line.product_uom_id.name == 'Days':
                                 sl_line.product_uom_qty = order.duration_days
-                            if sl_line.product_uom.name == 'Months':
+                            if sl_line.product_uom_id.name == 'Months':
                                 if not employee:
                                     month_employee = order.rental_inv_line_ids.filtered(lambda so_inv: so_inv.uom == 'months')
                                     employee = month_employee[0].sudo().employee_id
@@ -502,11 +519,11 @@ class Rentals(models.Model):
                         if rental_obj.worked_days>0:
                             inv_line={
                                 'product_id': line.product_id.id,
-                                'product_uom_id':line.product_uom.id,
+                                'product_uom_id':line.product_uom_id.id,
                                 'name': line.product_id.name,
                                 'quantity': rental_line.worked_days,
                                 'price_unit': line.price_unit,
-                                'tax_ids': line.tax_id,
+                                'tax_ids': line.tax_ids,
                                 'discount': line.discount,
                                 'sale_line_ids': [Command.link(line.id)],
                                 'rental_start_date': rental_line.rental_start_date,
@@ -523,7 +540,7 @@ class Rentals(models.Model):
             inv_obj = self.env['account.move'].create({
                 'move_type': 'out_invoice',
                 'partner_id': rental_obj.rental_sale_id.partner_id.id,
-                'invoice_date': invoice_date or fields.date.today(),
+                'invoice_date': invoice_date or fields.Date.today(),
                 'ref': rental_obj.rental_sale_id.name or '',
                 'narration': rental_obj.rental_sale_id.note,
                 'source_id': rental_obj.rental_sale_id.source_id.id,
@@ -731,7 +748,8 @@ class RentalOrdersLine(models.Model):
     #     self.manually_edited = False
     #     return res
 
-    @api.depends('product_id', 'product_uom', 'product_uom_qty')
+    # code changed by sriman 'product_uom' to 'product_uom_id' as product_uom is not available in odoo19. entire code it is changes
+    @api.depends('product_id', 'product_uom_id', 'product_uom_qty')
     def _compute_discount(self):
         discount_enabled = self.env['product.pricelist.item']._is_discount_feature_enabled()
         for line in self:
@@ -762,15 +780,15 @@ class RentalOrdersLine(models.Model):
             if order.order_id and order.order_id.is_rental_order == True:
                 if order.product_id and order.product_uom_qty>0.00:
                     # order.manually_edited = False
-                    if order.product_uom.name == 'Hours':
+                    if order.product_uom_id.name == 'Hours':
                         hours_qty = order.order_id.duration_days * 8
                         if order.product_uom_qty != hours_qty:
                             order.manually_edited = True
-                    elif order.product_uom.name == 'Days':
+                    elif order.product_uom_id.name == 'Days':
                         days_qty = order.order_id.duration_days
                         if order.product_uom_qty != days_qty:
                             order.manually_edited = True
-                    elif order.product_uom.name == 'Months':
+                    elif order.product_uom_id.name == 'Months':
                         tz = self.env.user.tz
                         m_start = order.order_id.rental_start_date + relativedelta(hours=7)
                         r_end = order.order_id.rental_return_date.astimezone(timezone(tz)).date()
@@ -779,7 +797,7 @@ class RentalOrdersLine(models.Model):
                         # if order.product_uom_qty != month_qty:
                         order.manually_edited = True
 
-    @api.onchange('product_uom')
+    @api.onchange('product_uom_id')
     def _onchange_product_uom_manual(self):
         for order in self:
             if order.order_id and order.order_id.is_rental_order == True:
@@ -823,7 +841,7 @@ class RentalOrdersLine(models.Model):
         for line in lines_by_milestones:
             sol_id = line.id or line._origin.id
             qty_delivered = reached_milestones_per_sol.get(sol_id, 0.0) * line.product_uom_qty
-            line.qty_delivered = line.product_uom._compute_quantity(qty_delivered, line.product_uom)
+            line.qty_delivered = line.product_uom_id._compute_quantity(qty_delivered, line.product_uom_id)
 
 
 def _get_rental_order_line_description(self):
@@ -994,30 +1012,30 @@ def _compute_name(self):
                 #         if line.state == 'active':
                 #             raise UserError(_("Employee is not available for rental."))
                 if order.order_id.duration_days>0 and order.product_uom_qty<=1:
-                    if order.product_uom.name == 'Hours':
+                    if order.product_uom_id.name == 'Hours':
                         order.product_uom_qty = order.order_id.duration_days * 8
-                    elif order.product_uom.name == 'Months':
+                    elif order.product_uom_id.name == 'Months':
                         months = (order.order_id.rental_return_date.year - order.order_id.rental_start_date.year) * 12 + (
                                              order.order_id.rental_return_date.month - order.order_id.rental_start_date.month)
                         order.product_uom_qty = months
                     else:
                         order.product_uom_qty = order.order_id.duration_days
 
-    @api.onchange('product_id', 'product_uom', 'product_uom_qty')
+    @api.onchange('product_id', 'product_uom_id', 'product_uom_qty')
     def _onchange_rentalproduct(self):
         for order in self:
             if order.order_id.is_rental_order == True:
                 if order.product_id.product_pricing_ids:
                     for product_pricing_id in order.product_id.product_pricing_ids:
-                        if order.product_uom.name == 'Hours' and product_pricing_id.recurrence_id.unit == 'hour':
+                        if order.product_uom_id.name == 'Hours' and product_pricing_id.recurrence_id.unit == 'hour':
                             order.price_unit= product_pricing_id.price
-                        elif order.product_uom.name == 'Days'and product_pricing_id.recurrence_id.unit == 'day':
+                        elif order.product_uom_id.name == 'Days'and product_pricing_id.recurrence_id.unit == 'day':
                             order.price_unit=product_pricing_id.price
-                        elif order.product_uom.name == 'Week'and product_pricing_id.recurrence_id.unit == 'week':
+                        elif order.product_uom_id.name == 'Week'and product_pricing_id.recurrence_id.unit == 'week':
                             order.price_unit=product_pricing_id.price
-                        elif order.product_uom.name == 'Months'and product_pricing_id.recurrence_id.unit == 'month':
+                        elif order.product_uom_id.name == 'Months'and product_pricing_id.recurrence_id.unit == 'month':
                             order.price_unit=product_pricing_id.price
-                        elif order.product_uom.name == 'Years' and product_pricing_id.recurrence_id.unit == 'year':
+                        elif order.product_uom_id.name == 'Years' and product_pricing_id.recurrence_id.unit == 'year':
                             order.price_unit=product_pricing_id.price
                 else:
                     if order.price_unit == 0.00:

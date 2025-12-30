@@ -6,6 +6,7 @@ from datetime import datetime
 import re
 import phonenumbers
 
+# employee_type field removed from this model added to hr.version (sriman)
 class HrEmployeeInherit(models.Model):
     _inherit = 'hr.employee'
 
@@ -16,7 +17,8 @@ class HrEmployeeInherit(models.Model):
     employee_name_english = fields.Char('Employee Name - English', copy=False)
     employee_name_arabic = fields.Char('Employee Name - Arabic', copy=False)
     nationality_at_birth_id = fields.Many2one("res.country", string="Nationality At Birth", copy=False)
-    country_code = fields.Char('Country Code', copy=False)
+    # sriman removed the country_code because it is already present in hr_employee,if we add this field it is disturbing the UI in the employee payroll page
+    # country_code = fields.Char('Country Code', copy=False)
 
     #Notebook Pages Field
     home_land_line_no = fields.Char('Home Land Line Number', copy=False)
@@ -174,8 +176,8 @@ class HrEmployeeInherit(models.Model):
     billing_amt = fields.Char('Billing Amount', copy=False)
     billing_currency_id = fields.Many2one('res.currency', string='Billing Currency', copy=False)
     emp_category_id = fields.Many2one('employee.category', string='Employee Category', copy=False)
-    employee_type = fields.Selection(selection_add=[('bootcamp', 'Bootcamp'),('permanent', 'Permanent'), ('temporary', 'Temporary'), ('seconded', 'Seconded')], ondelete={'bootcamp': 'cascade', 'permanent': 'cascade', 'temporary': 'cascade', 'seconded': 'cascade'})
-    
+
+
     # Emergency contact person address fields
     e_private_street = fields.Char(string="Private Street", copy=False)
     e_private_street2 = fields.Char(string="Private Street2", copy=False)
@@ -203,8 +205,17 @@ class HrEmployeeInherit(models.Model):
     u_private_zip = fields.Char(string="Private Zip", copy=False)
     u_private_country_id = fields.Many2one("res.country", string="Private Country", copy=False)
 
-    _sql_constraints = [('unique_emp_code', 'unique (emp_code)', 'Employee Code must be unique.')]
-    
+    # _sql_constraints = [('unique_emp_code', 'unique (emp_code)', 'Employee Code must be unique.')]
+    # code change by sriman
+    _emp_code_unique = models.Constraint(
+        'unique (emp_code)',
+        'Employee code must be unique!'
+    )
+
+
+
+
+
     # @api.constrains('issue_date')
     # def _onchange_date(self):
     #     if self.issue_date:
@@ -372,3 +383,11 @@ class HrEmployeeInherit(models.Model):
 
 
 
+
+class HrVersionInherit(models.Model):
+    _inherit = 'hr.version'
+
+    employee_type = fields.Selection(
+        selection_add=[('bootcamp', 'Bootcamp'), ('permanent', 'Permanent'), ('temporary', 'Temporary'),
+                       ('seconded', 'Seconded')],
+        ondelete={'bootcamp': 'cascade', 'permanent': 'cascade', 'temporary': 'cascade', 'seconded': 'cascade'})

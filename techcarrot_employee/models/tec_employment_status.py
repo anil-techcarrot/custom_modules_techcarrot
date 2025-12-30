@@ -7,6 +7,11 @@ class EmploymentStatus(models.Model):
 
     name = fields.Char('Employee Status', copy=False, required=True)
 
-    _sql_constraints = [('unique_employment_status', 'unique (name)', 'Employment Status name must be unique.')]
+    # code change by sriman
+    # _sql_constraints = [('unique_employment_status', 'unique (name)', 'Employment Status name must be unique.')]
 
+    _name_unique = models.Constraint(
+        'unique (name)',
+        'Employee Status name must be unique!'
+    )
 

@@ -7,6 +7,10 @@ class EmployeeCategory(models.Model):
 
     name = fields.Char('Employee Category', copy=False, required=True)
 
-    _sql_constraints = [('unique_employee_category', 'unique (name)', 'Employee Category must be unique.')]
-
+    # code change by sriman
+    # _sql_constraints = [('unique_employee_category', 'unique (name)', 'Employee Category must be unique.')]
+    _name_unique = models.Constraint(
+        'unique (name)',
+        'Employee Category must be unique!'
+    )
 

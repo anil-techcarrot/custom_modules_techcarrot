@@ -7,6 +7,10 @@ class EmployeePractice(models.Model):
 
     name = fields.Char('Practice', copy=False, required=True)
 
-    _sql_constraints = [('unique_employee_practice', 'unique (name)', 'Practice name must be unique.')]
-
+    # code change by sriman
+    # _sql_constraints = [('unique_employee_practice', 'unique (name)', 'Practice name must be unique.')]
+    _name_unique = models.Constraint(
+        'unique (name)',
+        'Practice name must be unique!'
+    )
 

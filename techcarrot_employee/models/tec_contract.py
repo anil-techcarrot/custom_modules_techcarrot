@@ -9,49 +9,50 @@ from odoo.tools.safe_eval import safe_eval, datetime as safe_eval_datetime, date
 
 
 
-class HrPayslipEmployees(models.TransientModel):
-    _inherit = 'hr.payslip.employees'
+# class HrPayslipEmployees(models.TransientModel):
+#     _inherit = 'hr.payslip.employees'
+#
+#     @api.depends('structure_id', 'department_id', 'structure_type_id', 'job_id')
+#     def _compute_employee_ids(self):
+#         for wizard in self:
+#             structure_type_id=''
+#             if wizard.structure_id:
+#                 structure_type_id = wizard.structure_id.type_id.id
+#             elif wizard.structure_type_id:
+#                 structure_type_id=wizard.structure_type_id.id
+#
+#             domain = wizard.get_employees_domain()
+#             emp_objs=self.env['hr.employee'].search(domain)
+#             employee_objs=[]
+#             if structure_type_id:
+#                 for emp_obj in emp_objs:
+#                     if emp_obj.structure_type_id.id == structure_type_id:
+#                         employee_objs.append(emp_obj.id)
+#             else:
+#                 for emp_obj in emp_objs:
+#                     employee_objs.append(emp_obj.id)
+#             wizard.employee_ids = employee_objs
 
-    @api.depends('structure_id', 'department_id', 'structure_type_id', 'job_id')
-    def _compute_employee_ids(self):
-        for wizard in self:
-            structure_type_id=''
-            if wizard.structure_id:
-                structure_type_id = wizard.structure_id.type_id.id
-            elif wizard.structure_type_id:
-                structure_type_id=wizard.structure_type_id.id
-
-            domain = wizard.get_employees_domain()
-            emp_objs=self.env['hr.employee'].search(domain)
-            employee_objs=[]
-            if structure_type_id:
-                for emp_obj in emp_objs:
-                    if emp_obj.structure_type_id.id == structure_type_id:
-                        employee_objs.append(emp_obj.id)
-            else:
-                for emp_obj in emp_objs:
-                    employee_objs.append(emp_obj.id)
-            wizard.employee_ids = employee_objs
-
-class HrContractInherit(models.Model):
-    _inherit = 'hr.contract'
+# code changed  from contract to HrEmployee, model changed from hr.contract to hr.employee(sriman)
+class HrEmployeeInherit(models.Model):
+    _inherit = 'hr.employee'
 
     aat_allowance = fields.Monetary('MI Allowance', copy=False)
     sub_total = fields.Monetary('Sub Total', copy=False)
-    emp_code = fields.Char('Employee Code', copy=False)
+    # emp_code = fields.Char('Employee Code', copy=False)
     #
-
-    @api.model_create_multi
-    def create(self, vals_list):
-        for vals in vals_list:
-            if 'emp_code' in vals and not vals.get('employee_id') and vals['emp_code'] != False:
-                emp_code = vals['emp_code']
-                employee = self.env['hr.employee'].search([('emp_code', '=', emp_code)], limit=1)
-                if employee:
-                    vals['employee_id'] = employee.id
-                else:
-                    raise ValidationError(_('Employee master not found. Employee ID: %s', emp_code))
-        return super(HrContractInherit, self).create(vals_list)
+    #
+    # @api.model_create_multi
+    # def create(self, vals_list):
+    #     for vals in vals_list:
+    #         if 'emp_code' in vals and not vals.get('employee_id') and vals['emp_code'] != False:
+    #             emp_code = vals['emp_code']
+    #             employee = self.env['hr.employee'].search([('emp_code', '=', emp_code)], limit=1)
+    #             if employee:
+    #                 vals['employee_id'] = employee.id
+    #             else:
+    #                 raise ValidationError(_('Employee master not found. Employee ID: %s', emp_code))
+    #     return super(HrContractInherit, self).create(vals_list)
 
 
 
@@ -111,7 +112,7 @@ class HrAttendance(models.Model):
 
 class HrPayslip(models.Model):
     _inherit = 'hr.payslip'
-    _order = 'number desc'
+    # _order = 'number desc'
 
 
     def _prepare_line_values(self, line, account_id, date, debit, credit):

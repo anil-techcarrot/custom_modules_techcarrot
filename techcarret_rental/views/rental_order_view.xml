@@ -59,7 +59,8 @@
         <field name="name">rental.order.form.inherit.stock</field>
         <field name="model">sale.order</field>
         <field name="arch" type="xml">
-            <xpath expr="//notebook/page[@name='order_lines']/field/list/field[@name='is_product_rentable']" position='after'>
+<!--            sriman changed the is_product_rentable(as not present in ui) to product_uom_qty -->
+            <xpath expr="//notebook/page[@name='order_lines']/field/list/field[@name='product_uom_qty']" position='after'>
                 <field name="tracking" column_invisible="True"/>
                 <field name="manually_edited" column_invisible="True"/>
                 <field name="available_reserved_lots" column_invisible="True"/>
@@ -218,7 +219,8 @@
             <field name="pricelist_id" position="attributes">
                 <attribute name="readonly">state in ['cancel', 'sale'] and subscription_state not in ['3_progress', '4_paused']</attribute>
             </field>
-            <field name="show_update_pricelist" position='before'>
+<!--            sriman changed the show_update_pricelist(as not present in view) to date_order-->
+            <field name="date_order" position='before'>
                 <label name="plan_label" for="plan_id" invisible="not has_recurring_line or not plan_id and state in ['sale', 'cancel']"/>
                 <div name="plan_block" class="o_row" invisible="not has_recurring_line or not plan_id and state in ['sale', 'cancel']">
                     <field name="plan_id" groups="!sales_team.group_sale_manager"
@@ -281,12 +283,14 @@
             <field name="tax_totals" position="after">
                 <field name="recurring_details" nolabel="1" colspan="2" invisible="not recurring_details"/>
             </field>
-            <page name="optional_products" position="attributes">
-                <attribute name="invisible">(not is_subscription and state not in ['draft', 'sent']) or (is_subscription and state == 'sale' and not ((user_quantity or user_extend) and subscription_state != '5_renewed'))</attribute>
-            </page>
-            <field name="sale_order_option_ids" position="attributes">
-                <attribute name="readonly">state == 'cancel'</attribute>
-            </field>
+<!--            sriman commented this as optional_products is not present in the odoo19 ui-->
+<!--            <page name="optional_products" position="attributes">-->
+<!--                <attribute name="invisible">(not is_subscription and state not in ['draft', 'sent']) or (is_subscription and state == 'sale' and not ((user_quantity or user_extend) and subscription_state != '5_renewed'))</attribute>-->
+<!--            </page>-->
+<!--        sriman commented sale_order_option_ids  field   not present in ui-->
+<!--            <field name="sale_order_option_ids" position="attributes">-->
+<!--                <attribute name="readonly">state == 'cancel'</attribute>-->
+<!--            </field>-->
         </field>
     </record>
 
@@ -332,6 +336,8 @@
             </xpath>
             <xpath expr="//field[@name='date_order']" position="after">
                 <field name="po_no" />
+                <field name="x_studio_po_date"/>
+                <field name="x_studio_so_period_1"/>
             </xpath>
         </field>
     </record>
@@ -347,84 +353,85 @@
         </field>
     </record>
 
+<!--sriman removed this search view as it creating unknown errors-->
+<!--    <record id="tec_sale_subscription_view_search" model="ir.ui.view">-->
+<!--        <field name="name">sale.order.search</field>-->
+<!--        <field name="model">sale.order</field>-->
+<!--        <field name="arch" type="xml">-->
+<!--            <search string="Subscriptions">-->
+<!--                <field name="name" string="Order" filter_domain="['|', ('name', 'ilike', self), ('client_order_ref', 'ilike', self)]"/>-->
+<!--                <field name="partner_id" operator="child_of"/>-->
+<!--                <field name="user_id"/>-->
+<!--                <field name="team_id"/>-->
+<!--                <field name="order_line" string="Product" filter_domain="[('order_line.product_id', 'ilike', self)]"/>-->
+<!--                <field name="sale_order_template_id" groups="sales_team.group_sale_manager"/>-->
+<!--                <filter name="my_subscriptions" string="My Subscriptions" domain="[('user_id','=',uid), ('subscription_state', '!=', False)]"/>-->
+<!--                <filter string="Unassigned" name="contracts_not_assigned" help="Subscriptions that are not assigned to an account manager." domain="[('user_id', '=', False)]"/>-->
+<!--                <separator/>-->
+<!--                <filter name="quotations" string="Quotations" domain="[('subscription_state','in', ['1_draft', '2_renewal'])]"/>-->
+<!--                <filter name="progress" string="In Progress" domain="[('subscription_state','=', '3_progress')]"/>-->
+<!--                <filter name="paused" string="Paused" domain="[('subscription_state','=', '4_paused')]"/>-->
+<!--                <filter name="churned" string="Churned" domain="[('subscription_state','=', '6_churn')]"/>-->
+<!--                <separator/>-->
+<!--                <filter name="to_renew" string="To Invoice" domain="[('next_invoice_date', '&lt;=', context_today().strftime('%Y-%m-%d')), ('subscription_state', 'in', ('3_progress', '4_paused'))]"/>-->
+<!--                <separator/>-->
+<!--                <filter name="payment_exception" string="Failed Payments" domain="[('payment_exception','=', True)]" help="Contracts whose payment has failed"/>-->
+<!--&lt;!&ndash;                sriman filter related to Health is removed in search view (health field not present)&ndash;&gt;-->
+<!--&lt;!&ndash;                <separator/>&ndash;&gt;-->
+<!--&lt;!&ndash;                <filter name="good" string="Good Health" domain="[('health', '=', 'done')]"/>&ndash;&gt;-->
+<!--&lt;!&ndash;                <filter name="bad" string="Bad Health" domain="[('health', '=', 'bad')]"/>&ndash;&gt;-->
+<!--                <separator/>-->
+<!--                <filter name="first_contract_date" date="first_contract_date"/>-->
+<!--                <separator/>-->
+<!--                <filter name="recurring_next_date" string="Next invoice Date" date="next_invoice_date"/>-->
+<!--                <separator/>-->
+<!--                <filter name="end_date" date="end_date"/>-->
+<!--                <separator/>-->
+<!--                <filter invisible="1" string="Late Activities" name="activities_overdue"-->
+<!--                        domain="[('my_activity_date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"-->
+<!--                        help="Show all records which has next action date is before today"/>-->
+<!--                <filter invisible="1" string="Today Activities" name="activities_today"-->
+<!--                        domain="[('my_activity_date_deadline', '=', context_today().strftime('%Y-%m-%d'))]"/>-->
+<!--                <filter invisible="1" string="Future Activities" name="activities_upcoming_all"-->
+<!--                        domain="[('my_activity_date_deadline', '&gt;', context_today().strftime('%Y-%m-%d'))-->
+<!--                        ]"/>-->
+<!--                <separator/>-->
+<!--                <group expand="0" string="Group By">-->
+<!--                    <filter string="Salesperson" name="sales_person" domain="[]" context="{'group_by':'user_id'}"/>-->
+<!--                    <filter string="Sales Team" name="sales_team" domain="[]" context="{'group_by':'team_id'}"/>-->
+<!--                    <filter string="Subscription Status" name="subscription_state" domain="[]" context="{'group_by':'subscription_state'}"/>-->
+<!--                    <filter string="Template" name="template" domain="[]" context="{'group_by':'sale_order_template_id'}" groups="sales_team.group_sale_manager"/>-->
+<!--                    <filter string="Recurring Plan" name="plan" domain="[]" context="{'group_by' : 'plan_id'}" />-->
+<!--                    <filter string="Customer" name="customer" domain="[]" context="{'group_by':'partner_id'}"/>-->
+<!--                    <filter string="First Contract Date" name="first_contract_month" domain="[]" context="{'group_by' : 'first_contract_date'}"/>-->
+<!--                    <filter string="End Date" name="end_month" domain="[]" context="{'group_by' : 'end_date'}" />-->
+<!--                    <filter string="Next Invoice Date" name="next_invoice_date" domain="[]" context="{'group_by' : 'next_invoice_date'}" />-->
+<!--                </group>-->
+<!--            </search>-->
+<!--        </field>-->
+<!--    </record>-->
 
-    <record id="tec_sale_subscription_view_search" model="ir.ui.view">
-        <field name="name">sale.order.search</field>
-        <field name="model">sale.order</field>
-        <field name="arch" type="xml">
-            <search string="Subscriptions">
-                <field name="name" string="Order" filter_domain="['|', ('name', 'ilike', self), ('client_order_ref', 'ilike', self)]"/>
-                <field name="partner_id" operator="child_of"/>
-                <field name="user_id"/>
-                <field name="team_id"/>
-                <field name="order_line" string="Product" filter_domain="[('order_line.product_id', 'ilike', self)]"/>
-                <field name="sale_order_template_id" groups="sales_team.group_sale_manager"/>
-                <filter name="my_subscriptions" string="My Subscriptions" domain="[('user_id','=',uid), ('subscription_state', '!=', False)]"/>
-                <filter string="Unassigned" name="contracts_not_assigned" help="Subscriptions that are not assigned to an account manager." domain="[('user_id', '=', False)]"/>
-                <separator/>
-                <filter name="quotations" string="Quotations" domain="[('subscription_state','in', ['1_draft', '2_renewal'])]"/>
-                <filter name="progress" string="In Progress" domain="[('subscription_state','=', '3_progress')]"/>
-                <filter name="paused" string="Paused" domain="[('subscription_state','=', '4_paused')]"/>
-                <filter name="churned" string="Churned" domain="[('subscription_state','=', '6_churn')]"/>
-                <separator/>
-                <filter name="to_renew" string="To Invoice" domain="[('next_invoice_date', '&lt;=', context_today().strftime('%Y-%m-%d')), ('subscription_state', 'in', ('3_progress', '4_paused'))]"/>
-                <separator/>
-                <filter name="payment_exception" string="Failed Payments" domain="[('payment_exception','=', True)]" help="Contracts whose payment has failed"/>
-                <separator/>
-                <filter name="good" string="Good Health" domain="[('health', '=', 'done')]"/>
-                <filter name="bad" string="Bad Health" domain="[('health', '=', 'bad')]"/>
-                <separator/>
-                <filter name="first_contract_date" date="first_contract_date"/>
-                <separator/>
-                <filter name="recurring_next_date" string="Next invoice Date" date="next_invoice_date"/>
-                <separator/>
-                <filter name="end_date" date="end_date"/>
-                <separator/>
-                <filter invisible="1" string="Late Activities" name="activities_overdue"
-                        domain="[('my_activity_date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"
-                        help="Show all records which has next action date is before today"/>
-                <filter invisible="1" string="Today Activities" name="activities_today"
-                        domain="[('my_activity_date_deadline', '=', context_today().strftime('%Y-%m-%d'))]"/>
-                <filter invisible="1" string="Future Activities" name="activities_upcoming_all"
-                        domain="[('my_activity_date_deadline', '&gt;', context_today().strftime('%Y-%m-%d'))
-                        ]"/>
-                <separator/>
-                <group expand="0" string="Group By">
-                    <filter string="Salesperson" name="sales_person" domain="[]" context="{'group_by':'user_id'}"/>
-                    <filter string="Sales Team" name="sales_team" domain="[]" context="{'group_by':'team_id'}"/>
-                    <filter string="Subscription Status" name="subscription_state" domain="[]" context="{'group_by':'subscription_state'}"/>
-                    <filter string="Template" name="template" domain="[]" context="{'group_by':'sale_order_template_id'}" groups="sales_team.group_sale_manager"/>
-                    <filter string="Recurring Plan" name="plan" domain="[]" context="{'group_by' : 'plan_id'}" />
-                    <filter string="Customer" name="customer" domain="[]" context="{'group_by':'partner_id'}"/>
-                    <filter string="First Contract Date" name="first_contract_month" domain="[]" context="{'group_by' : 'first_contract_date'}"/>
-                    <filter string="End Date" name="end_month" domain="[]" context="{'group_by' : 'end_date'}" />
-                    <filter string="Next Invoice Date" name="next_invoice_date" domain="[]" context="{'group_by' : 'next_invoice_date'}" />
-                </group>
-            </search>
-        </field>
-    </record>
-
-    <record id="view_rental_history_filter" model="ir.ui.view">
-        <field name="name">rental.invoice.history.list.select</field>
-        <field name="model">rental.invoice.history</field>
-        <field name="arch" type="xml">
-            <search string="Search modules">
-                <field name="rental_sale_id"/>
-                <field name="partner_id"/>
-                <group expand="0" string="Group By">
-                    <filter string="Rental Order" name="rsale" domain="[]" context="{'group_by':'rental_sale_id'}"/>
-                    <filter string="Partner" name="rpartner" domain="[]" context="{'group_by':'partner_id'}"/>
-                    <filter string="Rental Status" name="state" domain="[]" context="{'group_by':'state'}"/>
-                    <filter string="Company" name="company_id" domain="[]" context="{'group_by':'company_id'}"/>
-                </group>
-                <searchpanel>
-                    <field name="rental_sale_id" string="Rental Order"/>
-                    <field name="partner_id" string="Partner"/>
-                    <field name="company_id" string="Company"/>
-                </searchpanel>
-            </search>
-        </field>
-    </record>
+<!--    <record id="view_rental_history_filter" model="ir.ui.view">-->
+<!--        <field name="name">rental.invoice.history.list.select</field>-->
+<!--        <field name="model">rental.invoice.history</field>-->
+<!--        <field name="arch" type="xml">-->
+<!--            <search string="Search modules">-->
+<!--                <field name="rental_sale_id"/>-->
+<!--                <field name="partner_id"/>-->
+<!--                <group expand="0" string="Group By">-->
+<!--                    <filter string="Rental Order" name="rsale" domain="[]" context="{'group_by':'rental_sale_id'}"/>-->
+<!--                    <filter string="Partner" name="rpartner" domain="[]" context="{'group_by':'partner_id'}"/>-->
+<!--                    <filter string="Rental Status" name="state" domain="[]" context="{'group_by':'state'}"/>-->
+<!--                    <filter string="Company" name="company_id" domain="[]" context="{'group_by':'company_id'}"/>-->
+<!--                </group>-->
+<!--                <searchpanel>-->
+<!--                    <field name="rental_sale_id" string="Rental Order"/>-->
+<!--                    <field name="partner_id" string="Partner"/>-->
+<!--                    <field name="company_id" string="Company"/>-->
+<!--                </searchpanel>-->
+<!--            </search>-->
+<!--        </field>-->
+<!--    </record>-->
 
     <record id="rental_price_order_tree" model="ir.ui.view">
         <field name="name">rental.invoice.history.list</field>

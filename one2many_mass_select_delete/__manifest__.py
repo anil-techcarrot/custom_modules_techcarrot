@@ -21,7 +21,7 @@
 ###############################################################################
 {
     'name': 'One2many Mass Select Delete Widget',
-    'version': "18.0.1.0.0",
+    'version': "19.0.1.0.0",
     'category': 'Extra Tools',
     'summary': """One2many Mass Delete Select/Deselect Widget""",
     'description': """With this module, you can delete multiple lines in the

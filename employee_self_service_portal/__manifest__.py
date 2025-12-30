@@ -1,7 +1,7 @@
 # __manifest__.py
 {
     "name": "Employee Self Service Portal MLR",
-    "version": "18.1.5",
+    "version": "19.1.5",
     "depends": ["portal", "hr", "hr_attendance", "hr_payroll", "hr_holidays", "hr_expense", "techcarrot_crm_mlr"],
     "category": "Human Resources",
     "author": "Lovaraju Mylapalli",
@@ -19,7 +19,7 @@
         "security/portal_employee_security.xml",
         "data/portal_data.xml",
         "data/attendance_cron.xml",  # Auto-checkout cron job
-        "data/expense_categories.xml",  # Default expense categories
+        # "data/expense_categories.xml",  # Default expense categories
         "views/menu.xml",
         "views/portal_layout.xml",
         "views/portal_ess_dashboard.xml",

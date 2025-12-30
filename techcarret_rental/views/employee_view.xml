@@ -5,7 +5,8 @@
         <field name="model">hr.employee</field>
         <field name="inherit_id" ref="hr.view_employee_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//page[@name='public']" position="after">
+<!--            sriman changed from public to work_information-->
+            <xpath expr="//page[@name='work_information']" position="after">
                 <page string="Work Entry" name="work_entry">
                     <field name="work_entry_ids" mode="list" readonly="1" force_save="1">
                         <list editable="top">

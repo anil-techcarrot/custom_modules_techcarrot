@@ -78,4 +78,4 @@ class HREmployee(models.Model):
     x_passport_country = fields.Char("Passport Issuing Country")
     x_passport_issue = fields.Date("Passport Issue Date")
     x_passport_expiry = fields.Date("Passport Expiry Date")
-    ess_employee_id = fields.Char("Employee ID")
+    employee_id = fields.Char("Employee ID")

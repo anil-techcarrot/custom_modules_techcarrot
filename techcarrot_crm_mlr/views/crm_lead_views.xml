@@ -64,45 +64,45 @@
         </record>
 
         <!-- Add fields to search view -->
-        <record id="crm_lead_view_filter_inherit" model="ir.ui.view">
-            <field name="name">crm.lead.search.inherit</field>
-            <field name="model">crm.lead</field>
-            <field name="inherit_id" ref="crm.view_crm_case_opportunities_filter"/>
-            <field name="arch" type="xml">
-                <!-- Add search fields -->
-                <xpath expr="//field[@name='name']" position="after">
-                    <field name="deal_manager_id"/>
-                    <field name="point_of_contact_id"/>
-                    <field name="practice_id"/>
-                    <field name="industry_id"/>
-                   <field name="type_id"/>
-                </xpath>
-                
-                <!-- Add custom filters at the end -->
-                <xpath expr="//search" position="inside">
-                    <separator/>
-                    <filter name="filter_engaged_presales" string="Engaged Presales" 
-                            domain="[('engaged_presales', '=', True)]"/>
-                    <filter name="filter_client_proposal_submitted" string="Client Proposal Submitted" 
-                            domain="[('client_proposal_submission_date', '!=', False)]"/>
-                    <filter name="filter_proposal_submitted" string="Proposal Submitted" 
-                            domain="[('proposal_submitted_date', '!=', False)]"/>
-                    
-                    <!-- Group by options -->
-                    <group expand="0" string="Group By">
-                        <filter name="group_by_deal_manager" string="Deal Manager" 
-                                context="{'group_by': 'deal_manager_id'}"/>
-                        <filter name="group_by_practice" string="Practice" 
-                                context="{'group_by': 'practice_id'}"/>
-                        <filter name="group_by_industry" string="Industry" 
-                                context="{'group_by': 'industry_id'}"/>
-                        <filter name="group_by_engaged_presales" string="Engaged Presales" 
-                                context="{'group_by': 'engaged_presales'}"/>
-                   <filter name="group_by_type" string="Type" context="{'group_by': 'type_id'}"/>
-                    </group>
-                </xpath>
-            </field>
-        </record>
+<!--        <record id="crm_lead_view_filter_inherit" model="ir.ui.view">-->
+<!--            <field name="name">crm.lead.search.inherit</field>-->
+<!--            <field name="model">crm.lead</field>-->
+<!--            <field name="inherit_id" ref="crm.view_crm_case_opportunities_filter"/>-->
+<!--            <field name="arch" type="xml">-->
+<!--                &lt;!&ndash; Add search fields &ndash;&gt;-->
+<!--                <xpath expr="//field[@name='name']" position="after">-->
+<!--                    <field name="deal_manager_id"/>-->
+<!--                    <field name="point_of_contact_id"/>-->
+<!--                    <field name="practice_id"/>-->
+<!--                    <field name="industry_id"/>-->
+<!--                   <field name="type_id"/>-->
+<!--                </xpath>-->
+<!--                -->
+<!--                &lt;!&ndash; Add custom filters at the end &ndash;&gt;-->
+<!--                <xpath expr="//search" position="inside">-->
+<!--                    <separator/>-->
+<!--                    <filter name="filter_engaged_presales" string="Engaged Presales" -->
+<!--                            domain="[('engaged_presales', '=', True)]"/>-->
+<!--                    <filter name="filter_client_proposal_submitted" string="Client Proposal Submitted" -->
+<!--                            domain="[('client_proposal_submission_date', '!=', False)]"/>-->
+<!--                    <filter name="filter_proposal_submitted" string="Proposal Submitted" -->
+<!--                            domain="[('proposal_submitted_date', '!=', False)]"/>-->
+<!--                    -->
+<!--                    &lt;!&ndash; Group by options &ndash;&gt;-->
+<!--                    <group expand="0" string="Group By">-->
+<!--                        <filter name="group_by_deal_manager" string="Deal Manager" -->
+<!--                                context="{'group_by': 'deal_manager_id'}"/>-->
+<!--                        <filter name="group_by_practice" string="Practice" -->
+<!--                                context="{'group_by': 'practice_id'}"/>-->
+<!--                        <filter name="group_by_industry" string="Industry" -->
+<!--                                context="{'group_by': 'industry_id'}"/>-->
+<!--                        <filter name="group_by_engaged_presales" string="Engaged Presales" -->
+<!--                                context="{'group_by': 'engaged_presales'}"/>-->
+<!--                   <filter name="group_by_type" string="Type" context="{'group_by': 'type_id'}"/>-->
+<!--                    </group>-->
+<!--                </xpath>-->
+<!--            </field>-->
+<!--        </record>-->
 
         <!-- Kanban view inheritance -->
         <record id="crm_lead_view_kanban_inherit" model="ir.ui.view">

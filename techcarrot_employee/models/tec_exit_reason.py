@@ -7,6 +7,10 @@ class ExitReason(models.Model):
 
     name = fields.Char('Exit Reason', copy=False, required=True)
 
-    _sql_constraints = [('unique_exit_reason', 'unique (name)', 'Exit Reason name must be unique.')]
+    # code change by sriman
+    # _sql_constraints = [('unique_exit_reason', 'unique (name)', 'Exit Reason name must be unique.')]
 
-
+    _name_unique = models.Constraint(
+        'unique (name)',
+        'Exit Reason name must be unique!'
+    )

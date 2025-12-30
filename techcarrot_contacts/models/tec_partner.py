@@ -21,6 +21,8 @@ class ResPartner(models.Model):
     customer_code = fields.Char('Customer Code', copy=False)
     mapping_to_id = fields.Many2one('hr.employee', string='Mapping To', copy=False, 
                                     help="Employee that this contact is mapped to")
+    # mobile field added by sriman
+    mobile = fields.Char(copy=False)
 
     @api.constrains('secondary_email')
     def _check_email_validity(self):

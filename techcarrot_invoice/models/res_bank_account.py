@@ -8,12 +8,16 @@ class ResPartnerBank(models.Model):
     iban_no = fields.Char('IBAN')
     swift_code = fields.Char('SWIFT Code', copy=False)
 
-    _sql_constraints = [
-        (
-            "iban_no_unique",
-            "unique(iban_no)","Bank IBAN should be unique.",
-        ),
-    ]
+    # _sql_constraints = [
+    #     (
+    #         "iban_no_unique",
+    #         "unique(iban_no)","Bank IBAN should be unique.",
+    #     ),
+    # ]
+    _iban_no_unique = models.Constraint(
+        "unique (iban_no)",
+        "Bank IBAN should be unique."
+    )
 
 class ResBank(models.Model):
     _inherit = "res.bank"

@@ -5,20 +5,31 @@
         <field name="model">hr.employee</field>
         <field name="inherit_id" ref="hr.view_employee_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='work_email']" position="before">
-                <field name="employee_first_name"/>
-                <field name="employee_middle_name"/>
-                <field name="employee_last_name"/>
-                <field name="employee_name_english"/>
-                <field name="employee_name_arabic"/>
-                <field name="nationality_at_birth_id"/>
-                <field name="country_code" invisible="1"/>
+<!--inherited view place changed(sriman)-->
+            <xpath expr="//field[@name='employee_properties']" position="before">
+                <group>
+                    <group>
+                        <field name="employee_first_name"/>
+                        <field name="employee_last_name"/>
+                        <field name="employee_name_english"/>
+                        <field name="employee_name_arabic"/>
+
+                    </group>
+                    <group>
+                        <field name="employee_middle_name"/>
+                        <field name="emp_code"/>
+                        <field name="nationality_at_birth_id"/>
+                        <field name="country_code" invisible="1"/>
+
+                    </group>
+                </group>
+
             </xpath>
             <xpath expr="//field[@name='department_id']" position="before">
                 <field name="emp_code"/>
             </xpath>
-            <xpath expr="//field[@name='mobile_phone']" position="after">
-                <field name="country_code_for_work_mobile"/>
+            <xpath expr="//field[@name='mobile_phone']" position="before">
+                <field name="country_code_for_work_mobile" />
             </xpath>
             <xpath expr="//field[@name='next_appraisal_date']" position="after">
                 <field name="billable"/>
@@ -29,16 +40,17 @@
         </field>
     </record>
 
-    <record id="techcarrot_employee_contract_button_form_view" model="ir.ui.view">
-        <field name="name">hr.employee.form</field>
-        <field name="model">hr.employee</field>
-        <field name="inherit_id" ref="hr_contract.hr_hr_employee_view_form3"/>
-        <field name="arch" type="xml">
-            <xpath expr="//button[@name='action_open_contract']" position="attributes">
-                <attribute name="invisible">employee_type not in ['employee', 'student', 'trainee', 'permanent', 'temporary', 'bootcamp', 'seconded', 'freelance']</attribute>
-            </xpath>
-        </field>
-    </record>
+<!-- as contracts is not present in separate i am removing this code (sriman) -->
+<!--    <record id="techcarrot_employee_contract_button_form_view" model="ir.ui.view">-->
+<!--        <field name="name">hr.employee.form</field>-->
+<!--        <field name="model">hr.employee</field>-->
+<!--        <field name="inherit_id" ref="hr_contract.hr_hr_employee_view_form3"/>-->
+<!--        <field name="arch" type="xml">-->
+<!--            <xpath expr="//button[@name='action_open_contract']" position="attributes">-->
+<!--                <attribute name="invisible">employee_type not in ['employee', 'student', 'trainee', 'permanent', 'temporary', 'bootcamp', 'seconded', 'freelance']</attribute>-->
+<!--            </xpath>-->
+<!--        </field>-->
+<!--    </record>-->
 
     <record id="techcarrot_employee_inherit_tree_view" model="ir.ui.view">
     <field name="name">hr.employee.list</field>
@@ -297,16 +309,19 @@
             </page>
         </field>
     </record>
-    <!--Inherit the Private Information tab and Inherit the emergency group and adding a field-->
+    <!--Inherit the Private Information tab and Inherit the emergency group and adding a field(sriman)-->
     <record id="view_employee_form_private_info_tab_inherit" model="ir.ui.view">
         <field name="name">hr.employee.private.info.form.inherit</field>
         <field name="model">hr.employee</field>
         <field name="inherit_id" ref="hr.view_employee_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//group[@name='emergency']/separator" position="before">
-                <!-- Adding country code field -->
-                <field name="country_code_for_emergency_contact_person_phone_no" string="Country Code"/>
-            </xpath>
+            <xpath expr="//field[@name='emergency_contact']" position="before">
+            <field name="country_code_for_emergency_contact_person_phone_no"/>
+        </xpath>
+<!--            <xpath expr="//group[@name='Emergency Contact']/separator" position="before">-->
+<!--                &lt;!&ndash; Adding country code field &ndash;&gt;-->
+<!--                <field name="country_code_for_emergency_contact_person_phone_no" string="Country Code"/>-->
+<!--            </xpath>-->
         </field>
     </record>
 </odoo>

@@ -19,6 +19,16 @@
                 <field name="role_id" options="{'no_open': True, 'no_create': True}"/>
                 <field name="mapping_to_id" options="{'no_create': True}"/>
             </xpath>
+
+<!--            mobile field added by sriman    -->
+
+            <xpath expr="//div[field[@name='phone']]" position="after">
+                <div class="d-flex align-items-baseline w-md-50">
+                    <i class="fa fa-fw me-1 fa-mobile text-primary" title="Mobile"/>
+                    <field name="mobile" class="w-100" placeholder="Mobile" widget="phone"/>
+                </div>
+            </xpath>
+
             <xpath expr="//field[@name='function']" position="before">
                 <field name="first_name"/>
                 <field name="last_name"/>

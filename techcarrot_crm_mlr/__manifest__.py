@@ -1,6 +1,6 @@
 {
     'name': 'TechCarrot CRM Customization',
-    'version': '18.0.1.0.0',
+    'version': '19.0.1.0.0',
     'category': 'Customer Relationship Management',
     'summary': 'Custom fields for CRM module',
     'description': """

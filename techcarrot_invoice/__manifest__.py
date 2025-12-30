@@ -7,7 +7,7 @@
     'author': 'Ifensys.',
 
     'category': 'Account',
-    'version': '18.0.0.1.0',
+    'version': '19.0.0.1.0',
     'depends': ['base', 'web', 'sale_management', 'stock', 'sale_renting', 'account', 'account_accountant', 'sale', 'techcarret_rental'],
 
     'data': [
@@ -28,5 +28,5 @@
     'installable': True,
 
 
-    'pre_init_hook': 'pre_init_check',
+    # 'pre_init_hook': 'pre_init_check',
 }

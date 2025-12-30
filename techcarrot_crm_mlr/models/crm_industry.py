@@ -13,9 +13,14 @@ class CrmIndustry(models.Model):
     description = fields.Text(string='Description')
     active = fields.Boolean(string='Active', default=True)
     
-    _sql_constraints = [
-        ('name_uniq', 'unique(name)', 'Industry name must be unique!'),
-    ]
+    # _sql_constraints = [
+    #     ('name_uniq', 'unique(name)', 'Industry name must be unique!'),
+    # ]
+
+    _name_unique = models.Constraint(
+        'unique (name)',
+        'Industry name must be unique!'
+    )
     
     def name_get(self):
         """Return the display name for the industry."""
