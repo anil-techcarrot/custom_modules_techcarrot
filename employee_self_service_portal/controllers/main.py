@@ -1904,13 +1904,13 @@ class PortalEmployee(http.Controller):
             # Always update tag_ids, even if empty (to allow clearing all tags)
             lead.sudo().write({'tag_ids': [(6, 0, tag_id_list)]})
             return request.redirect(CRM_REDIRECT_URL)
-        partners = request.env['res.partner'].sudo().search([])
+        partners = request.env['res.partner'].sudo().search([('active', '=', True),('is_company', '=', True)])
         # Get contacts for point of contact field
         contacts = request.env['res.partner'].sudo().search([('is_company', '=', False)])
         stages = request.env['crm.stage'].sudo().search([])
         all_tags = request.env[CRM_TAG_MODEL].sudo().search([])
         # Show all users (internal and portal) as salespersons
-        salespersons = request.env['res.users'].sudo().search([('active', '=', True)])
+        salespersons = request.env['hr.employee'].sudo().search([('active', '=', True)])
         # Get TechCarrot CRM MLR related data
         practices = request.env['crm.practice'].sudo().search([('active', '=', True)])
         industries = request.env['crm.industry'].sudo().search([('active', '=', True)])
