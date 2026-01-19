@@ -40,24 +40,25 @@ class AccountMove(models.Model):
     
     @api.model
     def create(self, vals):
-    """Override create to handle auto-filling project codes when invoice is created"""
-    move = super(AccountMove, self).create(vals)
- 
-    for rec in move:
-        # Check if this is created from a sale order with a project
-        if rec.move_type == 'out_invoice' and rec.invoice_origin:
-            # Try to find related sale order
-            sale_orders = self.env['sale.order'].search([('name', '=', rec.invoice_origin)])
-            if sale_orders and sale_orders[0].project_id:
-                project_code = sale_orders[0].project_id.project_code
-                if project_code:
-                    # Set the invoice project
-                    rec.project_id = sale_orders[0].project_id.id
-                    # Update all lines without project code
-                    for line in rec.invoice_line_ids.filtered(lambda l: not l.project_code):
-                        line.project_code = project_code
-    return move
-
+        """Override create to handle auto-filling project codes when invoice is created"""
+        move = super(AccountMove, self).create(vals)
+    
+        for rec in move:
+            # Check if this is created from a sale order with a project
+            if rec.move_type == 'out_invoice' and rec.invoice_origin:
+                # Try to find related sale order
+                sale_orders = self.env['sale.order'].search([('name', '=', rec.invoice_origin)])
+                if sale_orders and sale_orders[0].project_id:
+                    project_code = sale_orders[0].project_id.project_code
+                    if project_code:
+                        # Set the invoice project
+                        rec.project_id = sale_orders[0].project_id.id
+                        # Update all lines without project code
+                        for line in rec.invoice_line_ids.filtered(lambda l: not l.project_code):
+                            line.project_code = project_code
+        
+        return move
+    
     @api.depends('company_id', 'invoice_filter_type_domain')
     def _compute_suitable_journal_ids(self):
         for m in self:
