@@ -33,9 +33,9 @@ from odoo.tools.safe_eval import safe_eval, datetime as safe_eval_datetime, date
 #                     employee_objs.append(emp_obj.id)
 #             wizard.employee_ids = employee_objs
 
-# code changed  from contract to HrEmployee, model changed from hr.contract to hr.employee(sriman)
-class HrEmployeeInherit(models.Model):
-    _inherit = 'hr.employee'
+# code changed  from contract to HrVersion, model changed from hr.contract to hr.version(sriman)
+class HrVersionInherit(models.Model):
+    _inherit = 'hr.version'
 
     aat_allowance = fields.Monetary('MI Allowance', copy=False)
     sub_total = fields.Monetary('Sub Total', copy=False)
