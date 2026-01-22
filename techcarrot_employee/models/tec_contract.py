@@ -9,7 +9,7 @@ from odoo.tools.safe_eval import safe_eval, datetime as safe_eval_datetime, date
 
 
 
-# class HrPayslipEmployees(models.TransientModel):
+# class HrPayslipEmployees(models.TransientModel): 
 #     _inherit = 'hr.payslip.employees'
 #
 #     @api.depends('structure_id', 'department_id', 'structure_type_id', 'job_id')
