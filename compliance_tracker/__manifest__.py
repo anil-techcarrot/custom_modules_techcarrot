@@ -3,7 +3,7 @@
     'version': '1.0',
     'category': 'Operations',
     'depends': ['base', 'mail'],
-    "icon": "/models/compliance_logo.png",
+    "images": "/static/description/icon.png",
     'data': [
         'security/security_groups.xml',
         'security/ir.model.access.csv',
