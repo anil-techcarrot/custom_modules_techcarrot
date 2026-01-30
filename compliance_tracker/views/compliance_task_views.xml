@@ -175,7 +175,7 @@
 
 
         <menuitem id="menu_compliance_root"
-                  name="Compliance Tracker"/>
+                  name="Compliance Tracker" web_icon="compliance_tracker,static/description/icon.png"/>
 
         <menuitem id="menu_compliance_task"
                   name="Compliance Tasks"

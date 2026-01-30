@@ -132,8 +132,8 @@
             <field name="view_mode">kanban,form</field>
         </record>
 
-        <menuitem id="menu_compliance_root"
-                  name="Compliance Tracker"/>
+        <!-- <menuitem id="menu_compliance_root"
+                  name="Compliance Tracker"/> -->
 
         <menuitem id="menu_compliance_project"
                   name="Compliance Projects"
