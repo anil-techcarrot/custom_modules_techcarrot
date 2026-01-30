@@ -9,7 +9,7 @@ from odoo.tools.safe_eval import safe_eval, datetime as safe_eval_datetime, date
 
 
 
-# class HrPayslipEmployees(models.TransientModel): 
+# class HrPayslipEmployees(models.TransientModel):
 #     _inherit = 'hr.payslip.employees'
 #
 #     @api.depends('structure_id', 'department_id', 'structure_type_id', 'job_id')
@@ -33,9 +33,9 @@ from odoo.tools.safe_eval import safe_eval, datetime as safe_eval_datetime, date
 #                     employee_objs.append(emp_obj.id)
 #             wizard.employee_ids = employee_objs
 
-# code changed  from contract to HrVersion, model changed from hr.contract to hr.version(sriman)
-class HrVersionInherit(models.Model):
-    _inherit = 'hr.version'
+# code changed  from contract to HrEmployee, model changed from hr.contract to hr.employee(sriman)
+class HrEmployeeInherit(models.Model):
+    _inherit = 'hr.employee'
 
     aat_allowance = fields.Monetary('MI Allowance', copy=False)
     sub_total = fields.Monetary('Sub Total', copy=False)
@@ -132,12 +132,11 @@ class HrPayslip(models.Model):
             'date': date,
             'debit': debit,
             'credit': credit,
-            'analytic_distribution': False , 
+            'analytic_distribution': (line.salary_rule_id.analytic_account_id and {line.salary_rule_id.analytic_account_id.id: 100}) or
+                                     (line.slip_id.contract_id.analytic_account_id.id and {line.slip_id.contract_id.analytic_account_id.id: 100}),
             'tax_tag_ids': line.debit_tag_ids.ids if account_id == line.salary_rule_id.account_debit.id else line.credit_tag_ids.ids,
         }
-        # commented by Dinesh / Sriman on 22-Jan and stopped anaytic distribution as it was creating error. We will reimplement as part of payroll 
-        #(line.salary_rule_id.analytic_account_id and {line.salary_rule_id.analytic_account_id.id: 100}) or
-        #                         (line.slip_id.contract_id.analytic_account_id.id and {line.slip_id.contract_id.analytic_account_id.id: 100}),
+
 
     def _get_report_name(self):
         formated_date_cache = {}

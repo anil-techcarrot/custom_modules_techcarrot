@@ -14,9 +14,15 @@ class HrEmployeeInherit(models.Model):
     employee_first_name = fields.Char('Employee First Name', copy=False)
     employee_middle_name = fields.Char('Employee Middle Name', copy=False)
     employee_last_name = fields.Char('Employee Last Name', copy=False)
-    employee_name_english = fields.Char('Employee Name - English', copy=False)
-    employee_name_arabic = fields.Char('Employee Name - Arabic', copy=False)
+    employee_name_english = fields.Char('Employee Name-English', copy=False)
+    employee_name_arabic = fields.Char('Employee Name-Arabic', copy=False)
     nationality_at_birth_id = fields.Many2one("res.country", string="Nationality At Birth", copy=False)
+    second_relation_with_employee = fields.Char("Relationship with Employee (1)", copy=False)
+
+
+    total_it_experience = fields.Char("Total IT Experience")
+    alternate_mobile_number = fields.Char("Alternate Mobile Number")
+    second_alternative_number = fields.Char("Second Alternative Number")
     # sriman removed the country_code because it is already present in hr_employee,if we add this field it is disturbing the UI in the employee payroll page
     # country_code = fields.Char('Country Code', copy=False)
 
@@ -124,7 +130,15 @@ class HrEmployeeInherit(models.Model):
     practice = fields.Many2one('employee.practice', copy=False)
     sub_practice = fields.Many2one('sub.practice', copy=False)
     practice_heads_id = fields.Many2one('hr.employee', string='Practice Head', copy=False)
-    engagement_location = fields.Char('Engagement Location', copy=False)
+    engagement_location = fields.Selection(
+        [
+            ('onsite', 'Onsite'),
+            ('offshore', 'Offshore'),
+            ('near_shore', 'Nearshore'),
+        ],
+        string='Engagement Location',
+
+    )
     created_by = fields.Many2one('res.users', string='Created By', readonly=True, copy=False)
     created_date_time = fields.Datetime('Created Date and Time', readonly=True, copy=False)
     last_modified_by = fields.Many2one('res.users', string='Last Modified By', readonly=True, copy=False)
@@ -205,12 +219,12 @@ class HrEmployeeInherit(models.Model):
     u_private_zip = fields.Char(string="Private Zip", copy=False)
     u_private_country_id = fields.Many2one("res.country", string="Private Country", copy=False)
 
-    #_sql_constraints = [('unique_emp_code', 'unique (emp_code)', 'Employee Code must be unique.')]
+    # _sql_constraints = [('unique_emp_code', 'unique (emp_code)', 'Employee Code must be unique.')]
     # code change by sriman
     #_emp_code_unique = models.Constraint(
     #    'unique (emp_code)',
     #    'Employee code must be unique!'
-    #) 
+    #)
 
 
 
