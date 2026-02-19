@@ -110,6 +110,8 @@ class AccountGeneralLedgerReportHandlerMulti(models.AbstractModel):
                 MIN(%(account_code_select)s) AS account_code,
                 MIN(move.name) AS name,
                 MIN(account_move_line.project_code) AS project,
+                MIN(account_move_line.name) AS label,
+                MIN(move.ref) AS ref,
                 """,
                 date=fields.Date.from_string(options['date']['date_from']),
                 account_name_select=account_name_select,
@@ -201,6 +203,9 @@ class AccountGeneralLedgerReportHandlerMulti(models.AbstractModel):
             'has_sublines': True,
             'name': None,
             'project': None,
+            'label':None,
+            'ref':None,
+
         })
 
         for row in self.env.execute_query_dict(query):
@@ -230,6 +235,9 @@ class AccountGeneralLedgerReportHandlerMulti(models.AbstractModel):
                             'move_name': row['move_name'],
                             'name': row.get('name', ''),
                             'project': row.get('project', ''),
+                            'label': row.get('label', ''),
+                            'ref': row.get('ref', ''),
+
                         })
 
                     if row['currency_id'] != self.env.company.currency_id.id:
