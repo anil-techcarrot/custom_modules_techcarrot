@@ -10,7 +10,7 @@ _logger = logging.getLogger(__name__)
 class PortalEmployeeSyncController(http.Controller):
 
     def _verify_api_key(self, api_key):
-        return api_key == "bafed37384fd011b0a237103a4040f47420a9d1e"
+        return api_key == "688d9c10954c5ef384d4e83f2c87ead130cd7bf6"
 
     def _val(self, value):
         """Extract value from SharePoint object"""
