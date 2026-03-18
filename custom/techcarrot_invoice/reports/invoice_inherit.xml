@@ -3,146 +3,180 @@
     <data>
 
         <!--
-            INHERIT: report_techcarrot_sales_document
-            PURPOSE: Add "Total Amount" column to main line items table
-                     and "Total Amount(AED)" column to Tax Summary table
-                     to match invoice format (Taxable Amount | VAT | Total Amount)
+            INHERIT: techcarret_rental.report_techcarrot_sales_document
+            PURPOSE: Restructure totals to match Invoice PS-2025-1948 layout:
+
+            MAIN TABLE COLUMNS (8 cols):
+              # | Item & Description | Qty | Rate | Tax % | VAT | Taxable Amount | Total Amount
+
+            TOTAL ROW (single row, all amounts in same line):
+              [empty x4] | Total | USD 5,775 (yellow) | USD 288.75 (yellow) | USD 6,063.75
+
+            TAX SUMMARY TABLE (4 cols):
+              Tax Details | Taxable Amount(AED) | Tax Amount(AED) | Total Amount(AED)
+              Standard Rate (5%) | 19,952.00 | 997.60 | 20,949.60
+              Total | AED 19,952.00 | AED 997.60 | AED 20,949.60
         -->
+
         <template id="report_techcarrot_sales_document_inherit"
                   inherit_id="techcarret_rental.report_techcarrot_sales_document">
 
-            <!-- ═══════════════════════════════════════════════════
-                 CHANGE 1: Add "Total Amount" header column
-                 (after the existing "Amount" th)
-            ════════════════════════════════════════════════════ -->
-            <xpath expr="//thead/tr/th[last()]" position="replace">
-                <th name="th_taxable_amount" width="12%" class="text-end" style="color: white;border:none;">
-                    <span>Taxable Amount</span>
-                </th>
-                <th name="th_total_amount" width="12%" class="text-end" style="color: white;border:none;">
-                    <span>Total Amount</span>
-                </th>
+            <!-- ══════════════════════════════════════════════════
+                 CHANGE 1: Replace the entire <thead><tr> to fix all 8 columns
+                 OLD: # | Item & Description | Qty | Rate | Tax % | Tax | Amount
+                 NEW: # | Item & Description | Qty | Rate | Tax % | VAT | Taxable Amount | Total Amount
+            ═══════════════════════════════════════════════════ -->
+            <xpath expr="//thead/tr" position="replace">
+                <tr style="background-color:#404040;border:none;">
+                    <th width="5%" class="text-center" style="color:white;border:none;">
+                        <span>#</span>
+                    </th>
+                    <th width="25%" style="color:white;border:none;">
+                        <span>Item &amp; Description</span>
+                    </th>
+                    <th width="8%" class="text-end" style="color:white;border:none;">
+                        <span>Qty</span>
+                    </th>
+                    <th width="9%" class="text-end" style="color:white;border:none;">
+                        <span>Rate</span>
+                    </th>
+                    <th width="9%" class="text-end" style="color:white;border:none;">
+                        <span>Tax %</span>
+                    </th>
+                    <th width="10%" class="text-end" style="color:white;border:none;">
+                        <span>VAT</span>
+                    </th>
+                    <th width="12%" class="text-end" style="color:white;border:none;">
+                        <span>Taxable Amount</span>
+                    </th>
+                    <th width="12%" class="text-end" style="color:white;border:none;">
+                        <span>Total Amount</span>
+                    </th>
+                </tr>
             </xpath>
 
-            <!-- ═══════════════════════════════════════════════════
-                 CHANGE 2: Add "Total Amount" data cell per line
-                 (after the existing price_subtotal td)
-                 price_subtotal = Taxable Amount (already present)
-                 price_subtotal + price_tax = Total Amount (new column)
-            ════════════════════════════════════════════════════ -->
+            <!-- ══════════════════════════════════════════════════
+                 CHANGE 2: Add Total Amount cell after price_subtotal
+                 price_subtotal = Taxable Amount (col 7)
+                 price_subtotal + price_tax = Total Amount (col 8 — NEW)
+            ═══════════════════════════════════════════════════ -->
             <xpath expr="//td[@name='td_subtotal'][last()]" position="after">
-                <td name="td_total_amount" style="border:none" class="text-end o_price_total">
+                <td name="td_total_amount" style="border:none;" class="text-end o_price_total">
                     <span class="text-nowrap"
-                          t-esc="'%.2f' % (line.price_subtotal + line.price_tax)">
-                    </span>
+                          t-esc="'%.2f' % (line.price_subtotal + line.price_tax)"/>
                 </td>
             </xpath>
 
-            <!-- ═══════════════════════════════════════════════════
-                 CHANGE 3: Sub Total row — extend to 8 columns
-                 (blank cell added for the new Total Amount column)
-            ════════════════════════════════════════════════════ -->
+            <!-- ══════════════════════════════════════════════════
+                 CHANGE 3: Remove Sub Total row
+                 (invoice 2 does not show a Sub Total row)
+            ═══════════════════════════════════════════════════ -->
             <xpath expr="//tr[td[contains(.,'Sub Total')]]" position="replace">
-                <tr style="border-top:1px solid #000;border-bottom:none;border-left:none;border-right:none;">
-                    <td colspan="6" class="text-end" style="border:none;"><b>Sub Total</b></td>
-                    <td class="text-end" style="border:none;">
-                        <span t-field="o.amount_untaxed"></span>
-                    </td>
-                    <td class="text-end" style="border:none;"></td>
-                </tr>
             </xpath>
 
-            <!-- ═══════════════════════════════════════════════════
-                 CHANGE 4: Standard Rate row — extend to 8 columns
-                 (blank cell added for the new Total Amount column)
-            ════════════════════════════════════════════════════ -->
+            <!-- ══════════════════════════════════════════════════
+                 CHANGE 4: Remove Standard Rate(5%) row
+                 (shown inline in the Total row below)
+            ═══════════════════════════════════════════════════ -->
             <xpath expr="//tr[td[contains(.,'Standard Rate(5%)')]]" position="replace">
-                <tr style="border:none;">
-                    <td colspan="6" class="text-end" style="border:none;"><b>Standard Rate(5%)</b></td>
-                    <td class="text-end" style="border:none;">
-                        <span t-field="o.amount_tax"></span>
-                    </td>
-                    <td class="text-end" style="border:none;"></td>
-                </tr>
             </xpath>
 
-            <!-- ═══════════════════════════════════════════════════
-                 CHANGE 5: Total row — show Taxable + Total Amount
-                 in the last two cells (same row, like invoice 2)
-            ════════════════════════════════════════════════════ -->
+            <!-- ══════════════════════════════════════════════════
+                 CHANGE 5: Replace Total footer row
+                 EXACT match to invoice 2:
+                   col 1-4 : empty
+                   col 5   : "Total"
+                   col 6   : USD 5,775    ← yellow background
+                   col 7   : USD 288.75   ← yellow background
+                   col 8   : USD 6,063.75
+            ═══════════════════════════════════════════════════ -->
             <xpath expr="//tr[td[contains(.,'Total')][contains(@style,'background-color:#F5F5F5')]]" position="replace">
-                <tr style="border:none;">
-                    <td colspan="4" class="text-end" style="border:none;"></td>
-                    <td colspan="2" class="text-end" style="background-color:#F5F5F5;border:none;">
+                <tr style="border-top:1px solid #000;border-left:none;border-right:none;border-bottom:none;">
+                    <td colspan="4" style="border:none;"></td>
+                    <td class="text-end" style="border:none;">
                         <b>Total</b>
                     </td>
-                    <td class="text-end" style="background-color:#F5F5F5;border:none;">
-                        <b><span t-field="o.amount_untaxed"></span></b>
+                    <!-- Taxable Amount — yellow highlight like invoice 2 -->
+                    <td class="text-end" style="background-color:#FFF176;border:none;">
+                        <b>
+                            <t t-esc="o.currency_id.name"/>&#160;<span t-field="o.amount_untaxed"/>
+                        </b>
                     </td>
-                    <td class="text-end" style="background-color:#F5F5F5;border:none;">
-                        <b><span t-field="o.amount_total"></span></b>
+                    <!-- VAT Amount — yellow highlight like invoice 2 -->
+                    <td class="text-end" style="background-color:#FFF176;border:none;">
+                        <b>
+                            <t t-esc="o.currency_id.name"/>&#160;<span t-field="o.amount_tax"/>
+                        </b>
+                    </td>
+                    <!-- Grand Total — no highlight -->
+                    <td class="text-end" style="border:none;">
+                        <b>
+                            <t t-esc="o.currency_id.name"/>&#160;<span t-field="o.amount_total"/>
+                        </b>
                     </td>
                 </tr>
             </xpath>
 
-            <!-- ═══════════════════════════════════════════════════
-                 CHANGE 6: Tax Summary header — add Total Amount(AED)
-            ════════════════════════════════════════════════════ -->
-            <xpath expr="//h3[text()='Tax Summary']/following-sibling::table//thead/tr" position="replace">
+            <!-- ══════════════════════════════════════════════════
+                 CHANGE 6: Tax Summary header — add 4th column
+                 Total Amount(AED)
+            ═══════════════════════════════════════════════════ -->
+            <xpath expr="//h3[text()='Tax Summary']/following-sibling::table[1]//thead/tr" position="replace">
                 <tr style="background-color:#404040;border:none;">
-                    <th name="inv_date" width="25%" style="color: white;border:none;" class="text-start">
+                    <th width="25%" style="color:white;border:none;" class="text-start">
                         Tax Details
                     </th>
-                    <th name="terms" width="25%" style="color: white;border:none;" class="text-end">
+                    <th width="25%" style="color:white;border:none;" class="text-end">
                         Taxable Amount(AED)
                     </th>
-                    <th name="due_date" width="25%" style="color: white;border:none;" class="text-end">
+                    <th width="25%" style="color:white;border:none;" class="text-end">
                         Tax Amount(AED)
                     </th>
-                    <th name="total_amount" width="25%" style="color: white;border:none;" class="text-end">
+                    <th width="25%" style="color:white;border:none;" class="text-end">
                         Total Amount(AED)
                     </th>
                 </tr>
             </xpath>
 
-            <!-- ═══════════════════════════════════════════════════
-                 CHANGE 7: Tax Summary Standard Rate row
-                 — add Total Amount(AED) cell
-            ════════════════════════════════════════════════════ -->
-            <xpath expr="//h3[text()='Tax Summary']/following-sibling::table//tbody/tr[1]" position="replace">
+            <!-- ══════════════════════════════════════════════════
+                 CHANGE 7: Tax Summary data row — add Total Amount
+                 Standard Rate (5%) | 19,952.00 | 997.60 | 20,949.60
+            ═══════════════════════════════════════════════════ -->
+            <xpath expr="//h3[text()='Tax Summary']/following-sibling::table[1]//tbody/tr[1]" position="replace">
                 <tr style="border-left:none;border-right:none;">
-                    <td name="inv_dt" style="border-left:none;border-right:none">
-                        <span>Standard Rate (5%)</span>
+                    <td style="border-left:none;border-right:none;">
+                        Standard Rate (5%)
                     </td>
-                    <td name="inv_dt" style="border-left:none;border-right:none" class="text-end">
-                        <span t-field="o.amount_untaxed"></span>
+                    <td class="text-end" style="border-left:none;border-right:none;">
+                        <span t-field="o.amount_untaxed"/>
                     </td>
-                    <td name="inv_dt" style="border-left:none;border-right:none" class="text-end">
-                        <span t-field="o.amount_tax"></span>
+                    <td class="text-end" style="border-left:none;border-right:none;">
+                        <span t-field="o.amount_tax"/>
                     </td>
-                    <td name="inv_dt" style="border-left:none;border-right:none" class="text-end">
-                        <span t-field="o.amount_total"></span>
+                    <td class="text-end" style="border-left:none;border-right:none;">
+                        <span t-field="o.amount_total"/>
                     </td>
                 </tr>
             </xpath>
 
-            <!-- ═══════════════════════════════════════════════════
-                 CHANGE 8: Tax Summary Total row
-                 — add Total Amount(AED) cell
-            ════════════════════════════════════════════════════ -->
-            <xpath expr="//h3[text()='Tax Summary']/following-sibling::table//tbody/tr[2]" position="replace">
+            <!-- ══════════════════════════════════════════════════
+                 CHANGE 8: Tax Summary Total row — add AED + Total Amount
+                 EXACT match invoice 2:
+                 Total | AED 19,952.00 | AED 997.60 | AED 20,949.60
+            ═══════════════════════════════════════════════════ -->
+            <xpath expr="//h3[text()='Tax Summary']/following-sibling::table[1]//tbody/tr[2]" position="replace">
                 <tr style="border-left:none;border-right:none;">
-                    <td name="inv_dt" style="border-left:none;border-right:none">
+                    <td style="border-left:none;border-right:none;">
                         <b>Total</b>
                     </td>
-                    <td name="inv_dt" style="border-left:none;border-right:none" class="text-end">
-                        <b><span t-field="o.amount_untaxed"></span></b>
+                    <td class="text-end" style="border-left:none;border-right:none;">
+                        <b>AED&#160;<span t-field="o.amount_untaxed"/></b>
                     </td>
-                    <td name="inv_dt" style="border-left:none;border-right:none" class="text-end">
-                        <b><span t-field="o.amount_tax"></span></b>
+                    <td class="text-end" style="border-left:none;border-right:none;">
+                        <b>AED&#160;<span t-field="o.amount_tax"/></b>
                     </td>
-                    <td name="inv_dt" style="border-left:none;border-right:none" class="text-end">
-                        <b><span t-field="o.amount_total"></span></b>
+                    <td class="text-end" style="border-left:none;border-right:none;">
+                        <b>AED&#160;<span t-field="o.amount_total"/></b>
                     </td>
                 </tr>
             </xpath>
