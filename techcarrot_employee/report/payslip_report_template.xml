@@ -10,13 +10,47 @@
                 <t t-set="report_name" t-value="o._get_report_name()"/>
                 <h2 id="payslip_name"><span t-out="report_name">August 2023 Payslip</span></h2>
             </xpath>
+            <xpath expr="//div[@id='employee_job_position']" position="replace">
+            <div id="employee_job_position" t-if="o.version_id.job_id" style="display:none">
+                                    <strong class="me-2">Job Position:</strong>
+                                    <span t-field="o.version_id.job_id"/>
+                                </div>
+            </xpath>
 
             <xpath expr="//div[@id='employee_id']" position="replace">
                 <div id="employee_id">
-                    <strong class="me-2">ID:</strong>
+                    <strong class="me-2">Employee Code:</strong>
                     <span t-if="o.employee_id.emp_code" t-field="o.employee_id.emp_code"/>
-                    <span t-else="" style="color:#875A7B" class="fw-bold">No ID number on the employee !!!</span>
+                    <span t-else="" style="color:#875A7B" class="fw-bold">No ID !!!</span>
                 </div>
+
+                <t t-if="o.company_id.currency_id.name == 'INR'">
+
+        <div id="pf_account">
+            <strong class="me-2">PF A/c No:</strong>
+            <span t-field="o.employee_id.pf_number"/>
+        </div>
+
+        <div id="uan_number">
+            <strong class="me-2">UAN:</strong>
+            <span t-field="o.employee_id.uan"/>
+        </div>
+
+
+    </t>
+
+            </xpath>
+            <xpath expr="//div[@id='employee_email']" position="replace">
+                <div id="employee_email" t-if="o.employee_id.work_email" style="display:none;">
+    <strong class="me-2">Email:</strong>
+    <span t-field="o.employee_id.work_email"/>
+</div>
+            </xpath>
+            <xpath expr="//div[@id='contract_type']" position="replace">
+            <div id="contract_type" t-if="o.version_id.contract_type_id" style="display:none;">
+                                    <strong class="me-2">Contract Type:</strong>
+                                    <span t-field="o.version_id.contract_type_id"/>
+                                </div>
             </xpath>
             <xpath expr="//div[@id='employee_marital']" position="replace">
                 <div id="employee_marital" style="display:none;">
@@ -36,8 +70,27 @@
                     <span t-field="o.compute_date"/>
                 </div>
             </xpath>
-            <xpath expr="//div[@id='contract_start']/strong" position="replace">
-                <strong class="me-2">Date of Joining:</strong>
+
+            <xpath expr="//div[@id='pay_period']" position="replace">
+                <div id="date_of_joining">
+                    <strong class="me-2">Date of Joining:</strong>
+                    <span t-if="o.employee_id.emp_code" t-field="o.employee_id.doj"/>
+                    <span t-else="" style="color:#875A7B" class="fw-bold">No DOJ !!!</span>
+                </div>
+                <div id ="pay_period" style="display:none;">
+                                    <strong class="me-2">Pay Period:</strong>
+                                    <span t-if="o.date_from &lt; o.version_id.contract_date_start" t-field="o.version_id.contract_date_start"/>
+                                    <span t-else="" t-field="o.date_from"/>
+                                    -
+                                    <span t-if="o.version_id.contract_date_end and o.date_to &gt; o.version_id.contract_date_end" t-field="o.version_id.contract_date_end"/>
+                                    <span t-else="" t-field="o.date_to"/>
+                                </div>
+            </xpath>
+            <xpath expr="//div[@id='contract_start']" position="replace">
+                <div id="contract_start" style="display:none;">
+    <strong class="me-2">Contract Start Date:</strong>
+    <span t-field="o.version_id.contract_date_start"/>
+</div>
             </xpath>
             <xpath expr="//div[@id='working_schedule']" position="replace">
                 <div id="working_schedule" style="display:none;">
@@ -45,13 +98,26 @@
                     <span t-field="o.employee_id.version_id.hours_per_week"/> Hours / Week
                 </div>
             </xpath>
-            <xpath expr="//div[@id='wage']" position="before">
-                <div id="employee_department" t-if="o.employee_id.department_id">
-                    <strong class="me-2">Department:</strong>
-                    <span t-field="o.employee_id.department_id"/>
-                </div>
-            </xpath>
+<!--            <xpath expr="//div[@id='wage']" position="before">-->
+<!--                <div id="employee_department" t-if="o.employee_id.department_id">-->
+<!--                    <strong class="me-2">Department:</strong>-->
+<!--                    <span t-field="o.employee_id.department_id"/>-->
+<!--                </div>-->
+<!--            </xpath>-->
             <xpath expr="//div[@id='contract_start']" position="after">
+
+                <t t-if="o.company_id.currency_id.name == 'INR'">
+    <div id="pan_number">
+        <strong class="me-2">PAN:</strong>
+        <span t-if="o.employee_id.pan" t-field="o.employee_id.pan"/>
+        <span t-else="" style="color:#875A7B" class="fw-bold">No PAN</span>
+    </div>
+</t>
+                <div id="designation">
+    <strong class="me-2">Designation:</strong>
+    <span t-field="o.employee_id.job_id.name"/>
+    <span t-field="o.employee_id.job_title"/>
+</div>
 
     <!-- Calculate unpaid leave days -->
     <t t-set="unpaid_days"
@@ -229,8 +295,10 @@
                 </div>
             </xpath>
             <xpath expr="//div[@id='to_pay']" position="after">
-                <br></br>
-                <br></br>
+                
+</br>
+                
+</br>
                 <span>This is a system generated document &amp; does not require a signature.</span>
             </xpath>
         </template>
