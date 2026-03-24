@@ -19,8 +19,8 @@ class HrEmployee(models.Model):
         readonly=True
     )
 
-    @api.model
-    def create(self, vals):
-        employee = super(HrEmployee, self).create(vals)
-        _logger.info(f" Created: {employee.name}")
-        return employee
+   # @api.model
+   # def create(self, vals):
+   #     employee = super(HrEmployee, self).create(vals)
+   #     _logger.info(f" Created: {employee.name}")
+   #     return employee
