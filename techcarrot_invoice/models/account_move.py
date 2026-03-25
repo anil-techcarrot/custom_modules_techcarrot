@@ -154,10 +154,11 @@ class AccountMoveLine(models.Model):
                     emp_product = self.env['product.product'].sudo().search([('employee_id', '=', employee.id)], limit=1)
                     if emp_product:
                         val['product_id'] = emp_product.id
-                    else:
-                        raise ValidationError(_('Employee master not found. Employee ID: %s', emp_code))
-                else:
-                    raise ValidationError(_('Employee master not found. Employee ID: %s', emp_code))
+                # While running payroll a check is implemented which is checking availability of emp product in Dubai company. it is commented and will be checked later for introduction
+                #     else:
+                #         raise ValidationError(_('Employee master not found. Employee ID: %s', emp_code))
+                # else:
+                #     raise ValidationError(_('Employee master not found. Employee ID: %s', emp_code))
 
         res = super(AccountMoveLine, self).create(vals)
         
