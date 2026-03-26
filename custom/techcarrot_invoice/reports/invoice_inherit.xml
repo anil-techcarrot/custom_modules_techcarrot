@@ -5,29 +5,14 @@
         <template id="report_techcarrot_invoices_document_total_inherit"
                   inherit_id="techcarrot_invoice.report_techcarrot_invoices_document">
 
-            <!-- ══════════════════════════════════════════════════════
-                 CHANGE 1: Remove the two <br/> tags after the table
-                 that create the visual gap
-            ═══════════════════════════════════════════════════════ -->
-            <xpath expr="//table[@name='invoice_line_table']/following-sibling::br[1]" position="replace">
-            </xpath>
 
             <xpath expr="//table[@name='invoice_line_table']/following-sibling::br[1]" position="replace">
             </xpath>
 
-            <!-- ══════════════════════════════════════════════════════
-                 CHANGE 2: Inject Total row as LAST ROW inside the
-                 same invoice_line_table — this removes all gap between
-                 line items and the Total row completely.
+            <xpath expr="//table[@name='invoice_line_table']/following-sibling::br[1]" position="replace">
+            </xpath>
 
-                 6 columns match the table header:
-                   col1 (35%) Item & Description → spacer
-                   col2 (10%) Qty               → spacer
-                   col3 (12%) Rate              → "Total" label
-                   col4 (15%) Taxable Amount    → currency + untaxed
-                   col5 (13%) VAT               → currency + tax
-                   col6 (15%) Total Amount      → currency + total
-            ═══════════════════════════════════════════════════════ -->
+
             <xpath expr="//table[@name='invoice_line_table']//tbody/tr[last()]" position="after">
                 <t t-set="amount_untaxed_fmt" t-value="'{:,.2f}'.format(o.amount_untaxed)"/>
                 <t t-set="amount_tax_fmt"     t-value="'{:,.2f}'.format(o.amount_tax)"/>
@@ -49,12 +34,7 @@
                 </tr>
             </xpath>
 
-            <!-- ══════════════════════════════════════════════════════
-                 CHANGE 3: Replace the old right-elements div
-                 (which had the separate floating table causing the gap)
-                 with ONLY the Total In Words line — amounts are now
-                 already shown in the table row above.
-            ═══════════════════════════════════════════════════════ -->
+
             <xpath expr="//div[@id='right-elements']" position="replace">
                 <div class="text-end mt-2 mb-3">
                     <p class="text-muted lh-sm" style="font-size:11px;">
