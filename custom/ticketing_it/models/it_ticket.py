@@ -17,9 +17,7 @@ class ITTicket(models.Model):
     _order = 'create_date desc'
     _rec_name = 'name'
 
-    # ======================
-    # BASIC FIELDS
-    # ======================
+
 
     name = fields.Char(
         string='Ticket Number',
