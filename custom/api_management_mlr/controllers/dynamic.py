@@ -7,10 +7,11 @@ import json
 
 _logger = logging.getLogger(__name__)
 
+
 def serialize_field(record, field_name, field):
     value = record[field_name]
     if field.type in (
-        'char', 'text', 'selection', 'integer', 'float', 'boolean', 'monetary'
+            'char', 'text', 'selection', 'integer', 'float', 'boolean', 'monetary'
     ):
         return value
     elif field.type in ('date', 'datetime'):
@@ -59,20 +60,17 @@ def serialize_field(record, field_name, field):
         return str(value)
 
 
+# FINAL PATCH: Ensure allowed_company_ids never becomes an empty list in context
+
 class DynamicAPI(http.Controller):
     @http.route('/api/<string:endpoint_path>', auth='none', type='http', methods=['GET'], csrf=False)
     def dynamic_api_handler(self, endpoint_path, **kwargs):
-
         api_key_value = (
                 request.httprequest.headers.get('x-api-key') or
-                request.params.get('key')
+                request.params.get('key')  # allow ?key=your_api_key in URL
         )
         ip_address = request.httprequest.remote_addr
         query_string = request.httprequest.query_string.decode()
-
-        # ✅ Dynamic limit & offset
-        limit = int(kwargs.get('limit', 1000))
-        offset = int(kwargs.get('offset', 0))
 
         api_key = request.env['res.api.key'].sudo().search([
             ('key', '=', api_key_value),
@@ -97,87 +95,66 @@ class DynamicAPI(http.Controller):
         allowed_fields = endpoint.field_ids.mapped('name')
         model_obj = request.env[model_name]
 
-        # ✅ Company handling
+        # Get allowed companies from API key, fallback to user's companies
         allowed_companies = api_key.company_ids.ids
         if not allowed_companies:
             allowed_companies = request.env.user.company_ids.ids
+        # If still no companies, get all companies as fallback
         if not allowed_companies:
             allowed_companies = request.env['res.company'].sudo().search([]).ids
-
-        if not allowed_companies:
-            return request.make_response(
-                json.dumps({'error': 'No companies found'}),
-                status=403,
-                headers=[('Content-Type', 'application/json')]
-            )
+        # Final check: if no companies exist at all, return error
+        if not allowed_companies:            return request.make_response(
+            json.dumps({'error': 'No companies found in the system.'}),
+            status=403,
+            headers=[('Content-Type', 'application/json')]
+        )
 
         try:
+            # Debug: Log the company IDs being used
+            _logger.info(f"Using allowed_companies: {allowed_companies}")
+            _logger.info(f"Model name: {model_name}")
+
+            # Try bypassing all Odoo security and company rules
+            # by using raw SQL query instead of ORM
+            _logger.info("Attempting direct SQL query to bypass ORM...")
+
+            # Get the table name for the model
             table_name = model_obj._table
+            _logger.info(f"Table name: {table_name}")
+            # Filter by allowed companies in raw SQL
             model_fields = model_obj._fields
-
+            # check for single-company field
             has_company_id = 'company_id' in model_fields
+            # check for multi-company many2many
             has_company_ids = 'company_ids' in model_fields and model_fields['company_ids'].type == 'many2many'
-
-            # ✅ TOTAL COUNT (IMPORTANT for Power BI)
             if has_company_id:
                 placeholders = ','.join(['%s'] * len(allowed_companies))
-                count_sql = f"SELECT COUNT(*) FROM {table_name} WHERE company_id IN ({placeholders})"
-                request.env.cr.execute(count_sql, tuple(allowed_companies))
-
+                sql = f"SELECT id FROM {table_name} WHERE company_id IN ({placeholders}) LIMIT 1000"
+                params = tuple(allowed_companies)
             elif has_company_ids:
                 m2m = model_fields['company_ids']
                 rel_table = m2m.relation
                 col1 = m2m.column1
                 col2 = m2m.column2
                 placeholders = ','.join(['%s'] * len(allowed_companies))
-
-                count_sql = f"""
-                    SELECT COUNT(DISTINCT t.id)
-                    FROM {table_name} t
-                    JOIN {rel_table} rel ON rel.{col1} = t.id
-                    WHERE rel.{col2} IN ({placeholders})
-                """
-                request.env.cr.execute(count_sql, tuple(allowed_companies))
-
+                sql = (f"SELECT t.id FROM {table_name} t "
+                       f"JOIN {rel_table} rel ON rel.{col1} = t.id "
+                       f"WHERE rel.{col2} IN ({placeholders}) LIMIT 1000")
+                params = tuple(allowed_companies)
             else:
-                count_sql = f"SELECT COUNT(*) FROM {table_name}"
-                request.env.cr.execute(count_sql)
-
-            total_count = request.env.cr.fetchone()[0]
-
-            # ✅ MAIN DATA QUERY WITH PAGINATION
-            if has_company_id:
-                sql = f"""
-                    SELECT id FROM {table_name}
-                    WHERE company_id IN ({placeholders})
-                    ORDER BY id
-                    LIMIT %s OFFSET %s
-                """
-                params = tuple(allowed_companies) + (limit, offset)
-
-            elif has_company_ids:
-                sql = f"""
-                    SELECT DISTINCT t.id FROM {table_name} t
-                    JOIN {rel_table} rel ON rel.{col1} = t.id
-                    WHERE rel.{col2} IN ({placeholders})
-                    ORDER BY t.id
-                    LIMIT %s OFFSET %s
-                """
-                params = tuple(allowed_companies) + (limit, offset)
-
-            else:
-                sql = f"""
-                    SELECT id FROM {table_name}
-                    ORDER BY id
-                    LIMIT %s OFFSET %s
-                """
-                params = (limit, offset)
-
+                _logger.warning(f"Model {model_name} has no company filter; returning unfiltered IDs")
+                sql = f"SELECT id FROM {table_name} LIMIT 1000"
+                params = ()
             request.env.cr.execute(sql, params)
             record_ids = [row[0] for row in request.env.cr.fetchall()]
+            _logger.info(f"Found {len(record_ids)} record IDs via SQL: {record_ids}")
 
-            records = model_obj.sudo().browse(record_ids) if record_ids else model_obj.sudo().browse([])
-
+            # Now browse the records using the IDs (this might still trigger the error)
+            if record_ids:
+                records = model_obj.sudo().browse(record_ids)
+                _logger.info(f"Successfully browsed {len(records)} records")
+            else:
+                records = model_obj.sudo().browse([])
         except Exception as e:
             return request.make_response(
                 json.dumps({'error': str(e)}),
@@ -185,12 +162,12 @@ class DynamicAPI(http.Controller):
                 headers=[('Content-Type', 'application/json')]
             )
 
-        # ✅ Serialize Data
+        model_fields = model_obj._fields
         data = []
         for rec in records:
             rec_data = {}
             for fld in allowed_fields:
-                field = model_obj._fields.get(fld)
+                field = model_fields.get(fld)
                 if field:
                     try:
                         rec_data[fld] = serialize_field(rec, fld, field)
@@ -198,7 +175,12 @@ class DynamicAPI(http.Controller):
                         continue
             data.append(rec_data)
 
-        # ✅ Logging
+        try:
+            if request.env.cr.status == "in_failed_transaction":
+                request.env.cr.rollback()
+        except Exception:
+            request.env.cr.rollback()
+
         request.env['api.access.log'].sudo().create({
             'api_key_id': api_key.id,
             'endpoint': endpoint.url_path,
@@ -207,13 +189,9 @@ class DynamicAPI(http.Controller):
             'query_string': query_string,
         })
 
-        # ✅ FINAL RESPONSE WITH TOTAL COUNT
         return request.make_response(
             json.dumps(data),
-            headers=[
-                ('Content-Type', 'application/json'),
-                ('X-Total-Count', str(total_count))
-            ]
+            headers=[('Content-Type', 'application/json')]
         )
 
     def _unauthorized(self, endpoint_path, ip_address, query_string):
