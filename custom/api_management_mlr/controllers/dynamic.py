@@ -58,17 +58,20 @@ def serialize_field(record, field_name, field):
     else:
         return str(value)
 
-# FINAL PATCH: Ensure allowed_company_ids never becomes an empty list in context
 
 class DynamicAPI(http.Controller):
     @http.route('/api/<string:endpoint_path>', auth='none', type='http', methods=['GET'], csrf=False)
     def dynamic_api_handler(self, endpoint_path, **kwargs):
         api_key_value = (
             request.httprequest.headers.get('x-api-key') or
-            request.params.get('key')  # allow ?key=your_api_key in URL
+            request.params.get('key')
         )
         ip_address = request.httprequest.remote_addr
         query_string = request.httprequest.query_string.decode()
+
+        # ✅ Get limit and offset from request
+        limit = int(kwargs.get('limit', 100))
+        offset = int(kwargs.get('offset', 0))
 
         api_key = request.env['res.api.key'].sudo().search([
             ('key', '=', api_key_value),
@@ -93,41 +96,28 @@ class DynamicAPI(http.Controller):
         allowed_fields = endpoint.field_ids.mapped('name')
         model_obj = request.env[model_name]
 
-        # Get allowed companies from API key, fallback to user's companies
         allowed_companies = api_key.company_ids.ids
         if not allowed_companies:
             allowed_companies = request.env.user.company_ids.ids
-          # If still no companies, get all companies as fallback
         if not allowed_companies:
             allowed_companies = request.env['res.company'].sudo().search([]).ids
-          # Final check: if no companies exist at all, return error
-        if not allowed_companies:            return request.make_response(
+        if not allowed_companies:
+            return request.make_response(
                 json.dumps({'error': 'No companies found in the system.'}),
                 status=403,
                 headers=[('Content-Type', 'application/json')]
             )
 
         try:
-            # Debug: Log the company IDs being used
-            _logger.info(f"Using allowed_companies: {allowed_companies}")
-            _logger.info(f"Model name: {model_name}")
-            
-            # Try bypassing all Odoo security and company rules
-            # by using raw SQL query instead of ORM
-            _logger.info("Attempting direct SQL query to bypass ORM...")
-            
-            # Get the table name for the model
             table_name = model_obj._table
-            _logger.info(f"Table name: {table_name}")
-            # Filter by allowed companies in raw SQL
             model_fields = model_obj._fields
-            # check for single-company field
             has_company_id = 'company_id' in model_fields
-            # check for multi-company many2many
             has_company_ids = 'company_ids' in model_fields and model_fields['company_ids'].type == 'many2many'
+
             if has_company_id:
                 placeholders = ','.join(['%s'] * len(allowed_companies))
-                sql = f"SELECT id FROM {table_name} WHERE company_id IN ({placeholders}) LIMIT 10"
+                # ✅ FIXED: Use limit and offset from request
+                sql = f"SELECT id FROM {table_name} WHERE company_id IN ({placeholders}) ORDER BY id LIMIT {limit} OFFSET {offset}"
                 params = tuple(allowed_companies)
             elif has_company_ids:
                 m2m = model_fields['company_ids']
@@ -135,24 +125,24 @@ class DynamicAPI(http.Controller):
                 col1 = m2m.column1
                 col2 = m2m.column2
                 placeholders = ','.join(['%s'] * len(allowed_companies))
+                # ✅ FIXED: Use limit and offset from request
                 sql = (f"SELECT t.id FROM {table_name} t "
                        f"JOIN {rel_table} rel ON rel.{col1} = t.id "
-                       f"WHERE rel.{col2} IN ({placeholders}) LIMIT 10")
+                       f"WHERE rel.{col2} IN ({placeholders}) ORDER BY t.id LIMIT {limit} OFFSET {offset}")
                 params = tuple(allowed_companies)
             else:
-                _logger.warning(f"Model {model_name} has no company filter; returning unfiltered IDs")
-                sql = f"SELECT id FROM {table_name} LIMIT 10"
+                # ✅ FIXED: Use limit and offset from request
+                sql = f"SELECT id FROM {table_name} ORDER BY id LIMIT {limit} OFFSET {offset}"
                 params = ()
+
             request.env.cr.execute(sql, params)
             record_ids = [row[0] for row in request.env.cr.fetchall()]
-            _logger.info(f"Found {len(record_ids)} record IDs via SQL: {record_ids}")
-            
-            # Now browse the records using the IDs (this might still trigger the error)
+
             if record_ids:
                 records = model_obj.sudo().browse(record_ids)
-                _logger.info(f"Successfully browsed {len(records)} records")
             else:
                 records = model_obj.sudo().browse([])
+
         except Exception as e:
             return request.make_response(
                 json.dumps({'error': str(e)}),
@@ -187,17 +177,21 @@ class DynamicAPI(http.Controller):
             'query_string': query_string,
         })
 
+        # ✅ Add total count in response header
         return request.make_response(
             json.dumps(data),
-            headers=[('Content-Type', 'application/json')]
+            headers=[
+                ('Content-Type', 'application/json'),
+                ('X-Total-Count', str(len(data)))
+            ]
         )
 
     def _unauthorized(self, endpoint_path, ip_address, query_string):
         request.env['api.access.log'].sudo().create({
-            'api_key_id':  False,
-            'endpoint':    endpoint_path,
-            'status':      'unauthorized',
-            'ip_address':  ip_address,
+            'api_key_id': False,
+            'endpoint': endpoint_path,
+            'status': 'unauthorized',
+            'ip_address': ip_address,
             'query_string': query_string,
         })
         return request.make_response(
