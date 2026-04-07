@@ -62,22 +62,23 @@ def serialize_field(record, field_name, field):
 class DynamicAPI(http.Controller):
     @http.route('/api/<string:endpoint_path>', auth='none', type='http', methods=['GET'], csrf=False)
     def dynamic_api_handler(self, endpoint_path, **kwargs):
+
         api_key_value = (
-            request.httprequest.headers.get('x-api-key') or
-            request.params.get('key')
+                request.httprequest.headers.get('x-api-key') or
+                request.params.get('key')
         )
         ip_address = request.httprequest.remote_addr
         query_string = request.httprequest.query_string.decode()
 
-        # ✅ Get limit and offset from request
-        limit = int(kwargs.get('limit', 100))
+        # ✅ Dynamic limit & offset
+        limit = int(kwargs.get('limit', 1000))
         offset = int(kwargs.get('offset', 0))
 
         api_key = request.env['res.api.key'].sudo().search([
             ('key', '=', api_key_value),
             ('active', '=', True),
             '|', ('expiry_date', '=', False),
-                 ('expiry_date', '>=', fields.Date.today())
+            ('expiry_date', '>=', fields.Date.today())
         ], limit=1)
 
         if not api_key:
@@ -96,14 +97,16 @@ class DynamicAPI(http.Controller):
         allowed_fields = endpoint.field_ids.mapped('name')
         model_obj = request.env[model_name]
 
+        # ✅ Company handling
         allowed_companies = api_key.company_ids.ids
         if not allowed_companies:
             allowed_companies = request.env.user.company_ids.ids
         if not allowed_companies:
             allowed_companies = request.env['res.company'].sudo().search([]).ids
+
         if not allowed_companies:
             return request.make_response(
-                json.dumps({'error': 'No companies found in the system.'}),
+                json.dumps({'error': 'No companies found'}),
                 status=403,
                 headers=[('Content-Type', 'application/json')]
             )
@@ -111,37 +114,69 @@ class DynamicAPI(http.Controller):
         try:
             table_name = model_obj._table
             model_fields = model_obj._fields
+
             has_company_id = 'company_id' in model_fields
             has_company_ids = 'company_ids' in model_fields and model_fields['company_ids'].type == 'many2many'
 
+            # ✅ TOTAL COUNT (IMPORTANT for Power BI)
             if has_company_id:
                 placeholders = ','.join(['%s'] * len(allowed_companies))
-                # ✅ FIXED: Use limit and offset from request
-                sql = f"SELECT id FROM {table_name} WHERE company_id IN ({placeholders}) ORDER BY id LIMIT {limit} OFFSET {offset}"
-                params = tuple(allowed_companies)
+                count_sql = f"SELECT COUNT(*) FROM {table_name} WHERE company_id IN ({placeholders})"
+                request.env.cr.execute(count_sql, tuple(allowed_companies))
+
             elif has_company_ids:
                 m2m = model_fields['company_ids']
                 rel_table = m2m.relation
                 col1 = m2m.column1
                 col2 = m2m.column2
                 placeholders = ','.join(['%s'] * len(allowed_companies))
-                # ✅ FIXED: Use limit and offset from request
-                sql = (f"SELECT t.id FROM {table_name} t "
-                       f"JOIN {rel_table} rel ON rel.{col1} = t.id "
-                       f"WHERE rel.{col2} IN ({placeholders}) ORDER BY t.id LIMIT {limit} OFFSET {offset}")
-                params = tuple(allowed_companies)
+
+                count_sql = f"""
+                    SELECT COUNT(DISTINCT t.id)
+                    FROM {table_name} t
+                    JOIN {rel_table} rel ON rel.{col1} = t.id
+                    WHERE rel.{col2} IN ({placeholders})
+                """
+                request.env.cr.execute(count_sql, tuple(allowed_companies))
+
             else:
-                # ✅ FIXED: Use limit and offset from request
-                sql = f"SELECT id FROM {table_name} ORDER BY id LIMIT {limit} OFFSET {offset}"
-                params = ()
+                count_sql = f"SELECT COUNT(*) FROM {table_name}"
+                request.env.cr.execute(count_sql)
+
+            total_count = request.env.cr.fetchone()[0]
+
+            # ✅ MAIN DATA QUERY WITH PAGINATION
+            if has_company_id:
+                sql = f"""
+                    SELECT id FROM {table_name}
+                    WHERE company_id IN ({placeholders})
+                    ORDER BY id
+                    LIMIT %s OFFSET %s
+                """
+                params = tuple(allowed_companies) + (limit, offset)
+
+            elif has_company_ids:
+                sql = f"""
+                    SELECT DISTINCT t.id FROM {table_name} t
+                    JOIN {rel_table} rel ON rel.{col1} = t.id
+                    WHERE rel.{col2} IN ({placeholders})
+                    ORDER BY t.id
+                    LIMIT %s OFFSET %s
+                """
+                params = tuple(allowed_companies) + (limit, offset)
+
+            else:
+                sql = f"""
+                    SELECT id FROM {table_name}
+                    ORDER BY id
+                    LIMIT %s OFFSET %s
+                """
+                params = (limit, offset)
 
             request.env.cr.execute(sql, params)
             record_ids = [row[0] for row in request.env.cr.fetchall()]
 
-            if record_ids:
-                records = model_obj.sudo().browse(record_ids)
-            else:
-                records = model_obj.sudo().browse([])
+            records = model_obj.sudo().browse(record_ids) if record_ids else model_obj.sudo().browse([])
 
         except Exception as e:
             return request.make_response(
@@ -150,12 +185,12 @@ class DynamicAPI(http.Controller):
                 headers=[('Content-Type', 'application/json')]
             )
 
-        model_fields = model_obj._fields
+        # ✅ Serialize Data
         data = []
         for rec in records:
             rec_data = {}
             for fld in allowed_fields:
-                field = model_fields.get(fld)
+                field = model_obj._fields.get(fld)
                 if field:
                     try:
                         rec_data[fld] = serialize_field(rec, fld, field)
@@ -163,12 +198,7 @@ class DynamicAPI(http.Controller):
                         continue
             data.append(rec_data)
 
-        try:
-            if request.env.cr.status == "in_failed_transaction":
-                request.env.cr.rollback()
-        except Exception:
-            request.env.cr.rollback()
-
+        # ✅ Logging
         request.env['api.access.log'].sudo().create({
             'api_key_id': api_key.id,
             'endpoint': endpoint.url_path,
@@ -177,12 +207,12 @@ class DynamicAPI(http.Controller):
             'query_string': query_string,
         })
 
-        # ✅ Add total count in response header
+        # ✅ FINAL RESPONSE WITH TOTAL COUNT
         return request.make_response(
             json.dumps(data),
             headers=[
                 ('Content-Type', 'application/json'),
-                ('X-Total-Count', str(len(data)))
+                ('X-Total-Count', str(total_count))
             ]
         )
 
