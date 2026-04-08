@@ -71,26 +71,27 @@ class DynamicAPI(http.Controller):
 
         model_obj = request.env[endpoint.model_id.model]
 
-        # ✅ COMPANY FILTER (MULTI COMPANY SUPPORT)
-        allowed_companies = api_key.company_ids.ids or request.env.user.company_ids.ids
+        # ✅ READ ALLOWED COMPANIES DIRECTLY FROM API KEY SCREEN
+        # This reads exactly what you set in the "Allowed Companies" field
+        allowed_companies = api_key.company_ids.ids
 
+        # Fallback: if no companies set on API key, return empty for safety
         if not allowed_companies:
-            allowed_companies = request.env['res.company'].sudo().search([]).ids
+            return request.make_response(
+                json.dumps({'error': 'No companies configured for this API key'}),
+                status=403,
+                headers=[('Content-Type', 'application/json')]
+            )
 
-        # ✅ APPLY CONTEXT (NO force_company)
+        # ✅ APPLY COMPANY CONTEXT
         model_obj = model_obj.sudo().with_context(
             allowed_company_ids=allowed_companies
         )
 
-        # ✅ DOMAIN FILTER
+        # ✅ DOMAIN: filter by whatever companies are set in API key screen
         domain = []
         if 'company_id' in model_obj._fields:
             domain.append(('company_id', 'in', allowed_companies))
-
-        # ✅ OPTIONAL: FILTER BY COMPANY FROM URL
-        company_param = kwargs.get('company_id')
-        if company_param:
-            domain = [('company_id', '=', int(company_param))]
 
         # ✅ TOTAL COUNT
         total_count = model_obj.search_count(domain)
