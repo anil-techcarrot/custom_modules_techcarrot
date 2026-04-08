@@ -71,11 +71,23 @@ class DynamicAPI(http.Controller):
 
         model_obj = request.env[endpoint.model_id.model]
 
-        # ✅ READ ALLOWED COMPANIES DIRECTLY FROM API KEY SCREEN
-        # This reads exactly what you set in the "Allowed Companies" field
-        allowed_companies = api_key.company_ids.ids
+        # ✅ FIND CORRECT FIELD NAME FOR ALLOWED COMPANIES
+        # Tries all possible field names used in different Odoo custom modules
+        allowed_companies = []
 
-        # Fallback: if no companies set on API key, return empty for safety
+        for field_name in ['company_ids', 'allowed_company_ids', 'company_id']:
+            if field_name in api_key._fields:
+                field = api_key._fields[field_name]
+                if field.type in ('many2many', 'one2many'):
+                    allowed_companies = api_key[field_name].ids
+                elif field.type == 'many2one':
+                    val = api_key[field_name]
+                    allowed_companies = [val.id] if val else []
+                if allowed_companies:
+                    _logger.info("API KEY: using field '%s' => companies: %s", field_name, allowed_companies)
+                    break
+
+        # ✅ SAFETY: if still empty, block the request
         if not allowed_companies:
             return request.make_response(
                 json.dumps({'error': 'No companies configured for this API key'}),
@@ -88,7 +100,7 @@ class DynamicAPI(http.Controller):
             allowed_company_ids=allowed_companies
         )
 
-        # ✅ DOMAIN: filter by whatever companies are set in API key screen
+        # ✅ DOMAIN FILTER — only allowed companies, no URL override
         domain = []
         if 'company_id' in model_obj._fields:
             domain.append(('company_id', 'in', allowed_companies))
