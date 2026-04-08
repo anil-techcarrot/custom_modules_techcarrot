@@ -50,7 +50,11 @@ class DynamicAPI(http.Controller):
         ], limit=1)
 
         if not api_key:
-            return request.make_response(json.dumps({'error': 'Unauthorized'}), status=401)
+            return request.make_response(
+                json.dumps({'error': 'Unauthorized'}),
+                status=401,
+                headers=[('Content-Type', 'application/json')]
+            )
 
         endpoint = request.env['res.api.endpoint'].sudo().search([
             ('url_path', '=', endpoint_path),
@@ -59,30 +63,47 @@ class DynamicAPI(http.Controller):
         ], limit=1)
 
         if not endpoint:
-            return request.make_response(json.dumps({'error': 'Invalid endpoint'}), status=404)
+            return request.make_response(
+                json.dumps({'error': 'Invalid endpoint'}),
+                status=404,
+                headers=[('Content-Type', 'application/json')]
+            )
 
         model_obj = request.env[endpoint.model_id.model]
 
-        # ✅ COMPANY FILTER
+        # ✅ COMPANY FILTER (MULTI COMPANY SUPPORT)
         allowed_companies = api_key.company_ids.ids or request.env.user.company_ids.ids
 
-        # 🔥 IMPORTANT FIX: FORCE COMPANY CONTEXT
+        if not allowed_companies:
+            allowed_companies = request.env['res.company'].sudo().search([]).ids
+
+        # ✅ APPLY CONTEXT (NO force_company)
         model_obj = model_obj.sudo().with_context(
-            allowed_company_ids=allowed_companies,
-            force_company=allowed_companies[0]
+            allowed_company_ids=allowed_companies
         )
 
-        # ✅ TOTAL COUNT
+        # ✅ DOMAIN FILTER
         domain = []
         if 'company_id' in model_obj._fields:
             domain.append(('company_id', 'in', allowed_companies))
 
+        # ✅ OPTIONAL: FILTER BY COMPANY FROM URL
+        company_param = kwargs.get('company_id')
+        if company_param:
+            domain = [('company_id', '=', int(company_param))]
+
+        # ✅ TOTAL COUNT
         total_count = model_obj.search_count(domain)
 
         # ✅ FETCH DATA WITH PAGINATION
-        records = model_obj.search(domain, limit=limit, offset=offset, order='id')
+        records = model_obj.search(
+            domain,
+            limit=limit,
+            offset=offset,
+            order='id'
+        )
 
-        # ✅ SERIALIZE
+        # ✅ SERIALIZE DATA
         data = []
         for rec in records:
             rec_data = {}
