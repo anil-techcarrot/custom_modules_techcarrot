@@ -41,7 +41,7 @@ class DynamicAPI(http.Controller):
         limit = int(kwargs.get('limit', 500))
         offset = int(kwargs.get('offset', 0))
 
-        # 🔐 API KEY VALIDATION
+        # API KEY VALIDATION
         api_key = request.env['res.api.key'].sudo().search([
             ('key', '=', api_key_value),
             ('active', '=', True),
@@ -71,7 +71,7 @@ class DynamicAPI(http.Controller):
 
         model_obj = request.env[endpoint.model_id.model]
 
-        # ✅ FIND CORRECT FIELD NAME FOR ALLOWED COMPANIES
+        # FIND CORRECT FIELD NAME FOR ALLOWED COMPANIES
         # Tries all possible field names used in different Odoo custom modules
         allowed_companies = []
 
@@ -87,7 +87,7 @@ class DynamicAPI(http.Controller):
                     _logger.info("API KEY: using field '%s' => companies: %s", field_name, allowed_companies)
                     break
 
-        # ✅ SAFETY: if still empty, block the request
+        # SAFETY: if still empty, block the request
         if not allowed_companies:
             return request.make_response(
                 json.dumps({'error': 'No companies configured for this API key'}),
@@ -95,28 +95,32 @@ class DynamicAPI(http.Controller):
                 headers=[('Content-Type', 'application/json')]
             )
 
-        # ✅ APPLY COMPANY CONTEXT
+        # APPLY COMPANY CONTEXT
         model_obj = model_obj.sudo().with_context(
             allowed_company_ids=allowed_companies
         )
 
-        # ✅ DOMAIN FILTER — only allowed companies, no URL override
+        # DOMAIN FILTER — only allowed companies, no URL override
         domain = []
         if 'company_id' in model_obj._fields:
             domain.append(('company_id', 'in', allowed_companies))
 
-        # ✅ TOTAL COUNT
+        # TOTAL COUNT
         total_count = model_obj.search_count(domain)
 
-        # ✅ FETCH DATA WITH PAGINATION
-        records = model_obj.search(
+        # Remove duplicates at DB level
+        record_ids = model_obj.search(
             domain,
             limit=limit,
             offset=offset,
             order='id'
-        )
+        ).ids
 
-        # ✅ SERIALIZE DATA
+        # Remove any duplicate IDs
+        unique_ids = list(dict.fromkeys(record_ids))
+        records = model_obj.sudo().browse(unique_ids)
+
+
         data = []
         for rec in records:
             rec_data = {}
