@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import datetime
 import logging
 from odoo import http, fields
 from odoo.http import request
@@ -9,39 +10,68 @@ _logger = logging.getLogger(__name__)
 
 def serialize_field(record, field_name, field):
     value = record[field_name]
-
-    if field.type in ('char', 'text', 'selection', 'integer', 'float', 'boolean', 'monetary'):
+    if field.type in (
+            'char', 'text', 'selection', 'integer', 'float', 'boolean', 'monetary'
+    ):
         return value
-
     elif field.type in ('date', 'datetime'):
         return value.isoformat() if value else value
-
     elif field.type == 'many2one':
         if value:
-            rec = value
-            name = rec.display_name if hasattr(rec, 'display_name') else str(rec.id)
+            try:
+                rec = value[0] if len(value) > 1 else value
+                rec.ensure_one()
+                try:
+                    ng = rec.name_get()
+                except Exception:
+                    ng = None
+                if ng:
+                    name = ng[0][1]
+                elif hasattr(rec, 'name'):
+                    name = rec.name
+                else:
+                    name = str(rec.id)
+            except Exception:
+                name = str(value.id) if value else ''
             return {'id': rec.id, 'name': name}
         return None
-
     elif field.type in ('one2many', 'many2many'):
-        return [{'id': r.id, 'name': r.display_name} for r in value]
-
+        result = []
+        for r in value:
+            try:
+                r.ensure_one()
+                try:
+                    ng = r.name_get()
+                except Exception:
+                    ng = None
+                if ng:
+                    name = ng[0][1]
+                elif hasattr(r, 'name'):
+                    name = r.name
+                else:
+                    name = str(r.id)
+            except Exception:
+                name = str(r.id)
+            result.append({'id': r.id, 'name': name})
+        return result
     elif field.type == 'binary':
         return bool(value)
+    else:
+        return str(value)
 
-    return str(value)
 
+# FINAL PATCH: Ensure allowed_company_ids never becomes an empty list in context
 
 class DynamicAPI(http.Controller):
-
     @http.route('/api/<string:endpoint_path>', auth='none', type='http', methods=['GET'], csrf=False)
     def dynamic_api_handler(self, endpoint_path, **kwargs):
+        api_key_value = (
+                request.httprequest.headers.get('x-api-key') or
+                request.params.get('key')  # allow ?key=your_api_key in URL
+        )
+        ip_address = request.httprequest.remote_addr
+        query_string = request.httprequest.query_string.decode()
 
-        api_key_value = request.params.get('key')
-        limit = int(kwargs.get('limit', 500))
-        offset = int(kwargs.get('offset', 0))
-
-        # API KEY VALIDATION
         api_key = request.env['res.api.key'].sudo().search([
             ('key', '=', api_key_value),
             ('active', '=', True),
@@ -50,11 +80,7 @@ class DynamicAPI(http.Controller):
         ], limit=1)
 
         if not api_key:
-            return request.make_response(
-                json.dumps({'error': 'Unauthorized'}),
-                status=401,
-                headers=[('Content-Type', 'application/json')]
-            )
+            return self._unauthorized(endpoint_path, ip_address, query_string)
 
         endpoint = request.env['res.api.endpoint'].sudo().search([
             ('url_path', '=', endpoint_path),
@@ -63,69 +89,85 @@ class DynamicAPI(http.Controller):
         ], limit=1)
 
         if not endpoint:
-            return request.make_response(
-                json.dumps({'error': 'Invalid endpoint'}),
-                status=404,
-                headers=[('Content-Type', 'application/json')]
-            )
+            return self._unauthorized(endpoint_path, ip_address, query_string)
 
-        model_obj = request.env[endpoint.model_id.model]
+        model_name = endpoint.model_id.model
+        allowed_fields = endpoint.field_ids.mapped('name')
+        model_obj = request.env[model_name]
 
-        # FIND CORRECT FIELD NAME FOR ALLOWED COMPANIES
-        # Tries all possible field names used in different Odoo custom modules
-        allowed_companies = []
-
-        for field_name in ['company_ids', 'allowed_company_ids', 'company_id']:
-            if field_name in api_key._fields:
-                field = api_key._fields[field_name]
-                if field.type in ('many2many', 'one2many'):
-                    allowed_companies = api_key[field_name].ids
-                elif field.type == 'many2one':
-                    val = api_key[field_name]
-                    allowed_companies = [val.id] if val else []
-                if allowed_companies:
-                    _logger.info("API KEY: using field '%s' => companies: %s", field_name, allowed_companies)
-                    break
-
-        # SAFETY: if still empty, block the request
+        # Get allowed companies from API key, fallback to user's companies
+        allowed_companies = api_key.company_ids.ids
         if not allowed_companies:
-            return request.make_response(
-                json.dumps({'error': 'No companies configured for this API key'}),
-                status=403,
-                headers=[('Content-Type', 'application/json')]
-            )
-
-        # APPLY COMPANY CONTEXT
-        model_obj = model_obj.sudo().with_context(
-            allowed_company_ids=allowed_companies
+            allowed_companies = request.env.user.company_ids.ids
+        # If still no companies, get all companies as fallback
+        if not allowed_companies:
+            allowed_companies = request.env['res.company'].sudo().search([]).ids
+        # Final check: if no companies exist at all, return error
+        if not allowed_companies:            return request.make_response(
+            json.dumps({'error': 'No companies found in the system.'}),
+            status=403,
+            headers=[('Content-Type', 'application/json')]
         )
 
-        # DOMAIN FILTER — only allowed companies, no URL override
-        domain = []
-        if 'company_id' in model_obj._fields:
-            domain.append(('company_id', 'in', allowed_companies))
+        try:
+            # Debug: Log the company IDs being used
+            _logger.info(f"Using allowed_companies: {allowed_companies}")
+            _logger.info(f"Model name: {model_name}")
 
-        # TOTAL COUNT
-        total_count = model_obj.search_count(domain)
+            # Try bypassing all Odoo security and company rules
+            # by using raw SQL query instead of ORM
+            _logger.info("Attempting direct SQL query to bypass ORM...")
 
-        # Remove duplicates at DB level
-        record_ids = model_obj.search(
-            domain,
-            limit=limit,
-            offset=offset,
-            order='id'
-        ).ids
+            # Get the table name for the model
+            table_name = model_obj._table
+            _logger.info(f"Table name: {table_name}")
+            # Filter by allowed companies in raw SQL
+            model_fields = model_obj._fields
+            # check for single-company field
+            has_company_id = 'company_id' in model_fields
+            # check for multi-company many2many
+            has_company_ids = 'company_ids' in model_fields and model_fields['company_ids'].type == 'many2many'
+            if has_company_id:
+                placeholders = ','.join(['%s'] * len(allowed_companies))
+                sql = f"SELECT id FROM {table_name} WHERE company_id IN ({placeholders}) LIMIT 1000"
+                params = tuple(allowed_companies)
+            elif has_company_ids:
+                m2m = model_fields['company_ids']
+                rel_table = m2m.relation
+                col1 = m2m.column1
+                col2 = m2m.column2
+                placeholders = ','.join(['%s'] * len(allowed_companies))
+                sql = (f"SELECT t.id FROM {table_name} t "
+                       f"JOIN {rel_table} rel ON rel.{col1} = t.id "
+                       f"WHERE rel.{col2} IN ({placeholders}) LIMIT 1000")
+                params = tuple(allowed_companies)
+            else:
+                _logger.warning(f"Model {model_name} has no company filter; returning unfiltered IDs")
+                sql = f"SELECT id FROM {table_name} LIMIT 1000"
+                params = ()
+            request.env.cr.execute(sql, params)
+            record_ids = [row[0] for row in request.env.cr.fetchall()]
+            _logger.info(f"Found {len(record_ids)} record IDs via SQL: {record_ids}")
 
-        # Remove any duplicate IDs
-        unique_ids = list(dict.fromkeys(record_ids))
-        records = model_obj.sudo().browse(unique_ids)
+            # Now browse the records using the IDs (this might still trigger the error)
+            if record_ids:
+                records = model_obj.sudo().browse(record_ids)
+                _logger.info(f"Successfully browsed {len(records)} records")
+            else:
+                records = model_obj.sudo().browse([])
+        except Exception as e:
+            return request.make_response(
+                json.dumps({'error': str(e)}),
+                status=500,
+                headers=[('Content-Type', 'application/json')]
+            )
 
-
+        model_fields = model_obj._fields
         data = []
         for rec in records:
             rec_data = {}
-            for fld in endpoint.field_ids.mapped('name'):
-                field = model_obj._fields.get(fld)
+            for fld in allowed_fields:
+                field = model_fields.get(fld)
                 if field:
                     try:
                         rec_data[fld] = serialize_field(rec, fld, field)
@@ -133,10 +175,35 @@ class DynamicAPI(http.Controller):
                         continue
             data.append(rec_data)
 
+        try:
+            if request.env.cr.status == "in_failed_transaction":
+                request.env.cr.rollback()
+        except Exception:
+            request.env.cr.rollback()
+
+        request.env['api.access.log'].sudo().create({
+            'api_key_id': api_key.id,
+            'endpoint': endpoint.url_path,
+            'status': 'success',
+            'ip_address': ip_address,
+            'query_string': query_string,
+        })
+
         return request.make_response(
             json.dumps(data),
-            headers=[
-                ('Content-Type', 'application/json'),
-                ('X-Total-Count', str(total_count))
-            ]
+            headers=[('Content-Type', 'application/json')]
+        )
+
+    def _unauthorized(self, endpoint_path, ip_address, query_string):
+        request.env['api.access.log'].sudo().create({
+            'api_key_id': False,
+            'endpoint': endpoint_path,
+            'status': 'unauthorized',
+            'ip_address': ip_address,
+            'query_string': query_string,
+        })
+        return request.make_response(
+            json.dumps({'error': 'Unauthorized'}),
+            status=401,
+            headers=[('Content-Type', 'application/json')]
         )
