@@ -40,6 +40,8 @@ def serialize_field(record, field_name, field):
         for r in value:
             try:
                 r.ensure_one()
+
+
                 try:
                     ng = r.name_get()
                 except Exception:
