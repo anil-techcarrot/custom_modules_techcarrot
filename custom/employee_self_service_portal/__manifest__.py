@@ -46,6 +46,7 @@
         "views/Employee_details/portal_payslip_view.xml",
         "views/portal_ess_ticket_form.xml",
         "views/Employee_details/all_fields_added.xml",
+        "views/Employee_details/portal_employee.xml",
     ],
     "installable": True,
     "application": True,
