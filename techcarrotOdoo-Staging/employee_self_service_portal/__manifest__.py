@@ -45,6 +45,7 @@
         "views/Employee_details/portal_payslip_templates.xml",  # Payslip templates
         "views/Employee_details/portal_payslip_view.xml",  # Payslip detail view
         "views/Employee_details/inherit_template.xml",
+        "views/Employee_details/payroll_inherit.xml",
     ],
     "installable": True,
     "application": True,
