@@ -21,15 +21,19 @@ class EmployeePortalPayroll(http.Controller):
     # =====================================================
     @http.route(MY_EMPLOYEE_URL + '/payroll', type='http', auth='user', website=True, methods=['GET', 'POST'])
     def portal_employee_payroll(self, **post):
-
+        """
+        Payroll tab — GET renders the page, POST saves allowed fields.
+        Read-only fields (salary, allowances) are shown but not writable
+        from portal — HR manages them in the backend.
+        Portal → Employee: writes directly to hr.employee via sudo()
+        Employee → Portal: template reads fresh from hr.employee on every load
+        """
         employee = self._get_employee()
 
         if not employee:
             return request.redirect('/my')
 
-        # =======================
-        # POST (Save Data)
-        # =======================
+        # ── POST: Save editable payroll fields ───────────────────────────────
         if request.httprequest.method == 'POST':
             try:
                 vals = {}
