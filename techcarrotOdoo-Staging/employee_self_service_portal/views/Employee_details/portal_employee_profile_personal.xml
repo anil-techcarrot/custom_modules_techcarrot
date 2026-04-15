@@ -216,7 +216,7 @@
                                     <input type="text"
                                            class="form-control"
                                            t-att-value="employee.work_location_id.name or ''"
-                                           disabled="disabled"/>
+                                           style="pointer-events: none; background-color: #e9ecef;"/>
                                 </div>
 
                             </div>
