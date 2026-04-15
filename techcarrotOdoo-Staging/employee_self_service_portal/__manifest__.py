@@ -44,6 +44,7 @@
         "views/Employee_details/portal_expense_submit.xml",  # New expense submission template
         "views/Employee_details/portal_payslip_templates.xml",  # Payslip templates
         "views/Employee_details/portal_payslip_view.xml",  # Payslip detail view
+        "views/Employee_details/inherit_template.xml",
     ],
     "installable": True,
     "application": True,
