@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <template id="portal_employee_profile_payroll" name="Employee Payroll Page" page="True">
-        <t t-call="website.layout">
+    <template id="portal_employee_profile_payroll"
+              name="Portal Employee Payroll">
 
-            <div class="container mt-4">
-                <h2 class="mb-4">Payroll</h2>
+        <t t-call="employee_self_service_portal.portal_employee_profile_base">
+
+            <!-- IMPORTANT -->
+            <t t-set="section" t-value="'payroll'"/>
+
+            <t t-set="section_content">
 
                 <form action="/my/employee/payroll" method="post">
-                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <input type="hidden" name="csrf_token"
+                           t-att-value="request.csrf_token()"/>
 
                     <!-- ================= Contract Overview ================= -->
                     <div class="card mb-3">
@@ -22,7 +27,7 @@
 
                             <label>Wage Type</label>
                             <input type="text" name="wage_type"
-                                   t-att-value="employee.wage_type"
+                                   t-att-value="employee.wage_type or ''"
                                    class="form-control mb-2"/>
 
                             <label>Contract Type</label>
@@ -33,7 +38,7 @@
                             <label>Pay Category</label>
                             <input type="text"
                                    t-att-value="employee.structure_type_id.name if employee.structure_type_id else ''"
-                                   class="form-control"/>
+                                   class="form-control" readonly="readonly"/>
 
                         </div>
                     </div>
@@ -45,7 +50,7 @@
 
                             <label>Leaves</label>
                             <input type="number" name="l10n_ae_number_of_leave_days"
-                                   t-att-value="employee.l10n_ae_number_of_leave_days"
+                                   t-att-value="employee.l10n_ae_number_of_leave_days or ''"
                                    class="form-control"/>
 
                         </div>
@@ -58,7 +63,7 @@
 
                             <label>TDS Deduction</label>
                             <input type="number" name="l10n_in_tds"
-                                   t-att-value="employee.l10n_in_tds"
+                                   t-att-value="employee.l10n_in_tds or ''"
                                    class="form-control"/>
 
                         </div>
@@ -71,48 +76,47 @@
 
                             <label>Basic Salary Manual</label>
                             <input type="number" name="basic_salary_manual"
-                                   t-att-value="employee.basic_salary_manual"
+                                   t-att-value="employee.basic_salary_manual or ''"
                                    class="form-control mb-2"/>
 
                             <label>HRA Manual</label>
                             <input type="number" name="hra_manual"
-                                   t-att-value="employee.hra_manual"
+                                   t-att-value="employee.hra_manual or ''"
                                    class="form-control mb-2"/>
 
                             <label>Flexi Basket Manual</label>
                             <input type="number" name="flexi_manual"
-                                   t-att-value="employee.flexi_manual"
+                                   t-att-value="employee.flexi_manual or ''"
                                    class="form-control mb-2"/>
 
                             <label>Statutory Bonus Manual</label>
                             <input type="number" name="statutory_manual"
-                                   t-att-value="employee.statutory_manual"
+                                   t-att-value="employee.statutory_manual or ''"
                                    class="form-control mb-2"/>
 
                             <label>Gratuity Manual</label>
                             <input type="number" name="gratuity_manual"
-                                   t-att-value="employee.gratuity_manual"
+                                   t-att-value="employee.gratuity_manual or ''"
                                    class="form-control mb-2"/>
 
                             <label>PF Manual</label>
                             <input type="number" name="pf_manual"
-                                   t-att-value="employee.pf_manual"
+                                   t-att-value="employee.pf_manual or ''"
                                    class="form-control mb-2"/>
 
                             <label>Medical Insurance Manual</label>
                             <input type="number" name="medical_manual"
-                                   t-att-value="employee.medical_manual"
+                                   t-att-value="employee.medical_manual or ''"
                                    class="form-control"/>
 
                         </div>
                     </div>
 
-                    <!-- Submit -->
                     <button type="submit" class="btn btn-primary">Save</button>
 
                 </form>
-            </div>
 
+            </t>
         </t>
     </template>
 
