@@ -1,28 +1,20 @@
 <odoo>
     <template id="portal_employee_profile_payroll"
-              inherit_id="employee_self_service_portal.portal_employee_profile_base">
+              inherit_id="employee_self_service_portal.portal_employee_profile_personal">
 
-        <!-- Activate Payroll Tab -->
+        <!-- Change section to payroll -->
         <xpath expr="//t[@t-set='section']" position="replace">
             <t t-set="section" t-value="'payroll'"/>
         </xpath>
 
-        <!-- Add Payroll Tab -->
-        <xpath expr="//ul[contains(@class,'nav')]" position="inside">
-            <li class="nav-item">
-                <a class="nav-link"
-                   t-attf-href="/my/employee/payroll"
-                   t-att-class="'nav-link ' + ('active' if section == 'payroll' else '')">
-                    <i class="fa fa-money me-1"></i>Payroll
-                </a>
-            </li>
-        </xpath>
-
-        <!-- Payroll Content -->
+        <!-- Replace whole content -->
         <xpath expr="//t[@t-set='section_content']" position="replace">
+
             <t t-set="section_content">
 
-                <!-- ================= Contract Overview ================= -->
+                <!-- ============================= -->
+                <!-- Contract Overview -->
+                <!-- ============================= -->
                 <div class="card mb-4 shadow-sm">
                     <div class="card-header bg-light">
                         <h5 class="mb-0">Contract Overview</h5>
@@ -32,29 +24,29 @@
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Contract</label>
-                                <input type="text" class="form-control"
-                                       t-att-value="employee.contract_id and employee.contract_id.contract_date_start or ''"
+                                <input type="date" class="form-control"
+                                       t-att-value="employee.contract_date_start"
                                        readonly="readonly"/>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Wage Type</label>
                                 <input type="text" class="form-control"
-                                       t-att-value="employee.contract_id and employee.contract_id.wage_type or ''"
+                                       t-att-value="employee.wage_type"
                                        readonly="readonly"/>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Contract Type</label>
                                 <input type="text" class="form-control"
-                                       t-att-value="employee.contract_id and employee.contract_id.contract_type_id.name or ''"
+                                       t-att-value="employee.contract_type_id.name"
                                        readonly="readonly"/>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Pay Category</label>
                                 <input type="text" class="form-control"
-                                       t-att-value="employee.contract_id and employee.contract_id.structure_type_id.name or ''"
+                                       t-att-value="employee.structure_type_id.name"
                                        readonly="readonly"/>
                             </div>
 
@@ -62,7 +54,9 @@
                     </div>
                 </div>
 
-                <!-- ================= Annual Leave ================= -->
+                <!-- ============================= -->
+                <!-- Annual Leave -->
+                <!-- ============================= -->
                 <div class="card mb-4 shadow-sm">
                     <div class="card-header bg-light">
                         <h5 class="mb-0">Annual Leave Provision</h5>
@@ -73,7 +67,7 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Leaves</label>
                                 <input type="text" class="form-control"
-                                       t-att-value="employee.contract_id and employee.contract_id.l10n_ae_number_of_leave_days or ''"
+                                       t-att-value="employee.l10n_ae_number_of_leave_days"
                                        readonly="readonly"/>
                             </div>
 
@@ -81,7 +75,9 @@
                     </div>
                 </div>
 
-                <!-- ================= Tax ================= -->
+                <!-- ============================= -->
+                <!-- Tax -->
+                <!-- ============================= -->
                 <div class="card mb-4 shadow-sm">
                     <div class="card-header bg-light">
                         <h5 class="mb-0">Tax Deductions</h5>
@@ -92,7 +88,7 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">TDS Deduction</label>
                                 <input type="text" class="form-control"
-                                       t-att-value="employee.contract_id and employee.contract_id.l10n_in_tds or ''"
+                                       t-att-value="employee.l10n_in_tds"
                                        readonly="readonly"/>
                             </div>
 
@@ -100,7 +96,9 @@
                     </div>
                 </div>
 
-                <!-- ================= Manual Salary ================= -->
+                <!-- ============================= -->
+                <!-- Manual Salary -->
+                <!-- ============================= -->
                 <div class="card mb-4 shadow-sm">
                     <div class="card-header bg-light">
                         <h5 class="mb-0">Manual Salary Components</h5>
@@ -108,60 +106,33 @@
                     <div class="card-body">
                         <div class="row g-3">
 
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Basic Salary Manual</label>
-                                <input type="text" class="form-control"
-                                       t-att-value="employee.contract_id and employee.contract_id.basic_salary_manual or ''"
-                                       readonly="readonly"/>
-                            </div>
+                            <t t-foreach="[
+                                ('Basic Salary Manual','basic_salary_manual'),
+                                ('HRA Manual','hra_manual'),
+                                ('Flexi Basket Manual','flexi_manual'),
+                                ('Statutory Bonus Manual','statutory_manual'),
+                                ('Gratuity Manual','gratuity_manual'),
+                                ('PF Manual','pf_manual'),
+                                ('Medical Insurance Manual','medical_manual')
+                            ]" t-as="field">
 
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">HRA Manual</label>
-                                <input type="text" class="form-control"
-                                       t-att-value="employee.contract_id and employee.contract_id.hra_manual or ''"
-                                       readonly="readonly"/>
-                            </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">
+                                        <t t-esc="field[0]"/>
+                                    </label>
+                                    <input type="text" class="form-control"
+                                           t-att-value="getattr(employee, field[1]) or ''"
+                                           readonly="readonly"/>
+                                </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Flexi Basket Manual</label>
-                                <input type="text" class="form-control"
-                                       t-att-value="employee.contract_id and employee.contract_id.flexi_manual or ''"
-                                       readonly="readonly"/>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Statutory Bonus Manual</label>
-                                <input type="text" class="form-control"
-                                       t-att-value="employee.contract_id and employee.contract_id.statutory_manual or ''"
-                                       readonly="readonly"/>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Gratuity Manual</label>
-                                <input type="text" class="form-control"
-                                       t-att-value="employee.contract_id and employee.contract_id.gratuity_manual or ''"
-                                       readonly="readonly"/>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">PF Manual</label>
-                                <input type="text" class="form-control"
-                                       t-att-value="employee.contract_id and employee.contract_id.pf_manual or ''"
-                                       readonly="readonly"/>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Medical Insurance Manual</label>
-                                <input type="text" class="form-control"
-                                       t-att-value="employee.contract_id and employee.contract_id.medical_manual or ''"
-                                       readonly="readonly"/>
-                            </div>
+                            </t>
 
                         </div>
                     </div>
                 </div>
 
             </t>
+
         </xpath>
 
     </template>
