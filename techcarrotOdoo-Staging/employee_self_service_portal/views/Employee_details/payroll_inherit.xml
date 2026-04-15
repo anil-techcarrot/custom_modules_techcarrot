@@ -1,394 +1,119 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="portal_employee_profile_payroll" name="Portal Employee Payroll">
-        <t t-call="employee_self_service_portal.portal_employee_profile_base">
-            <t t-set="section" t-value="'payroll'"/>
-            <t t-set="section_content">
 
-                <!-- Success/Error Messages -->
-                <div id="messageContainer" style="display: none;">
-                    <div id="successMessage" class="alert alert-success alert-dismissible fade" role="alert"
-                         style="display: none;">
-                        <i class="fa fa-check-circle me-2"></i>
-                        <span id="successText"></span>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                    <div id="errorMessage" class="alert alert-danger alert-dismissible fade" role="alert"
-                         style="display: none;">
-                        <i class="fa fa-exclamation-triangle me-2"></i>
-                        <span id="errorText"></span>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                </div>
+    <template id="portal_employee_profile_payroll" name="Employee Payroll Page" page="True">
+        <t t-call="website.layout">
 
-                <form id="payrollForm" action="/my/employee/payroll" method="post" enctype="multipart/form-data">
+            <div class="container mt-4">
+                <h2 class="mb-4">Payroll</h2>
+
+                <form action="/my/employee/payroll" method="post">
                     <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
 
-                    <!-- ============================= -->
-                    <!-- Contract Overview             -->
-                    <!-- ============================= -->
-                    <div class="card mb-4 shadow-sm">
-                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">
-                                <i class="fa fa-file-text text-primary me-2"></i>Contract Overview
-                            </h5>
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="editMode"
-                                       onchange="toggleEditMode()"/>
-                                <label class="form-check-label" for="editMode">Edit Mode</label>
-                            </div>
-                        </div>
+                    <!-- ================= Contract Overview ================= -->
+                    <div class="card mb-3">
+                        <div class="card-header"><b>Contract Overview</b></div>
                         <div class="card-body">
-                            <div class="row g-3">
 
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Contract Start Date</label>
-                                    <input type="date"
-                                           name="contract_date_start"
-                                           class="form-control"
-                                           t-att-value="employee.contract_date_start"
-                                           readonly="readonly"/>
-                                </div>
+                            <label>Contract</label>
+                            <input type="date" name="contract_date_start"
+                                   t-att-value="employee.contract_date_start"
+                                   class="form-control mb-2"/>
 
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Wage Type</label>
-                                    <input type="text"
-                                           name="wage_type"
-                                           class="form-control"
-                                           t-att-value="employee.wage_type or ''"
-                                           readonly="readonly"/>
-                                </div>
+                            <label>Wage Type</label>
+                            <input type="text" name="wage_type"
+                                   t-att-value="employee.wage_type"
+                                   class="form-control mb-2"/>
 
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Contract Type</label>
-                                    <input type="text"
-                                           class="form-control"
-                                           t-att-value="employee.contract_type_id.name if employee.contract_type_id else ''"
-                                           readonly="readonly"/>
-                                </div>
+                            <label>Contract Type</label>
+                            <input type="text"
+                                   t-att-value="employee.contract_type_id.name if employee.contract_type_id else ''"
+                                   class="form-control mb-2" readonly="readonly"/>
 
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Pay Category</label>
-                                    <input type="text"
-                                           class="form-control"
-                                           t-att-value="employee.structure_type_id.name if employee.structure_type_id else ''"
-                                           readonly="readonly"/>
-                                </div>
+                            <label>Pay Category</label>
+                            <input type="text"
+                                   t-att-value="employee.structure_type_id.name if employee.structure_type_id else ''"
+                                   class="form-control"/>
 
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Reference</label>
-                                    <input type="text"
-                                           class="form-control"
-                                           t-att-value="employee.registration_number or ''"
-                                           readonly="readonly"/>
-                                </div>
-
-                            </div>
                         </div>
                     </div>
 
-                    <!-- ============================= -->
-                    <!-- Allowances                    -->
-                    <!-- ============================= -->
-                    <div class="card mb-4 shadow-sm">
-                        <div class="card-header bg-light">
-                            <h5 class="mb-0">
-                                <i class="fa fa-money text-primary me-2"></i>Allowances
-                            </h5>
-                        </div>
+                    <!-- ================= Annual Leave ================= -->
+                    <div class="card mb-3">
+                        <div class="card-header"><b>Annual Leave Provision</b></div>
                         <div class="card-body">
-                            <div class="row g-3">
 
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Housing Allowance</label>
-                                    <input type="text"
-                                           class="form-control"
-                                           t-att-value="employee['110_ae_housing_allowance'] if hasattr(employee, '110_ae_housing_allowance') else (employee.x_110_ae_housing_allowance or '')"
-                                           readonly="readonly"/>
-                                </div>
+                            <label>Leaves</label>
+                            <input type="number" name="l10n_ae_number_of_leave_days"
+                                   t-att-value="employee.l10n_ae_number_of_leave_days"
+                                   class="form-control"/>
 
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Transportation Allowance</label>
-                                    <input type="text"
-                                           class="form-control"
-                                           t-att-value="employee.x_110_ae_trasportation_allowance or ''"
-                                           readonly="readonly"/>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Other Allowance</label>
-                                    <input type="text"
-                                           class="form-control"
-                                           t-att-value="employee.x_110_ae_other_allowance or ''"
-                                           readonly="readonly"/>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">MI Allowance</label>
-                                    <input type="text"
-                                           class="form-control"
-                                           t-att-value="employee.aat_allowance or ''"
-                                           readonly="readonly"/>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Total Salary</label>
-                                    <input type="text"
-                                           class="form-control"
-                                           t-att-value="employee.x_110_ae_total_salary or ''"
-                                           readonly="readonly"/>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Sub Total</label>
-                                    <input type="text"
-                                           class="form-control"
-                                           t-att-value="employee.sub_total or ''"
-                                           readonly="readonly"/>
-                                </div>
-
-                            </div>
                         </div>
                     </div>
 
-                    <!-- ============================= -->
-                    <!-- Annual Leave Provision        -->
-                    <!-- ============================= -->
-                    <div class="card mb-4 shadow-sm">
-                        <div class="card-header bg-light">
-                            <h5 class="mb-0">
-                                <i class="fa fa-calendar text-primary me-2"></i>Annual Leave Provision
-                            </h5>
-                        </div>
+                    <!-- ================= Tax ================= -->
+                    <div class="card mb-3">
+                        <div class="card-header"><b>Tax Deductions</b></div>
                         <div class="card-body">
-                            <div class="row g-3">
 
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Leaves (Days)</label>
-                                    <input type="text"
-                                           name="l10n_ae_number_of_leave_days"
-                                           class="form-control"
-                                           t-att-value="employee.l10n_ae_number_of_leave_days or ''"
-                                           readonly="readonly"/>
-                                </div>
+                            <label>TDS Deduction</label>
+                            <input type="number" name="l10n_in_tds"
+                                   t-att-value="employee.l10n_in_tds"
+                                   class="form-control"/>
 
-                            </div>
                         </div>
                     </div>
 
-                    <!-- ============================= -->
-                    <!-- DEWS Benefits                 -->
-                    <!-- ============================= -->
-                    <div class="card mb-4 shadow-sm">
-                        <div class="card-header bg-light">
-                            <h5 class="mb-0">
-                                <i class="fa fa-shield text-primary me-2"></i>DEWS Benefits
-                            </h5>
-                        </div>
+                    <!-- ================= Manual Salary ================= -->
+                    <div class="card mb-3">
+                        <div class="card-header"><b>Manual Salary Components</b></div>
                         <div class="card-body">
-                            <div class="row g-3">
 
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Is DEWS Applied</label>
-                                    <input type="text"
-                                           class="form-control"
-                                           t-att-value="'Yes' if employee.x_110_ae_dews_applied else 'No'"
-                                           readonly="readonly"/>
-                                </div>
+                            <label>Basic Salary Manual</label>
+                            <input type="number" name="basic_salary_manual"
+                                   t-att-value="employee.basic_salary_manual"
+                                   class="form-control mb-2"/>
 
-                            </div>
+                            <label>HRA Manual</label>
+                            <input type="number" name="hra_manual"
+                                   t-att-value="employee.hra_manual"
+                                   class="form-control mb-2"/>
+
+                            <label>Flexi Basket Manual</label>
+                            <input type="number" name="flexi_manual"
+                                   t-att-value="employee.flexi_manual"
+                                   class="form-control mb-2"/>
+
+                            <label>Statutory Bonus Manual</label>
+                            <input type="number" name="statutory_manual"
+                                   t-att-value="employee.statutory_manual"
+                                   class="form-control mb-2"/>
+
+                            <label>Gratuity Manual</label>
+                            <input type="number" name="gratuity_manual"
+                                   t-att-value="employee.gratuity_manual"
+                                   class="form-control mb-2"/>
+
+                            <label>PF Manual</label>
+                            <input type="number" name="pf_manual"
+                                   t-att-value="employee.pf_manual"
+                                   class="form-control mb-2"/>
+
+                            <label>Medical Insurance Manual</label>
+                            <input type="number" name="medical_manual"
+                                   t-att-value="employee.medical_manual"
+                                   class="form-control"/>
+
                         </div>
                     </div>
 
-                    <!-- ============================= -->
-                    <!-- Schedule                      -->
-                    <!-- ============================= -->
-                    <div class="card mb-4 shadow-sm">
-                        <div class="card-header bg-light">
-                            <h5 class="mb-0">
-                                <i class="fa fa-clock-o text-primary me-2"></i>Schedule
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row g-3">
+                    <!-- Submit -->
+                    <button type="submit" class="btn btn-primary">Save</button>
 
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Work Entry Source</label>
-                                    <input type="text"
-                                           class="form-control"
-                                           t-att-value="employee.work_entry_source or ''"
-                                           readonly="readonly"/>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Working Hours</label>
-                                    <input type="text"
-                                           class="form-control"
-                                           t-att-value="employee.resource_calendar_id.name if employee.resource_calendar_id else ''"
-                                           readonly="readonly"/>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ============================= -->
-                    <!-- End of Service               -->
-                    <!-- ============================= -->
-                    <div class="card mb-4 shadow-sm">
-                        <div class="card-header bg-light">
-                            <h5 class="mb-0">
-                                <i class="fa fa-sign-out text-primary me-2"></i>End of Service
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row g-3">
-
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Computed Based on Daily Salary</label>
-                                    <input type="text"
-                                           class="form-control"
-                                           t-att-value="'Yes' if employee.x_110_ae_is_computed_based_on_daily_salary else 'No'"
-                                           readonly="readonly"/>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Form Actions -->
-                    <div class="card shadow-sm">
-                        <div class="card-body text-center">
-                            <div id="formActions" style="display: none;">
-                                <button type="button" class="btn btn-secondary me-2" onclick="cancelEdit()">
-                                    <i class="fa fa-times me-1"></i>Cancel
-                                </button>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fa fa-check me-1"></i>Save Changes
-                                </button>
-                            </div>
-                            <div id="viewActions">
-                                <p class="text-muted mb-3">
-                                    <i class="fa fa-info-circle me-1"></i>
-                                    Profile last updated:
-                                    <strong>
-                                        <t t-esc="employee.write_date.strftime('%d %b, %Y at %I:%M %p') if employee.write_date else 'Never'"/>
-                                    </strong>
-                                </p>
-                                <button type="button" class="btn btn-outline-primary" onclick="enableEditMode()">
-                                    <i class="fa fa-edit me-1"></i>Edit Profile
-                                </button>
-                            </div>
-                        </div>
-                    </div>
                 </form>
+            </div>
 
-                <script type="text/javascript">
-                    <![CDATA[
-                    let isEditMode = false;
-                    let originalFormData = {};
-
-                    function toggleEditMode() {
-                        const editMode = document.getElementById('editMode').checked;
-                        if (editMode) { enableEditMode(); } else { disableEditMode(); }
-                    }
-
-                    function enableEditMode() {
-                        isEditMode = true;
-                        document.getElementById('editMode').checked = true;
-                        storeOriginalFormData();
-                        const inputs = document.querySelectorAll('#payrollForm input, #payrollForm select');
-                        inputs.forEach(input => {
-                            if (input.type !== 'hidden') {
-                                input.removeAttribute('readonly');
-                                input.removeAttribute('disabled');
-                            }
-                        });
-                        document.getElementById('formActions').style.display = 'block';
-                        document.getElementById('viewActions').style.display = 'none';
-                    }
-
-                    function disableEditMode() {
-                        isEditMode = false;
-                        document.getElementById('editMode').checked = false;
-                        const inputs = document.querySelectorAll('#payrollForm input, #payrollForm select');
-                        inputs.forEach(input => {
-                            if (input.type !== 'hidden') {
-                                input.setAttribute('readonly', 'readonly');
-                                if (input.tagName === 'SELECT') input.setAttribute('disabled', 'disabled');
-                            }
-                        });
-                        document.getElementById('formActions').style.display = 'none';
-                        document.getElementById('viewActions').style.display = 'block';
-                    }
-
-                    function storeOriginalFormData() {
-                        const form = document.getElementById('payrollForm');
-                        const formData = new FormData(form);
-                        originalFormData = {};
-                        for (let [key, value] of formData.entries()) { originalFormData[key] = value; }
-                    }
-
-                    function cancelEdit() {
-                        for (let [key, value] of Object.entries(originalFormData)) {
-                            const input = document.querySelector(`[name="${key}"]`);
-                            if (input) input.value = value;
-                        }
-                        disableEditMode();
-                        showMessage('Changes cancelled.', 'info');
-                    }
-
-                    document.getElementById('payrollForm').addEventListener('submit', function(e) {
-                        e.preventDefault();
-                        fetch('/my/employee/payroll', {
-                            method: 'POST',
-                            body: new FormData(this)
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                showMessage('Payroll details updated successfully!', 'success');
-                                disableEditMode();
-                            } else {
-                                showMessage('Error: ' + (data.error || 'Unknown error'), 'error');
-                            }
-                        })
-                        .catch(() => showMessage('Network error. Please try again.', 'error'));
-                    });
-
-                    function showMessage(text, type) {
-                        const c = document.getElementById('messageContainer');
-                        const s = document.getElementById('successMessage');
-                        const er = document.getElementById('errorMessage');
-                        s.style.display = 'none'; er.style.display = 'none';
-                        s.classList.remove('show'); er.classList.remove('show');
-                        if (type === 'success') {
-                            document.getElementById('successText').textContent = text;
-                            s.style.display = 'block'; s.classList.add('show');
-                        } else {
-                            document.getElementById('errorText').textContent = text;
-                            er.style.display = 'block'; er.classList.add('show');
-                        }
-                        c.style.display = 'block';
-                        c.scrollIntoView({ behavior: 'smooth' });
-                        setTimeout(() => { s.classList.remove('show'); er.classList.remove('show'); }, 5000);
-                    }
-                    ]]>
-                </script>
-
-                <style>
-                    <![CDATA[
-                    .form-label { font-weight: 600; color: #495057; margin-bottom: 0.5rem; }
-                    .form-control:focus { border-color: #80bdff; box-shadow: 0 0 0 0.2rem rgba(13,110,253,.25); }
-                    .form-control[readonly] { background-color: #f8f9fa; }
-                    .card { transition: all 0.3s ease; }
-                    .card:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,.1) !important; }
-                    .form-switch .form-check-input:checked { background-color: #0d6efd; border-color: #0d6efd; }
-                    @media(max-width:768px){ .card-body{padding:1rem;} }
-                    ]]>
-                </style>
-
-            </t>
         </t>
     </template>
+
 </odoo>
