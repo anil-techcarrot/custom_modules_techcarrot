@@ -76,19 +76,19 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-4 text-center">
-                                <div class="position-relative mb-3">
-                                    <img t-if="employee.image_1920"
-                                         t-attf-src="/web/image/hr.employee/{{employee.id}}/image_1920/150x150"
-                                         class="rounded-circle shadow"
-                                         style="width:120px;height:120px;object-fit:cover;"
-                                         alt="Employee Photo"/>
-                                    <img t-else=""
-                                         src="/web/static/src/img/avatar.png"
-                                         class="rounded-circle shadow opacity-50"
-                                         style="width:120px;height:120px;object-fit:cover;"
-                                         alt="Default Avatar"/>
-                                </div>
+<!--                            <div class="col-md-4 text-center">-->
+<!--                                <div class="position-relative mb-3">-->
+<!--                                    <img t-if="employee.image_1920"-->
+<!--                                         t-attf-src="/web/image/hr.employee/{{employee.id}}/image_1920/150x150"-->
+<!--                                         class="rounded-circle shadow"-->
+<!--                                         style="width:120px;height:120px;object-fit:cover;"-->
+<!--                                         alt="Employee Photo"/>-->
+<!--                                    <img t-else=""-->
+<!--                                         src="/web/static/src/img/avatar.png"-->
+<!--                                         class="rounded-circle shadow opacity-50"-->
+<!--                                         style="width:120px;height:120px;object-fit:cover;"-->
+<!--                                         alt="Default Avatar"/>-->
+<!--                                </div>-->
                                 <div class="text-center">
                                     <h6 class="mb-1">
                                         <t t-esc="employee.name"/>
