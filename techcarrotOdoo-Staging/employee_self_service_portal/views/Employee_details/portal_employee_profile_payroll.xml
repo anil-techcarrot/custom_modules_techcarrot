@@ -3,7 +3,7 @@
     <!-- ================================================================
          STANDALONE Payroll Tab Template — NO inherit_id
          ================================================================ -->
-    <template id="portal_employee_profile_payroll" name="Portal Employee Payroll">
+    <template id="portal_employee_profile_payroll">
 
         <t t-call="employee_self_service_portal.portal_employee_profile_base">
             <t t-set="section" t-value="'payroll'"/>
