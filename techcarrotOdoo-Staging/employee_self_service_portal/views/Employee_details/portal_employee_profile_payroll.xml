@@ -1,24 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-  <data>
+    <template id="portal_employee_profile_payroll">
 
-    <template id="portal_employee_profile_payroll"
-              name="Employee Payroll Portal Page">
+        <t t-call="employee_self_service_portal.portal_employee_profile_base">
+            <t t-set="section" t-value="'payroll'"/>
 
-      <t t-call="employee_self_service_portal.portal_employee_profile_base">
+            <t t-set="section_content">
 
-        <t t-set="section" t-value="'payroll'"/>
+                <!-- Messages -->
+                <div id="messageBox" style="display:none;"></div>
 
-        <t t-set="section_content">
+                <!-- FORM -->
+                <form id="payrollForm" method="post">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
 
-          <h3>Payroll Working</h3>
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Payroll Details</h5>
+                        </div>
 
+                        <div class="card-body">
+
+                            <div class="row g-3">
+
+                                <div class="col-md-6">
+                                    <label>Contract Start Date</label>
+                                    <input type="date" name="contract_date_start"
+                                           class="form-control"
+                                           t-att-value="employee.contract_date_start or ''"/>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label>Wage Type</label>
+                                    <input type="text" name="wage_type"
+                                           class="form-control"
+                                           t-att-value="employee.wage_type or ''"/>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label>Leave Days</label>
+                                    <input type="number" name="l10n_ae_number_of_leave_days"
+                                           class="form-control"
+                                           t-att-value="employee.l10n_ae_number_of_leave_days or ''"/>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label>TDS</label>
+                                    <input type="number" name="l10n_in_tds"
+                                           class="form-control"
+                                           t-att-value="employee.l10n_in_tds or ''"/>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">
+                            Save Payroll
+                        </button>
+                    </div>
+
+                </form>
+
+                <!-- ================= JS ================= -->
+                <script type="text/javascript">
+                <![CDATA[
+                    document.addEventListener('DOMContentLoaded', function () {
+
+                        const form = document.getElementById('payrollForm');
+                        const messageBox = document.getElementById('messageBox');
+
+                        form.addEventListener('submit', function (e) {
+                            e.preventDefault();
+
+                            fetch('/my/employee/payroll', {
+                                method: 'POST',
+                                body: new FormData(form)
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+
+                                messageBox.style.display = 'block';
+
+                                if (data.success) {
+                                    messageBox.innerHTML =
+                                        '<div class="alert alert-success">Payroll updated successfully</div>';
+                                } else {
+                                    messageBox.innerHTML =
+                                        '<div class="alert alert-danger">' + data.error + '</div>';
+                                }
+
+                            })
+                            .catch(error => {
+                                messageBox.style.display = 'block';
+                                messageBox.innerHTML =
+                                    '<div class="alert alert-danger">Something went wrong</div>';
+                            });
+
+                        });
+
+                    });
+                ]]>
+                </script>
+
+            </t>
         </t>
 
-      </t>
-
     </template>
-
-  </data>
 
 </odoo>

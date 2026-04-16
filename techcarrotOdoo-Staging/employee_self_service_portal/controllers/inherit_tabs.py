@@ -38,6 +38,9 @@ class EmployeePortalPayroll(http.Controller):
         # =====================================================
         # POST → Save Data
         # =====================================================
+        # =====================================================
+        # POST → Save Data
+        # =====================================================
         if request.httprequest.method == 'POST':
             try:
                 vals = {}
@@ -50,14 +53,6 @@ class EmployeePortalPayroll(http.Controller):
 
                 if post.get('wage_type'):
                     vals['wage_type'] = post.get('wage_type')
-
-                # ⚠️ DO NOT allow portal to change relational HR config
-                # safer to comment these unless required
-                # if post.get('contract_type_id'):
-                #     vals['contract_type_id'] = int(post.get('contract_type_id'))
-
-                # if post.get('structure_type_id'):
-                #     vals['structure_type_id'] = int(post.get('structure_type_id'))
 
                 # -------------------------------
                 # Annual Leave
@@ -105,20 +100,19 @@ class EmployeePortalPayroll(http.Controller):
                 if vals:
                     employee.sudo().write(vals)
 
-                # 👉 IMPORTANT: return redirect (not JSON)
-                return request.redirect('/my/employee/payroll')
+                # ✅ IMPORTANT: RETURN JSON (NOT REDIRECT)
+                return request.make_json_response({
+                    'success': True,
+                    'message': 'Payroll updated successfully'
+                })
 
             except Exception as e:
                 _logger.exception("Payroll update error")
 
-                return request.render(
-                    'employee_self_service_portal.portal_employee_profile_payroll',
-                    {
-                        'employee': employee,
-                        'section': 'payroll',
-                        'error': str(e),
-                    }
-                )
+                return request.make_json_response({
+                    'success': False,
+                    'error': str(e)
+                })
 
         # =====================================================
         # GET → Load Page
