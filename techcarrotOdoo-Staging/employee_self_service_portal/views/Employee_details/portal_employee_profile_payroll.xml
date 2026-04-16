@@ -46,8 +46,17 @@
                                     <input type="text" name="wage_type"
                                            t-att-value="employee.wage_type or ''"
                                            class="form-control"
-                                           readonly="readonly"/>
+                                           style="pointer-events: none;"/>
                                 </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Sub Total</label>
+                                    <input type="text" name="sub_total"
+                                           t-att-value="employee.sub_total or ''"
+                                           class="form-control"
+                                           style="pointer-events: none;"/>
+                                </div>
+
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Annual Leave Days</label>
                                     <input type="number" name="l10n_ae_number_of_leave_days"
