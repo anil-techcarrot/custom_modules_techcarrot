@@ -2,69 +2,34 @@
 <odoo>
     <data>
 
-        <template id="portal_employee_profile_payroll" name="Portal Employee Payroll">
+        <template id="portal_employee_profile_payroll" name="Portal Employee Payroll" page="True">
 
-            <t t-call="employee_self_service_portal.portal_employee_profile_base">
-                <t t-set="section" t-value="'payroll'"/>
+            <t t-call="website.layout">
+                <div class="container mt-4">
+                    <h2>Payroll</h2>
 
-                <t t-set="section_content">
+                    <form action="/my/employee/payroll" method="post">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
 
-                    <div class="container mt-3">
-                        <h4>Payroll</h4>
+                        <label>Contract Start</label>
+                        <input type="date" name="contract_date_start"
+                               t-att-value="employee.contract_date_start"
+                               class="form-control mb-2"/>
 
-                        <form action="/my/employee/payroll" method="post">
-                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <label>Wage Type</label>
+                        <input type="text" name="wage_type"
+                               t-att-value="employee.wage_type"
+                               class="form-control mb-2"/>
 
-                            <!-- Contract -->
-                            <div class="card mb-3">
-                                <div class="card-header">Contract</div>
-                                <div class="card-body">
+                        <label>Leave Days</label>
+                        <input type="number" name="l10n_ae_number_of_leave_days"
+                               t-att-value="employee.l10n_ae_number_of_leave_days"
+                               class="form-control mb-2"/>
 
-                                    <label>Start Date</label>
-                                    <input type="date" name="contract_date_start"
-                                           t-att-value="employee.contract_date_start"
-                                           class="form-control"/>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </form>
 
-                                    <label>Wage Type</label>
-                                    <input type="text" name="wage_type"
-                                           t-att-value="employee.wage_type"
-                                           class="form-control"/>
-
-                                </div>
-                            </div>
-
-                            <!-- Leave -->
-                            <div class="card mb-3">
-                                <div class="card-header">Leave</div>
-                                <div class="card-body">
-
-                                    <label>Leave Days</label>
-                                    <input type="number" name="l10n_ae_number_of_leave_days"
-                                           t-att-value="employee.l10n_ae_number_of_leave_days"
-                                           class="form-control"/>
-
-                                </div>
-                            </div>
-
-                            <!-- Tax -->
-                            <div class="card mb-3">
-                                <div class="card-header">Tax</div>
-                                <div class="card-body">
-
-                                    <label>TDS</label>
-                                    <input type="number" name="l10n_in_tds"
-                                           t-att-value="employee.l10n_in_tds"
-                                           class="form-control"/>
-
-                                </div>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary">Save</button>
-
-                        </form>
-                    </div>
-
-                </t>
+                </div>
             </t>
 
         </template>
