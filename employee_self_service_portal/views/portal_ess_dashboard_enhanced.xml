@@ -13,7 +13,22 @@
                             Welcome back, <strong t-esc="employee.name if employee else 'Employee'"/>! 
                             Here's your overview for <span id="currentDate"></span>
                         </p>
+
+                        <!-- Add after the welcome paragraph in the Header Section -->
+                        <t t-if="request.params.get('ticket_success')">
+                            <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                                <i class="fa fa-check-circle me-2"></i>
+                                <strong>Ticket submitted successfully!</strong>
+                                Your IT support ticket has been created and sent to your line manager for approval.
+                                <a href="/my/tickets" class="alert-link ms-2">View your tickets →</a>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        </t>
+
                     </div>
+
+
+
                     <div class="col-md-4 text-end">
                         <div class="d-flex justify-content-end align-items-center gap-2">
                             <a href="/my/ess/classic" class="btn btn-outline-secondary btn-sm">
@@ -323,6 +338,75 @@
                                 </div>
                             </div>
 
+                            <!-- IT Tickets Card - ADD after Payslips card in Module Cards section -->
+                            <div class="col-md-6">
+                                <div class="module-card card border-0 shadow-sm h-100">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="icon-circle bg-danger bg-opacity-10 me-3">
+                                                <i class="fa fa-ticket fa-lg text-danger"></i>
+                                            </div>
+                                            <div>
+                                                <h5 class="mb-1">IT Support</h5>
+                                                <p class="text-muted mb-0 small">Submit and track IT tickets</p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Ticket Stats -->
+                                        <div class="ticket-summary mb-3">
+                                            <div class="row text-center">
+                                                <div class="col-6">
+                                                    <div class="metric-box">
+                                                        <h4 class="text-danger mb-0" t-esc="it_tickets_count or 0"/>
+                                                        <small class="text-muted">Total</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="metric-box">
+                                                        <h4 class="text-warning mb-0" t-esc="it_tickets_pending or 0"/>
+                                                        <small class="text-muted">Pending</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Recent Tickets Preview -->
+                                        <t t-if="it_tickets_recent">
+                                            <div class="mb-3">
+                                                <t t-foreach="it_tickets_recent" t-as="ticket">
+                                                    <div class="d-flex justify-content-between align-items-center py-1 border-bottom">
+                                                        <small class="text-truncate me-2" style="max-width:140px;">
+                                                            <t t-esc="ticket.name"/>
+                                                            -
+                                                            <t t-esc="ticket.subject"/>
+                                                        </small>
+                                                        <span t-attf-class="badge badge-{{
+                                'success' if ticket.state == 'done' else
+                                'danger' if ticket.state == 'rejected' else
+                                'warning' if ticket.state in ['manager_approval','it_approval'] else
+                                'secondary'
+                            }} badge-sm" style="font-size:0.65rem;">
+                                                            <t t-esc="dict(ticket._fields['state'].selection).get(ticket.state)"/>
+                                                        </span>
+                                                    </div>
+                                                </t>
+                                            </div>
+                                        </t>
+
+                                        <!-- Action Buttons -->
+                                        <div class="d-grid gap-2">
+                                            <a href="/my/ess/tickets/new" class="btn btn-danger btn-sm">
+                                                <i class="fa fa-plus me-1"></i>
+                                                Create New Ticket
+                                            </a>
+                                            <a href="/my/tickets" class="btn btn-outline-danger btn-sm">
+                                                <i class="fa fa-list me-1"></i>
+                                                View All Tickets
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <!-- CRM Card -->
                             <t t-if="has_crm_access">
                                 <div class="col-md-6">

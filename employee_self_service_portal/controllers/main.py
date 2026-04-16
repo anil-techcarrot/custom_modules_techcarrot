@@ -5,6 +5,7 @@ from .access_helpers import check_portal_access, has_feature_access
 import html
 import json
 import logging
+import base64
 
 # Set up logger
 _logger = logging.getLogger(__name__)
@@ -888,12 +889,191 @@ class PortalEmployee(http.Controller):
         # Set enhanced dashboard as default
         return self._render_ess_dashboard('employee_self_service_portal.portal_ess_dashboard_enhanced', **kwargs)
 
-    @http.route('/my/ess/classic', type='http', auth='user', website=True)  
+    @http.route('/my/ess/classic', type='http', auth='user', website=True)
     def portal_ess_dashboard_classic(self, **kwargs):
         # Keep the classic view accessible via /my/ess/classic
         return self._render_ess_dashboard('employee_self_service_portal.portal_ess_dashboard', **kwargs)
-        
-    @http.route('/my/ess/enhanced', type='http', auth='user', website=True)  
+
+    # ---------------------------------------------------------------------------
+    # IT Ticket routes (added from updated version)
+    # ---------------------------------------------------------------------------
+
+    @http.route('/my/ess/tickets/new', type='http', auth='user', website=True)
+    def portal_ess_ticket_new(self, **kw):
+        """Show create ticket form from ESS dashboard"""
+        employee = self._get_employee()
+        if not employee:
+            return request.redirect('/my/ess')
+
+        # Resolve line manager so the template can display it and
+        # disable the submit button when no manager is set.
+        # employee.parent_id  → manager's hr.employee record
+        # .user_id            → that manager's res.users record (has .name)
+        line_manager = None
+        if employee.parent_id and employee.parent_id.user_id:
+            line_manager = employee.parent_id.user_id
+        ticket_types = request.env['it.ticket.type'].sudo().search([])
+        values = {
+            'employee': employee,
+            'line_manager': line_manager,
+            'page_name': 'ess_dashboard',
+            'ticket_types': ticket_types,
+            'error': kw.get('error'),
+            'error_msg': kw.get('error_msg', ''),
+        }
+        return request.render('employee_self_service_portal.portal_ess_ticket_form', values)
+
+    @http.route(['/my/tickets', '/my/tickets/page/<int:page>'], type='http', auth='user', website=True)
+    def portal_my_tickets(self, page=1, sortby=None, filterby=None, **kw):
+        """Display all IT tickets for the current portal user"""
+
+        employee = self._get_employee()
+        if not employee:
+            return request.redirect('/my/ess')
+
+        # Base domain - tickets created by this employee
+        domain = [('employee_id', '=', employee.id)]
+
+        # Sorting options
+        searchbar_sortings = {
+            'date': {'label': 'Newest First', 'order': 'create_date desc'},
+            'name': {'label': 'Ticket Number', 'order': 'name'},
+            'state': {'label': 'Status', 'order': 'state'},
+        }
+
+        # Filter options
+        searchbar_filters = {
+            'all': {'label': 'All', 'domain': []},
+            'pending': {'label': 'Pending Approval', 'domain': [('state', 'in', ['manager_approval', 'it_approval'])]},
+            'active': {'label': 'Active', 'domain': [('state', 'in', ['assigned', 'in_progress'])]},
+            'done': {'label': 'Completed', 'domain': [('state', '=', 'done')]},
+            'rejected': {'label': 'Rejected', 'domain': [('state', '=', 'rejected')]},
+        }
+
+        # Default sort and filter
+        if not sortby:
+            sortby = 'date'
+        if not filterby:
+            filterby = 'all'
+
+        order = searchbar_sortings[sortby]['order']
+        domain += searchbar_filters[filterby]['domain']
+
+        # Get tickets
+        tickets = request.env['it.ticket'].sudo().search(domain, order=order)
+
+        values = {
+            'tickets': tickets,
+            'page_name': 'tickets',
+            'searchbar_sortings': searchbar_sortings,
+            'searchbar_filters': searchbar_filters,
+            'sortby': sortby,
+            'filterby': filterby,
+            'employee': employee,
+        }
+
+        return request.render('employee_self_service_portal.portal_my_tickets', values)
+
+    @http.route(['/my/tickets/<int:ticket_id>'], type='http', auth='user', website=True)
+    def portal_my_ticket_detail(self, ticket_id, **kw):
+        """Display single ticket details"""
+
+        employee = self._get_employee()
+        if not employee:
+            return request.redirect('/my/ess')
+
+        # Get ticket (only if it belongs to this employee)
+        ticket = request.env['it.ticket'].sudo().search([
+            ('id', '=', ticket_id),
+            ('employee_id', '=', employee.id)
+        ], limit=1)
+
+        if not ticket:
+            return request.redirect('/my/tickets')
+
+        attachments = request.env['ir.attachment'].sudo().search([
+            ('res_model', '=', 'it.ticket'),
+            ('res_id', '=', ticket.id)
+        ])
+
+        values = {
+            'ticket': ticket,
+            'page_name': 'tickets',
+            'ticket_attachments': attachments,
+            'employee': employee,
+        }
+
+        return request.render('employee_self_service_portal.portal_my_ticket_detail', values)
+
+    @http.route('/my/ess/tickets/submit', type='http', auth='user', website=True, methods=['POST'], csrf=True)
+    def portal_ess_ticket_submit(self, **post):
+        """Submit new IT ticket from ESS dashboard"""
+        employee = self._get_employee()
+        if not employee:
+            return request.redirect('/my/ess')
+
+        if not post.get('subject') or not post.get('ticket_type_id') or not post.get('description'):
+            return request.redirect('/my/ess/tickets/new?error=1&error_msg=Please+fill+all+required+fields')
+
+            # ✅✅✅ ADDED: Required Date Validation
+        required_date = post.get('required_date')
+        if required_date:
+            required_date_obj = fields.Date.from_string(required_date)
+            today_date = fields.Date.today()
+
+            _logger.info("ESS required_date_obj: %s | today: %s", required_date_obj, today_date)
+
+            if required_date_obj < today_date:
+                _logger.warning("ESS: Past required_date attempted: %s", required_date_obj)
+                return request.redirect(
+                    '/my/ess/tickets/new?error=1&error_msg=Required+Date+cannot+be+in+the+past'
+                )
+        # ✅✅✅ END ADDED VALIDATION
+        try:
+            ticket_type_id = post.get('ticket_type_id')
+            if ticket_type_id:
+                ticket_type_id = int(ticket_type_id)
+
+            ticket = request.env['it.ticket'].sudo().create({
+                'employee_id': employee.id,
+                'ticket_type_id': ticket_type_id,
+                'priority': post.get('priority', '1'),
+                'subject': post.get('subject'),
+                'description': post.get('description'),
+                'required_date': required_date or False,
+                'submitted_date': fields.Datetime.now(),
+            })
+            # ====================================================
+            # ✅✅✅ ADDED: ATTACHMENT HANDLING
+            # ====================================================
+            attachment = request.httprequest.files.get('attachment')
+            if attachment and attachment.filename:
+                attachment_content = attachment.read()
+
+                request.env['ir.attachment'].sudo().create({
+                    'name': attachment.filename,
+                    'type': 'binary',
+                    'datas': base64.b64encode(attachment_content),
+                    'res_model': 'it.ticket',
+                    'res_id': ticket.id,
+                    'mimetype': attachment.mimetype,
+                })
+                _logger.info("Attachment %s added to Ticket %s", attachment.filename, ticket.name)
+            # ====================================================
+            _logger.info("IT Ticket %s created from ESS portal by %s", ticket.name, employee.name)
+            return request.redirect('/my/ess?ticket_success=1')
+
+        except Exception as e:
+            _logger.error("Error creating IT ticket from ESS portal: %s", e)
+            request.env.cr.rollback()
+            return request.redirect('/my/ess/tickets/new?error=1&error_msg=Failed+to+create+ticket.+Please+try+again.')
+
+    # ---------------------------------------------------------------------------
+    # End IT Ticket routes
+    # ---------------------------------------------------------------------------
+
+
+    @http.route('/my/ess/enhanced', type='http', auth='user', website=True)
     def portal_ess_dashboard_enhanced(self, **kwargs):
         # Maintain this route for backward compatibility
         return self._render_ess_dashboard('employee_self_service_portal.portal_ess_dashboard_enhanced', **kwargs)
@@ -1110,7 +1290,25 @@ class PortalEmployee(http.Controller):
             'weekly_hours': weekly_hours,
             'monthly_targets': self._get_monthly_targets(employee),
         }
-        
+
+        # IT Tickets data for dashboard
+        it_tickets_count = 0
+        it_tickets_pending = 0
+        it_tickets_recent = None
+        try:
+            it_tickets_count = request.env['it.ticket'].search_count([
+                ('employee_id', '=', employee.id)
+            ])
+            it_tickets_pending = request.env['it.ticket'].search_count([
+                ('employee_id', '=', employee.id),
+                ('state', 'in', ['draft', 'manager_approval', 'it_approval'])
+            ])
+            it_tickets_recent = request.env['it.ticket'].search([
+                ('employee_id', '=', employee.id)
+            ], order='create_date desc', limit=3)
+        except Exception:
+            pass
+
         dashboard_data.update({
             'payslips_count': payslips_count,
             'latest_payslip': latest_payslip,
@@ -1128,6 +1326,9 @@ class PortalEmployee(http.Controller):
             'expense_stats': expense_stats,
             'recent_activities': recent_activities[:5],  # Top 5 recent activities
             'performance_metrics': performance_metrics,
+            'it_tickets_count': it_tickets_count,
+            'it_tickets_pending': it_tickets_pending,
+            'it_tickets_recent': it_tickets_recent,
         })
         
         return dashboard_data
