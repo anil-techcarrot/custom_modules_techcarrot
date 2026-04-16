@@ -18,33 +18,23 @@
                         <form method="post" action="/my/employee/payroll">
                             <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
 
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <label>Joining Date</label>
-                                    <input type="date" name="contract_date_start"
-                                           t-att-value="employee.contract_date_start"
-                                           class="form-control"/>
-                                </div>
-
-                                <div class="col-md-4">
-                                    <label>Wage Type</label>
-                                    <select name="wage_type" class="form-control">
-                                        <option value="monthly"
-                                            t-att-selected="employee.wage_type == 'monthly'">Monthly</option>
-                                        <option value="hourly"
-                                            t-att-selected="employee.wage_type == 'hourly'">Hourly</option>
-                                    </select>
-                                </div>
+                            <div class="mb-3">
+                                <label>Joining Date</label>
+                                <input type="date"
+                                       name="contract_date_start"
+                                       t-att-value="employee.contract_date_start"
+                                       class="form-control"/>
                             </div>
 
-                            <div class="mt-3">
+                            <div class="mb-3">
                                 <label>Basic Salary</label>
-                                <input type="number" name="basic_salary_manual"
+                                <input type="number"
+                                       name="basic_salary_manual"
                                        t-att-value="employee.basic_salary_manual"
                                        class="form-control"/>
                             </div>
 
-                            <div class="mt-3 text-center">
+                            <div class="text-center">
                                 <button type="submit" class="btn btn-primary">
                                     Save
                                 </button>
