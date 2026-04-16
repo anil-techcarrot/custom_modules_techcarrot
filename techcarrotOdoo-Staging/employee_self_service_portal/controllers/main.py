@@ -1272,7 +1272,7 @@ class PortalEmployee(http.Controller):
             'section': 'personal',
         })
 
-    @http.route(MY_EMPLOYEE_URL + '/upload-photo', type='http', auth='user', website=True, methods=['POST'])
+    @http.route(MY_EMPLOYEE_URL + '/upload-photo', type='http', auth='user', website=True, methods=['POST'], csrf=False)
     def portal_employee_upload_photo(self, **post):
         """Handle employee photo upload"""
         try:
