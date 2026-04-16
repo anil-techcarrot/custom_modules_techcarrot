@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <template id="portal_employee_profile_payroll" name="Employee Payroll">
+    <template id="portal_employee_profile_payroll"
+              name="Employee Payroll Portal"
+              primary="True">
+
         <t t-call="employee_self_service_portal.portal_employee_profile_base">
-
             <t t-set="section" t-value="'payroll'"/>
-
             <t t-set="section_content">
 
-                <!-- Success/Error Messages -->
-                <div id="messageContainer" style="display: none;">
-                    <div id="successMessage" class="alert alert-success alert-dismissible fade" role="alert" style="display: none;">
+                <!-- Messages -->
+                <div id="messageContainer" style="display:none;">
+                    <div id="successMessage" class="alert alert-success alert-dismissible fade" style="display:none;">
                         <i class="fa fa-check-circle me-2"></i>
                         <span id="successText"></span>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
-                    <div id="errorMessage" class="alert alert-danger alert-dismissible fade" role="alert" style="display: none;">
+                    <div id="errorMessage" class="alert alert-danger alert-dismissible fade" style="display:none;">
                         <i class="fa fa-exclamation-triangle me-2"></i>
                         <span id="errorText"></span>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -25,6 +26,7 @@
                 <form id="payrollForm" method="post">
                     <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
 
+                    <!-- Contract Overview -->
                     <div class="card mb-4 shadow-sm">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
@@ -72,45 +74,45 @@
                             <div class="row g-3">
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">Basic Salary</label>
-                                    <input type="number" name="basic_salary_manual"
+                                    <input type="number" step="0.01" name="basic_salary_manual"
                                            t-att-value="employee.basic_salary_manual or ''"
-                                           class="form-control" step="0.01"/>
+                                           class="form-control"/>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">HRA</label>
-                                    <input type="number" name="hra_manual"
+                                    <input type="number" step="0.01" name="hra_manual"
                                            t-att-value="employee.hra_manual or ''"
-                                           class="form-control" step="0.01"/>
+                                           class="form-control"/>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">Flexi</label>
-                                    <input type="number" name="flexi_manual"
+                                    <input type="number" step="0.01" name="flexi_manual"
                                            t-att-value="employee.flexi_manual or ''"
-                                           class="form-control" step="0.01"/>
+                                           class="form-control"/>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">Statutory</label>
-                                    <input type="number" name="statutory_manual"
+                                    <input type="number" step="0.01" name="statutory_manual"
                                            t-att-value="employee.statutory_manual or ''"
-                                           class="form-control" step="0.01"/>
+                                           class="form-control"/>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">Gratuity</label>
-                                    <input type="number" name="gratuity_manual"
+                                    <input type="number" step="0.01" name="gratuity_manual"
                                            t-att-value="employee.gratuity_manual or ''"
-                                           class="form-control" step="0.01"/>
+                                           class="form-control"/>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">PF</label>
-                                    <input type="number" name="pf_manual"
+                                    <input type="number" step="0.01" name="pf_manual"
                                            t-att-value="employee.pf_manual or ''"
-                                           class="form-control" step="0.01"/>
+                                           class="form-control"/>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">Medical</label>
-                                    <input type="number" name="medical_manual"
+                                    <input type="number" step="0.01" name="medical_manual"
                                            t-att-value="employee.medical_manual or ''"
-                                           class="form-control" step="0.01"/>
+                                           class="form-control"/>
                                 </div>
                             </div>
                         </div>
@@ -123,7 +125,6 @@
                             </button>
                         </div>
                     </div>
-
                 </form>
 
                 <script type="text/javascript">
@@ -133,7 +134,6 @@
 
                         form.addEventListener('submit', function (e) {
                             e.preventDefault();
-
                             fetch('/my/employee/payroll', {
                                 method: 'POST',
                                 body: new FormData(form)
@@ -143,12 +143,10 @@
                                 if (data.success) {
                                     showMessage('Payroll updated successfully!', 'success');
                                 } else {
-                                    showMessage(data.error || 'Unknown error occurred', 'error');
+                                    showMessage(data.error || 'Unknown error', 'error');
                                 }
                             })
-                            .catch(err => {
-                                showMessage('Network error. Please try again.', 'error');
-                            });
+                            .catch(() => showMessage('Network error. Please try again.', 'error'));
                         });
 
                         function showMessage(text, type) {
@@ -173,7 +171,6 @@
 
                             container.style.display = 'block';
                             container.scrollIntoView({ behavior: 'smooth' });
-
                             setTimeout(() => {
                                 successMsg.classList.remove('show');
                                 errorMsg.classList.remove('show');
