@@ -1,132 +1,24 @@
 <odoo>
-  <template id="portal_employee_profile_payroll">
-    <t t-call="employee_self_service_portal.portal_employee_profile_base">
 
-      <!-- IMPORTANT -->
-      <t t-set="section" t-value="'payroll'"/>
+  <data>
 
-      <t t-set="section_content">
+    <template id="portal_employee_profile_payroll"
+              name="Employee Payroll Portal Page">
 
-        <!-- Payroll Form -->
-        <form action="/my/employee/payroll" method="post">
-          <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+      <t t-call="employee_self_service_portal.portal_employee_profile_base">
 
-          <!-- Contract Info -->
-          <div class="card mb-4 shadow-sm">
-            <div class="card-header bg-light">
-              <h5 class="mb-0">
-                <i class="fa fa-file-contract me-2"></i>Contract Details
-              </h5>
-            </div>
-            <div class="card-body row g-3">
+        <t t-set="section" t-value="'payroll'"/>
 
-              <div class="col-md-6">
-                <label class="form-label">Start Date</label>
-                <input type="date" name="contract_date_start"
-                       class="form-control"
-                       t-att-value="employee.contract_date_start"/>
-              </div>
+        <t t-set="section_content">
 
-              <div class="col-md-6">
-                <label class="form-label">Wage Type</label>
-                <input type="text" name="wage_type"
-                       class="form-control"
-                       t-att-value="employee.wage_type"/>
-              </div>
+          <h3>Payroll Working</h3>
 
-            </div>
-          </div>
-
-          <!-- Salary Components -->
-          <div class="card mb-4 shadow-sm">
-            <div class="card-header bg-light">
-              <h5 class="mb-0">
-                <i class="fa fa-money-bill me-2"></i>Salary Components
-              </h5>
-            </div>
-            <div class="card-body row g-3">
-
-              <div class="col-md-4">
-                <label>Basic Salary</label>
-                <input type="number" step="0.01" name="basic_salary_manual"
-                       class="form-control"
-                       t-att-value="employee.basic_salary_manual"/>
-              </div>
-
-              <div class="col-md-4">
-                <label>HRA</label>
-                <input type="number" step="0.01" name="hra_manual"
-                       class="form-control"
-                       t-att-value="employee.hra_manual"/>
-              </div>
-
-              <div class="col-md-4">
-                <label>Flexi</label>
-                <input type="number" step="0.01" name="flexi_manual"
-                       class="form-control"
-                       t-att-value="employee.flexi_manual"/>
-              </div>
-
-              <div class="col-md-4">
-                <label>PF</label>
-                <input type="number" step="0.01" name="pf_manual"
-                       class="form-control"
-                       t-att-value="employee.pf_manual"/>
-              </div>
-
-              <div class="col-md-4">
-                <label>Medical</label>
-                <input type="number" step="0.01" name="medical_manual"
-                       class="form-control"
-                       t-att-value="employee.medical_manual"/>
-              </div>
-
-              <div class="col-md-4">
-                <label>Gratuity</label>
-                <input type="number" step="0.01" name="gratuity_manual"
-                       class="form-control"
-                       t-att-value="employee.gratuity_manual"/>
-              </div>
-
-            </div>
-          </div>
-
-          <!-- Leave & Tax -->
-          <div class="card mb-4 shadow-sm">
-            <div class="card-header bg-light">
-              <h5 class="mb-0">
-                <i class="fa fa-calculator me-2"></i>Leave &amp; Tax
-              </h5>
-            </div>
-            <div class="card-body row g-3">
-
-              <div class="col-md-6">
-                <label>Annual Leave Days</label>
-                <input type="number" name="l10n_ae_number_of_leave_days"
-                       class="form-control"
-                       t-att-value="employee.l10n_ae_number_of_leave_days"/>
-              </div>
-
-              <div class="col-md-6">
-                <label>TDS (%)</label>
-                <input type="number" step="0.01" name="l10n_in_tds"
-                       class="form-control"
-                       t-att-value="employee.l10n_in_tds"/>
-              </div>
-
-            </div>
-          </div>
-
-          <!-- Submit -->
-          <div class="text-center mb-5">
-            <button type="submit" class="btn btn-primary">
-              <i class="fa fa-save me-1"></i>Save Payroll
-            </button>
-          </div>
-
-        </form>
+        </t>
 
       </t>
-    </t>
-  </template>
+
+    </template>
+
+  </data>
+
 </odoo>
