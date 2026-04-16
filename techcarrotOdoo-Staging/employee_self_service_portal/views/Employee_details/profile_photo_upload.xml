@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <template id="portal_employee_profile_base_photo_upload"
-              inherit_id="your_module.portal_employee_profile_base">
+              inherit_id="employee_self_service_portal.portal_employee_profile_base">
 
         <!-- Replace the avatar div -->
-        <xpath expr="//div[contains(@class,'col-md-4') and contains(@class,'text-center')]/div[contains(@class,'position-relative')]" position="replace">
+        <xpath expr="//div[contains(@class,'col-md-4') and contains(@class,'text-center')]/div[contains(@class,'position-relative')]"
+               position="replace">
             <div class="position-relative mb-3" style="display:inline-block;">
                 <img t-if="employee.image_1920"
                      t-attf-src="/web/image/hr.employee/{{employee.id}}/image_1920/150x150"
@@ -44,49 +45,64 @@
         <xpath expr="//style" position="after">
             <script type="text/javascript">
                 document.addEventListener('DOMContentLoaded', function () {
-                    const input = document.getElementById('photoUploadInput');
-                    if (!input) return;
+                const input = document.getElementById('photoUploadInput');
+                if (!input) return;
 
-                    input.addEventListener('change', function () {
-                        if (!this.files || !this.files[0]) return;
+                input.addEventListener('change', function () {
+                if (!this.files || !this.files[0]) return;
 
-                        const file = this.files[0];
-                        const statusEl = document.getElementById('photoUploadStatus');
-                        const imgEl = document.getElementById('employeePhotoImg');
+                const file = this.files[0];
+                const statusEl = document.getElementById('photoUploadStatus');
+                const imgEl = document.getElementById('employeePhotoImg');
 
-                        // Client-side size check (5MB)
-                        if (file.size > 5 * 1024 * 1024) {
-                            statusEl.innerHTML = '<span class="text-danger"><i class="fa fa-times-circle me-1"></i>File too large. Max 5MB.</span>';
-                            return;
-                        }
+                // Client-side size check (5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                statusEl.innerHTML = '
+                <span class="text-danger"><i class="fa fa-times-circle me-1"></i>File too large. Max 5MB.
+                </span>
+                ';
+                return;
+                }
 
-                        statusEl.innerHTML = '<span class="text-muted"><i class="fa fa-spinner fa-spin me-1"></i>Uploading...</span>';
+                statusEl.innerHTML = '
+                <span class="text-muted"><i class="fa fa-spinner fa-spin me-1"></i>Uploading...
+                </span>
+                ';
 
-                        const formData = new FormData();
-                        formData.append('photo', file);
+                const formData = new FormData();
+                formData.append('photo', file);
 
-                        fetch('/my/employee/upload-photo', {
-                            method: 'POST',
-                            body: formData,
-                        })
-                        .then(function(res) { return res.json(); })
-                        .then(function(data) {
-                            if (data.success) {
-                                statusEl.innerHTML = '<span class="text-success"><i class="fa fa-check-circle me-1"></i>Photo updated!</span>';
-                                // Update image src without page reload
-                                imgEl.src = data.image_url + '?t=' + Date.now();
-                                imgEl.alt = 'Employee Photo';
-                                imgEl.classList.remove('opacity-50');
-                                // Clear status after 3s
-                                setTimeout(function() { statusEl.innerHTML = ''; }, 3000);
-                            } else {
-                                statusEl.innerHTML = '<span class="text-danger"><i class="fa fa-times-circle me-1"></i>' + data.error + '</span>';
-                            }
-                        })
-                        .catch(function() {
-                            statusEl.innerHTML = '<span class="text-danger"><i class="fa fa-times-circle me-1"></i>Upload failed. Try again.</span>';
-                        });
-                    });
+                fetch('/my/employee/upload-photo', {
+                method: 'POST',
+                body: formData,
+                })
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                if (data.success) {
+                statusEl.innerHTML = '
+                <span class="text-success"><i class="fa fa-check-circle me-1"></i>Photo updated!
+                </span>
+                ';
+                // Update image src without page reload
+                imgEl.src = data.image_url + '?t=' + Date.now();
+                imgEl.alt = 'Employee Photo';
+                imgEl.classList.remove('opacity-50');
+                // Clear status after 3s
+                setTimeout(function() { statusEl.innerHTML = ''; }, 3000);
+                } else {
+                statusEl.innerHTML = '
+                <span class="text-danger"><i class="fa fa-times-circle me-1"></i>' + data.error + '
+                </span>
+                ';
+                }
+                })
+                .catch(function() {
+                statusEl.innerHTML = '
+                <span class="text-danger"><i class="fa fa-times-circle me-1"></i>Upload failed. Try again.
+                </span>
+                ';
+                });
+                });
                 });
             </script>
         </xpath>
