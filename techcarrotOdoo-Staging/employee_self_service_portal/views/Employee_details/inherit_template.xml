@@ -49,22 +49,22 @@
 
                         <div class="col-md-6">
                             <label>Legal Name</label>
-                            <input class="form-control" t-att-value="employee.legal_name or ''" readonly="readonly"/>
+                            <input class="form-control" t-att-value="employee.legal_name or ''" style="pointer-events: none;"/>
                         </div>
 
                         <div class="col-md-6">
                             <label>Birthday</label>
-                            <input class="form-control" t-att-value="employee.birthday or ''" readonly="readonly"/>
+                            <input class="form-control" t-att-value="employee.birthday or ''" style="pointer-events: none;"/>
                         </div>
 
                         <div class="col-md-6">
                             <label>Place of Birth</label>
-                            <input class="form-control" t-att-value="employee.place_of_birth or ''" readonly="readonly"/>
+                            <input class="form-control" t-att-value="employee.place_of_birth or ''" style="pointer-events: none;"/>
                         </div>
 
                         <div class="col-md-6">
                             <label>Payslip Language</label>
-                            <input class="form-control" t-att-value="employee.lang or ''" readonly="readonly"/>
+                            <input class="form-control" t-att-value="employee.lang or ''" style="pointer-events: none;"/>
                         </div>
 
                     </div>
