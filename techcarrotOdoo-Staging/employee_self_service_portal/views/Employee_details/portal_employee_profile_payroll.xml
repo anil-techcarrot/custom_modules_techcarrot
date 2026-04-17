@@ -62,14 +62,14 @@
                                     <input type="number" name="l10n_ae_number_of_leave_days"
                                            t-att-value="employee.l10n_ae_number_of_leave_days or ''"
                                            class="form-control"
-                                           readonly="readonly"/>
+                                           style="pointer-events: none;"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">TDS</label>
                                     <input type="number" name="l10n_in_tds"
                                            t-att-value="employee.l10n_in_tds or ''"
                                            class="form-control"
-                                           readonly="readonly"/>
+                                           style="pointer-events: none;"/>
                                 </div>
                             </div>
                         </div>
