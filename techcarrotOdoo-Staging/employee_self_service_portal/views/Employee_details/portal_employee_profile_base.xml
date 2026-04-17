@@ -121,6 +121,114 @@
                             </div>
                             <!-- ✅ END PHOTO UPLOAD SECTION -->
 
+
+
+
+                             <!-- ===== ORGANIZATION CHART ===== -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="fa fa-sitemap text-primary me-2"></i>Organization Chart
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div style="overflow-x:auto;">
+                            <div class="d-flex flex-column align-items-center" style="min-width:300px;">
+
+                                <!-- MANAGER ROW -->
+                                <t t-if="employee.parent_id">
+                                    <div class="d-flex justify-content-center">
+                                        <div class="org-node org-manager">
+                                            <div class="org-avatar-wrap">
+                                                <img t-if="employee.parent_id.image_1920"
+                                                     t-attf-src="/web/image/hr.employee/{{employee.parent_id.id}}/image_1920/50x50"
+                                                     class="rounded-circle"
+                                                     style="width:48px;height:48px;object-fit:cover;"
+                                                     alt="Manager"/>
+                                                <div t-else=""
+                                                     class="rounded-circle d-inline-flex align-items-center justify-content-center"
+                                                     style="width:48px;height:48px;background:#6f42c1;color:#fff;font-size:18px;font-weight:700;">
+                                                    <t t-esc="(employee.parent_id.name or 'M')[0]"/>
+                                                </div>
+                                            </div>
+                                            <div class="org-details">
+                                                <div class="org-name"><t t-esc="employee.parent_id.name"/></div>
+                                                <div class="org-role"><t t-esc="employee.parent_id.job_title or employee.parent_id.job_id.name or 'Manager'"/></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="width:2px;height:28px;background:#ced4da;margin:0 auto;"></div>
+                                </t>
+
+                                <!-- CURRENT EMPLOYEE (highlighted) -->
+                                <div class="d-flex justify-content-center">
+                                    <div class="org-node org-self">
+                                        <div class="org-avatar-wrap">
+                                            <img t-if="employee.image_1920"
+                                                 t-attf-src="/web/image/hr.employee/{{employee.id}}/image_1920/50x50"
+                                                 class="rounded-circle"
+                                                 style="width:48px;height:48px;object-fit:cover;"
+                                                 alt="You"/>
+                                            <div t-else=""
+                                                 class="rounded-circle d-inline-flex align-items-center justify-content-center"
+                                                 style="width:48px;height:48px;background:#0d6efd;color:#fff;font-size:18px;font-weight:700;">
+                                                <t t-esc="(employee.name or 'E')[0]"/>
+                                            </div>
+                                        </div>
+                                        <div class="org-details">
+                                            <div class="org-name" style="color:#0d6efd;"><t t-esc="employee.name"/></div>
+                                            <div class="org-role"><t t-esc="employee.job_title or employee.job_id.name or ''"/></div>
+                                            <span style="display:inline-block;background:#0d6efd;color:#fff;border-radius:4px;font-size:10px;padding:1px 6px;margin-top:2px;">You</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- SUBORDINATES ROW -->
+                                <t t-if="employee.child_ids">
+                                    <div style="width:2px;height:28px;background:#ced4da;margin:0 auto;"></div>
+                                    <div class="d-flex flex-wrap justify-content-center" style="gap:16px;">
+                                        <t t-foreach="employee.child_ids" t-as="child">
+                                            <div class="d-flex flex-column align-items-center">
+                                                <div style="width:2px;height:20px;background:#ced4da;"></div>
+                                                <div class="org-node org-child">
+                                                    <div class="org-avatar-wrap">
+                                                        <img t-if="child.image_1920"
+                                                             t-attf-src="/web/image/hr.employee/{{child.id}}/image_1920/50x50"
+                                                             class="rounded-circle"
+                                                             style="width:42px;height:42px;object-fit:cover;"
+                                                             alt="Report"/>
+                                                        <div t-else=""
+                                                             class="rounded-circle d-inline-flex align-items-center justify-content-center"
+                                                             style="width:42px;height:42px;background:#198754;color:#fff;font-size:16px;font-weight:700;">
+                                                            <t t-esc="(child.name or 'S')[0]"/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="org-details">
+                                                        <div class="org-name"><t t-esc="child.name"/></div>
+                                                        <div class="org-role"><t t-esc="child.job_title or child.job_id.name or ''"/></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </t>
+
+                                <!-- No hierarchy -->
+                                <t t-if="not employee.parent_id and not employee.child_ids">
+                                    <p class="text-muted text-center mt-3">
+                                        <i class="fa fa-info-circle me-1"></i>No organizational hierarchy configured.
+                                    </p>
+                                </t>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- ===== END ORGANIZATION CHART ===== -->
+
+
+
+
                         </div>
                     </div>
                 </div>
