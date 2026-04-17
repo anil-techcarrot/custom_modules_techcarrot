@@ -49,7 +49,7 @@
                                            class="form-control"
                                            t-att-value="employee.work_email"
                                            readonly="readonly"
-                                           required="required"
+                                           style="pointer-events: none;"
                                            data-validation="email"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
