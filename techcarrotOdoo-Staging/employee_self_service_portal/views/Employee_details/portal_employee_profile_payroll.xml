@@ -88,43 +88,43 @@
                                     <label class="form-label fw-bold">Basic Salary</label>
                                     <input type="number" step="0.01" name="basic_salary_manual"
                                            t-att-value="employee.basic_salary_manual or ''"
-                                           class="form-control" readonly="readonly"/>
+                                           class="form-control"  style="pointer-events: none;"/>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">HRA</label>
                                     <input type="number" step="0.01" name="hra_manual"
                                            t-att-value="employee.hra_manual or ''"
-                                           class="form-control" readonly="readonly"/>
+                                           class="form-control"  style="pointer-events: none;"/>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">Flexi</label>
                                     <input type="number" step="0.01" name="flexi_manual"
                                            t-att-value="employee.flexi_manual or ''"
-                                           class="form-control" readonly="readonly"/>
+                                           class="form-control"  style="pointer-events: none;"/>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">Statutory</label>
                                     <input type="number" step="0.01" name="statutory_manual"
                                            t-att-value="employee.statutory_manual or ''"
-                                           class="form-control" readonly="readonly"/>
+                                           class="form-control" style="pointer-events: none;"/>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">Gratuity</label>
                                     <input type="number" step="0.01" name="gratuity_manual"
                                            t-att-value="employee.gratuity_manual or ''"
-                                           class="form-control" readonly="readonly"/>
+                                           class="form-control"  style="pointer-events: none;"/>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">PF</label>
                                     <input type="number" step="0.01" name="pf_manual"
                                            t-att-value="employee.pf_manual or ''"
-                                           class="form-control" readonly="readonly"/>
+                                           class="form-control"  style="pointer-events: none;"/>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">Medical</label>
                                     <input type="number" step="0.01" name="medical_manual"
                                            t-att-value="employee.medical_manual or ''"
-                                           class="form-control" readonly="readonly"/>
+                                           class="form-control"  style="pointer-events: none;"/>
                                 </div>
                             </div>
                         </div>
