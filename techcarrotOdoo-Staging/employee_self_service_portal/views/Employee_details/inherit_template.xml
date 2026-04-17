@@ -81,12 +81,12 @@
 
                         <div class="col-md-6">
                             <label>Visa No</label>
-                            <input class="form-control" t-att-value="employee.visa_no or ''" readonly="readonly"/>
+                            <input class="form-control" t-att-value="employee.visa_no or ''" style="pointer-events: none;"/>
                         </div>
 
                         <div class="col-md-6">
                             <label>Work Permit No</label>
-                            <input class="form-control" t-att-value="employee.permit_no or ''" readonly="readonly"/>
+                            <input class="form-control" t-att-value="employee.permit_no or ''" style="pointer-events: none;"/>
                         </div>
 
                         <div class="col-md-6">
@@ -110,7 +110,7 @@
                             <label>Nationality</label>
                             <input class="form-control"
                                    t-att-value="employee.country_id.name or ''"
-                                   readonly="readonly"/>
+                                   style="pointer-events: none;"/>
                         </div>
 
                         <div class="col-md-6">
@@ -124,21 +124,21 @@
                             <label>Identification No</label>
                             <input class="form-control"
                                    t-att-value="employee.identification_id or ''"
-                                   readonly="readonly"/>
+                                   style="pointer-events: none;"/>
                         </div>
 
                         <div class="col-md-6">
                             <label>SSN No</label>
                             <input class="form-control"
                                    t-att-value="employee.ssnid or ''"
-                                   readonly="readonly"/>
+                                  style="pointer-events: none;"/>
                         </div>
 
                         <div class="col-md-6">
                             <label>Passport No</label>
                             <input class="form-control"
                                    t-att-value="employee.passport_id or ''"
-                                   readonly="readonly"/>
+                                   style="pointer-events: none;"/>
                         </div>
 
                     </div>
