@@ -10,6 +10,15 @@ import phonenumbers
 class HrEmployeeInherit(models.Model):
     _inherit = 'hr.employee'
 
+    x_experience = fields.Text(
+        string='Professional Experience Summary',
+        help='Describe professional experience, roles, responsibilities and achievements'
+    )
+    x_skills = fields.Char(
+        string='Technical & Professional Skills',
+        help='Separate skills with commas. e.g., Python, Project Management'
+    )
+
     # Document Management
     emirates_id_file = fields.Binary(string='Emirates ID Copy', attachment=True)
     emirates_id_filename = fields.Char(string='Emirates ID Filename')

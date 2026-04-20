@@ -111,6 +111,29 @@
                             <field name="bank_name"/>
                         </group>
 
+
+                        <!-- Add this inside the Resume tab, after existing resume lines -->
+                        <page string="Resume" name="resume">
+                            <!-- Your existing resume content stays here -->
+
+                            <!-- Work Experience Section -->
+                            <separator string="Work Experience"/>
+                            <group>
+                                <group string="Professional Experience">
+                                    <field name="x_experience"
+                                           string="Professional Experience Summary"
+                                           widget="html"
+                                           placeholder="Describe your professional experience, roles, responsibilities and achievements..."/>
+                                </group>
+                                <group string="Skills &amp; Competencies">
+                                    <field name="x_skills"
+                                           string="Technical &amp; Professional Skills"
+                                           placeholder="e.g., Python, Project Management, Data Analysis, Leadership..."/>
+                                    <small class="text-muted">Separate skills with commas</small>
+                                </group>
+                            </group>
+                        </page>
+
                         <separator string="Document Management"/>
                         <group>
                             <group string="Emirates ID Copy">
@@ -137,7 +160,6 @@
                                 <field name="other_documents_filename" invisible="1"/>
                             </group>
                         </group>
-
 
 
                         <group string="Document and Personal Details">
