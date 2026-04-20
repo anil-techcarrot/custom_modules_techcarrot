@@ -66,17 +66,17 @@
                                            data-validation="phone"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">
-                                        <i class="fa fa-flag text-muted me-1"></i>Nationality
-                                    </label>
-                                    <input type="text"
-                                           name="country_id"
-                                           class="form-control"
-                                           t-att-value="employee.country_id"
-                                           style="pointer-events: none;"/>
-                                    <div class="invalid-feedback"></div>
-                                </div>
+<!--                                <div class="col-md-6">-->
+<!--                                    <label class="form-label fw-bold">-->
+<!--                                        <i class="fa fa-flag text-muted me-1"></i>Nationality-->
+<!--                                    </label>-->
+<!--                                    <input type="text"-->
+<!--                                           name="country_id"-->
+<!--                                           class="form-control"-->
+<!--                                           t-att-value="employee.country_id"-->
+<!--                                           style="pointer-events: none;"/>-->
+<!--                                    <div class="invalid-feedback"></div>-->
+<!--                                </div>-->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-venus-mars text-muted me-1"></i>Gender
