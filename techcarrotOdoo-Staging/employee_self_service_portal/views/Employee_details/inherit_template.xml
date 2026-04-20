@@ -49,22 +49,26 @@
 
                         <div class="col-md-6">
                             <label>Legal Name</label>
-                            <input class="form-control" t-att-value="employee.legal_name or ''" style="pointer-events: none;"/>
+                            <input class="form-control" t-att-value="employee.legal_name or ''"
+                                   style="pointer-events: none;"/>
                         </div>
 
                         <div class="col-md-6">
                             <label>Birthday</label>
-                            <input class="form-control" t-att-value="employee.birthday or ''" style="pointer-events: none;"/>
+                            <input class="form-control" t-att-value="employee.birthday or ''"
+                                   style="pointer-events: none;"/>
                         </div>
 
                         <div class="col-md-6">
                             <label>Place of Birth</label>
-                            <input class="form-control" t-att-value="employee.place_of_birth or ''" style="pointer-events: none;"/>
+                            <input class="form-control" t-att-value="employee.place_of_birth or ''"
+                                   style="pointer-events: none;"/>
                         </div>
 
                         <div class="col-md-6">
                             <label>Payslip Language</label>
-                            <input class="form-control" t-att-value="employee.lang or ''" style="pointer-events: none;"/>
+                            <input class="form-control" t-att-value="employee.lang or ''"
+                                   style="pointer-events: none;"/>
                         </div>
 
                     </div>
@@ -74,24 +78,41 @@
             <!-- ================= Visa & Work Permit ================= -->
             <div class="card mb-4 shadow-sm">
                 <div class="card-header bg-light">
-                    <h5 class="mb-0">Visa  &amp; Work Permit</h5>
+                    <h5 class="mb-0">Visa &amp; Work Permit</h5>
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
 
                         <div class="col-md-6">
                             <label>Visa No</label>
-                            <input class="form-control" t-att-value="employee.visa_no or ''" style="pointer-events: none;"/>
+                            <input class="form-control" t-att-value="employee.visa_no or ''"
+                                   style="pointer-events: none;"/>
                         </div>
 
                         <div class="col-md-6">
                             <label>Work Permit No</label>
-                            <input class="form-control" t-att-value="employee.permit_no or ''" style="pointer-events: none;"/>
+                            <input class="form-control" t-att-value="employee.permit_no or ''"
+                                   style="pointer-events: none;"/>
                         </div>
 
                         <div class="col-md-6">
-                            <label>Work Permit File</label>
-                            <input type="file" class="form-control" disabled="disabled"/>
+                            <label class="form-label fw-bold">Work Permit</label>
+
+                            <!-- Show Existing File -->
+                            <t t-if="employee.has_work_permit">
+                                <div class="mb-2">
+                                    <a t-att-href="'/web/content/hr.employee/%s/has_work_permit?download=true' % employee.id"
+                                       target="_blank"
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="fa fa-download me-1"></i>Download Current File
+                                    </a>
+                                </div>
+                            </t>
+
+                            <!-- Upload New File -->
+                            <input type="file"
+                                   name="has_work_permit"
+                                   class="form-control"/>
                         </div>
 
                     </div>
@@ -131,7 +152,7 @@
                             <label>SSN No</label>
                             <input class="form-control"
                                    t-att-value="employee.ssnid or ''"
-                                  style="pointer-events: none;"/>
+                                   style="pointer-events: none;"/>
                         </div>
 
                         <div class="col-md-6">
