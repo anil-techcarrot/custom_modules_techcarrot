@@ -71,9 +71,9 @@
                                         <i class="fa fa-flag text-muted me-1"></i>Nationality
                                     </label>
                                     <input type="text"
-                                           name="x_nationality"
+                                           name="country_id"
                                            class="form-control"
-                                           t-att-value="employee.x_nationality"
+                                           t-att-value="employee.country_id"
                                            style="pointer-events: none;"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
