@@ -1,213 +1,241 @@
 <odoo>
-  <template id="portal_employee_profile_experience">
-    <t t-call="employee_self_service_portal.portal_employee_profile_base">
-      <t t-set="section" t-value="'experience'"/>
-      <t t-set="section_content">
-        
-        <!-- Success/Error Messages -->
-        <div id="messageContainer" style="display: none;">
-          <div id="successMessage" class="alert alert-success alert-dismissible fade" role="alert" style="display: none;">
-            <i class="fa fa-check-circle me-2"></i>
-            <span id="successText"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-          </div>
-          <div id="errorMessage" class="alert alert-danger alert-dismissible fade" role="alert" style="display: none;">
-            <i class="fa fa-exclamation-triangle me-2"></i>
-            <span id="errorText"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-          </div>
-        </div>
+    <template id="portal_employee_profile_experience">
+        <t t-call="employee_self_service_portal.portal_employee_profile_base">
+            <t t-set="section" t-value="'experience'"/>
+            <t t-set="section_content">
 
-        <!-- Experience Management Form -->
-        <form id="experienceForm" action="/my/employee/experience" method="post" enctype="multipart/form-data">
-          <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-          
-          <!-- Work Experience Section -->
-          <div class="card mb-4 shadow-sm">
-            <div class="card-header bg-light d-flex justify-content-between align-items-center">
-              <h5 class="mb-0">
-                <i class="fa fa-briefcase text-primary me-2"></i>Work Experience
-              </h5>
-              <div class="d-flex gap-2">
-                <span class="badge bg-info" id="experienceYears">0 Years</span>
-                <button type="button" class="btn btn-sm btn-outline-primary" onclick="toggleEditMode('experience')">
-                  <i class="fa fa-edit me-1"></i>Edit
-                </button>
-              </div>
-            </div>
-            <div class="card-body">
-              <div class="mb-3">
-                <label class="form-label fw-bold">
-                  <i class="fa fa-history text-muted me-1"></i>Professional Experience Summary
-                </label>
-                <textarea name="x_experience" 
-                          id="experienceText"
-                          class="form-control" 
-                          rows="6" 
-                          readonly=""
-                          placeholder="Describe your professional experience, roles, responsibilities, and achievements..."
-                          data-validation="required"><t t-esc="employee.x_experience"/></textarea>
-                <div class="invalid-feedback"></div>
-                <small class="text-muted">
-                  <span id="experienceWordCount">0</span> words | 
-                  Recommended: 50-200 words for a comprehensive summary
-                </small>
-              </div>
-              
-              <!-- Experience Timeline (Visual Enhancement) -->
-              <div class="experience-timeline" id="experienceTimeline" style="display: none;">
-                <h6 class="text-muted mb-3">
-                  <i class="fa fa-timeline me-1"></i>Career Timeline
-                </h6>
-                <div class="timeline-content">
-                  <p class="text-muted small">Add structured experience details in the text area above to see them visualized here.</p>
+                <!-- Success/Error Messages -->
+                <div id="messageContainer" style="display: none;">
+                    <div id="successMessage" class="alert alert-success alert-dismissible fade" role="alert"
+                         style="display: none;">
+                        <i class="fa fa-check-circle me-2"></i>
+                        <span id="successText"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    <div id="errorMessage" class="alert alert-danger alert-dismissible fade" role="alert"
+                         style="display: none;">
+                        <i class="fa fa-exclamation-triangle me-2"></i>
+                        <span id="errorText"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
                 </div>
-              </div>
-            </div>
-          </div>
 
-          <!-- Skills Section -->
-          <div class="card mb-4 shadow-sm">
-            <div class="card-header bg-light d-flex justify-content-between align-items-center">
-              <h5 class="mb-0">
-                <i class="fa fa-cogs text-primary me-2"></i>Skills &amp; Competencies
-              </h5>
-              <div class="d-flex gap-2">
-                <span class="badge bg-success" id="skillsCount">0 Skills</span>
-                <button type="button" class="btn btn-sm btn-outline-primary" onclick="toggleEditMode('skills')">
-                  <i class="fa fa-edit me-1"></i>Edit
-                </button>
-              </div>
-            </div>
-            <div class="card-body">
-              <div class="mb-3">
-                <label class="form-label fw-bold">
-                  <i class="fa fa-star text-muted me-1"></i>Technical &amp; Professional Skills
-                </label>
-                <input type="text" 
-                       name="x_skills" 
-                       id="skillsInput"
-                       class="form-control" 
-                       t-att-value="employee.x_skills" 
-                       readonly=""
-                       placeholder="e.g., Python, Project Management, Data Analysis, Leadership..."
-                       data-validation="required"/>
-                <div class="invalid-feedback"></div>
-                <small class="text-muted">
-                  Separate skills with commas. Add 5-15 key skills that best represent your expertise.
-                </small>
-              </div>
-              
-              <!-- Skills Visualization -->
-              <div class="skills-display" id="skillsDisplay">
-                <h6 class="text-muted mb-3">
-                  <i class="fa fa-tags me-1"></i>Skill Tags
-                </h6>
-                <div id="skillsBadges" class="d-flex flex-wrap gap-2">
-                  <!-- Skills will be populated by JavaScript -->
-                </div>
-              </div>
-            </div>
-          </div>
+                <!-- Experience Management Form -->
+                <form id="experienceForm" action="/my/employee/experience" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
 
-          <!-- Professional Development Section -->
-          <div class="card mb-4 shadow-sm">
-            <div class="card-header bg-light">
-              <h5 class="mb-0">
-                <i class="fa fa-graduation-cap text-primary me-2"></i>Professional Development
-              </h5>
-            </div>
-            <div class="card-body">
-              <div class="text-center">
-                <p class="text-muted">Additional training and language information can be added through the HR department.</p>
-              </div>
-            </div>
-          </div>
+                    <!-- Work Experience Section -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="fa fa-briefcase text-primary me-2"></i>Work Experience
+                            </h5>
+                            <div class="d-flex gap-2">
+                                <span class="badge bg-info" id="experienceYears">0 Years</span>
+                                <button type="button" class="btn btn-sm btn-outline-primary"
+                                        onclick="toggleEditMode('experience')">
+                                    <i class="fa fa-edit me-1"></i>Edit
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fa fa-history text-muted me-1"></i>Professional Experience Summary
+                                </label>
+                                <textarea name="x_experience"
+                                          id="experienceText"
+                                          class="form-control"
+                                          rows="6"
+                                          readonly=""
+                                          placeholder="Describe your professional experience, roles, responsibilities, and achievements..."
+                                          data-validation="required">
+                                    <t t-esc="employee.x_experience"/>
+                                </textarea>
+                                <div class="invalid-feedback"></div>
+                                <small class="text-muted">
+                                    <span id="experienceWordCount">0</span>
+                                    words |
+                                    Recommended: 50-200 words for a comprehensive summary
+                                </small>
+                            </div>
 
-          <!-- Document Upload Section -->
-          <div class="card mb-4 shadow-sm">
-            <div class="card-header bg-light">
-              <h5 class="mb-0">
-                <i class="fa fa-folder-open text-primary me-2"></i>Supporting Documents
-              </h5>
-            </div>
-            <div class="card-body">
-              <div class="row g-3">
-                <div class="col-md-4">
-                  <label class="form-label fw-bold">
-                    <i class="fa fa-file-pdf text-muted me-1"></i>Resume/CV
-                  </label>
-                  <input type="file" 
-                         name="resume_file" 
-                         class="form-control" 
-                         accept=".pdf,.doc,.docx"
-                         disabled=""
-                         data-max-size="10"/>
-                  <small class="text-muted">PDF, DOC, DOCX (Max: 10MB)</small>
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label fw-bold">
-                    <i class="fa fa-certificate text-muted me-1"></i>Training Certificates
-                  </label>
-                  <input type="file" 
-                         name="training_certificates" 
-                         class="form-control" 
-                         accept=".pdf,.jpg,.jpeg,.png"
-                         disabled=""
-                         multiple=""
-                         data-max-size="5"/>
-                  <small class="text-muted">Multiple files (Max: 5MB each)</small>
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label fw-bold">
-                    <i class="fa fa-trophy text-muted me-1"></i>Awards &amp; Recognition
-                  </label>
-                  <input type="file" 
-                         name="awards_files" 
-                         class="form-control" 
-                         accept=".pdf,.jpg,.jpeg,.png"
-                         disabled=""
-                         multiple=""
-                         data-max-size="5"/>
-                  <small class="text-muted">Multiple files (Max: 5MB each)</small>
-                </div>
-              </div>
-            </div>
-          </div>
+                            <!-- Experience Timeline (Visual Enhancement) -->
+                            <div class="experience-timeline" id="experienceTimeline" style="display: none;">
+                                <h6 class="text-muted mb-3">
+                                    <i class="fa fa-timeline me-1"></i>Career Timeline
+                                </h6>
+                                <div class="timeline-content">
+                                    <p class="text-muted small">Add structured experience details in the text area above
+                                        to see them visualized here.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-          <!-- Form Actions -->
-          <div class="card shadow-sm">
-            <div class="card-body text-center">
-              <div id="formActions" style="display: none;">
-                <button type="button" class="btn btn-secondary me-2" onclick="cancelEdit()">
-                  <i class="fa fa-times me-1"></i>Cancel
-                </button>
-                <button type="button" class="btn btn-info me-2" onclick="autoSave()">
-                  <i class="fa fa-save me-1"></i>Auto-Save
-                </button>
-                <button type="submit" class="btn btn-primary">
-                  <i class="fa fa-check me-1"></i>Save Changes
-                </button>
-              </div>
-              <div id="viewActions">
-                <p class="text-muted mb-3">
-                  <i class="fa fa-clock me-1"></i>
-                  Last updated: 
-                  <strong>
-                    <t t-esc="employee.write_date.strftime('%d %b, %Y at %I:%M %p') if employee.write_date else 'Never'"/>
-                  </strong>
-                </p>
-                <button type="button" class="btn btn-outline-primary" onclick="enableFullEdit()">
-                  <i class="fa fa-edit me-1"></i>Edit Experience &amp; Skills
-                </button>
-              </div>
-            </div>
-          </div>
-        </form>
+                    <!-- Skills Section -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="fa fa-cogs text-primary me-2"></i>Skills &amp; Competencies
+                            </h5>
+                            <div class="d-flex gap-2">
+                                <span class="badge bg-success" id="skillsCount">0 Skills</span>
+                                <button type="button" class="btn btn-sm btn-outline-primary"
+                                        onclick="toggleEditMode('skills')">
+                                    <i class="fa fa-edit me-1"></i>Edit
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fa fa-star text-muted me-1"></i>Technical &amp; Professional Skills
+                                </label>
+                                <input type="text"
+                                       name="x_skills"
+                                       id="skillsInput"
+                                       class="form-control"
+                                       t-att-value="employee.x_skills"
+                                       readonly=""
+                                       placeholder="e.g., Python, Project Management, Data Analysis, Leadership..."
+                                       data-validation="required"/>
+                                <div class="invalid-feedback"></div>
+                                <small class="text-muted">
+                                    Separate skills with commas. Add 5-15 key skills that best represent your expertise.
+                                </small>
+                            </div>
 
-        <!-- Enhanced JavaScript for Experience Management -->
-        <script type="text/javascript">
-        <![CDATA[
+                            <!-- Skills Visualization -->
+                            <div class="skills-display" id="skillsDisplay">
+                                <h6 class="text-muted mb-3">
+                                    <i class="fa fa-tags me-1"></i>Skill Tags
+                                </h6>
+                                <div id="skillsBadges" class="d-flex flex-wrap gap-2">
+                                    <!-- Skills will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Professional Development Section -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">
+                                <i class="fa fa-graduation-cap text-primary me-2"></i>Professional Development
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center">
+                                <p class="text-muted">Additional training and language information can be added through
+                                    the HR department.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Document Upload Section -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">
+                                <i class="fa fa-folder-open text-primary me-2"></i>Supporting Documents
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+
+                                <!-- Resume/CV -->
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold">
+                                        <i class="fa fa-file-pdf text-muted me-1"></i>Resume/CV
+                                    </label>
+                                    <t t-if="employee.resume_file">
+                                        <a t-att-href="'/web/content/hr.employee/%s/resume_file/%s' % (employee.id, employee.resume_file_filename or 'resume')"
+                                           class="btn btn-outline-primary btn-sm d-block"
+                                           target="_blank">
+                                            <i class="fa fa-download me-1"></i>
+                                            <t t-esc="employee.resume_file_filename or 'Download Resume'"/>
+                                        </a>
+                                    </t>
+                                    <t t-else="">
+                                        <p class="text-muted small">No file uploaded</p>
+                                    </t>
+                                </div>
+
+                                <!-- Training Certificates -->
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold">
+                                        <i class="fa fa-certificate text-muted me-1"></i>Training Certificates
+                                    </label>
+                                    <t t-if="employee.training_certificates">
+                                        <a t-att-href="'/web/content/hr.employee/%s/training_certificates/%s' % (employee.id, employee.training_certificates_filename or 'certificate')"
+                                           class="btn btn-outline-primary btn-sm d-block"
+                                           target="_blank">
+                                            <i class="fa fa-download me-1"></i>
+                                            <t t-esc="employee.training_certificates_filename or 'Download Certificate'"/>
+                                        </a>
+                                    </t>
+                                    <t t-else="">
+                                        <p class="text-muted small">No file uploaded</p>
+                                    </t>
+                                </div>
+
+                                <!-- Awards & Recognition -->
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold">
+                                        <i class="fa fa-trophy text-muted me-1"></i>Awards &amp; Recognition
+                                    </label>
+                                    <t t-if="employee.awards_files">
+                                        <a t-att-href="'/web/content/hr.employee/%s/awards_files/%s' % (employee.id, employee.awards_files_filename or 'award')"
+                                           class="btn btn-outline-primary btn-sm d-block"
+                                           target="_blank">
+                                            <i class="fa fa-download me-1"></i>
+                                            <t t-esc="employee.awards_files_filename or 'Download Award'"/>
+                                        </a>
+                                    </t>
+                                    <t t-else="">
+                                        <p class="text-muted small">No file uploaded</p>
+                                    </t>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="card shadow-sm">
+                        <div class="card-body text-center">
+                            <div id="formActions" style="display: none;">
+                                <button type="button" class="btn btn-secondary me-2" onclick="cancelEdit()">
+                                    <i class="fa fa-times me-1"></i>Cancel
+                                </button>
+                                <button type="button" class="btn btn-info me-2" onclick="autoSave()">
+                                    <i class="fa fa-save me-1"></i>Auto-Save
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa fa-check me-1"></i>Save Changes
+                                </button>
+                            </div>
+                            <div id="viewActions">
+                                <p class="text-muted mb-3">
+                                    <i class="fa fa-clock me-1"></i>
+                                    Last updated:
+                                    <strong>
+                                        <t t-esc="employee.write_date.strftime('%d %b, %Y at %I:%M %p') if employee.write_date else 'Never'"/>
+                                    </strong>
+                                </p>
+                                <button type="button" class="btn btn-outline-primary" onclick="enableFullEdit()">
+                                    <i class="fa fa-edit me-1"></i>Edit Experience &amp; Skills
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Enhanced JavaScript for Experience Management -->
+                <script type="text/javascript">
+                    <![CDATA[
           let isEditMode = false;
           let originalFormData = {};
           let autoSaveTimer = null;
@@ -530,11 +558,11 @@
             }
           });
         ]]>
-        </script>
+                </script>
 
-        <!-- Enhanced CSS Styles for Experience -->
-        <style>
-        <![CDATA[
+                <!-- Enhanced CSS Styles for Experience -->
+                <style>
+                    <![CDATA[
           .skills-display {
             background-color: #f8f9fa;
             border-radius: 0.375rem;
@@ -592,8 +620,8 @@
             }
           }
         ]]>
-        </style>
-      </t>
-    </t>
-  </template>
+                </style>
+            </t>
+        </t>
+    </template>
 </odoo>
