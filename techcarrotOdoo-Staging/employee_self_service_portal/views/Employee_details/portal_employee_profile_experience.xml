@@ -151,17 +151,25 @@
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-file-pdf text-muted me-1"></i>Resume/CV
                                     </label>
+                                    <!-- Show existing file if uploaded -->
                                     <t t-if="employee.resume_file">
                                         <a t-att-href="'/web/content/hr.employee/%s/resume_file/%s' % (employee.id, employee.resume_file_filename or 'resume')"
-                                           class="btn btn-outline-primary btn-sm d-block"
+                                           class="btn btn-outline-success btn-sm d-block mb-2"
                                            target="_blank">
                                             <i class="fa fa-download me-1"></i>
                                             <t t-esc="employee.resume_file_filename or 'Download Resume'"/>
                                         </a>
                                     </t>
                                     <t t-else="">
-                                        <p class="text-muted small">No file uploaded</p>
+                                        <p class="text-muted small mb-1">No file uploaded yet</p>
                                     </t>
+                                    <!-- Upload new file -->
+                                    <input type="file"
+                                           name="resume_file"
+                                           class="form-control form-control-sm"
+                                           accept=".pdf,.doc,.docx"
+                                           data-max-size="10"/>
+                                    <small class="text-muted">PDF, DOC, DOCX (Max: 10MB)</small>
                                 </div>
 
                                 <!-- Training Certificates -->
@@ -169,17 +177,26 @@
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-certificate text-muted me-1"></i>Training Certificates
                                     </label>
+                                    <!-- Show existing file if uploaded -->
                                     <t t-if="employee.training_certificates">
                                         <a t-att-href="'/web/content/hr.employee/%s/training_certificates/%s' % (employee.id, employee.training_certificates_filename or 'certificate')"
-                                           class="btn btn-outline-primary btn-sm d-block"
+                                           class="btn btn-outline-success btn-sm d-block mb-2"
                                            target="_blank">
                                             <i class="fa fa-download me-1"></i>
                                             <t t-esc="employee.training_certificates_filename or 'Download Certificate'"/>
                                         </a>
                                     </t>
                                     <t t-else="">
-                                        <p class="text-muted small">No file uploaded</p>
+                                        <p class="text-muted small mb-1">No file uploaded yet</p>
                                     </t>
+                                    <!-- Upload new file -->
+                                    <input type="file"
+                                           name="training_certificates"
+                                           class="form-control form-control-sm"
+                                           accept=".pdf,.jpg,.jpeg,.png"
+                                           multiple=""
+                                           data-max-size="5"/>
+                                    <small class="text-muted">Multiple files (Max: 5MB each)</small>
                                 </div>
 
                                 <!-- Awards & Recognition -->
@@ -187,17 +204,26 @@
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-trophy text-muted me-1"></i>Awards &amp; Recognition
                                     </label>
+                                    <!-- Show existing file if uploaded -->
                                     <t t-if="employee.awards_files">
                                         <a t-att-href="'/web/content/hr.employee/%s/awards_files/%s' % (employee.id, employee.awards_files_filename or 'award')"
-                                           class="btn btn-outline-primary btn-sm d-block"
+                                           class="btn btn-outline-success btn-sm d-block mb-2"
                                            target="_blank">
                                             <i class="fa fa-download me-1"></i>
                                             <t t-esc="employee.awards_files_filename or 'Download Award'"/>
                                         </a>
                                     </t>
                                     <t t-else="">
-                                        <p class="text-muted small">No file uploaded</p>
+                                        <p class="text-muted small mb-1">No file uploaded yet</p>
                                     </t>
+                                    <!-- Upload new file -->
+                                    <input type="file"
+                                           name="awards_files"
+                                           class="form-control form-control-sm"
+                                           accept=".pdf,.jpg,.jpeg,.png"
+                                           multiple=""
+                                           data-max-size="5"/>
+                                    <small class="text-muted">Multiple files (Max: 5MB each)</small>
                                 </div>
 
                             </div>
