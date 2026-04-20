@@ -10,6 +10,16 @@ import phonenumbers
 class HrEmployeeInherit(models.Model):
     _inherit = 'hr.employee'
 
+    # Professional Development & Supporting Documents
+    resume_file = fields.Binary(string='Resume/CV', attachment=True)
+    resume_file_filename = fields.Char(string='Resume/CV Filename')
+
+    training_certificates = fields.Binary(string='Training Certificates', attachment=True)
+    training_certificates_filename = fields.Char(string='Training Certificates Filename')
+
+    awards_files = fields.Binary(string='Awards & Recognition', attachment=True)
+    awards_files_filename = fields.Char(string='Awards & Recognition Filename')
+
     x_experience = fields.Text(
         string='Professional Experience Summary',
         help='Describe professional experience, roles, responsibilities and achievements'

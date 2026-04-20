@@ -45,8 +45,11 @@
                 <field name="billing_currency_id"/>
                 <field name="emp_category_id" options="{'no_open': True, 'no_create': True}"/>
             </xpath>
+
         </field>
+
     </record>
+
 
     <!-- as contracts is not present in separate i am removing this code (sriman) -->
     <!--    <record id="techcarrot_employee_contract_button_form_view" model="ir.ui.view">-->
@@ -110,29 +113,6 @@
                             </div>
                             <field name="bank_name"/>
                         </group>
-
-
-                        <xpath expr="//page[@name='resume']" position="inside">
-
-                            <separator string="Work Experience"/>
-
-                            <group>
-                                <group string="Professional Experience">
-                                    <field name="x_experience"
-                                           string="Professional Experience Summary"
-                                           widget="html"
-                                           placeholder="Describe your experience..."/>
-                                </group>
-
-                                <group string="Skills &amp; Competencies">
-                                    <field name="x_skills"
-                                           string="Technical &amp; Professional Skills"
-                                           placeholder="e.g., Python, Odoo, SQL"/>
-                                </group>
-                            </group>
-
-                        </xpath>
-
 
 
                         <separator string="Document Management"/>
@@ -362,6 +342,58 @@
                     </group>
                 </page>
             </page>
+
+        </field>
+    </record>
+
+
+    <!-- Separate record to inherit hr.view_employee_form for Resume tab -->
+    <record id="techcarrot_employee_resume_tab_view" model="ir.ui.view">
+        <field name="name">hr.employee.resume.experience</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//page[@name='resume']" position="inside">
+
+                <separator string="Work Experience &amp; Skills"/>
+
+                <group>
+                    <group string="Professional Experience">
+                        <field name="x_experience"
+                               widget="text"
+                               placeholder="Describe your professional experience, roles, responsibilities and achievements..."/>
+                    </group>
+
+                    <group string="Skills &amp; Competencies">
+                        <field name="x_skills"
+                               placeholder="e.g., Python, Project Management, Data Analysis, Leadership..."/>
+                    </group>
+                </group>
+
+                <separator string="Professional Development"/>
+                <group>
+                    <group string="Resume/CV">
+                        <field name="resume_file" string="Resume/CV"
+                               widget="binary" filename="resume_file_filename"/>
+                        <field name="resume_file_filename" invisible="1"/>
+                    </group>
+                    <group string="Training Certificates">
+                        <field name="training_certificates" string="Training Certificates"
+                               widget="binary" filename="training_certificates_filename"/>
+                        <field name="training_certificates_filename" invisible="1"/>
+                    </group>
+                </group>
+                <group>
+                    <group string="Awards &amp; Recognition">
+                        <field name="awards_files" string="Awards &amp; Recognition"
+                               widget="binary" filename="awards_files_filename"/>
+                        <field name="awards_files_filename" invisible="1"/>
+                    </group>
+                </group>
+
+            </xpath>
+
         </field>
     </record>
 
