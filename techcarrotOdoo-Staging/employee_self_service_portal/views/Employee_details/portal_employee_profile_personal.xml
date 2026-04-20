@@ -66,17 +66,17 @@
                                            data-validation="phone"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
-<!--                                <div class="col-md-6">-->
-<!--                                    <label class="form-label fw-bold">-->
-<!--                                        <i class="fa fa-flag text-muted me-1"></i>Nationality-->
-<!--                                    </label>-->
-<!--                                    <input type="text"-->
-<!--                                           name="country_id"-->
-<!--                                           class="form-control"-->
-<!--                                           t-att-value="employee.country_id"-->
-<!--                                           style="pointer-events: none;"/>-->
-<!--                                    <div class="invalid-feedback"></div>-->
-<!--                                </div>-->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">
+                                        <i class="fa fa-flag text-muted me-1"></i>Nationality
+                                    </label>
+                                    <input type="text"
+                                           name="country_id"
+                                           class="form-control"
+                                           t-att-value="employee.country_id.name or ''"
+                                           style="pointer-events: none;"/>
+                                    <div class="invalid-feedback"></div>
+                                </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-venus-mars text-muted me-1"></i>Gender
@@ -103,7 +103,7 @@
                                            name="birthday"
                                            class="form-control"
                                            t-att-value="employee.birthday"
-                                          style="pointer-events: none;"
+                                           style="pointer-events: none;"
                                            data-validation="date"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
@@ -389,9 +389,6 @@
                     </div>
 
 
-
-
-
                     <!-- Identity Documents Section -->
                     <div class="card mb-4 shadow-sm">
                         <div class="card-header bg-light">
@@ -444,7 +441,7 @@
                                     <input type="text"
                                            name="issue_countries_id"
                                            class="form-control"
-                                           t-att-value="employee.issue_countries_id"
+                                           t-att-value="employee.issue_countries_id.name or ''"
                                            readonly="readonly"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
