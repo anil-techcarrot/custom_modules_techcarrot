@@ -606,52 +606,77 @@
                         </div>
                     </div>
 
-                    <!-- Document Upload Section -->
                     <div class="card mb-4 shadow-sm">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
                                 <i class="fa fa-folder-open text-primary me-2"></i>Document Management
                             </h5>
                         </div>
+
                         <div class="card-body">
                             <div class="row g-3">
+
+                                <!-- Emirates ID -->
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-id-card text-muted me-1"></i>Emirates ID Copy
                                     </label>
-                                    <input type="file"
-                                           name="emirates_id_file"
-                                           class="form-control"
-                                           accept=".pdf,.jpg,.jpeg,.png"
-                                           disabled=""
-                                           data-max-size="5"/>
-                                    <small class="text-muted">PDF, JPG, PNG (Max: 5MB)</small>
+
+                                    <!-- Show Existing -->
+                                    <t t-if="employee.emirates_id_file">
+                                        <div class="mb-2">
+                                            <a t-att-href="'/web/content/hr.employee/%s/emirates_id_file?download=true' % employee.id"
+                                               class="btn btn-sm btn-outline-primary"
+                                               target="_blank">
+                                                Download File
+                                            </a>
+                                        </div>
+                                    </t>
+
+                                    <!-- Upload -->
+                                    <input type="file" name="emirates_id_file" class="form-control"/>
                                 </div>
+
+
+                                <!-- Passport -->
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-passport text-muted me-1"></i>Passport Copy
                                     </label>
-                                    <input type="file"
-                                           name="passport_file"
-                                           class="form-control"
-                                           accept=".pdf,.jpg,.jpeg,.png"
-                                           disabled=""
-                                           data-max-size="5"/>
-                                    <small class="text-muted">PDF, JPG, PNG (Max: 5MB)</small>
+
+                                    <t t-if="employee.passport_file">
+                                        <div class="mb-2">
+                                            <a t-att-href="'/web/content/hr.employee/%s/passport_file?download=true' % employee.id"
+                                               class="btn btn-sm btn-outline-primary"
+                                               target="_blank">
+                                                Download File
+                                            </a>
+                                        </div>
+                                    </t>
+
+                                    <input type="file" name="passport_file" class="form-control"/>
                                 </div>
+
+
+                                <!-- Other Documents -->
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-file-text text-muted me-1"></i>Other Documents
                                     </label>
-                                    <input type="file"
-                                           name="other_documents"
-                                           class="form-control"
-                                           accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                                           disabled=""
-                                           multiple=""
-                                           data-max-size="10"/>
-                                    <small class="text-muted">Multiple files allowed (Max: 10MB each)</small>
+
+                                    <t t-if="employee.other_documents">
+                                        <div class="mb-2">
+                                            <a t-att-href="'/web/content/hr.employee/%s/other_documents?download=true' % employee.id"
+                                               class="btn btn-sm btn-outline-primary"
+                                               target="_blank">
+                                                Download File
+                                            </a>
+                                        </div>
+                                    </t>
+
+                                    <input type="file" name="other_documents" class="form-control"/>
                                 </div>
+
                             </div>
                         </div>
                     </div>

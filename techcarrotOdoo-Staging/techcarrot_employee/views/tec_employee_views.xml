@@ -138,6 +138,8 @@
                             </group>
                         </group>
 
+
+
                         <group string="Document and Personal Details">
                             <field name="aadhar_no" string="Aadhar Number"/>
                             <field name="pan" string="PAN"/>
