@@ -10,6 +10,16 @@ import phonenumbers
 class HrEmployeeInherit(models.Model):
     _inherit = 'hr.employee'
 
+    # Document Management
+    emirates_id_file = fields.Binary(string='Emirates ID Copy', attachment=True)
+    emirates_id_filename = fields.Char(string='Emirates ID Filename')
+
+    passport_file = fields.Binary(string='Passport Copy', attachment=True)
+    passport_filename = fields.Char(string='Passport Filename')
+
+    other_documents = fields.Binary(string='Other Documents', attachment=True)
+    other_documents_filename = fields.Char(string='Other Documents Filename')
+
     resource_id = fields.Many2one('resource.resource', required=False)
     employee_first_name = fields.Char('Employee First Name', copy=False)
     employee_middle_name = fields.Char('Employee Middle Name', copy=False)

@@ -111,6 +111,33 @@
                             <field name="bank_name"/>
                         </group>
 
+                        <separator string="Document Management"/>
+                        <group>
+                            <group string="Emirates ID Copy">
+                                <field name="emirates_id_file"
+                                       string="Emirates ID Copy"
+                                       widget="binary"
+                                       filename="emirates_id_filename"/>
+                                <field name="emirates_id_filename" invisible="1"/>
+                            </group>
+                            <group string="Passport Copy">
+                                <field name="passport_file"
+                                       string="Passport Copy"
+                                       widget="binary"
+                                       filename="passport_filename"/>
+                                <field name="passport_filename" invisible="1"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Other Documents">
+                                <field name="other_documents"
+                                       string="Other Documents"
+                                       widget="binary"
+                                       filename="other_documents_filename"/>
+                                <field name="other_documents_filename" invisible="1"/>
+                            </group>
+                        </group>
+
                         <group string="Document and Personal Details">
                             <field name="aadhar_no" string="Aadhar Number"/>
                             <field name="pan" string="PAN"/>
