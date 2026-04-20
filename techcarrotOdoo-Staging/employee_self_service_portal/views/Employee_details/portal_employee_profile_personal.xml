@@ -392,88 +392,88 @@
 
 
 
-                    <!-- Identity Documents Section -->
-                    <div class="card mb-4 shadow-sm">
-                        <div class="card-header bg-light">
-                            <h5 class="mb-0">
-                                <i class="fa fa-id-card text-primary me-2"></i>Identity Documents
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">
-                                        <i class="fa fa-id-badge text-muted me-1"></i>Emirates ID
-                                    </label>
-                                    <input type="text"
-                                           name="x_emirates_id"
-                                           class="form-control"
-                                           t-att-value="employee.x_emirates_id"
-                                           readonly="readonly"
-                                           pattern="[0-9]{3}-[0-9]{4}-[0-9]{7}-[0-9]{1}"/>
-                                    <div class="invalid-feedback"></div>
-                                    <small class="text-muted">Format: 784-1234-1234567-1</small>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">
-                                        <i class="fa fa-calendar-times text-muted me-1"></i>Emirates ID Expiry
-                                    </label>
-                                    <input type="date"
-                                           name="x_emirates_expiry"
-                                           class="form-control"
-                                           t-att-value="employee.x_emirates_expiry"
-                                           readonly="readonly"
-                                           data-validation="future-date"/>
-                                    <div class="invalid-feedback"></div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">
-                                        <i class="fa fa-passport text-muted me-1"></i>Passport Number
-                                    </label>
-                                    <input type="text"
-                                           name="x_passport_number"
-                                           class="form-control"
-                                           t-att-value="employee.x_passport_number"
-                                           style="pointer-events: none;"/>
-                                    <div class="invalid-feedback"></div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">
-                                        <i class="fa fa-globe text-muted me-1"></i>Passport Issuing Country
-                                    </label>
-                                    <input type="text"
-                                           name="x_passport_country"
-                                           class="form-control"
-                                           t-att-value="employee.x_passport_country"
-                                           readonly="readonly"/>
-                                    <div class="invalid-feedback"></div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">
-                                        <i class="fa fa-calendar text-muted me-1"></i>Passport Issue Date
-                                    </label>
-                                    <input type="date"
-                                           name="x_passport_issue"
-                                           class="form-control"
-                                           t-att-value="employee.x_passport_issue"
-                                           readonly="readonly"/>
-                                    <div class="invalid-feedback"></div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">
-                                        <i class="fa fa-calendar-times text-muted me-1"></i>Passport Expiry Date
-                                    </label>
-                                    <input type="date"
-                                           name="x_passport_expiry"
-                                           class="form-control"
-                                           t-att-value="employee.x_passport_expiry"
-                                           readonly="readonly"
-                                           data-validation="future-date"/>
-                                    <div class="invalid-feedback"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+<!--                    &lt;!&ndash; Identity Documents Section &ndash;&gt;-->
+<!--                    <div class="card mb-4 shadow-sm">-->
+<!--                        <div class="card-header bg-light">-->
+<!--                            <h5 class="mb-0">-->
+<!--                                <i class="fa fa-id-card text-primary me-2"></i>Identity Documents-->
+<!--                            </h5>-->
+<!--                        </div>-->
+<!--                        <div class="card-body">-->
+<!--                            <div class="row g-3">-->
+<!--                                <div class="col-md-6">-->
+<!--                                    <label class="form-label fw-bold">-->
+<!--                                        <i class="fa fa-id-badge text-muted me-1"></i>Emirates ID-->
+<!--                                    </label>-->
+<!--                                    <input type="text"-->
+<!--                                           name="x_emirates_id"-->
+<!--                                           class="form-control"-->
+<!--                                           t-att-value="employee.x_emirates_id"-->
+<!--                                           readonly="readonly"-->
+<!--                                           pattern="[0-9]{3}-[0-9]{4}-[0-9]{7}-[0-9]{1}"/>-->
+<!--                                    <div class="invalid-feedback"></div>-->
+<!--                                    <small class="text-muted">Format: 784-1234-1234567-1</small>-->
+<!--                                </div>-->
+<!--                                <div class="col-md-6">-->
+<!--                                    <label class="form-label fw-bold">-->
+<!--                                        <i class="fa fa-calendar-times text-muted me-1"></i>Emirates ID Expiry-->
+<!--                                    </label>-->
+<!--                                    <input type="date"-->
+<!--                                           name="x_emirates_expiry"-->
+<!--                                           class="form-control"-->
+<!--                                           t-att-value="employee.x_emirates_expiry"-->
+<!--                                           readonly="readonly"-->
+<!--                                           data-validation="future-date"/>-->
+<!--                                    <div class="invalid-feedback"></div>-->
+<!--                                </div>-->
+<!--                                <div class="col-md-6">-->
+<!--                                    <label class="form-label fw-bold">-->
+<!--                                        <i class="fa fa-passport text-muted me-1"></i>Passport Number-->
+<!--                                    </label>-->
+<!--                                    <input type="text"-->
+<!--                                           name="x_passport_number"-->
+<!--                                           class="form-control"-->
+<!--                                           t-att-value="employee.x_passport_number"-->
+<!--                                           style="pointer-events: none;"/>-->
+<!--                                    <div class="invalid-feedback"></div>-->
+<!--                                </div>-->
+<!--                                <div class="col-md-6">-->
+<!--                                    <label class="form-label fw-bold">-->
+<!--                                        <i class="fa fa-globe text-muted me-1"></i>Passport Issuing Country-->
+<!--                                    </label>-->
+<!--                                    <input type="text"-->
+<!--                                           name="x_passport_country"-->
+<!--                                           class="form-control"-->
+<!--                                           t-att-value="employee.x_passport_country"-->
+<!--                                           readonly="readonly"/>-->
+<!--                                    <div class="invalid-feedback"></div>-->
+<!--                                </div>-->
+<!--                                <div class="col-md-6">-->
+<!--                                    <label class="form-label fw-bold">-->
+<!--                                        <i class="fa fa-calendar text-muted me-1"></i>Passport Issue Date-->
+<!--                                    </label>-->
+<!--                                    <input type="date"-->
+<!--                                           name="x_passport_issue"-->
+<!--                                           class="form-control"-->
+<!--                                           t-att-value="employee.x_passport_issue"-->
+<!--                                           readonly="readonly"/>-->
+<!--                                    <div class="invalid-feedback"></div>-->
+<!--                                </div>-->
+<!--                                <div class="col-md-6">-->
+<!--                                    <label class="form-label fw-bold">-->
+<!--                                        <i class="fa fa-calendar-times text-muted me-1"></i>Passport Expiry Date-->
+<!--                                    </label>-->
+<!--                                    <input type="date"-->
+<!--                                           name="x_passport_expiry"-->
+<!--                                           class="form-control"-->
+<!--                                           t-att-value="employee.x_passport_expiry"-->
+<!--                                           readonly="readonly"-->
+<!--                                           data-validation="future-date"/>-->
+<!--                                    <div class="invalid-feedback"></div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
                     <!-- Contact Information Section -->
                     <div class="card mb-4 shadow-sm">
                         <div class="card-header bg-light">
