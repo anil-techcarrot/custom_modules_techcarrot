@@ -1215,20 +1215,21 @@ class PortalEmployee(http.Controller):
                     vals['marital'] = post.get('marital')
                 
                 # Identity documents
-                if post.get('x_nationality'):
-                    vals['x_nationality'] = post.get('x_nationality')
-                if post.get('x_emirates_id'):
-                    vals['x_emirates_id'] = post.get('x_emirates_id')
-                if post.get('x_emirates_expiry'):
-                    vals['x_emirates_expiry'] = post.get('x_emirates_expiry')
-                if post.get('x_passport_number'):
-                    vals['x_passport_number'] = post.get('x_passport_number')
-                if post.get('x_passport_country'):
-                    vals['x_passport_country'] = post.get('x_passport_country')
-                if post.get('x_passport_issue'):
-                    vals['x_passport_issue'] = post.get('x_passport_issue')
-                if post.get('x_passport_expiry'):
-                    vals['x_passport_expiry'] = post.get('x_passport_expiry')
+                # CORRECT field names
+                if post.get('emirates_id_number'):
+                    vals['emirates_id_number'] = post.get('emirates_id_number')
+                if post.get('emirates_issue_date'):
+                    vals['emirates_issue_date'] = post.get('emirates_issue_date')
+                if post.get('emirates_expiry_date'):
+                    vals['emirates_expiry_date'] = post.get('emirates_expiry_date')
+                if post.get('ssnid'):
+                    vals['ssnid'] = post.get('ssnid')
+                if post.get('issue_date'):
+                    vals['issue_date'] = post.get('issue_date')
+                if post.get('expiry_date'):
+                    vals['expiry_date'] = post.get('expiry_date')
+                if post.get('issue_countries_id'):
+                    vals['issue_countries_id'] = int(post.get('issue_countries_id'))
                 
                 # Contact information
                 if post.get('private_email'):
