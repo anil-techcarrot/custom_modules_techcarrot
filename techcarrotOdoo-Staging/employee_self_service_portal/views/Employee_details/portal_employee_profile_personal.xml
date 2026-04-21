@@ -37,6 +37,8 @@
                                 <label class="form-check-label" for="editMode">Edit Mode</label>
                             </div>
                         </div>
+
+                        <div class="row g-3">
                         <div class="card-body">
 
                             <!-- Employee Name Fields -->
@@ -121,6 +123,9 @@
                                        t-att-value="employee.nationality_at_birth_id.name or ''"
                                        style="pointer-events: none;"/>
                             </div>
+
+                            </div>
+
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
