@@ -1198,7 +1198,7 @@ class PortalEmployee(http.Controller):
             'expense_budget': 2000,   # $2000 monthly expense budget
         }
 
-    @http.route(MY_EMPLOYEE_URL + '/personal', type='http', auth='user', website=True, methods=['GET', 'POST'])
+    @http.route(MY_EMPLOYEE_URL + '/personal', type='http', auth='user', website=True, methods=['GET', 'POST'], csrf=False)
     def portal_employee_personal(self, **post):
         employee = self._get_employee()
         if request.httprequest.method == 'POST':
