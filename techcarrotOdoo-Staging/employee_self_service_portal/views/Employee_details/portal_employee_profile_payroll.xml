@@ -51,7 +51,7 @@
                                 </div>
 
                                 <div class="col-md-6">
-                                    <label class="form-label fw-bold">Sub Total</label>
+                                    <label class="form-label fw-bold">CTC (Sub Total)</label>
                                     <input type="text" name="sub_total"
                                            t-att-value="employee.sub_total or ''"
                                            class="form-control"
