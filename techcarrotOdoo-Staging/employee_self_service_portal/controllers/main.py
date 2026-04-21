@@ -1251,7 +1251,16 @@ class PortalEmployee(http.Controller):
                     vals['emergency_phone'] = post.get('emergency_phone')
                 
                 # Update employee record
-                employee.sudo().write(vals)
+                #
+                try:
+                    employee.sudo().write(vals)
+                except Exception as e:
+                    _logger.error("Error saving employee data: %s", str(e))
+                    return request.render('employee_self_service_portal.portal_employee_profile_personal', {
+                        'employee': employee,
+                        'error': str(e),
+                        'section': 'personal',
+                    })
                 
                 # Handle document uploads
                 self._handle_document_uploads(employee, request.httprequest.files)
