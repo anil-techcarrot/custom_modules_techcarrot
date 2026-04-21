@@ -1390,25 +1390,36 @@ class PortalEmployee(http.Controller):
         """Handle document file uploads"""
         try:
             import base64
-            
+
             # Handle Emirates ID file
             emirates_file = files.get('emirates_id_file')
             if emirates_file and emirates_file.filename:
-                self._save_employee_document(employee, emirates_file, 'Emirates ID')
-            
+                file_data = base64.b64encode(emirates_file.read())
+                employee.sudo().write({
+                    'emirates_id_file': file_data,
+                    'emirates_id_filename': emirates_file.filename,
+                })
+
             # Handle Passport file
             passport_file = files.get('passport_file')
             if passport_file and passport_file.filename:
-                self._save_employee_document(employee, passport_file, 'Passport')
-            
-            # Handle other documents
-            other_files = files.getlist('other_documents')
-            for file in other_files:
-                if file and file.filename:
-                    self._save_employee_document(employee, file, 'Other Document')
-                    
+                file_data = base64.b64encode(passport_file.read())
+                employee.sudo().write({
+                    'passport_file': file_data,
+                    'passport_filename': passport_file.filename,
+                })
+
+            # Handle Other Documents
+            other_file = files.get('other_documents')
+            if other_file and other_file.filename:
+                file_data = base64.b64encode(other_file.read())
+                employee.sudo().write({
+                    'other_documents': file_data,
+                    'other_documents_filename': other_file.filename,
+                })
+
         except Exception as e:
-            _logger.error(f"Error handling document uploads: {str(e)}")
+            _logger.error("Error handling document uploads: %s", str(e))
 
     def _save_employee_document(self, employee, file, doc_type):
         """Save individual document file"""
