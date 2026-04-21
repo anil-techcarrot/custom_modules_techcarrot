@@ -123,7 +123,7 @@ def _process_partner_field(field_value, field_name='partner_id'):
 
 class PortalEmployee(http.Controller):
     def _get_employee(self):
-        return request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.uid)], limit=1)
+        return request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
 
     @http.route(MY_EMPLOYEE_URL, type='http', auth='user', website=True)
     def portal_employee_profile(self, **kw):
