@@ -1338,11 +1338,11 @@ class PortalEmployee(http.Controller):
                         ], limit=1)
                         if country:
                             vals['issue_countries_id'] = country.id
+                # Nationality
                 if post.get('country_id'):
                     try:
                         vals['country_id'] = int(post.get('country_id'))
                     except (ValueError, TypeError):
-                        # It's a country name string - find the ID
                         country = request.env['res.country'].sudo().search([
                             ('name', '=', post.get('country_id'))
                         ], limit=1)
@@ -1379,6 +1379,7 @@ class PortalEmployee(http.Controller):
                         'employee': employee,
                         'error': str(e),
                         'section': 'personal',
+                        'countries': request.env['res.country'].sudo().search([], order='name'),
                     })
                 
                 # Handle document uploads
