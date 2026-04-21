@@ -47,7 +47,7 @@
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">Employee First Name</label>
                                     <input type="text" name="employee_first_name"
-                                           class="form-control"
+                                           class="form-control bg-light text-muted"
                                            t-att-value="employee.employee_first_name or ''"
                                            style="pointer-events: none;"/>
                                 </div>
@@ -117,7 +117,6 @@
                                            style="pointer-events: none;"/>
                                 </div>
 
-                                <!-- NEW FIELD (you asked) -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Nationality At Birth</label>
                                     <input type="text" name="nationality_at_birth_id"
