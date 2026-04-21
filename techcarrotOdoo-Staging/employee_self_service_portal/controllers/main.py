@@ -127,7 +127,7 @@ class PortalEmployee(http.Controller):
 
     @http.route(MY_EMPLOYEE_URL, type='http', auth='user', website=True)
     def portal_employee_profile(self, **kw):
-        employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.uid)], limit=1)
+        employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', )], limit=1)
         return request.render('employee_self_service_portal.portal_employee_profile_personal', {
             'employee': employee,
             'section': 'personal',
@@ -135,7 +135,7 @@ class PortalEmployee(http.Controller):
 
     @http.route(MY_EMPLOYEE_URL + '/attendance/checkin', type='http', auth='user', methods=['POST'], website=True)
     def check_in(self, **post):
-        employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.uid)], limit=1)
+        employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
         if not employee:
             return request.redirect(MY_EMPLOYEE_URL + '?error=employee_not_found')
         
@@ -226,7 +226,7 @@ class PortalEmployee(http.Controller):
     @http.route(MY_EMPLOYEE_URL + '/attendance/quick-checkin', type='http', auth='user', methods=['POST'], website=True, csrf=False)
     def quick_check_in(self, **post):
         """Quick check-in from dashboard"""
-        employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.uid)], limit=1)
+        employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
         if not employee:
             return request.make_response(json.dumps({'status': 'error', 'message': 'Employee not found'}), 
                                        headers={'Content-Type': 'application/json'})
@@ -291,7 +291,7 @@ class PortalEmployee(http.Controller):
 
     @http.route(MY_EMPLOYEE_URL + '/attendance/checkout', type='http', auth='user', methods=['POST'], website=True)
     def check_out(self, **post):
-        employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.uid)], limit=1)
+        employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
         if not employee:
             return request.redirect(MY_EMPLOYEE_URL + '?error=employee_not_found')
             
@@ -386,7 +386,7 @@ class PortalEmployee(http.Controller):
     @http.route(MY_EMPLOYEE_URL + '/attendance/quick-checkout', type='http', auth='user', methods=['POST'], website=True, csrf=False)
     def quick_check_out(self, **post):
         """Quick check-out from dashboard"""
-        employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.uid)], limit=1)
+        employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
         if not employee:
             return request.make_response(json.dumps({'status': 'error', 'message': 'Employee not found'}), 
                                        headers={'Content-Type': 'application/json'})
@@ -478,7 +478,7 @@ class PortalEmployee(http.Controller):
         user_timezone = get_user_timezone()
         user_pytz = pytz.timezone(user_timezone)
         
-        employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.uid)], limit=1)
+        employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
         
         # Get current time in user's timezone
         utc_now = datetime.now(pytz.UTC)
@@ -696,7 +696,7 @@ class PortalEmployee(http.Controller):
     @http.route(MY_EMPLOYEE_URL + '/attendance/analytics', type='http', auth='user', website=True)
     def portal_attendance_analytics(self, **kwargs):
         """Dedicated analytics page for attendance"""
-        employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.uid)], limit=1)
+        employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
         if not employee:
             return request.redirect(MY_EMPLOYEE_URL)
         
@@ -732,7 +732,7 @@ class PortalEmployee(http.Controller):
     @http.route(MY_EMPLOYEE_URL + '/attendance/export', type='http', auth='user', website=True)
     def portal_attendance_export(self, **kwargs):
         """Export attendance data to Excel"""
-        employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.uid)], limit=1)
+        employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
         if not employee:
             return request.redirect(MY_EMPLOYEE_URL)
         
@@ -854,7 +854,7 @@ class PortalEmployee(http.Controller):
 
     @http.route(MY_EMPLOYEE_URL + '/edit', type='http', auth='user', website=True, methods=['GET', 'POST'])
     def portal_employee_edit(self, **post):
-        employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.uid)], limit=1)
+        employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
         if not employee:
             return request.redirect(MY_EMPLOYEE_URL)
         if http.request.httprequest.method == 'POST':
@@ -902,7 +902,7 @@ class PortalEmployee(http.Controller):
         """Common method to render dashboard with enhanced data"""
         import pytz
         
-        employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.uid)], limit=1)
+        employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
         
         # Get dashboard statistics
         dashboard_data = {}
@@ -2361,7 +2361,7 @@ class PortalEmployee(http.Controller):
         errors = []
         
         # Get employee for company-specific validations
-        employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.uid)], limit=1)
+        employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
         currency_symbol = employee.company_id.currency_id.symbol or '$'
         
         # Required field validation
@@ -2400,7 +2400,7 @@ class PortalEmployee(http.Controller):
         # Duplicate expense detection
         if post.get('date') and post.get('total_amount') and post.get('category_id'):
             try:
-                employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.uid)], limit=1)
+                employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
                 existing_expense = request.env['hr.expense'].sudo().search([
                     ('employee_id', '=', employee.id),
                     ('date', '=', post.get('date')),
@@ -2530,7 +2530,7 @@ class PortalEmployee(http.Controller):
         import logging
         _logger = logging.getLogger(__name__)
         
-        employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.uid)], limit=1)
+        employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
         if not employee:
             return request.redirect(MY_EMPLOYEE_URL)
             
@@ -2590,19 +2590,19 @@ class PortalEmployee(http.Controller):
         
         try:
             payslip = request.env['hr.payslip'].sudo().browse(payslip_id)
-            employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.uid)], limit=1)
+            employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
             
             # Security check - only allow access to own payslips
             if not payslip.exists() or not employee or payslip.employee_id.id != employee.id:
-                _logger.warning("Unauthorized payslip access attempt by user %s for payslip %s", request.uid, payslip_id)
+                _logger.warning("Unauthorized payslip access attempt by user %s for payslip %s", request.env.uid, payslip_id)
                 return request.redirect(MY_EMPLOYEE_URL + '/payslips?error=access_denied')
             
             # Only allow download of confirmed payslips
             if payslip.state not in ['validated','done', 'paid']:
-                _logger.warning("Download attempt for unconfirmed payslip %s by user %s", payslip_id, request.uid)
+                _logger.warning("Download attempt for unconfirmed payslip %s by user %s", payslip_id, request.env.uid)
                 return request.redirect(MY_EMPLOYEE_URL + '/payslips?error=not_confirmed')
             
-            _logger.info("Attempting to download payslip %s for user %s", payslip_id, request.uid)
+            _logger.info("Attempting to download payslip %s for user %s", payslip_id, request.env.uid)
             
             # Try to find the payslip report - multiple approaches with detailed logging
             report_ref = None
@@ -2841,7 +2841,7 @@ Payslip Details:
                             ('Pragma', 'no-cache')
                         ]
                         
-                        _logger.info("Payslip %s downloaded as text file by user %s", payslip_id, request.uid)
+                        _logger.info("Payslip %s downloaded as text file by user %s", payslip_id, request.env.uid)
                         return request.make_response(simple_content.encode('utf-8'), headers=headers)
                         
                 except Exception as fallback_error:
@@ -2873,7 +2873,7 @@ Payslip Details:
             ]
             
             _logger.info("Payslip %s downloaded successfully by user %s, file size: %d bytes", 
-                        payslip_id, request.uid, len(pdf_content))
+                        payslip_id, request.env.uid, len(pdf_content))
             
             return request.make_response(pdf_content, headers=pdfhttpheaders)
             
@@ -2887,7 +2887,7 @@ Payslip Details:
     def portal_payslip_view(self, payslip_id, **kwargs):
         """View payslip details"""
         payslip = request.env['hr.payslip'].sudo().browse(payslip_id)
-        employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.uid)], limit=1)
+        employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
         
         # Security check - only allow access to own payslips
         if not payslip or not employee or payslip.employee_id.id != employee.id:
