@@ -873,37 +873,82 @@ class PortalEmployee(http.Controller):
             return request.redirect(MY_EMPLOYEE_URL)
         if http.request.httprequest.method == 'POST':
             vals = {}
-            # Personal Details
-            vals['work_email'] = post.get('work_email')
-            vals['work_phone'] = post.get('work_phone')
 
-            # Private Contact
+            if post.get('work_email'):
+                import re
+                email_pattern = r'^[^\s@]+@[^\s@]+\.[^\s@]+$'
+                if re.match(email_pattern, post.get('work_email')):
+                    vals['work_email'] = post.get('work_email')
+
+            if post.get('work_phone'):
+                vals['work_phone'] = post.get('work_phone')
+            if post.get('birthday'):
+                vals['birthday'] = post.get('birthday')
+            if post.get('gender'):
+                vals['gender'] = post.get('gender')
+            if post.get('marital'):
+                vals['marital'] = post.get('marital')
+
+                # Identity documents
+            if post.get('emirates_id_number'):
+                vals['emirates_id_number'] = post.get('emirates_id_number')
+            if post.get('emirates_expiry_date'):
+                vals['emirates_expiry_date'] = post.get('emirates_expiry_date')
+            if post.get('issue_date'):
+                vals['issue_date'] = post.get('issue_date')
+            if post.get('expiry_date'):
+                vals['expiry_date'] = post.get('expiry_date')
+            if post.get('passport_id'):
+                vals['passport_id'] = post.get('passport_id')
+            if post.get('ssnid'):
+                vals['ssnid'] = post.get('ssnid')
+            if post.get('issue_countries_id'):
+                vals['issue_countries_id'] = self._get_many2one_id(
+                    post.get('issue_countries_id'), 'res.country')
+
+                # Contact information
+            if post.get('private_email'):
+                vals['private_email'] = post.get('private_email')
+            if post.get('private_phone'):
+                vals['private_phone'] = post.get('private_phone')
+            if post.get('private_street'):
+                vals['private_street'] = post.get('private_street')
+            if post.get('private_street2'):
+                vals['private_street2'] = post.get('private_street2')
+            if post.get('private_city'):
+                vals['private_city'] = post.get('private_city')
+            if post.get('private_zip'):
+                vals['private_zip'] = post.get('private_zip')
+
+                # Emergency contact
+            if post.get('emergency_contact'):
+                vals['emergency_contact'] = post.get('emergency_contact')
+            if post.get('emergency_phone'):
+                vals['emergency_phone'] = post.get('emergency_phone')
+
+                # Private Contact (from inherited template)
             if post.get('private_email'):
                 vals['private_email'] = post.get('private_email')
             if post.get('private_phone'):
                 vals['private_phone'] = post.get('private_phone')
 
-            # Personal Information
+                # Personal Information (from inherited template)
             if post.get('legal_name'):
                 vals['legal_name'] = post.get('legal_name')
             if post.get('place_of_birth'):
                 vals['place_of_birth'] = post.get('place_of_birth')
 
-            # Visa & Work Permit
+                # Visa & Work Permit (from inherited template)
             if post.get('visa_no'):
                 vals['visa_no'] = post.get('visa_no')
             if post.get('permit_no'):
                 vals['permit_no'] = post.get('permit_no')
 
-            # Citizenship
+                # Citizenship (from inherited template)
             if post.get('identification_id'):
                 vals['identification_id'] = post.get('identification_id')
-            if post.get('ssnid'):
-                vals['ssnid'] = post.get('ssnid')
-            if post.get('passport_id'):
-                vals['passport_id'] = post.get('passport_id')
 
-            # Family
+                # Family (from inherited template)
             if post.get('study_field'):
                 vals['study_field'] = post.get('study_field')
             if post.get('certificate'):
@@ -913,19 +958,21 @@ class PortalEmployee(http.Controller):
                     vals['children'] = int(post.get('children'))
                 except (ValueError, TypeError):
                     pass
-
-            vals['birthday'] = post.get('birthday')
-            vals['gender'] = post.get('gender')
-            vals['marital'] = post.get('marital')
-            # Experience & Skills
-            vals['x_experience'] = post.get('x_experience')
-            vals['x_skills'] = post.get('x_skills')
-            # Certifications
-            vals['x_certifications'] = post.get('x_certifications')
-            # Bank Details
-            vals['x_bank_account'] = post.get('x_bank_account')
-            vals['x_bank_name'] = post.get('x_bank_name')
-            vals['x_ifsc'] = post.get('x_ifsc')
+            # Personal Details
+            # vals['work_email'] = post.get('work_email')
+            # vals['work_phone'] = post.get('work_phone')
+            # vals['birthday'] = post.get('birthday')
+            # vals['gender'] = post.get('gender')
+            # vals['marital'] = post.get('marital')
+            # # Experience & Skills
+            # vals['x_experience'] = post.get('x_experience')
+            # vals['x_skills'] = post.get('x_skills')
+            # # Certifications
+            # vals['x_certifications'] = post.get('x_certifications')
+            # # Bank Details
+            # vals['x_bank_account'] = post.get('x_bank_account')
+            # vals['x_bank_name'] = post.get('x_bank_name')
+            # vals['x_ifsc'] = post.get('x_ifsc')
             # Only update fields that are present in the form
             vals = {k: v for k, v in vals.items() if v is not None}
             if vals:
