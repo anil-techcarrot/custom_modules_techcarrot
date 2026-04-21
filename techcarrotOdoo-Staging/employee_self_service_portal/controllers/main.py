@@ -122,6 +122,20 @@ def _process_partner_field(field_value, field_name='partner_id'):
     return False
 
 class PortalEmployee(http.Controller):
+
+    def _get_many2one_id(self, value, model_name, field_name='name'):
+        """Helper to safely get ID from either int or string"""
+        if not value:
+            return False
+        try:
+            return int(value)
+        except (ValueError, TypeError):
+            record = request.env[model_name].sudo().search([
+                (field_name, '=', value)
+            ], limit=1)
+            return record.id if record else False
+
+
     def _get_employee(self):
         return request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
 
@@ -1228,8 +1242,17 @@ class PortalEmployee(http.Controller):
                     vals['issue_date'] = post.get('issue_date')
                 if post.get('expiry_date'):
                     vals['expiry_date'] = post.get('expiry_date')
+
                 if post.get('issue_countries_id'):
-                    vals['issue_countries_id'] = int(post.get('issue_countries_id'))
+                    try:
+                        vals['issue_countries_id'] = int(post.get('issue_countries_id'))
+                    except (ValueError, TypeError):
+                        # It's a country name string - find the ID
+                        country = request.env['res.country'].sudo().search([
+                            ('name', '=', post.get('issue_countries_id'))
+                        ], limit=1)
+                        if country:
+                            vals['issue_countries_id'] = country.id
                 
                 # Contact information
                 if post.get('private_email'):
