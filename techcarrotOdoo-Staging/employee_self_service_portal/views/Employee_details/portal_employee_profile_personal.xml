@@ -38,93 +38,96 @@
                             </div>
                         </div>
 
-                        <div class="row g-3">
+
                         <div class="card-body">
+                            <div class="row g-3">
 
-                            <!-- Employee Name Fields -->
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Employee First Name</label>
-                                <input type="text" name="employee_first_name"
-                                       class="form-control"
-                                       t-att-value="employee.employee_first_name or ''"
-                                       style="pointer-events: none;"/>
+
+                                <!-- Employee Name Fields -->
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold">Employee First Name</label>
+                                    <input type="text" name="employee_first_name"
+                                           class="form-control"
+                                           t-att-value="employee.employee_first_name or ''"
+                                           style="pointer-events: none;"/>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold">Employee Middle Name</label>
+                                    <input type="text" name="employee_middle_name"
+                                           class="form-control"
+                                           t-att-value="employee.employee_middle_name or ''"
+                                           style="pointer-events: none;"/>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold">Employee Last Name</label>
+                                    <input type="text" name="employee_last_name"
+                                           class="form-control"
+                                           t-att-value="employee.employee_last_name or ''"
+                                           style="pointer-events: none;"/>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Employee Name (English)</label>
+                                    <input type="text" name="employee_name_english"
+                                           class="form-control"
+                                           t-att-value="employee.employee_name_english or ''"
+                                           style="pointer-events: none;"/>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Employee Name (Arabic)</label>
+                                    <input type="text" name="employee_name_arabic"
+                                           class="form-control"
+                                           t-att-value="employee.employee_name_arabic or ''"
+                                           style="pointer-events: none;"/>
+                                </div>
+
+                                <!-- Employment Details -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Employment Type</label>
+                                    <input type="text" name="employment_type"
+                                           class="form-control"
+                                           t-att-value="employee.employment_type or ''"
+                                           style="pointer-events: none;"/>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Engagement Location</label>
+                                    <input type="text" name="engagement_location"
+                                           class="form-control"
+                                           t-att-value="employee.engagement_location or ''"
+                                           style="pointer-events: none;"/>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Payroll</label>
+                                    <input type="text" name="payroll_location"
+                                           class="form-control"
+                                           t-att-value="employee.payroll_location or ''"
+                                           style="pointer-events: none;"/>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Currency</label>
+                                    <input type="text" name="currency_id"
+                                           class="form-control"
+                                           t-att-value="employee.currency_id.name or ''"
+                                           style="pointer-events: none;"/>
+                                </div>
+
+                                <!-- NEW FIELD (you asked) -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Nationality At Birth</label>
+                                    <input type="text" name="nationality_at_birth_id"
+                                           class="form-control"
+                                           t-att-value="employee.nationality_at_birth_id.name or ''"
+                                           style="pointer-events: none;"/>
+                                </div>
+
                             </div>
 
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Employee Middle Name</label>
-                                <input type="text" name="employee_middle_name"
-                                       class="form-control"
-                                       t-att-value="employee.employee_middle_name or ''"
-                                       style="pointer-events: none;"/>
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Employee Last Name</label>
-                                <input type="text" name="employee_last_name"
-                                       class="form-control"
-                                       t-att-value="employee.employee_last_name or ''"
-                                       style="pointer-events: none;"/>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Employee Name (English)</label>
-                                <input type="text" name="employee_name_english"
-                                       class="form-control"
-                                       t-att-value="employee.employee_name_english or ''"
-                                       style="pointer-events: none;"/>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Employee Name (Arabic)</label>
-                                <input type="text" name="employee_name_arabic"
-                                       class="form-control"
-                                       t-att-value="employee.employee_name_arabic or ''"
-                                       style="pointer-events: none;"/>
-                            </div>
-
-                            <!-- Employment Details -->
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Employment Type</label>
-                                <input type="text" name="employment_type"
-                                       class="form-control"
-                                       t-att-value="employee.employment_type or ''"
-                                       style="pointer-events: none;"/>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Engagement Location</label>
-                                <input type="text" name="engagement_location"
-                                       class="form-control"
-                                       t-att-value="employee.engagement_location or ''"
-                                       style="pointer-events: none;"/>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Payroll</label>
-                                <input type="text" name="payroll_location"
-                                       class="form-control"
-                                       t-att-value="employee.payroll_location or ''"
-                                       style="pointer-events: none;"/>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Currency</label>
-                                <input type="text" name="currency_id"
-                                       class="form-control"
-                                       t-att-value="employee.currency_id.name or ''"
-                                       style="pointer-events: none;"/>
-                            </div>
-
-                            <!-- NEW FIELD (you asked) -->
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Nationality At Birth</label>
-                                <input type="text" name="nationality_at_birth_id"
-                                       class="form-control"
-                                       t-att-value="employee.nationality_at_birth_id.name or ''"
-                                       style="pointer-events: none;"/>
-                            </div>
-
-                            </div>
 
                             <div class="row g-3">
                                 <div class="col-md-6">
