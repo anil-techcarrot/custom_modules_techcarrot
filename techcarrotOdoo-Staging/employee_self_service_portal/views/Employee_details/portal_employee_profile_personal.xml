@@ -805,286 +805,230 @@
                 <script type="text/javascript">
                     <![CDATA[
           let isEditMode = false;
-          let originalFormData = {};
+let originalFormData = {};
 
-          // Toggle edit mode
-          function toggleEditMode() {
-            const editMode = document.getElementById('editMode').checked;
-            if (editMode) {
-              enableEditMode();
-            } else {
-              disableEditMode();
+function toggleEditMode() {
+    const editMode = document.getElementById('editMode').checked;
+    if (editMode) {
+        enableEditMode();
+    } else {
+        disableEditMode();
+    }
+}
+
+function enableEditMode() {
+    isEditMode = true;
+    document.getElementById('editMode').checked = true;
+    storeOriginalFormData();
+    const inputs = document.querySelectorAll('#personalDetailsForm input, #personalDetailsForm select');
+    inputs.forEach(input => {
+        if (input.type !== 'hidden') {
+            input.removeAttribute('readonly');
+            input.removeAttribute('disabled');
+            input.style.removeProperty('pointer-events');
+        }
+    });
+    document.getElementById('formActions').style.display = 'block';
+    document.getElementById('viewActions').style.display = 'none';
+    inputs.forEach(input => {
+        input.addEventListener('input', validateField);
+        input.addEventListener('blur', validateField);
+    });
+}
+
+function disableEditMode() {
+    isEditMode = false;
+    document.getElementById('editMode').checked = false;
+    const inputs = document.querySelectorAll('#personalDetailsForm input, #personalDetailsForm select');
+    inputs.forEach(input => {
+        if (input.type !== 'hidden') {
+            input.setAttribute('readonly', 'readonly');
+            if (input.tagName === 'SELECT') {
+                input.setAttribute('disabled', 'disabled');
             }
-          }
+        }
+    });
+    document.getElementById('formActions').style.display = 'none';
+    document.getElementById('viewActions').style.display = 'block';
+    clearValidationStates();
+}
 
-          function enableEditMode() {
-            isEditMode = true;
-            document.getElementById('editMode').checked = true;
-            
-            // Store original form data
-            storeOriginalFormData();
-            
-            // Enable all form inputs
-            const inputs = document.querySelectorAll('#personalDetailsForm input, #personalDetailsForm select');
-            inputs.forEach(input => {
-              if (input.type !== 'hidden') {
-                input.removeAttribute('readonly');
-                input.removeAttribute('disabled');
-              }
-            });
-            
-            // Show/hide action buttons
-            document.getElementById('formActions').style.display = 'block';
-            document.getElementById('viewActions').style.display = 'none';
-            
-            // Add change listeners for auto-validation
-            inputs.forEach(input => {
-              input.addEventListener('input', validateField);
-              input.addEventListener('blur', validateField);
-            });
-          }
+function storeOriginalFormData() {
+    const form = document.getElementById('personalDetailsForm');
+    const formData = new FormData(form);
+    originalFormData = {};
+    for (let [key, value] of formData.entries()) {
+        originalFormData[key] = value;
+    }
+}
 
-          function disableEditMode() {
-            isEditMode = false;
-            document.getElementById('editMode').checked = false;
-            
-            // Disable all form inputs
-            const inputs = document.querySelectorAll('#personalDetailsForm input, #personalDetailsForm select');
-            inputs.forEach(input => {
-              if (input.type !== 'hidden') {
-                input.setAttribute('readonly', 'readonly');
-                if (input.tagName === 'SELECT') {
-                  input.setAttribute('disabled', 'disabled');
-                }
-              }
-            });
-            
-            // Show/hide action buttons
-            document.getElementById('formActions').style.display = 'none';
-            document.getElementById('viewActions').style.display = 'block';
-            
-            // Clear validation states
-            clearValidationStates();
-          }
+function cancelEdit() {
+    for (let [key, value] of Object.entries(originalFormData)) {
+        const input = document.querySelector(`[name="${key}"]`);
+        if (input) input.value = value;
+    }
+    disableEditMode();
+    showMessage('Changes cancelled successfully.', 'info');
+}
 
-          function storeOriginalFormData() {
-            const form = document.getElementById('personalDetailsForm');
-            const formData = new FormData(form);
-            originalFormData = {};
-            for (let [key, value] of formData.entries()) {
-              originalFormData[key] = value;
-            }
-          }
+function saveAsDraft() {
+    const form = document.getElementById('personalDetailsForm');
+    const formData = new FormData(form);
+    const draftData = {};
+    for (let [key, value] of formData.entries()) {
+        draftData[key] = value;
+    }
+    localStorage.setItem('profileDraft', JSON.stringify(draftData));
+    showMessage('Profile saved as draft.', 'info');
+}
 
-          function cancelEdit() {
-            // Restore original form data
-            for (let [key, value] of Object.entries(originalFormData)) {
-              const input = document.querySelector(`[name="${key}"]`);
-              if (input) {
-                input.value = value;
-              }
-            }
-            
-            disableEditMode();
-            showMessage('Changes cancelled successfully.', 'info');
-          }
-
-          function saveAsDraft() {
-            // Save form data to localStorage as draft
-            const form = document.getElementById('personalDetailsForm');
-            const formData = new FormData(form);
-            const draftData = {};
-            for (let [key, value] of formData.entries()) {
-              draftData[key] = value;
-            }
-            
-            localStorage.setItem('profileDraft', JSON.stringify(draftData));
-            showMessage('Profile saved as draft.', 'info');
-          }
-
-          // Field validation
-          function validateField(event) {
-            const field = event.target;
-            const validationType = field.getAttribute('data-validation');
-            let isValid = true;
-            let errorMessage = '';
-
-            // Clear previous validation state
-            field.classList.remove('is-valid', 'is-invalid');
-
-            if (validationType) {
-              switch (validationType) {
-                case 'email':
-                  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                  if (field.value && !emailRegex.test(field.value)) {
+function validateField(event) {
+    const field = event.target;
+    const validationType = field.getAttribute('data-validation');
+    let isValid = true;
+    let errorMessage = '';
+    field.classList.remove('is-valid', 'is-invalid');
+    if (validationType) {
+        switch (validationType) {
+            case 'email':
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (field.value && !emailRegex.test(field.value)) {
                     isValid = false;
                     errorMessage = 'Please enter a valid email address.';
-                  }
-                  break;
-
-                case 'phone':
-                  const phoneRegex = /^[+]?[0-9\s\-\(\)]+$/;
-                  if (field.value && !phoneRegex.test(field.value)) {
+                }
+                break;
+            case 'phone':
+                const phoneRegex = /^[+]?[0-9\s\-\(\)]+$/;
+                if (field.value && !phoneRegex.test(field.value)) {
                     isValid = false;
                     errorMessage = 'Please enter a valid phone number.';
-                  }
-                  break;
-
-                case 'required':
-                  if (!field.value || field.value.trim() === '') {
+                }
+                break;
+            case 'required':
+                if (!field.value || field.value.trim() === '') {
                     isValid = false;
                     errorMessage = 'This field is required.';
-                  }
-                  break;
-
-                case 'date':
-                  if (field.value) {
+                }
+                break;
+            case 'date':
+                if (field.value) {
                     const date = new Date(field.value);
                     if (isNaN(date.getTime())) {
-                      isValid = false;
-                      errorMessage = 'Please enter a valid date.';
+                        isValid = false;
+                        errorMessage = 'Please enter a valid date.';
                     }
-                  }
-                  break;
-
-                case 'future-date':
-                  if (field.value) {
+                }
+                break;
+            case 'future-date':
+                if (field.value) {
                     const date = new Date(field.value);
                     const today = new Date();
                     if (date <= today) {
-                      isValid = false;
-                      errorMessage = 'Date must be in the future.';
+                        isValid = false;
+                        errorMessage = 'Date must be in the future.';
                     }
-                  }
-                  break;
-              }
-            }
-
-            // Apply validation styling
-            if (field.value) {
-              if (isValid) {
-                field.classList.add('is-valid');
-              } else {
-                field.classList.add('is-invalid');
-                const feedback = field.parentNode.querySelector('.invalid-feedback');
-                if (feedback) {
-                  feedback.textContent = errorMessage;
                 }
-              }
-            }
+                break;
+        }
+    }
+    if (field.value) {
+        if (isValid) {
+            field.classList.add('is-valid');
+        } else {
+            field.classList.add('is-invalid');
+            const feedback = field.parentNode.querySelector('.invalid-feedback');
+            if (feedback) feedback.textContent = errorMessage;
+        }
+    }
+    return isValid;
+}
 
-            return isValid;
-          }
+function clearValidationStates() {
+    const inputs = document.querySelectorAll('#personalDetailsForm input, #personalDetailsForm select');
+    inputs.forEach(input => input.classList.remove('is-valid', 'is-invalid'));
+}
 
-          function clearValidationStates() {
-            const inputs = document.querySelectorAll('#personalDetailsForm input, #personalDetailsForm select');
-            inputs.forEach(input => {
-              input.classList.remove('is-valid', 'is-invalid');
+function showMessage(text, type) {
+    const messageContainer = document.getElementById('messageContainer');
+    const successMsg = document.getElementById('successMessage');
+    const errorMsg = document.getElementById('errorMessage');
+    successMsg.style.display = 'none';
+    errorMsg.style.display = 'none';
+    successMsg.classList.remove('show');
+    errorMsg.classList.remove('show');
+    if (type === 'success') {
+        document.getElementById('successText').textContent = text;
+        successMsg.style.display = 'block';
+        successMsg.classList.add('show');
+    } else {
+        document.getElementById('errorText').textContent = text;
+        errorMsg.style.display = 'block';
+        errorMsg.classList.add('show');
+    }
+    messageContainer.style.display = 'block';
+    messageContainer.scrollIntoView({ behavior: 'smooth' });
+    setTimeout(() => {
+        successMsg.classList.remove('show');
+        errorMsg.classList.remove('show');
+    }, 5000);
+}
+
+// SINGLE submit handler with CSRF token
+document.getElementById('personalDetailsForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const inputs = document.querySelectorAll('#personalDetailsForm input[data-validation], #personalDetailsForm select[data-validation]');
+    let isFormValid = true;
+    inputs.forEach(input => {
+        if (!validateField({ target: input })) isFormValid = false;
+    });
+
+    if (!isFormValid) {
+        showMessage('Please correct the errors in the form before submitting.', 'error');
+        return;
+    }
+
+    const formData = new FormData(this);
+    const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+
+    fetch('/my/employee/personal', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': csrfToken
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showMessage('Profile updated successfully!', 'success');
+            disableEditMode();
+            localStorage.removeItem('profileDraft');
+        } else {
+            showMessage('Error updating profile: ' + (data.error || 'Unknown error'), 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showMessage('Network error. Please try again.', 'error');
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const draftData = localStorage.getItem('profileDraft');
+    if (draftData) {
+        try {
+            const draft = JSON.parse(draftData);
+            Object.entries(draft).forEach(([key, value]) => {
+                const input = document.querySelector(`[name="${key}"]`);
+                if (input && input.type !== 'hidden') input.value = value;
             });
-          }
-
-          // Form submission with validation
-          document.getElementById('personalDetailsForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Validate all fields
-            const inputs = document.querySelectorAll('#personalDetailsForm input[data-validation], #personalDetailsForm select[data-validation]');
-            let isFormValid = true;
-            
-            inputs.forEach(input => {
-              const fieldValid = validateField({ target: input });
-              if (!fieldValid) {
-                isFormValid = false;
-              }
-            });
-
-            if (!isFormValid) {
-              showMessage('Please correct the errors in the form before submitting.', 'error');
-              return;
-            }
-
-            // Submit form via AJAX
-            const formData = new FormData(this);
-            
-            fetch('/my/employee/personal', {
-              method: 'POST',
-              body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-              if (data.success) {
-                showMessage('Profile updated successfully!', 'success');
-                disableEditMode();
-                
-                // Remove draft from localStorage
-                localStorage.removeItem('profileDraft');
-                
-                // Update last updated time
-                const now = new Date().toLocaleString();
-                document.querySelector('#lastUpdateDate').textContent = now;
-              } else {
-                showMessage('Error updating profile: ' + (data.error || 'Unknown error'), 'error');
-              }
-            })
-            .catch(error => {
-              console.error('Error:', error);
-              showMessage('Network error. Please try again.', 'error');
-            });
-          });
-
-          // Show messages
-          function showMessage(text, type) {
-            const messageContainer = document.getElementById('messageContainer');
-            const successMsg = document.getElementById('successMessage');
-            const errorMsg = document.getElementById('errorMessage');
-            
-            // Hide all messages first
-            successMsg.style.display = 'none';
-            errorMsg.style.display = 'none';
-            successMsg.classList.remove('show');
-            errorMsg.classList.remove('show');
-            
-            if (type === 'success') {
-              document.getElementById('successText').textContent = text;
-              successMsg.style.display = 'block';
-              successMsg.classList.add('show');
-            } else {
-              document.getElementById('errorText').textContent = text;
-              errorMsg.style.display = 'block';
-              errorMsg.classList.add('show');
-            }
-            
-            messageContainer.style.display = 'block';
-            messageContainer.scrollIntoView({ behavior: 'smooth' });
-            
-            // Auto-hide after 5 seconds
-            setTimeout(() => {
-              if (type === 'success') {
-                successMsg.classList.remove('show');
-              } else {
-                errorMsg.classList.remove('show');
-              }
-            }, 5000);
-          }
-
-          // Load draft data on page load
-          document.addEventListener('DOMContentLoaded', function() {
-            const draftData = localStorage.getItem('profileDraft');
-            if (draftData) {
-              try {
-                const draft = JSON.parse(draftData);
-                Object.entries(draft).forEach(([key, value]) => {
-                  const input = document.querySelector(`[name="${key}"]`);
-                  if (input && input.type !== 'hidden') {
-                    input.value = value;
-                  }
-                });
-                showMessage('Draft data loaded. You can continue editing or discard changes.', 'info');
-              } catch (e) {
-                console.error('Error loading draft:', e);
-              }
-            }
-          });
+            showMessage('Draft data loaded. You can continue editing or discard changes.', 'info');
+        } catch (e) {
+            console.error('Error loading draft:', e);
+        }
+    }
+});
         ]]>
                 </script>
 
