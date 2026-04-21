@@ -403,26 +403,6 @@
                     </group>
                 </group>
 
-                <separator string="Professional Development"/>
-                <group>
-                    <group string="Resume/CV">
-                        <field name="resume_file" string="Resume/CV"
-                               widget="binary" filename="resume_file_filename"/>
-                        <field name="resume_file_filename" invisible="1"/>
-                    </group>
-                    <group string="Training Certificates">
-                        <field name="training_certificates" string="Training Certificates"
-                               widget="binary" filename="training_certificates_filename"/>
-                        <field name="training_certificates_filename" invisible="1"/>
-                    </group>
-                </group>
-                <group>
-                    <group string="Awards &amp; Recognition">
-                        <field name="awards_files" string="Awards &amp; Recognition"
-                               widget="binary" filename="awards_files_filename"/>
-                        <field name="awards_files_filename" invisible="1"/>
-                    </group>
-                </group>
 
             </xpath>
 
