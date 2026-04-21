@@ -2,7 +2,6 @@
     <template id="portal_employee_profile_personal_inherit_extra"
               inherit_id="employee_self_service_portal.portal_employee_profile_personal">
 
-        <!-- Add after Work Information OR anywhere you want -->
         <xpath expr="//div[@class='card mb-4 shadow-sm'][.//h5[contains(., 'Work Information')]]"
                position="after">
 
@@ -13,28 +12,24 @@
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
-
                         <div class="col-md-6">
                             <label>Email</label>
-                            <input type="text" class="form-control"
+                            <input type="text" name="private_email" class="form-control"
                                    t-att-value="employee.private_email or ''"
                                    readonly="readonly"/>
                         </div>
-
                         <div class="col-md-6">
                             <label>Phone</label>
-                            <input type="text" class="form-control"
+                            <input type="text" name="private_phone" class="form-control"
                                    t-att-value="employee.private_phone or ''"
                                    readonly="readonly"/>
                         </div>
-
                         <div class="col-md-6">
                             <label>Bank Accounts</label>
                             <input type="text" class="form-control"
                                    t-att-value="', '.join(employee.bank_account_ids.mapped('acc_number')) if employee.bank_account_ids else ''"
                                    readonly="readonly"/>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -46,31 +41,30 @@
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
-
                         <div class="col-md-6">
                             <label>Legal Name</label>
-                            <input class="form-control" t-att-value="employee.legal_name or ''"
-                                   style="pointer-events: none;"/>
+                            <input name="legal_name" class="form-control"
+                                   t-att-value="employee.legal_name or ''"
+                                   readonly="readonly"/>
                         </div>
-
                         <div class="col-md-6">
                             <label>Birthday</label>
-                            <input class="form-control" t-att-value="employee.birthday or ''"
-                                   style="pointer-events: none;"/>
+                            <input name="birthday" type="date" class="form-control"
+                                   t-att-value="employee.birthday or ''"
+                                   readonly="readonly"/>
                         </div>
-
                         <div class="col-md-6">
                             <label>Place of Birth</label>
-                            <input class="form-control" t-att-value="employee.place_of_birth or ''"
-                                   style="pointer-events: none;"/>
+                            <input name="place_of_birth" class="form-control"
+                                   t-att-value="employee.place_of_birth or ''"
+                                   readonly="readonly"/>
                         </div>
-
                         <div class="col-md-6">
                             <label>Payslip Language</label>
-                            <input class="form-control" t-att-value="employee.lang or ''"
-                                   style="pointer-events: none;"/>
+                            <input class="form-control"
+                                   t-att-value="employee.lang or ''"
+                                   readonly="readonly"/>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -82,23 +76,20 @@
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
-
                         <div class="col-md-6">
                             <label>Visa No</label>
-                            <input class="form-control" t-att-value="employee.visa_no or ''"
-                                   style="pointer-events: none;"/>
+                            <input name="visa_no" class="form-control"
+                                   t-att-value="employee.visa_no or ''"
+                                   readonly="readonly"/>
                         </div>
-
                         <div class="col-md-6">
                             <label>Work Permit No</label>
-                            <input class="form-control" t-att-value="employee.permit_no or ''"
-                                   style="pointer-events: none;"/>
+                            <input name="permit_no" class="form-control"
+                                   t-att-value="employee.permit_no or ''"
+                                   readonly="readonly"/>
                         </div>
-
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Work Permit</label>
-
-                            <!-- Show Existing File -->
                             <t t-if="employee.has_work_permit">
                                 <div class="mb-2">
                                     <a t-att-href="'/web/content/hr.employee/%s/has_work_permit?download=true' % employee.id"
@@ -108,13 +99,8 @@
                                     </a>
                                 </div>
                             </t>
-
-                            <!-- Upload New File -->
-                            <input type="file"
-                                   name="has_work_permit"
-                                   class="form-control"/>
+                            <input type="file" name="has_work_permit" class="form-control"/>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -126,42 +112,36 @@
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
-
                         <div class="col-md-6">
                             <label>Nationality</label>
                             <input class="form-control"
                                    t-att-value="employee.country_id.name or ''"
-                                   style="pointer-events: none;"/>
+                                   readonly="readonly"/>
                         </div>
-
                         <div class="col-md-6">
                             <label>Non Resident</label>
                             <input class="form-control"
                                    t-att-value="'Yes' if employee.is_non_resident else 'No'"
                                    readonly="readonly"/>
                         </div>
-
                         <div class="col-md-6">
                             <label>Identification No</label>
-                            <input class="form-control"
+                            <input name="identification_id" class="form-control"
                                    t-att-value="employee.identification_id or ''"
-                                   style="pointer-events: none;"/>
+                                   readonly="readonly"/>
                         </div>
-
                         <div class="col-md-6">
                             <label>SSN No</label>
-                            <input class="form-control"
+                            <input name="ssnid" class="form-control"
                                    t-att-value="employee.ssnid or ''"
-                                   style="pointer-events: none;"/>
+                                   readonly="readonly"/>
                         </div>
-
                         <div class="col-md-6">
                             <label>Passport No</label>
-                            <input class="form-control"
+                            <input name="passport_id" class="form-control"
                                    t-att-value="employee.passport_id or ''"
-                                   style="pointer-events: none;"/>
+                                   readonly="readonly"/>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -173,35 +153,30 @@
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
-
                         <div class="col-md-6">
                             <label>Disabled</label>
                             <input class="form-control"
                                    t-att-value="'Yes' if employee.disabled else 'No'"
                                    readonly="readonly"/>
                         </div>
-
                         <div class="col-md-6">
                             <label>Children</label>
-                            <input class="form-control"
+                            <input name="children" class="form-control"
                                    t-att-value="employee.children or ''"
                                    readonly="readonly"/>
                         </div>
-
                         <div class="col-md-6">
                             <label>Certificate</label>
-                            <input class="form-control"
+                            <input name="certificate" class="form-control"
                                    t-att-value="employee.certificate or ''"
                                    readonly="readonly"/>
                         </div>
-
                         <div class="col-md-6">
                             <label>Field of Study</label>
-                            <input class="form-control"
+                            <input name="study_field" class="form-control"
                                    t-att-value="employee.study_field or ''"
                                    readonly="readonly"/>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -213,21 +188,18 @@
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
-
                         <div class="col-md-6">
                             <label>Mother Tongue</label>
                             <input class="form-control"
                                    t-att-value="employee.mother_tongue_id.name or ''"
                                    readonly="readonly"/>
                         </div>
-
                         <div class="col-md-6">
                             <label>Languages Known</label>
                             <input class="form-control"
                                    t-att-value="', '.join(employee.language_known_ids.mapped('name')) if employee.language_known_ids else ''"
                                    readonly="readonly"/>
                         </div>
-
                     </div>
                 </div>
             </div>

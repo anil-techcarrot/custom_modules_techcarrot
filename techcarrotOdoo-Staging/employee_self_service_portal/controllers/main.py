@@ -876,6 +876,44 @@ class PortalEmployee(http.Controller):
             # Personal Details
             vals['work_email'] = post.get('work_email')
             vals['work_phone'] = post.get('work_phone')
+
+            # Private Contact
+            if post.get('private_email'):
+                vals['private_email'] = post.get('private_email')
+            if post.get('private_phone'):
+                vals['private_phone'] = post.get('private_phone')
+
+            # Personal Information
+            if post.get('legal_name'):
+                vals['legal_name'] = post.get('legal_name')
+            if post.get('place_of_birth'):
+                vals['place_of_birth'] = post.get('place_of_birth')
+
+            # Visa & Work Permit
+            if post.get('visa_no'):
+                vals['visa_no'] = post.get('visa_no')
+            if post.get('permit_no'):
+                vals['permit_no'] = post.get('permit_no')
+
+            # Citizenship
+            if post.get('identification_id'):
+                vals['identification_id'] = post.get('identification_id')
+            if post.get('ssnid'):
+                vals['ssnid'] = post.get('ssnid')
+            if post.get('passport_id'):
+                vals['passport_id'] = post.get('passport_id')
+
+            # Family
+            if post.get('study_field'):
+                vals['study_field'] = post.get('study_field')
+            if post.get('certificate'):
+                vals['certificate'] = post.get('certificate')
+            if post.get('children'):
+                try:
+                    vals['children'] = int(post.get('children'))
+                except (ValueError, TypeError):
+                    pass
+
             vals['birthday'] = post.get('birthday')
             vals['gender'] = post.get('gender')
             vals['marital'] = post.get('marital')
