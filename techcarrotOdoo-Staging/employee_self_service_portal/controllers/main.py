@@ -127,7 +127,7 @@ class PortalEmployee(http.Controller):
 
     @http.route(MY_EMPLOYEE_URL, type='http', auth='user', website=True)
     def portal_employee_profile(self, **kw):
-        employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', )], limit=1)
+        employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
         return request.render('employee_self_service_portal.portal_employee_profile_personal', {
             'employee': employee,
             'section': 'personal',
