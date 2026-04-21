@@ -8,15 +8,15 @@
           <div class="row mb-2">
             <div class="col-md-4">
               <label>Bank Name</label>
-              <input type="text" name="x_bank_name" class="form-control" t-att-value="employee.x_bank_name"/>
+              <input type="text" name="bank_name" class="form-control" t-att-value="employee.x_bank_name"/>
             </div>
             <div class="col-md-4">
               <label>Account Number</label>
-              <input type="text" name="x_bank_account" class="form-control" t-att-value="employee.x_bank_account"/>
+              <input type="text" name="bank_account_no" class="form-control" t-att-value="employee.bank_account_no"/>
             </div>
             <div class="col-md-4">
               <label>IFSC</label>
-              <input type="text" name="x_ifsc" class="form-control" t-att-value="employee.x_ifsc"/>
+              <input type="text" name="ifsc_code" class="form-control" t-att-value="employee.ifsc_code"/>
             </div>
           </div>
           <button type="submit" class="btn btn-primary mt-3">Save</button>
