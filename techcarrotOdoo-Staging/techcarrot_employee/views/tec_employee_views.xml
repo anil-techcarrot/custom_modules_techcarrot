@@ -107,6 +107,8 @@
                             <div class="o_address_format">
                                 <field name="branch_name" placeholder="Branch Name..." class="o_address_branch_name"/>
                                 <field name="bank_city" placeholder="Bank City..." class="o_address_bank_city"/>
+                                <field name="bank_account_no" placeholder="Bank Account Number..."
+                                       class="o_address_bank_account_no"/>
                                 <field name="iban_no" placeholder="IBAN Number" class="o_address_iban_no"/>
                                 <field name="ifsc_code" placeholder="Bank SWIFT / IFSC Code"
                                        class="o_address_ifsc_code"/>

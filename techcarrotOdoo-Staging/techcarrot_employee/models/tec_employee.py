@@ -10,6 +10,8 @@ import phonenumbers
 class HrEmployeeInherit(models.Model):
     _inherit = 'hr.employee'
 
+    bank_account_no = fields.Char(string='Bank Account Number')
+
     # Professional Development & Supporting Documents
     resume_file = fields.Binary(string='Resume/CV', attachment=True)
     resume_file_filename = fields.Char(string='Resume/CV Filename')
