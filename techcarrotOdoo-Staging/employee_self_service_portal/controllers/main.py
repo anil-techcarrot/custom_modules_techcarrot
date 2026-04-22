@@ -1415,6 +1415,10 @@ class PortalEmployee(http.Controller):
                 if post.get('marital'):
                     vals['marital'] = post.get('marital')
 
+                allowed_certificates = ['graduate', 'bachelor', 'master', 'doctor', 'other']
+                if post.get('certificate') and post.get('certificate') in allowed_certificates:
+                    vals['certificate'] = post.get('certificate')
+
                 vals['is_non_resident'] = True if post.get('is_non_resident') == 'on' else False
 
                 _logger.info("Writing vals to employee %s: %s", employee.id, list(vals.keys()))

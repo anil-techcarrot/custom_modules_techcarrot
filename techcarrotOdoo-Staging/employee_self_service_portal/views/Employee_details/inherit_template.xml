@@ -174,10 +174,30 @@
                                    readonly="readonly"/>
                         </div>
                         <div class="col-md-6">
-                            <label>Certificate</label>
-                            <input name="certificate" class="form-control"
-                                   t-att-value="employee.certificate or ''"
-                                   readonly="readonly"/>
+                            <label class="form-label fw-bold">Certificate</label>
+                            <select name="certificate" class="form-select" style="pointer-events: none;">
+                                <option value="">Select Certificate</option>
+                                <option value="graduate"
+                                        t-att-selected="'selected' if employee.certificate == 'graduate' else None">
+                                    Graduate
+                                </option>
+                                <option value="bachelor"
+                                        t-att-selected="'selected' if employee.certificate == 'bachelor' else None">
+                                    Bachelor
+                                </option>
+                                <option value="master"
+                                        t-att-selected="'selected' if employee.certificate == 'master' else None">
+                                    Master
+                                </option>
+                                <option value="doctor"
+                                        t-att-selected="'selected' if employee.certificate == 'doctor' else None">
+                                    Doctor
+                                </option>
+                                <option value="other"
+                                        t-att-selected="'selected' if employee.certificate == 'other' else None">
+                                    Other
+                                </option>
+                            </select>
                         </div>
                         <div class="col-md-6">
                             <label>Field of Study</label>
