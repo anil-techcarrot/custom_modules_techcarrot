@@ -1328,6 +1328,8 @@ class PortalEmployee(http.Controller):
                     vals['sex'] = post.get('sex')
                 if post.get('marital'):
                     vals['marital'] = post.get('marital')
+                if post.get('children'):
+                    vals['children'] = post.get('children')
 
                 # Identity documents
                 # CORRECT field names
