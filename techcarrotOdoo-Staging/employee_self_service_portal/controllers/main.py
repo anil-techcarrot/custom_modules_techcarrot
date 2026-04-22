@@ -1407,6 +1407,8 @@ class PortalEmployee(http.Controller):
                 if post.get('l10n_in_relationship'):
                     vals['l10n_in_relationship'] = post.get('l10n_in_relationship')
 
+                vals['is_non_resident'] = True if post.get('is_non_resident') == 'on' else False
+
                 _logger.info("Writing vals to employee %s: %s", employee.id, list(vals.keys()))
                 employee.sudo().write(vals)
                 _logger.info("Successfully wrote vals for employee %s", employee.id)
