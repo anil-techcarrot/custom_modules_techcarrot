@@ -907,18 +907,34 @@ class PortalEmployee(http.Controller):
                     post.get('issue_countries_id'), 'res.country')
 
                 # Contact information
+            # Write regular fields
+            try:
+                employee.sudo().write(vals)
+            except Exception as e:
+                _logger.error("Error saving employee data: %s", str(e))
+
+            # Write private fields separately with sudo
+            private_vals = {}
             if post.get('private_email'):
-                vals['private_email'] = post.get('private_email')
+                private_vals['private_email'] = post.get('private_email')
             if post.get('private_phone'):
-                vals['private_phone'] = post.get('private_phone')
+                private_vals['private_phone'] = post.get('private_phone')
             if post.get('private_street'):
-                vals['private_street'] = post.get('private_street')
+                private_vals['private_street'] = post.get('private_street')
             if post.get('private_street2'):
-                vals['private_street2'] = post.get('private_street2')
+                private_vals['private_street2'] = post.get('private_street2')
             if post.get('private_city'):
-                vals['private_city'] = post.get('private_city')
+                private_vals['private_city'] = post.get('private_city')
             if post.get('private_zip'):
-                vals['private_zip'] = post.get('private_zip')
+                private_vals['private_zip'] = post.get('private_zip')
+
+            if private_vals:
+                try:
+                    # Use env with superuser to bypass private field restrictions
+                    request.env['hr.employee'].sudo().browse(employee.id).write(private_vals)
+                    _logger.info("Private fields saved: %s", list(private_vals.keys()))
+                except Exception as e:
+                    _logger.error("Error saving private fields: %s", str(e))
 
                 # Emergency contact
             if post.get('emergency_contact'):
@@ -927,10 +943,10 @@ class PortalEmployee(http.Controller):
                 vals['emergency_phone'] = post.get('emergency_phone')
 
                 # Private Contact (from inherited template)
-            if post.get('private_email'):
-                vals['private_email'] = post.get('private_email')
-            if post.get('private_phone'):
-                vals['private_phone'] = post.get('private_phone')
+            # if post.get('private_email'):
+            #     vals['private_email'] = post.get('private_email')
+            # if post.get('private_phone'):
+            #     vals['private_phone'] = post.get('private_phone')
 
                 # Personal Information (from inherited template)
             if post.get('legal_name'):
