@@ -1674,7 +1674,7 @@ class PortalEmployee(http.Controller):
         try:
             import base64
 
-            # Handle Resume/CV
+            # Handle Resume/ CV
             resume_file = files.get('resume_file')
             if resume_file and resume_file.filename:
                 file_data = base64.b64encode(resume_file.read())
@@ -1684,7 +1684,7 @@ class PortalEmployee(http.Controller):
                 })
                 _logger.info("Resume file saved: %s", resume_file.filename)
 
-            # Handle Training Certificates
+            # Handle Training  Certificates
             training_file = files.get('training_certificates')
             if training_file and training_file.filename:
                 file_data = base64.b64encode(training_file.read())
@@ -1725,7 +1725,7 @@ class PortalEmployee(http.Controller):
                     _logger.info("Certification - Writing vals to employee %s: %s", employee.id, list(vals.keys()))
                     employee.sudo().write(vals)
 
-                # ✅ Handle file uploads
+                # ✅ Handle files uploads
                 import base64
                 files = request.httprequest.files
 

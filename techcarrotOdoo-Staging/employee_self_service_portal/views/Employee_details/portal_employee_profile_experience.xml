@@ -4,7 +4,7 @@
             <t t-set="section" t-value="'experience'"/>
             <t t-set="section_content">
 
-                <!-- Success/Error Messages -->
+                <!-- Success/Error contain Messages -->
                 <div id="messageContainer" style="display: none;">
                     <div id="successMessage" class="alert alert-success alert-dismissible fade" role="alert"
                          style="display: none;">
