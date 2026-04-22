@@ -8,15 +8,18 @@
           <div class="row mb-2">
             <div class="col-md-4">
               <label>Bank Name</label>
-              <input type="text" name="bank_name" class="form-control" t-att-value="employee.bank_name" style="pointer-events: none;"/>
+              <input type="text" name="bank_name" class="form-control" t-att-value="employee.bank_name" data-always-readonly="1"
+       readonly="readonly"/>
             </div>
             <div class="col-md-4">
               <label>Account Number</label>
-              <input type="text" name="bank_account_no" class="form-control" t-att-value="employee.bank_account_no" style="pointer-events: none;"/>
+              <input type="text" name="bank_account_no" class="form-control" t-att-value="employee.bank_account_no" data-always-readonly="1"
+       readonly="readonly"/>
             </div>
             <div class="col-md-4">
               <label>IFSC</label>
-              <input type="text" name="ifsc_code" class="form-control" t-att-value="employee.ifsc_code" style="pointer-events: none;"/>
+              <input type="text" name="ifsc_code" class="form-control" t-att-value="employee.ifsc_code" data-always-readonly="1"
+       readonly="readonly"/>
             </div>
           </div>
           <button type="submit" class="btn btn-primary mt-3">Save</button>

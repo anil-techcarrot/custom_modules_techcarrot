@@ -107,7 +107,8 @@
                                     <input type="text" name="payroll_location"
                                            class="form-control"
                                            t-att-value="employee.payroll_location or ''"
-                                           style="pointer-events: none;"/>
+                                           data-always-readonly="1"
+                                           readonly="readonly"/>
                                 </div>
 
                                 <div class="col-md-6">
@@ -115,7 +116,8 @@
                                     <input type="text" name="currency_id"
                                            class="form-control"
                                            t-att-value="employee.currency_id.name or ''"
-                                           style="pointer-events: none;"/>
+                                           data-always-readonly="1"
+                                           readonly="readonly"/>
                                 </div>
 
                                 <div class="col-md-6">
@@ -123,7 +125,8 @@
                                     <input type="text" name="nationality_at_birth_id"
                                            class="form-control"
                                            t-att-value="employee.nationality_at_birth_id.name or ''"
-                                           style="pointer-events: none;"/>
+                                           data-always-readonly="1"
+                                           readonly="readonly"/>
                                 </div>
 
                             </div>
@@ -139,8 +142,8 @@
                                            name="work_email"
                                            class="form-control"
                                            t-att-value="employee.work_email"
+                                           data-always-readonly="1"
                                            readonly="readonly"
-                                           style="pointer-events: none;"
                                            data-validation="email"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
@@ -152,7 +155,6 @@
                                            name="work_phone"
                                            class="form-control"
                                            t-att-value="employee.work_phone"
-                                           style="pointer-events: none;"
                                            pattern="[+]?[0-9\s\-\(\)]*"
                                            data-validation="phone"/>
                                     <div class="invalid-feedback"></div>
@@ -176,7 +178,8 @@
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-venus-mars text-muted me-1"></i>Gender
                                     </label>
-                                    <select name="sex" class="form-select" disabled="">
+                                    <select name="sex" class="form-select" data-always-readonly="1"
+                                           readonly="readonly" disabled="">
                                         <option value="">Select Gender</option>
                                         <option value="male"
                                                 t-att-selected="'selected' if employee.sex == 'male' else None">Male
@@ -198,6 +201,7 @@
                                            name="birthday"
                                            class="form-control"
                                            t-att-value="employee.birthday"
+                                           data-always-readonly="1"
                                            readonly="readonly"
                                            data-validation="date"/>
                                     <div class="invalid-feedback"></div>
@@ -206,7 +210,7 @@
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-heart text-muted me-1"></i>Marital Status
                                     </label>
-                                    <select name="marital" class="form-select" style="pointer-events: none;">
+                                    <select name="marital" class="form-select">
                                         <option value="">Select Status</option>
                                         <option value="single"
                                                 t-att-selected="'selected' if employee.marital == 'single' else None">
@@ -254,7 +258,7 @@
                                            name="e_private_city"
                                            class="form-control"
                                            t-att-value="employee.e_private_city or ''"
-                                           readonly="readonly"/>
+                                           />
                                 </div>
 
                             </div>
@@ -276,37 +280,43 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Company</label>
                                     <input type="text" class="form-control" t-att-value="employee.company_id.name"
-                                           style="pointer-events: none;"/>
+                                           data-always-readonly="1"
+                                           readonly="readonly"/>
                                 </div>
                                 <!--  Employee Code  -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Employee Code</label>
                                     <input type="text" class="form-control" t-att-value="employee.emp_code"
-                                           style="pointer-events: none;"/>
+                                           data-always-readonly="1"
+                                           readonly="readonly"/>
                                 </div>
                                 <!--  Department  -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Department</label>
                                     <input type="text" class="form-control" t-att-value="employee.department_id.name"
-                                           style="pointer-events: none;"/>
+                                           data-always-readonly="1"
+                                           readonly="readonly"/>
                                 </div>
                                 <!--  Job Position  -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Job Position</label>
                                     <input type="text" class="form-control" t-att-value="employee.job_id.name"
-                                           style="pointer-events: none;"/>
+                                           data-always-readonly="1"
+                                           readonly="readonly"/>
                                 </div>
                                 <!--  Job Title  -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Job Title</label>
                                     <input type="text" class="form-control" t-att-value="employee.job_title"
-                                           style="pointer-events: none;"/>
+                                           data-always-readonly="1"
+                                           readonly="readonly"/>
                                 </div>
                                 <!--  Manager  -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Account Manager</label>
                                     <input type="text" class="form-control" t-att-value="employee.parent_id.name"
-                                           style="pointer-events: none;"/>
+                                          data-always-readonly="1"
+                                           readonly="readonly"/>
                                 </div>
                             </div>
                         </div>
@@ -328,7 +338,8 @@
                                     <input type="text"
                                            class="form-control"
                                            t-att-value="employee.address_id.name or ''"
-                                           style="pointer-events: none;"/>
+                                           data-always-readonly="1"
+                                           readonly="readonly"/>
                                 </div>
 
                                 <!-- Work Location -->
@@ -337,7 +348,8 @@
                                     <input type="text"
                                            class="form-control"
                                            t-att-value="employee.work_location_id.name or ''"
-                                           style="pointer-events: none; background-color: #e9ecef;"/>
+                                           data-always-readonly="1"
+                                           readonly="readonly"/>
                                 </div>
 
                             </div>
@@ -358,34 +370,39 @@
                                     <label class="form-label fw-bold">Aadhar Number</label>
                                     <input type="text" class="form-control"
                                            t-att-value="employee.aadhar_no or ''"
-                                           style="pointer-events: none;"/>
+                                           data-always-readonly="1"
+                                           readonly="readonly"/>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">PAN</label>
                                     <input type="text" class="form-control"
                                            t-att-value="employee.pan or ''"
-                                           style="pointer-events: none;"/>
+                                           data-always-readonly="1"
+                                           readonly="readonly"/>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">UAN</label>
                                     <input type="text" class="form-control"
                                            t-att-value="employee.uan or ''"
-                                           style="pointer-events: none;"/>
+                                           data-always-readonly="1"
+                                           readonly="readonly"/>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">PF Number</label>
                                     <input type="text" class="form-control"
                                            t-att-value="employee.pf_number or ''"
-                                           style="pointer-events: none;"/>
+                                           data-always-readonly="1"
+                                           readonly="readonly"/>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Country of Residency</label>
                                     <input type="text" class="form-control"
                                            t-att-value="employee.country_residences_id.name or ''"
+                                           data-always-readonly="1"
                                            readonly="readonly"/>
                                 </div>
 
@@ -394,35 +411,39 @@
                                     <input type="text" class="form-control"
                                            name="whatsapp"
                                            t-att-value="employee.whatsapp or ''"
-                                           readonly="readonly"/>
+                                           />
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">DOJ</label>
                                     <input type="text" class="form-control"
                                            t-att-value="employee.doj or ''"
-                                           style="pointer-events: none;"/>
+                                           data-always-readonly="1"
+                                           readonly="readonly"/>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Original Hire Date</label>
                                     <input type="text" class="form-control"
                                            t-att-value="employee.original_hire_date or ''"
-                                           style="pointer-events: none;"/>
+                                           data-always-readonly="1"
+                                           readonly="readonly"/>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Payroll</label>
                                     <input type="text" class="form-control"
                                            t-att-value="employee.payroll or ''"
-                                           style="pointer-events: none;"/>
+                                           data-always-readonly="1"
+                                           readonly="readonly"/>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Mentor Name</label>
                                     <input type="text" class="form-control"
                                            t-att-value="employee.mentor_names_id.name or ''"
-                                           style="pointer-events: none;"/>
+                                           data-always-readonly="1"
+                                           readonly="readonly"/>
                                 </div>
 
                                 <div class="col-md-6">
@@ -430,7 +451,7 @@
                                     <input type="text" class="form-control"
                                            name="house_no"
                                            t-att-value="employee.house_no or ''"
-                                           readonly="readonly"/>
+                                           />
                                 </div>
 
                                 <div class="col-md-6">
@@ -438,7 +459,7 @@
                                     <input type="text" class="form-control"
                                            name="area_name"
                                            t-att-value="employee.area_name or ''"
-                                           readonly="readonly"/>
+                                           />
                                 </div>
 
                                 <div class="col-md-6">
@@ -446,7 +467,7 @@
                                     <input type="text" class="form-control"
                                            name="city"
                                            t-att-value="employee.city or ''"
-                                           readonly="readonly"/>
+                                           />
                                 </div>
 
                                 <div class="col-md-6">
@@ -454,7 +475,7 @@
                                     <input type="text" class="form-control"
                                            name="countries_id"
                                            t-att-value="employee.countries_id.name or ''"
-                                           readonly="readonly"/>
+                                           />
                                 </div>
 
                                 <div class="col-md-6">
@@ -462,7 +483,7 @@
                                     <input type="text" class="form-control"
                                            name="states_id"
                                            t-att-value="employee.states_id.name or ''"
-                                           readonly="readonly"/>
+                                           />
                                 </div>
 
                                 <div class="col-md-6">
@@ -470,7 +491,7 @@
                                     <input type="text" class="form-control"
                                            name="zip_code"
                                            t-att-value="employee.zip_code or ''"
-                                           readonly="readonly"/>
+                                           />
                                 </div>
 
                                 <div class="col-md-6">
@@ -478,13 +499,14 @@
                                     <input type="text" class="form-control"
                                            name="linkedin"
                                            t-att-value="employee.linkedin or ''"
-                                           readonly="readonly"/>
+                                           />
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Religion</label>
                                     <input type="text" class="form-control"
                                            t-att-value="employee.religion.name if employee.religion else ''"
+                                           data-always-readonly="1"
                                            readonly="readonly"/>
                                 </div>
 
@@ -515,12 +537,14 @@
                                     <label>Place of Birth</label>
                                     <input name="place_of_birth" class="form-control"
                                            t-att-value="employee.place_of_birth or ''"
+                                           data-always-readonly="1"
                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label>Payslip Language</label>
                                     <input class="form-control"
                                            t-att-value="employee.lang or ''"
+                                           data-always-readonly="1"
                                            readonly="readonly"/>
                                 </div>
                             </div>
@@ -570,7 +594,8 @@
                                            name="passport_id"
                                            class="form-control"
                                            t-att-value="employee.passport_id"
-                                           style="pointer-events: none;"/>
+                                           data-always-readonly="1"
+                                           readonly="readonly"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
                                 <div class="col-md-6">
@@ -581,6 +606,7 @@
                                            name="issue_countries_id"
                                            class="form-control"
                                            t-att-value="employee.issue_countries_id.name or ''"
+                                           data-always-readonly="1"
                                            readonly="readonly"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
@@ -592,6 +618,7 @@
                                            name="issue_date"
                                            class="form-control"
                                            t-att-value="employee.issue_date"
+                                           data-always-readonly="1"
                                            readonly="readonly"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
@@ -603,6 +630,7 @@
                                            name="expiry_date"
                                            class="form-control"
                                            t-att-value="employee.expiry_date"
+                                          data-always-readonly="1"
                                            readonly="readonly"
                                            data-validation="future-date"/>
                                     <div class="invalid-feedback"></div>
