@@ -1633,50 +1633,37 @@ class PortalEmployee(http.Controller):
         if request.httprequest.method == 'POST':
             try:
                 vals = {}
-                
-                # Validate and update experience
-                experience = post.get('x_experience', '').strip()
-                if experience:
-                    # Basic validation - minimum word count
-                    word_count = len(experience.split())
-                    if word_count < 10:
-                        return request.make_json_response({
-                            'success': False,
-                            'error': 'Experience description should be at least 10 words.'
-                        })
-                    vals['x_experience'] = experience
-                
-                # Validate and update skills
-                skills = post.get('x_skills', '').strip()
-                if skills:
-                    # Clean up skills - remove extra spaces and normalize
-                    skills_list = [skill.strip() for skill in skills.split(',') if skill.strip()]
-                    if len(skills_list) < 3:
-                        return request.make_json_response({
-                            'success': False,
-                            'error': 'Please add at least 3 skills.'
-                        })
-                    vals['x_skills'] = ', '.join(skills_list)
-                
-                # Experience field is already handled above
-                
-                # Update employee record
-                employee.sudo().write(vals)
-                
-                # Handle document uploads for experience section
+
+                # ✅ No validation - just save whatever is provided
+                if post.get('x_experience') is not None:
+                    vals['x_experience'] = post.get('x_experience', '').strip()
+
+                if post.get('x_skills') is not None:
+                    vals['x_skills'] = post.get('x_skills', '').strip()
+
+                # ✅ Write only if there are values to write
+                if vals:
+                    _logger.info("Experience - Writing vals to employee %s: %s", employee.id, list(vals.keys()))
+                    employee.sudo().write(vals)
+                    _logger.info("Experience - Successfully wrote for employee %s", employee.id)
+
+                # Handle document uploads
                 self._handle_experience_documents(employee, request.httprequest.files)
-                
+
                 return request.make_json_response({
                     'success': True,
                     'message': 'Experience and skills updated successfully'
                 })
-                
+
             except Exception as e:
+                _logger.error("Error in portal_employee_experience POST: %s", str(e))
+                import traceback
+                _logger.error("Traceback: %s", traceback.format_exc())
                 return request.make_json_response({
                     'success': False,
                     'error': str(e)
                 })
-        
+
         return request.render('employee_self_service_portal.portal_employee_profile_experience', {
             'employee': employee,
             'section': 'experience',
