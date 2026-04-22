@@ -2,8 +2,7 @@
     <template id="portal_employee_profile_personal_inherit_extra"
               inherit_id="employee_self_service_portal.portal_employee_profile_personal">
 
-        <xpath expr="//div[@class='card mb-4 shadow-sm'][.//h5[contains(., 'Work Information')]]"
-               position="after">
+        <xpath expr="//div[@class='card shadow-sm'][.//div[@id='formActions']]" position="before">
 
             <!-- ================= Private Contact ================= -->
             <div class="card mb-4 shadow-sm">
@@ -50,7 +49,7 @@
                         <div class="col-md-6">
                             <label>Birthday</label>
                             <input name="birthday" type="date" class="form-control"
-                                   t-att-value="employee.birthday or ''"
+                                   t-att-value="employee.birthday.strftime('%Y-%m-%d') if employee.birthday else ''"
                                    readonly="readonly"/>
                         </div>
                         <div class="col-md-6">
