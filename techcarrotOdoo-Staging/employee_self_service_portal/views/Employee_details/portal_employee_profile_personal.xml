@@ -205,7 +205,7 @@
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-heart text-muted me-1"></i>Marital Status
                                     </label>
-                                    <select name="marital" class="form-select" disabled="">
+                                    <select name="marital" class="form-select" style="pointer-events: none;">
                                         <option value="">Select Status</option>
                                         <option value="single"
                                                 t-att-selected="'selected' if employee.marital == 'single' else None">
