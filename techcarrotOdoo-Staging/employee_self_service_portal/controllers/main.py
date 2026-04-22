@@ -1306,7 +1306,7 @@ class PortalEmployee(http.Controller):
             try:
                 # Enhanced personal details update with validation
                 vals = {}
-                
+
                 # Basic information
                 if post.get('work_email'):
                     # Validate email format
@@ -1319,7 +1319,7 @@ class PortalEmployee(http.Controller):
                             'success': False,
                             'error': 'Invalid email format'
                         })
-                
+
                 if post.get('work_phone'):
                     vals['work_phone'] = post.get('work_phone')
                 if post.get('birthday'):
@@ -1328,7 +1328,7 @@ class PortalEmployee(http.Controller):
                     vals['sex'] = post.get('sex')
                 if post.get('marital'):
                     vals['marital'] = post.get('marital')
-                
+
                 # Identity documents
                 # CORRECT field names
                 if post.get('emirates_id_number'):
@@ -1364,7 +1364,7 @@ class PortalEmployee(http.Controller):
                         ], limit=1)
                         if country:
                             vals['country_id'] = country.id
-                
+
                 # Contact information
                 if post.get('private_email'):
                     vals['private_email'] = post.get('private_email')
@@ -1381,7 +1381,7 @@ class PortalEmployee(http.Controller):
 
                 if post.get('e_private_city'):
                     vals['e_private_city'] = post.get('e_private_city')
-                
+
                 # Emergency contact
                 if post.get('emergency_contact'):
                     vals['emergency_contact'] = post.get('emergency_contact')
@@ -1392,29 +1392,35 @@ class PortalEmployee(http.Controller):
                     vals['legal_name'] = post.get('legal_name')
                 if post.get('place_of_birth'):
                     vals['place_of_birth'] = post.get('place_of_birth')
-                
-                # Update employee record
-                #
-                try:
-                    employee.sudo().write(vals)
-                except Exception as e:
-                    _logger.error("Error saving employee data: %s", str(e))
-                    return request.render('employee_self_service_portal.portal_employee_profile_personal', {
-                        'employee': employee,
-                        'error': str(e),
-                        'section': 'personal',
-                        'countries': request.env['res.country'].sudo().search([], order='name'),
-                    })
-                
+                if post.get('whatsapp'):
+                    vals['whatsapp'] = post.get('whatsapp')
+                if post.get('house_no'):
+                    vals['house_no'] = post.get('house_no')
+                if post.get('area_name'):
+                    vals['area_name'] = post.get('area_name')
+                if post.get('city'):
+                    vals['city'] = post.get('city')
+                if post.get('zip_code'):
+                    vals['zip_code'] = post.get('zip_code')
+                if post.get('linkedin'):
+                    vals['linkedin'] = post.get('linkedin')
+
+                _logger.info("Writing vals to employee %s: %s", employee.id, list(vals.keys()))
+                employee.sudo().write(vals)
+                _logger.info("Successfully wrote vals for employee %s", employee.id)
+
                 # Handle document uploads
                 self._handle_document_uploads(employee, request.httprequest.files)
-                
+
                 return request.make_json_response({
                     'success': True,
                     'message': 'Personal details updated successfully'
                 })
-                
+
             except Exception as e:
+                _logger.error("Error in portal_employee_personal POST: %s", str(e))
+                import traceback
+                _logger.error("Traceback: %s", traceback.format_exc())
                 return request.make_json_response({
                     'success': False,
                     'error': str(e)

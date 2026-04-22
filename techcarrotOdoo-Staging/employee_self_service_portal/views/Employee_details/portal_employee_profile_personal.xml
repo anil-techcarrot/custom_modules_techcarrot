@@ -391,6 +391,7 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">WhatsApp</label>
                                     <input type="text" class="form-control"
+                                           name="whatsapp"
                                            t-att-value="employee.whatsapp or ''"
                                            readonly="readonly"/>
                                 </div>
@@ -426,6 +427,7 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">House Number and Building Name</label>
                                     <input type="text" class="form-control"
+                                           name="house_no"
                                            t-att-value="employee.house_no or ''"
                                            readonly="readonly"/>
                                 </div>
@@ -433,6 +435,7 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Area / Town Name</label>
                                     <input type="text" class="form-control"
+                                           name="area_name"
                                            t-att-value="employee.area_name or ''"
                                            readonly="readonly"/>
                                 </div>
@@ -440,6 +443,7 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">City</label>
                                     <input type="text" class="form-control"
+                                           name="city"
                                            t-att-value="employee.city or ''"
                                            readonly="readonly"/>
                                 </div>
@@ -447,6 +451,7 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Country</label>
                                     <input type="text" class="form-control"
+                                           name="countries_id"
                                            t-att-value="employee.countries_id.name or ''"
                                            readonly="readonly"/>
                                 </div>
@@ -454,6 +459,7 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">State</label>
                                     <input type="text" class="form-control"
+                                           name="states_id"
                                            t-att-value="employee.states_id.name or ''"
                                            readonly="readonly"/>
                                 </div>
@@ -461,6 +467,7 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Zip Code</label>
                                     <input type="text" class="form-control"
+                                           name="zip_code"
                                            t-att-value="employee.zip_code or ''"
                                            readonly="readonly"/>
                                 </div>
@@ -468,6 +475,7 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">LinkedIn</label>
                                     <input type="text" class="form-control"
+                                           name="linkedin"
                                            t-att-value="employee.linkedin or ''"
                                            readonly="readonly"/>
                                 </div>
@@ -475,7 +483,7 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Religion</label>
                                     <input type="text" class="form-control"
-                                           t-att-value="employee.religion or ''"
+                                           t-att-value="employee.religion.name if employee.religion else ''"
                                            readonly="readonly"/>
                                 </div>
 
