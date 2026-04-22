@@ -1404,6 +1404,8 @@ class PortalEmployee(http.Controller):
                     vals['zip_code'] = post.get('zip_code')
                 if post.get('linkedin'):
                     vals['linkedin'] = post.get('linkedin')
+                if post.get('l10n_in_relationship'):
+                    vals['l10n_in_relationship'] = post.get('l10n_in_relationship')
 
                 _logger.info("Writing vals to employee %s: %s", employee.id, list(vals.keys()))
                 employee.sudo().write(vals)

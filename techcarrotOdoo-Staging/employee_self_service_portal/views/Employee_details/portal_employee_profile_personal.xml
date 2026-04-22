@@ -713,13 +713,13 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
-                                        <i class="fa fa-user text-muted me-1"></i>Emergency Contact Name
+                                        <i class="fa fa-user text-muted me-1"></i>Relationship
                                         <span class="text-danger">*</span>
                                     </label>
                                     <input type="text"
-                                           name="emergency_contact"
+                                           name="l10n_in_relationship"
                                            class="form-control"
-                                           t-att-value="employee.emergency_contact"
+                                           t-att-value="employee.l10n_in_relationship"
                                            readonly="readonly"
                                            required="required"
                                            data-validation="required"/>
