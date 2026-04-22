@@ -155,6 +155,7 @@
                                            name="work_phone"
                                            class="form-control"
                                            t-att-value="employee.work_phone"
+                                           readonly="readonly"
                                            pattern="[+]?[0-9\s\-\(\)]*"
                                            data-validation="phone"/>
                                     <div class="invalid-feedback"></div>
