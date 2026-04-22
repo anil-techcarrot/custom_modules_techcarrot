@@ -13,6 +13,8 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label>Email</label>
+                            <!-- ✅ No data-always-readonly = editable in edit mode -->
+                            <!-- ✅ readonly="readonly" = locked until edit mode ON -->
                             <input type="text" name="private_email" class="form-control"
                                    t-att-value="employee.private_email or ''"
                                    readonly="readonly"/>
@@ -25,10 +27,11 @@
                         </div>
                         <div class="col-md-6">
                             <label>Bank Accounts</label>
+                            <!-- ✅ data-always-readonly = NEVER editable -->
                             <input type="text" class="form-control"
                                    t-att-value="', '.join(employee.bank_account_ids.mapped('acc_number')) if employee.bank_account_ids else ''"
                                    data-always-readonly="1"
-       readonly="readonly"/>
+                                   readonly="readonly"/>
                         </div>
                     </div>
                 </div>
@@ -46,14 +49,14 @@
                             <input name="visa_no" class="form-control"
                                    t-att-value="employee.visa_no or ''"
                                    data-always-readonly="1"
-       readonly="readonly"/>
+                                   readonly="readonly"/>
                         </div>
                         <div class="col-md-6">
                             <label>Work Permit No</label>
                             <input name="permit_no" class="form-control"
                                    t-att-value="employee.permit_no or ''"
                                    data-always-readonly="1"
-       readonly="readonly"/>
+                                   readonly="readonly"/>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Work Permit</label>
@@ -84,7 +87,7 @@
                             <input class="form-control"
                                    t-att-value="employee.country_id.name or ''"
                                    data-always-readonly="1"
-       readonly="readonly"/>
+                                   readonly="readonly"/>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Non Resident</label>
@@ -106,21 +109,21 @@
                             <input name="identification_id" class="form-control"
                                    t-att-value="employee.identification_id or ''"
                                    data-always-readonly="1"
-       readonly="readonly"/>
+                                   readonly="readonly"/>
                         </div>
                         <div class="col-md-6">
                             <label>SSN No</label>
                             <input name="ssnid" class="form-control"
                                    t-att-value="employee.ssnid or ''"
                                    data-always-readonly="1"
-       readonly="readonly"/>
+                                   readonly="readonly"/>
                         </div>
                         <div class="col-md-6">
                             <label>Passport No</label>
                             <input name="passport_id" class="form-control"
                                    t-att-value="employee.passport_id or ''"
                                    data-always-readonly="1"
-       readonly="readonly"/>
+                                   readonly="readonly"/>
                         </div>
                     </div>
                 </div>
@@ -138,10 +141,11 @@
                             <input class="form-control"
                                    t-att-value="'Yes' if employee.disabled else 'No'"
                                    data-always-readonly="1"
-       readonly="readonly"/>
+                                   readonly="readonly"/>
                         </div>
                         <div class="col-md-6">
                             <label>Children</label>
+                            <!-- ✅ Editable in edit mode -->
                             <input name="children" class="form-control"
                                    t-att-value="employee.children or ''"
                                    readonly="readonly"/>
@@ -177,13 +181,14 @@
                             <input name="study_field" class="form-control"
                                    t-att-value="employee.study_field or ''"
                                    data-always-readonly="1"
-       readonly="readonly"/>
+                                   readonly="readonly"/>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- ================= Languages ================= -->
+            <!-- ✅ Fixed - removed duplicate nested card -->
             <div class="card mb-4 shadow-sm">
                 <div class="card-header bg-light">
                     <h5 class="mb-0">Languages</h5>
@@ -195,31 +200,14 @@
                             <input class="form-control"
                                    t-att-value="employee.mother_tongue_id.name or ''"
                                    data-always-readonly="1"
-       readonly="readonly"/>
+                                   readonly="readonly"/>
                         </div>
-                        <!-- ================= Languages ================= -->
-                        <div class="card mb-4 shadow-sm">
-                            <div class="card-header bg-light">
-                                <h5 class="mb-0">Languages</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <label>Mother Tongue</label>
-                                        <input class="form-control"
-                                               t-att-value="employee.mother_tongue_id.name or ''"
-                                               data-always-readonly="1"
-       readonly="readonly"/>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-bold">Languages Known</label>
-                                        <input class="form-control"
-                                               t-att-value="', '.join(employee.language_known_ids.mapped('name')) if employee.language_known_ids else ''"
-                                               data-always-readonly="1"
-       readonly="readonly"/>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Languages Known</label>
+                            <input class="form-control"
+                                   t-att-value="', '.join(employee.language_known_ids.mapped('name')) if employee.language_known_ids else ''"
+                                   data-always-readonly="1"
+                                   readonly="readonly"/>
                         </div>
                     </div>
                 </div>
@@ -231,8 +219,7 @@
         <xpath expr="//script[@type='text/javascript']" position="after">
             <script type="text/javascript">
                 <![CDATA[
-// ✅ Fields that should NEVER be editable (system/readonly fields)
-// Add any field name here to make it always readonly
+
 const ALWAYS_READONLY = [
     'bank_account_ids',
     'country_id',
@@ -240,97 +227,81 @@ const ALWAYS_READONLY = [
     'mother_tongue_id',
 ];
 
-// ✅ Helper function to check if input should always be readonly
 function isAlwaysReadonly(input) {
-    // Check by data attribute
     if (input.hasAttribute('data-always-readonly')) return true;
-    // Check by field name
     const fieldName = input.name || '';
     if (ALWAYS_READONLY.includes(fieldName)) return true;
     return false;
 }
 
-// ✅ Override enableEditMode to handle extra fields
+// ✅ Override enableEditMode
 const _originalEnableEditMode = window.enableEditMode;
-window.enableEditMode = function() {
-    // Call original function first
+window.enableEditMode = function () {
     if (typeof _originalEnableEditMode === 'function') {
         _originalEnableEditMode();
     }
 
-    // ✅ Handle all inputs in the form
-    const allInputs = document.querySelectorAll('#personalDetailsForm input, #personalDetailsForm select');
+    const allInputs = document.querySelectorAll(
+        '#personalDetailsForm input, #personalDetailsForm select'
+    );
 
-    allInputs.forEach(function(input) {
+    allInputs.forEach(function (input) {
         if (input.type === 'hidden') return;
         if (input.type === 'file') return;
 
-        // ✅ Always-readonly fields - lock them even in edit mode
         if (isAlwaysReadonly(input)) {
+            // ✅ Lock always-readonly fields
             input.setAttribute('readonly', 'readonly');
             if (input.tagName === 'SELECT' || input.type === 'checkbox') {
                 input.setAttribute('disabled', 'disabled');
             }
             input.style.setProperty('pointer-events', 'none');
             input.style.setProperty('background-color', '#e9ecef');
-            return;
+        } else {
+            // ✅ Unlock editable fields
+            input.removeAttribute('disabled');
+            input.removeAttribute('readonly');
+            input.style.removeProperty('pointer-events');
+            input.style.removeProperty('background-color');
         }
-
-        // ✅ Editable fields - unlock them
-        input.removeAttribute('disabled');
-        input.removeAttribute('readonly');
-        input.style.removeProperty('pointer-events');
-        input.style.removeProperty('background-color');
     });
 
-    // ✅ Special handle for checkbox - enable only if NOT always readonly
+    // ✅ Non Resident checkbox - enable if not always readonly
     const nonResidentCheckbox = document.getElementById('is_non_resident');
     if (nonResidentCheckbox && !isAlwaysReadonly(nonResidentCheckbox)) {
         nonResidentCheckbox.removeAttribute('disabled');
     }
 
-    // ✅ Special handle for language select - enable only if NOT always readonly
-    const langSelect = document.getElementById('language_known_ids');
-    if (langSelect && !isAlwaysReadonly(langSelect)) {
-        langSelect.removeAttribute('disabled');
-        langSelect.style.removeProperty('pointer-events');
-    }
-
     console.log('Edit mode enabled');
 };
 
-// ✅ Override disableEditMode to handle extra fields
+// ✅ Override disableEditMode
 const _originalDisableEditMode = window.disableEditMode;
-window.disableEditMode = function() {
-    // Call original function first
+window.disableEditMode = function () {
     if (typeof _originalDisableEditMode === 'function') {
         _originalDisableEditMode();
     }
 
-    // ✅ Lock all selects
-    const extraSelects = document.querySelectorAll('#personalDetailsForm select');
-    extraSelects.forEach(function(select) {
-        select.setAttribute('disabled', 'disabled');
-        // ✅ Keep always-readonly styling
-        if (isAlwaysReadonly(select)) {
-            select.style.setProperty('pointer-events', 'none');
-            select.style.setProperty('background-color', '#e9ecef');
-        } else {
-            select.style.removeProperty('pointer-events');
-            select.style.removeProperty('background-color');
-        }
-    });
+    const allInputs = document.querySelectorAll(
+        '#personalDetailsForm input, #personalDetailsForm select'
+    );
 
-    // ✅ Lock all inputs
-    const extraInputs = document.querySelectorAll('#personalDetailsForm input');
-    extraInputs.forEach(function(input) {
-        if (input.type === 'hidden' || input.type === 'file') return;
+    allInputs.forEach(function (input) {
+        if (input.type === 'hidden') return;
+        if (input.type === 'file') return;
+
         if (input.type === 'checkbox') {
             input.setAttribute('disabled', 'disabled');
             return;
         }
-        input.setAttribute('readonly', 'readonly');
-        // ✅ Keep always-readonly styling
+
+        if (input.tagName === 'SELECT') {
+            input.setAttribute('disabled', 'disabled');
+        } else {
+            input.setAttribute('readonly', 'readonly');
+        }
+
+        // ✅ Always-readonly gets extra styling
         if (isAlwaysReadonly(input)) {
             input.style.setProperty('pointer-events', 'none');
             input.style.setProperty('background-color', '#e9ecef');
@@ -343,28 +314,23 @@ window.disableEditMode = function() {
     console.log('Edit mode disabled');
 };
 
-// ✅ Fix form submit - remove disabled from selects before submitting
-// BUT keep always-readonly fields disabled so they are NOT submitted
-document.getElementById('personalDetailsForm').addEventListener('submit', function(e) {
-
-    // ✅ Only enable non-always-readonly selects for submission
-    const disabledSelects = this.querySelectorAll('select[disabled]');
-    disabledSelects.forEach(function(select) {
+// ✅ Form submit - enable non-always-readonly fields before POST
+document.getElementById('personalDetailsForm').addEventListener('submit', function (e) {
+    // Enable disabled selects for submission (except always-readonly)
+    this.querySelectorAll('select[disabled]').forEach(function (select) {
         if (!isAlwaysReadonly(select)) {
             select.removeAttribute('disabled');
         }
     });
-
-    // ✅ Only enable non-always-readonly checkboxes for submission
-    const disabledCheckboxes = this.querySelectorAll('input[type="checkbox"][disabled]');
-    disabledCheckboxes.forEach(function(cb) {
+    // Enable disabled checkboxes for submission (except always-readonly)
+    this.querySelectorAll('input[type="checkbox"][disabled]').forEach(function (cb) {
         if (!isAlwaysReadonly(cb)) {
             cb.removeAttribute('disabled');
         }
     });
+}, true);
 
-}, true); // capture phase - runs BEFORE the existing submit handler
-]]>
+                ]]>
             </script>
         </xpath>
 
