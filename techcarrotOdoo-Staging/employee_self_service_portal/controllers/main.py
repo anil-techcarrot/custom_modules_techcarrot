@@ -1309,10 +1309,7 @@ class PortalEmployee(http.Controller):
             [('active', '=', True)], order='name'
         )
         countries = request.env['res.country'].sudo().search([], order='name')
-        employee_lang_ids = employee.language_known_ids.ids
 
-        _logger.info("Languages loaded: %s", [(l.id, l.name) for l in languages])
-        _logger.info("Employee lang IDs: %s", employee_lang_ids)
 
         if request.httprequest.method == 'POST':
             try:
@@ -1442,25 +1439,6 @@ class PortalEmployee(http.Controller):
                 if post.get('certificate') and post.get('certificate') in allowed_certificates:
                     vals['certificate'] = post.get('certificate')
 
-                # ✅ Languages Known - Many2many res.lang active only
-                language_ids = request.httprequest.form.getlist('language_known_ids')
-                _logger.info("Received language_known_ids from form: %s", language_ids)
-                if language_ids:
-                    try:
-                        lang_id_list = [int(lid) for lid in language_ids if lid]
-                        if lang_id_list:
-                            # ✅ Verify IDs exist in active res.lang only
-                            valid_langs = request.env['res.lang'].sudo().search([
-                                ('id', 'in', lang_id_list),
-                                ('active', '=', True)
-                            ])
-                            _logger.info("Valid language IDs to save: %s", valid_langs.ids)
-                            vals['language_known_ids'] = [(6, 0, valid_langs.ids)]
-                    except (ValueError, TypeError) as e:
-                        _logger.error("Error processing language IDs: %s", str(e))
-                else:
-                    # ✅ Empty selection - clear all languages
-                    vals['language_known_ids'] = [(5, 0, 0)]
 
                 # ✅ Checkbox field - always set True or False
                 vals['is_non_resident'] = True if post.get('is_non_resident') == 'on' else False
@@ -1486,16 +1464,13 @@ class PortalEmployee(http.Controller):
                     'success': False,
                     'error': str(e)
                 })
-        _logger.info("portal_employee_profile - Languages: %s", len(languages))
-        _logger.info("portal_employee_profile - Employee lang IDs: %s", employee_lang_ids)
+
 
         # ✅ GET - pass all required variables to template
         return request.render('employee_self_service_portal.portal_employee_profile_personal', {
             'employee': employee,
             'section': 'personal',
             'countries': countries,
-            'languages': languages,
-            'employee_lang_ids': employee_lang_ids,
         })
         
         return request.render('employee_self_service_portal.portal_employee_profile_personal', {

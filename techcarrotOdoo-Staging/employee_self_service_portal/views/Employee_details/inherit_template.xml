@@ -187,26 +187,27 @@
                                    t-att-value="employee.mother_tongue_id.name or ''"
                                    readonly="readonly"/>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Languages Known</label>
-                            <select name="language_known_ids"
-                                    id="language_known_ids"
-                                    class="form-select"
-                                    multiple="multiple"
-                                    disabled="disabled"
-                                    size="6">
-                                <t t-foreach="languages" t-as="lang">
-                                    <option
-                                        t-att-value="lang.id"
-                                        t-att-selected="'selected' if lang.id in employee_lang_ids else None">
-                                        <t t-esc="lang.name"/>
-                                    </option>
-                                </t>
-                            </select>
-                            <small class="text-muted">
-                                <i class="fa fa-info-circle me-1"></i>
-                                Enable edit mode and hold Ctrl to select multiple
-                            </small>
+                        <!-- ================= Languages ================= -->
+                        <div class="card mb-4 shadow-sm">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Languages</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label>Mother Tongue</label>
+                                        <input class="form-control"
+                                               t-att-value="employee.mother_tongue_id.name or ''"
+                                               style="pointer-events: none;"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Languages Known</label>
+                                        <input class="form-control"
+                                               t-att-value="', '.join(employee.language_known_ids.mapped('name')) if employee.language_known_ids else ''"
+                                               style="pointer-events: none;"/>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
