@@ -1486,6 +1486,8 @@ class PortalEmployee(http.Controller):
                     'success': False,
                     'error': str(e)
                 })
+        _logger.info("portal_employee_profile - Languages: %s", len(languages))
+        _logger.info("portal_employee_profile - Employee lang IDs: %s", employee_lang_ids)
 
         # ✅ GET - pass all required variables to template
         return request.render('employee_self_service_portal.portal_employee_profile_personal', {
