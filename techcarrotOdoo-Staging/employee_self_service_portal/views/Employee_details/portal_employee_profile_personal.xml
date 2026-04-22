@@ -197,7 +197,7 @@
                                            name="birthday"
                                            class="form-control"
                                            t-att-value="employee.birthday"
-                                           style="pointer-events: none;"
+                                           readonly="readonly"
                                            data-validation="date"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
