@@ -224,15 +224,24 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Languages Known</label>
-                            <select name="language_known_ids" class="form-select" multiple="multiple"
-                                    style="pointer-events: none;" size="4">
-                                <t t-foreach="languages" t-as="lang">
-                                    <option t-att-value="lang.id"
-                                            t-att-selected="'selected' if lang in employee.language_known_ids else None">
-                                        <t t-esc="lang.name"/>
-                                    </option>
-                                </t>
-                            </select>
+                            <t t-if="languages">
+                                <select name="language_known_ids" class="form-select"
+                                        multiple="multiple"
+                                        style="pointer-events: none;"
+                                        size="4">
+                                    <t t-foreach="languages" t-as="lang">
+                                        <option t-att-value="lang.id"
+                                                t-att-selected="'selected' if lang in employee.language_known_ids else None">
+                                            <t t-esc="lang.name"/>
+                                        </option>
+                                    </t>
+                                </select>
+                            </t>
+                            <t t-else="">
+                                <input type="text" class="form-control"
+                                       t-att-value="', '.join(employee.language_known_ids.mapped('name')) if employee.language_known_ids else ''"
+                                       readonly="readonly"/>
+                            </t>
                         </div>
                     </div>
                 </div>

@@ -1302,6 +1302,8 @@ class PortalEmployee(http.Controller):
     @http.route(MY_EMPLOYEE_URL + '/personal', type='http', auth='user', website=True, methods=['GET', 'POST'], csrf=False)
     def portal_employee_personal(self, **post):
         employee = self._get_employee()
+        languages = request.env['res.lang'].sudo().search([], order='name')
+        countries = request.env['res.country'].sudo().search([], order='name')
         if request.httprequest.method == 'POST':
             try:
                 # Enhanced personal details update with validation
@@ -1423,11 +1425,11 @@ class PortalEmployee(http.Controller):
                 if language_ids:
                     try:
                         lang_id_list = [int(lid) for lid in language_ids if lid]
-                        vals['language_known_ids'] = [(6, 0, lang_id_list)]
+                        if lang_id_list:
+                            vals['language_known_ids'] = [(6, 0, lang_id_list)]
                     except (ValueError, TypeError):
                         pass
                 else:
-                    # If nothing selected, clear the field
                     vals['language_known_ids'] = [(5, 0, 0)]
 
                 vals['is_non_resident'] = True if post.get('is_non_resident') == 'on' else False
@@ -1455,8 +1457,8 @@ class PortalEmployee(http.Controller):
         return request.render('employee_self_service_portal.portal_employee_profile_personal', {
             'employee': employee,
             'section': 'personal',
-            'countries': request.env['res.country'].sudo().search([], order='name'),
-            'languages': request.env['res.lang'].sudo().search([('active', '=', True)], order='name'),  # ✅ ADD THIS
+            'countries': countries,
+            'languages': languages,
         })
         
         return request.render('employee_self_service_portal.portal_employee_profile_personal', {
