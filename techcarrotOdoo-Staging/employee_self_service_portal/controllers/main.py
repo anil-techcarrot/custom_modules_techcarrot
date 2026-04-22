@@ -1299,19 +1299,22 @@ class PortalEmployee(http.Controller):
             'expense_budget': 2000,   # $2000 monthly expense budget
         }
 
-    @http.route(MY_EMPLOYEE_URL + '/personal', type='http', auth='user', website=True, methods=['GET', 'POST'], csrf=False)
+    @http.route(MY_EMPLOYEE_URL + '/personal', type='http', auth='user', website=True, methods=['GET', 'POST'],
+                csrf=False)
     def portal_employee_personal(self, **post):
         employee = self._get_employee()
-        languages = request.env['res.lang'].sudo().search([], order='name')
+
+        # ✅ Fetch with active_test=False to get ALL languages including inactive ones
+        languages = request.env['res.lang'].sudo().with_context(active_test=False).search([], order='name')
         countries = request.env['res.country'].sudo().search([], order='name')
+        employee_lang_ids = employee.language_known_ids.ids
+
         if request.httprequest.method == 'POST':
             try:
-                # Enhanced personal details update with validation
                 vals = {}
 
                 # Basic information
                 if post.get('work_email'):
-                    # Validate email format
                     import re
                     email_pattern = r'^[^\s@]+@[^\s@]+\.[^\s@]+$'
                     if re.match(email_pattern, post.get('work_email')):
@@ -1331,12 +1334,16 @@ class PortalEmployee(http.Controller):
                 if post.get('marital'):
                     vals['marital'] = post.get('marital')
                 if post.get('children'):
-                    vals['children'] = post.get('children')
-                if post.get('certificate'):
-                    vals['certificate'] = post.get('certificate')
+                    try:
+                        vals['children'] = int(post.get('children'))
+                    except (ValueError, TypeError):
+                        pass
+                if post.get('study_field'):
+                    vals['study_field'] = post.get('study_field')
+                if post.get('l10n_in_relationship'):
+                    vals['l10n_in_relationship'] = post.get('l10n_in_relationship')
 
                 # Identity documents
-                # CORRECT field names
                 if post.get('emirates_id_number'):
                     vals['emirates_id_number'] = post.get('emirates_id_number')
                 if post.get('emirates_issue_date'):
@@ -1354,12 +1361,12 @@ class PortalEmployee(http.Controller):
                     try:
                         vals['issue_countries_id'] = int(post.get('issue_countries_id'))
                     except (ValueError, TypeError):
-                        # It's a country name string - find the ID
                         country = request.env['res.country'].sudo().search([
                             ('name', '=', post.get('issue_countries_id'))
                         ], limit=1)
                         if country:
                             vals['issue_countries_id'] = country.id
+
                 # Nationality
                 if post.get('country_id'):
                     try:
@@ -1384,7 +1391,6 @@ class PortalEmployee(http.Controller):
                     vals['private_city'] = post.get('private_city')
                 if post.get('private_zip'):
                     vals['private_zip'] = post.get('private_zip')
-
                 if post.get('e_private_city'):
                     vals['e_private_city'] = post.get('e_private_city')
 
@@ -1394,10 +1400,13 @@ class PortalEmployee(http.Controller):
                 if post.get('emergency_phone'):
                     vals['emergency_phone'] = post.get('emergency_phone')
 
+                # Personal information
                 if post.get('legal_name'):
                     vals['legal_name'] = post.get('legal_name')
                 if post.get('place_of_birth'):
                     vals['place_of_birth'] = post.get('place_of_birth')
+
+                # Document and personal details
                 if post.get('whatsapp'):
                     vals['whatsapp'] = post.get('whatsapp')
                 if post.get('house_no'):
@@ -1410,30 +1419,34 @@ class PortalEmployee(http.Controller):
                     vals['zip_code'] = post.get('zip_code')
                 if post.get('linkedin'):
                     vals['linkedin'] = post.get('linkedin')
-                if post.get('l10n_in_relationship'):
-                    vals['l10n_in_relationship'] = post.get('l10n_in_relationship')
-                if post.get('study_field'):
-                    vals['study_field'] = post.get('study_field')
-                if post.get('marital'):
-                    vals['marital'] = post.get('marital')
 
+                # ✅ Certificate - selection field with validation
                 allowed_certificates = ['graduate', 'bachelor', 'master', 'doctor', 'other']
                 if post.get('certificate') and post.get('certificate') in allowed_certificates:
                     vals['certificate'] = post.get('certificate')
 
+                # ✅ Languages Known - Many2many res.lang with active_test=False
                 language_ids = request.httprequest.form.getlist('language_known_ids')
+                _logger.info("Received language_known_ids from form: %s", language_ids)
                 if language_ids:
                     try:
                         lang_id_list = [int(lid) for lid in language_ids if lid]
                         if lang_id_list:
-                            vals['language_known_ids'] = [(6, 0, lang_id_list)]
-                    except (ValueError, TypeError):
-                        pass
+                            # Verify IDs exist in res.lang including inactive
+                            valid_langs = request.env['res.lang'].sudo().with_context(
+                                active_test=False
+                            ).browse(lang_id_list).exists()
+                            _logger.info("Valid language IDs to save: %s", valid_langs.ids)
+                            vals['language_known_ids'] = [(6, 0, valid_langs.ids)]
+                    except (ValueError, TypeError) as e:
+                        _logger.error("Error processing language IDs: %s", str(e))
                 else:
                     vals['language_known_ids'] = [(5, 0, 0)]
 
+                # ✅ Checkbox field
                 vals['is_non_resident'] = True if post.get('is_non_resident') == 'on' else False
 
+                # ✅ Single write call
                 _logger.info("Writing vals to employee %s: %s", employee.id, list(vals.keys()))
                 employee.sudo().write(vals)
                 _logger.info("Successfully wrote vals for employee %s", employee.id)
@@ -1454,11 +1467,14 @@ class PortalEmployee(http.Controller):
                     'success': False,
                     'error': str(e)
                 })
+
+        # ✅ GET - pass all required variables to template
         return request.render('employee_self_service_portal.portal_employee_profile_personal', {
             'employee': employee,
             'section': 'personal',
             'countries': countries,
             'languages': languages,
+            'employee_lang_ids': employee_lang_ids,  # ✅ Pass IDs separately for selected check
         })
         
         return request.render('employee_self_service_portal.portal_employee_profile_personal', {

@@ -225,17 +225,23 @@
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Languages Known</label>
                             <t t-if="languages">
-                                <select name="language_known_ids" class="form-select"
+                                <select name="language_known_ids"
+                                        class="form-select"
                                         multiple="multiple"
                                         style="pointer-events: none;"
-                                        size="4">
+                                        size="5">
                                     <t t-foreach="languages" t-as="lang">
-                                        <option t-att-value="lang.id"
-                                                t-att-selected="'selected' if lang in employee.language_known_ids else None">
+                                        <option
+                                                t-att-value="lang.id"
+                                                t-att-selected="'selected' if lang.id in employee_lang_ids else None">
                                             <t t-esc="lang.name"/>
                                         </option>
                                     </t>
                                 </select>
+                                <small class="text-muted">
+                                    <i class="fa fa-info-circle me-1"></i>
+                                    Enable edit mode and hold Ctrl to select multiple
+                                </small>
                             </t>
                             <t t-else="">
                                 <input type="text" class="form-control"
