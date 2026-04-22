@@ -49,7 +49,8 @@
                                     <input type="text" name="employee_first_name"
                                            class="form-control bg-light text-muted"
                                            t-att-value="employee.employee_first_name or ''"
-                                           style="pointer-events: none;"/>
+                                           data-always-readonly="1"
+                                           readonly="readonly"/>
                                 </div>
 
                                 <div class="col-md-4">
@@ -57,7 +58,8 @@
                                     <input type="text" name="employee_middle_name"
                                            class="form-control"
                                            t-att-value="employee.employee_middle_name or ''"
-                                           style="pointer-events: none;"/>
+                                           data-always-readonly="1"
+                                           readonly="readonly"/>
                                 </div>
 
                                 <div class="col-md-4">
@@ -65,7 +67,8 @@
                                     <input type="text" name="employee_last_name"
                                            class="form-control"
                                            t-att-value="employee.employee_last_name or ''"
-                                           style="pointer-events: none;"/>
+                                           data-always-readonly="1"
+                                           readonly="readonly"/>
                                 </div>
 
                                 <div class="col-md-6">
@@ -73,7 +76,8 @@
                                     <input type="text" name="employee_name_english"
                                            class="form-control"
                                            t-att-value="employee.employee_name_english or ''"
-                                           style="pointer-events: none;"/>
+                                           data-always-readonly="1"
+                                           readonly="readonly"/>
                                 </div>
 
                                 <div class="col-md-6">
@@ -81,7 +85,8 @@
                                     <input type="text" name="employee_name_arabic"
                                            class="form-control"
                                            t-att-value="employee.employee_name_arabic or ''"
-                                           style="pointer-events: none;"/>
+                                           data-always-readonly="1"
+                                           readonly="readonly"/>
                                 </div>
 
                                 <!-- Employment Details -->
@@ -90,7 +95,8 @@
                                     <input type="text" name="employment_type"
                                            class="form-control"
                                            t-att-value="employee.employment_type or ''"
-                                           style="pointer-events: none;"/>
+                                           data-always-readonly="1"
+                                           readonly="readonly"/>
                                 </div>
 
                                 <div class="col-md-6">
@@ -250,6 +256,7 @@
                                     <input type="text"
                                            name="e_private_city"
                                            class="form-control"
+                                           readonly="readonly"
                                            t-att-value="employee.e_private_city or ''"
                                     />
                                 </div>
@@ -467,6 +474,7 @@
                                     <label class="form-label fw-bold">Country</label>
                                     <input type="text" class="form-control"
                                            name="countries_id"
+                                           readonly="readonly"
                                            t-att-value="employee.countries_id.name or ''"
                                     />
                                 </div>
@@ -475,6 +483,7 @@
                                     <label class="form-label fw-bold">State</label>
                                     <input type="text" class="form-control"
                                            name="states_id"
+                                            readonly="readonly"
                                            t-att-value="employee.states_id.name or ''"
                                     />
                                 </div>
@@ -483,6 +492,7 @@
                                     <label class="form-label fw-bold">Zip Code</label>
                                     <input type="text" class="form-control"
                                            name="zip_code"
+                                            readonly="readonly"
                                            t-att-value="employee.zip_code or ''"
                                     />
                                 </div>
@@ -491,6 +501,7 @@
                                     <label class="form-label fw-bold">LinkedIn</label>
                                     <input type="text" class="form-control"
                                            name="linkedin"
+                                            readonly="readonly"
                                            t-att-value="employee.linkedin or ''"
                                     />
                                 </div>
