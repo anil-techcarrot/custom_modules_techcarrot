@@ -1672,25 +1672,42 @@ class PortalEmployee(http.Controller):
     def _handle_experience_documents(self, employee, files):
         """Handle experience-related document uploads"""
         try:
+            import base64
+
             # Handle Resume/CV
             resume_file = files.get('resume_file')
             if resume_file and resume_file.filename:
-                self._save_employee_document(employee, resume_file, 'Resume/CV')
-            
+                file_data = base64.b64encode(resume_file.read())
+                employee.sudo().write({
+                    'resume_file': file_data,
+                    'resume_file_filename': resume_file.filename,
+                })
+                _logger.info("Resume file saved: %s", resume_file.filename)
+
             # Handle Training Certificates
-            training_files = files.getlist('training_certificates')
-            for file in training_files:
-                if file and file.filename:
-                    self._save_employee_document(employee, file, 'Training Certificate')
-            
-            # Handle Awards
-            award_files = files.getlist('awards_files')
-            for file in award_files:
-                if file and file.filename:
-                    self._save_employee_document(employee, file, 'Award/Recognition')
-                    
+            training_file = files.get('training_certificates')
+            if training_file and training_file.filename:
+                file_data = base64.b64encode(training_file.read())
+                employee.sudo().write({
+                    'training_certificates': file_data,
+                    'training_certificates_filename': training_file.filename,
+                })
+                _logger.info("Training certificate saved: %s", training_file.filename)
+
+            # Handle Awards & Recognition
+            awards_file = files.get('awards_files')
+            if awards_file and awards_file.filename:
+                file_data = base64.b64encode(awards_file.read())
+                employee.sudo().write({
+                    'awards_files': file_data,
+                    'awards_files_filename': awards_file.filename,
+                })
+                _logger.info("Awards file saved: %s", awards_file.filename)
+
         except Exception as e:
-            _logger.error(f"Error handling experience documents: {str(e)}")
+            _logger.error("Error handling experience documents: %s", str(e))
+            import traceback
+            _logger.error("Traceback: %s", traceback.format_exc())
 
     @http.route(MY_EMPLOYEE_URL + '/certification', type='http', auth='user', website=True, methods=['GET', 'POST'])
     def portal_employee_certification(self, **post):
