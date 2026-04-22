@@ -1713,10 +1713,56 @@ class PortalEmployee(http.Controller):
     def portal_employee_certification(self, **post):
         employee = self._get_employee()
         if request.httprequest.method == 'POST':
-            vals = {
-                'x_certifications': post.get('x_certifications'),
-            }
-            employee.sudo().write({k: v for k, v in vals.items() if v is not None})
+            try:
+                vals = {}
+
+                # Certifications text
+                if post.get('x_certifications') is not None:
+                    vals['x_certifications'] = post.get('x_certifications', '').strip()
+
+                # ✅ Write text fields
+                if vals:
+                    _logger.info("Certification - Writing vals to employee %s: %s", employee.id, list(vals.keys()))
+                    employee.sudo().write(vals)
+
+                # ✅ Handle file uploads
+                import base64
+                files = request.httprequest.files
+
+                training_file = files.get('training_certificates')
+                if training_file and training_file.filename:
+                    file_data = base64.b64encode(training_file.read())
+                    employee.sudo().write({
+                        'training_certificates': file_data,
+                        'training_certificates_filename': training_file.filename,
+                    })
+                    _logger.info("Training certificate saved: %s", training_file.filename)
+
+                awards_file = files.get('awards_files')
+                if awards_file and awards_file.filename:
+                    file_data = base64.b64encode(awards_file.read())
+                    employee.sudo().write({
+                        'awards_files': file_data,
+                        'awards_files_filename': awards_file.filename,
+                    })
+                    _logger.info("Awards file saved: %s", awards_file.filename)
+
+                _logger.info("Certification - Successfully saved for employee %s", employee.id)
+
+                return request.make_json_response({
+                    'success': True,
+                    'message': 'Certifications updated successfully'
+                })
+
+            except Exception as e:
+                _logger.error("Error in portal_employee_certification POST: %s", str(e))
+                import traceback
+                _logger.error("Traceback: %s", traceback.format_exc())
+                return request.make_json_response({
+                    'success': False,
+                    'error': str(e)
+                })
+
         return request.render('employee_self_service_portal.portal_employee_profile_certification', {
             'employee': employee,
             'section': 'certification',
