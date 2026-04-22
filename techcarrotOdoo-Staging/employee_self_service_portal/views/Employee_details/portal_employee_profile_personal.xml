@@ -251,8 +251,8 @@
                                     <label class="form-label fw-bold">Emergency Address</label>
                                     <input type="text"
                                            class="form-control"
-                                           t-att-value="employee.e_private_street or ''"
-                                           style="pointer-events: none;"/>
+                                           t-att-value="employee.e_private_city or ''"
+                                           readonly="readonly"/>
                                 </div>
 
                             </div>

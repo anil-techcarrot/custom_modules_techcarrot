@@ -1363,8 +1363,8 @@ class PortalEmployee(http.Controller):
                 if post.get('private_zip'):
                     vals['private_zip'] = post.get('private_zip')
 
-                if post.get('e_private_street'):
-                    vals['e_private_street'] = post.get('e_private_street')
+                if post.get('e_private_city'):
+                    vals['e_private_city'] = post.get('e_private_city')
                 
                 # Emergency contact
                 if post.get('emergency_contact'):
