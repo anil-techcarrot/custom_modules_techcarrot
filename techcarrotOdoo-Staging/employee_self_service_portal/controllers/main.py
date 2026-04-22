@@ -1419,6 +1419,17 @@ class PortalEmployee(http.Controller):
                 if post.get('certificate') and post.get('certificate') in allowed_certificates:
                     vals['certificate'] = post.get('certificate')
 
+                language_ids = request.httprequest.form.getlist('language_known_ids')
+                if language_ids:
+                    try:
+                        lang_id_list = [int(lid) for lid in language_ids if lid]
+                        vals['language_known_ids'] = [(6, 0, lang_id_list)]
+                    except (ValueError, TypeError):
+                        pass
+                else:
+                    # If nothing selected, clear the field
+                    vals['language_known_ids'] = [(5, 0, 0)]
+
                 vals['is_non_resident'] = True if post.get('is_non_resident') == 'on' else False
 
                 _logger.info("Writing vals to employee %s: %s", employee.id, list(vals.keys()))
@@ -1441,6 +1452,12 @@ class PortalEmployee(http.Controller):
                     'success': False,
                     'error': str(e)
                 })
+        return request.render('employee_self_service_portal.portal_employee_profile_personal', {
+            'employee': employee,
+            'section': 'personal',
+            'countries': request.env['res.country'].sudo().search([], order='name'),
+            'languages': request.env['res.lang'].sudo().search([('active', '=', True)], order='name'),  # ✅ ADD THIS
+        })
         
         return request.render('employee_self_service_portal.portal_employee_profile_personal', {
             'employee': employee,
