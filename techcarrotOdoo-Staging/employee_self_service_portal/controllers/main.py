@@ -1406,6 +1406,8 @@ class PortalEmployee(http.Controller):
                     vals['linkedin'] = post.get('linkedin')
                 if post.get('l10n_in_relationship'):
                     vals['l10n_in_relationship'] = post.get('l10n_in_relationship')
+                if post.get('study_field'):
+                    vals['study_field'] = post.get('study_field')
 
                 vals['is_non_resident'] = True if post.get('is_non_resident') == 'on' else False
 
