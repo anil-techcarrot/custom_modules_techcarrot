@@ -949,10 +949,10 @@ class PortalEmployee(http.Controller):
             #     vals['private_phone'] = post.get('private_phone')
 
                 # Personal Information (from inherited template)
-            if post.get('legal_name'):
-                vals['legal_name'] = post.get('legal_name')
-            if post.get('place_of_birth'):
-                vals['place_of_birth'] = post.get('place_of_birth')
+            # if post.get('legal_name'):
+            #     vals['legal_name'] = post.get('legal_name')
+            # if post.get('place_of_birth'):
+            #     vals['place_of_birth'] = post.get('place_of_birth')
 
                 # Visa & Work Permit (from inherited template)
             if post.get('visa_no'):
@@ -1387,6 +1387,11 @@ class PortalEmployee(http.Controller):
                     vals['emergency_contact'] = post.get('emergency_contact')
                 if post.get('emergency_phone'):
                     vals['emergency_phone'] = post.get('emergency_phone')
+
+                if post.get('legal_name'):
+                    vals['legal_name'] = post.get('legal_name')
+                if post.get('place_of_birth'):
+                    vals['place_of_birth'] = post.get('place_of_birth')
                 
                 # Update employee record
                 #
