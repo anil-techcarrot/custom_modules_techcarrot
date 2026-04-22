@@ -160,19 +160,11 @@
                                     <div class="invalid-feedback"></div>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label fw-bold">
-                                        <i class="fa fa-flag text-muted me-1"></i>Nationality
-                                    </label>
-                                    <select name="country_id" class="form-select" disabled="disabled">
-                                        <option value="">-- Select Country --</option>
-                                        <t t-foreach="countries" t-as="country">
-                                            <option t-att-value="country.id"
-                                                    t-att-selected="'selected' if country.id == employee.country_id.id else None">
-                                                <t t-esc="country.name"/>
-                                            </option>
-                                        </t>
-                                    </select>
-                                    <div class="invalid-feedback"></div>
+                                    <label>Nationality</label>
+                                    <input class="form-control"
+                                           t-att-value="employee.country_id.name or ''"
+                                           data-always-readonly="1"
+                                           readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
