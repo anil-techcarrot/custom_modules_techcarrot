@@ -864,21 +864,32 @@ function toggleEditMode() {
         disableEditMode();
     }
 }
-
 function enableEditMode() {
     isEditMode = true;
     document.getElementById('editMode').checked = true;
     storeOriginalFormData();
+
     const inputs = document.querySelectorAll('#personalDetailsForm input, #personalDetailsForm select');
     inputs.forEach(input => {
-        if (input.type !== 'hidden') {
-            input.removeAttribute('readonly');
-            input.removeAttribute('disabled');
-            input.style.removeProperty('pointer-events');
+        if (input.type === 'hidden') return;
+
+        // ✅ Skip fields marked as always readonly
+        if (input.hasAttribute('data-always-readonly')) {
+            input.setAttribute('readonly', 'readonly');
+            input.style.setProperty('pointer-events', 'none');
+            input.style.setProperty('background-color', '#e9ecef');
+            return;
         }
+
+        input.removeAttribute('readonly');
+        input.removeAttribute('disabled');
+        input.style.removeProperty('pointer-events');
+        input.style.removeProperty('background-color');
     });
+
     document.getElementById('formActions').style.display = 'block';
     document.getElementById('viewActions').style.display = 'none';
+
     inputs.forEach(input => {
         input.addEventListener('input', validateField);
         input.addEventListener('blur', validateField);
@@ -888,15 +899,25 @@ function enableEditMode() {
 function disableEditMode() {
     isEditMode = false;
     document.getElementById('editMode').checked = false;
+
     const inputs = document.querySelectorAll('#personalDetailsForm input, #personalDetailsForm select');
     inputs.forEach(input => {
-        if (input.type !== 'hidden') {
+        if (input.type === 'hidden') return;
+
+        // ✅ Always-readonly fields stay locked
+        if (input.hasAttribute('data-always-readonly')) {
             input.setAttribute('readonly', 'readonly');
-            if (input.tagName === 'SELECT') {
-                input.setAttribute('disabled', 'disabled');
-            }
+            input.style.setProperty('pointer-events', 'none');
+            input.style.setProperty('background-color', '#e9ecef');
+            return;
+        }
+
+        input.setAttribute('readonly', 'readonly');
+        if (input.tagName === 'SELECT') {
+            input.setAttribute('disabled', 'disabled');
         }
     });
+
     document.getElementById('formActions').style.display = 'none';
     document.getElementById('viewActions').style.display = 'block';
     clearValidationStates();
