@@ -179,7 +179,7 @@
                                         <i class="fa fa-venus-mars text-muted me-1"></i>Gender
                                     </label>
                                     <select name="sex" class="form-select" data-always-readonly="1"
-                                           readonly="readonly" disabled="">
+                                            readonly="readonly" disabled="">
                                         <option value="">Select Gender</option>
                                         <option value="male"
                                                 t-att-selected="'selected' if employee.sex == 'male' else None">Male
@@ -258,7 +258,7 @@
                                            name="e_private_city"
                                            class="form-control"
                                            t-att-value="employee.e_private_city or ''"
-                                           />
+                                    />
                                 </div>
 
                             </div>
@@ -315,7 +315,7 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Account Manager</label>
                                     <input type="text" class="form-control" t-att-value="employee.parent_id.name"
-                                          data-always-readonly="1"
+                                           data-always-readonly="1"
                                            readonly="readonly"/>
                                 </div>
                             </div>
@@ -411,7 +411,7 @@
                                     <input type="text" class="form-control"
                                            name="whatsapp"
                                            t-att-value="employee.whatsapp or ''"
-                                           />
+                                    />
                                 </div>
 
                                 <div class="col-md-6">
@@ -451,7 +451,7 @@
                                     <input type="text" class="form-control"
                                            name="house_no"
                                            t-att-value="employee.house_no or ''"
-                                           />
+                                    />
                                 </div>
 
                                 <div class="col-md-6">
@@ -459,7 +459,7 @@
                                     <input type="text" class="form-control"
                                            name="area_name"
                                            t-att-value="employee.area_name or ''"
-                                           />
+                                    />
                                 </div>
 
                                 <div class="col-md-6">
@@ -467,7 +467,7 @@
                                     <input type="text" class="form-control"
                                            name="city"
                                            t-att-value="employee.city or ''"
-                                           />
+                                    />
                                 </div>
 
                                 <div class="col-md-6">
@@ -475,7 +475,7 @@
                                     <input type="text" class="form-control"
                                            name="countries_id"
                                            t-att-value="employee.countries_id.name or ''"
-                                           />
+                                    />
                                 </div>
 
                                 <div class="col-md-6">
@@ -483,7 +483,7 @@
                                     <input type="text" class="form-control"
                                            name="states_id"
                                            t-att-value="employee.states_id.name or ''"
-                                           />
+                                    />
                                 </div>
 
                                 <div class="col-md-6">
@@ -491,7 +491,7 @@
                                     <input type="text" class="form-control"
                                            name="zip_code"
                                            t-att-value="employee.zip_code or ''"
-                                           />
+                                    />
                                 </div>
 
                                 <div class="col-md-6">
@@ -499,7 +499,7 @@
                                     <input type="text" class="form-control"
                                            name="linkedin"
                                            t-att-value="employee.linkedin or ''"
-                                           />
+                                    />
                                 </div>
 
                                 <div class="col-md-6">
@@ -569,6 +569,7 @@
                                            name="emirates_id_number"
                                            class="form-control"
                                            t-att-value="employee.emirates_id_number"
+                                           data-always-readonly="1"
                                            readonly="readonly"
                                            pattern="[0-9]{3}-[0-9]{4}-[0-9]{7}-[0-9]{1}"/>
                                     <div class="invalid-feedback"></div>
@@ -582,6 +583,7 @@
                                            name="emirates_expiry_date"
                                            class="form-control"
                                            t-att-value="employee.emirates_expiry_date"
+                                           data-always-readonly="1"
                                            readonly="readonly"
                                            data-validation="future-date"/>
                                     <div class="invalid-feedback"></div>
@@ -630,7 +632,7 @@
                                            name="expiry_date"
                                            class="form-control"
                                            t-att-value="employee.expiry_date"
-                                          data-always-readonly="1"
+                                           data-always-readonly="1"
                                            readonly="readonly"
                                            data-validation="future-date"/>
                                     <div class="invalid-feedback"></div>
