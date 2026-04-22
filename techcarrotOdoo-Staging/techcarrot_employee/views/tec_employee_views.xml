@@ -360,18 +360,18 @@
 
                 <separator string="Work Experience &amp; Skills"/>
 
-                <group>
-                    <group string="Professional Experience">
-                        <field name="x_experience"
-                               widget="text"
-                               placeholder="Describe your professional experience, roles, responsibilities and achievements..."/>
-                    </group>
+<!--                <group>-->
+<!--                    <group string="Professional Experience">-->
+<!--                        <field name="x_experience"-->
+<!--                               widget="text"-->
+<!--                               placeholder="Describe your professional experience, roles, responsibilities and achievements..."/>-->
+<!--                    </group>-->
 
-                    <group string="Skills &amp; Competencies">
-                        <field name="x_skills"
-                               placeholder="e.g., Python, Project Management, Data Analysis, Leadership..."/>
-                    </group>
-                </group>
+<!--                    <group string="Skills &amp; Competencies">-->
+<!--                        <field name="x_skills"-->
+<!--                               placeholder="e.g., Python, Project Management, Data Analysis, Leadership..."/>-->
+<!--                    </group>-->
+<!--                </group>-->
 
                 <separator string="Certifications"/>
                 <group>
