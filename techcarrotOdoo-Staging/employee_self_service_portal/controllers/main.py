@@ -1304,10 +1304,15 @@ class PortalEmployee(http.Controller):
     def portal_employee_personal(self, **post):
         employee = self._get_employee()
 
-        # ✅ Fetch with active_test=False to get ALL languages including inactive ones
-        languages = request.env['res.lang'].sudo().with_context(active_test=False).search([], order='name')
+        # ✅ Only active/installed languages
+        languages = request.env['res.lang'].sudo().search(
+            [('active', '=', True)], order='name'
+        )
         countries = request.env['res.country'].sudo().search([], order='name')
         employee_lang_ids = employee.language_known_ids.ids
+
+        _logger.info("Languages loaded: %s", [(l.id, l.name) for l in languages])
+        _logger.info("Employee lang IDs: %s", employee_lang_ids)
 
         if request.httprequest.method == 'POST':
             try:
@@ -1420,33 +1425,47 @@ class PortalEmployee(http.Controller):
                 if post.get('linkedin'):
                     vals['linkedin'] = post.get('linkedin')
 
+                # Visa and work permit
+                if post.get('visa_no'):
+                    vals['visa_no'] = post.get('visa_no')
+                if post.get('permit_no'):
+                    vals['permit_no'] = post.get('permit_no')
+
+                # Citizenship
+                if post.get('identification_id'):
+                    vals['identification_id'] = post.get('identification_id')
+                if post.get('passport_id'):
+                    vals['passport_id'] = post.get('passport_id')
+
                 # ✅ Certificate - selection field with validation
                 allowed_certificates = ['graduate', 'bachelor', 'master', 'doctor', 'other']
                 if post.get('certificate') and post.get('certificate') in allowed_certificates:
                     vals['certificate'] = post.get('certificate')
 
-                # ✅ Languages Known - Many2many res.lang with active_test=False
+                # ✅ Languages Known - Many2many res.lang active only
                 language_ids = request.httprequest.form.getlist('language_known_ids')
                 _logger.info("Received language_known_ids from form: %s", language_ids)
                 if language_ids:
                     try:
                         lang_id_list = [int(lid) for lid in language_ids if lid]
                         if lang_id_list:
-                            # Verify IDs exist in res.lang including inactive
-                            valid_langs = request.env['res.lang'].sudo().with_context(
-                                active_test=False
-                            ).browse(lang_id_list).exists()
+                            # ✅ Verify IDs exist in active res.lang only
+                            valid_langs = request.env['res.lang'].sudo().search([
+                                ('id', 'in', lang_id_list),
+                                ('active', '=', True)
+                            ])
                             _logger.info("Valid language IDs to save: %s", valid_langs.ids)
                             vals['language_known_ids'] = [(6, 0, valid_langs.ids)]
                     except (ValueError, TypeError) as e:
                         _logger.error("Error processing language IDs: %s", str(e))
                 else:
+                    # ✅ Empty selection - clear all languages
                     vals['language_known_ids'] = [(5, 0, 0)]
 
-                # ✅ Checkbox field
+                # ✅ Checkbox field - always set True or False
                 vals['is_non_resident'] = True if post.get('is_non_resident') == 'on' else False
 
-                # ✅ Single write call
+                # ✅ Single write call - all fields together
                 _logger.info("Writing vals to employee %s: %s", employee.id, list(vals.keys()))
                 employee.sudo().write(vals)
                 _logger.info("Successfully wrote vals for employee %s", employee.id)
@@ -1474,7 +1493,7 @@ class PortalEmployee(http.Controller):
             'section': 'personal',
             'countries': countries,
             'languages': languages,
-            'employee_lang_ids': employee_lang_ids,  # ✅ Pass IDs separately for selected check
+            'employee_lang_ids': employee_lang_ids,
         })
         
         return request.render('employee_self_service_portal.portal_employee_profile_personal', {

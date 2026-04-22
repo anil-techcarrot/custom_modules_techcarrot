@@ -33,41 +33,6 @@
                 </div>
             </div>
 
-            <!-- ================= Personal Information ================= -->
-            <!--            <div class="card mb-4 shadow-sm">-->
-            <!--                <div class="card-header bg-light">-->
-            <!--                    <h5 class="mb-0">Personal Information</h5>-->
-            <!--                </div>-->
-            <!--                <div class="card-body">-->
-            <!--                    <div class="row g-3">-->
-            <!--                        <div class="col-md-6">-->
-            <!--                            <label>Legal Name</label>-->
-            <!--                            <input name="legal_name" class="form-control"-->
-            <!--                                   t-att-value="employee.legal_name or ''"-->
-            <!--                                   readonly="readonly"/>-->
-            <!--                        </div>-->
-            <!--                        <div class="col-md-6">-->
-            <!--                            <label>Birthday</label>-->
-            <!--                            <input name="birthday" type="date" class="form-control"-->
-            <!--                                   t-att-value="employee.birthday.strftime('%Y-%m-%d') if employee.birthday else ''"-->
-            <!--                                   readonly="readonly"/>-->
-            <!--                        </div>-->
-            <!--                        <div class="col-md-6">-->
-            <!--                            <label>Place of Birth</label>-->
-            <!--                            <input name="place_of_birth" class="form-control"-->
-            <!--                                   t-att-value="employee.place_of_birth or ''"-->
-            <!--                                   readonly="readonly"/>-->
-            <!--                        </div>-->
-            <!--                        <div class="col-md-6">-->
-            <!--                            <label>Payslip Language</label>-->
-            <!--                            <input class="form-control"-->
-            <!--                                   t-att-value="employee.lang or ''"-->
-            <!--                                   readonly="readonly"/>-->
-            <!--                        </div>-->
-            <!--                    </div>-->
-            <!--                </div>-->
-            <!--            </div>-->
-
             <!-- ================= Visa & Work Permit ================= -->
             <div class="card mb-4 shadow-sm">
                 <div class="card-header bg-light">
@@ -125,7 +90,7 @@
                                        name="is_non_resident"
                                        id="is_non_resident"
                                        t-att-checked="'checked' if employee.is_non_resident else None"
-                                       style="pointer-events: none;"/>
+                                       disabled="disabled"/>
                                 <label class="form-check-label" for="is_non_resident">
                                     <t t-if="employee.is_non_resident">Yes</t>
                                     <t t-else="">No</t>
@@ -175,7 +140,7 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Certificate</label>
-                            <select name="certificate" class="form-select" style="pointer-events: none;">
+                            <select name="certificate" class="form-select" disabled="disabled">
                                 <option value="">Select Certificate</option>
                                 <option value="graduate"
                                         t-att-selected="'selected' if employee.certificate == 'graduate' else None">
@@ -224,35 +189,136 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Languages Known</label>
-                            <t t-if="languages">
-                                <select name="language_known_ids"
-                                        class="form-select"
-                                        multiple="multiple"
-                                        style="pointer-events: none;"
-                                        size="5">
-                                    <t t-foreach="languages" t-as="lang">
-                                        <option
-                                                t-att-value="lang.id"
-                                                t-att-selected="'selected' if lang.id in employee_lang_ids else None">
-                                            <t t-esc="lang.name"/>
-                                        </option>
-                                    </t>
-                                </select>
-                                <small class="text-muted">
-                                    <i class="fa fa-info-circle me-1"></i>
-                                    Enable edit mode and hold Ctrl to select multiple
-                                </small>
-                            </t>
-                            <t t-else="">
-                                <input type="text" class="form-control"
-                                       t-att-value="', '.join(employee.language_known_ids.mapped('name')) if employee.language_known_ids else ''"
-                                       readonly="readonly"/>
-                            </t>
+                            <select name="language_known_ids"
+                                    id="language_known_ids"
+                                    class="form-select"
+                                    multiple="multiple"
+                                    disabled="disabled"
+                                    size="6">
+                                <t t-foreach="languages" t-as="lang">
+                                    <option
+                                        t-att-value="lang.id"
+                                        t-att-selected="'selected' if lang.id in employee_lang_ids else None">
+                                        <t t-esc="lang.name"/>
+                                    </option>
+                                </t>
+                            </select>
+                            <small class="text-muted">
+                                <i class="fa fa-info-circle me-1"></i>
+                                Enable edit mode and hold Ctrl to select multiple
+                            </small>
                         </div>
                     </div>
                 </div>
             </div>
 
         </xpath>
+
+        <!-- ================= JavaScript ================= -->
+        <xpath expr="//script[@type='text/javascript']" position="after">
+            <script type="text/javascript">
+                <![CDATA[
+// ✅ Fields that should NEVER be editable (system/readonly fields)
+const ALWAYS_READONLY = [
+    'bank_account_ids',
+    'country_id',
+    'disabled',
+    'mother_tongue_id',
+];
+
+// ✅ Override enableEditMode to handle extra fields
+const _originalEnableEditMode = window.enableEditMode;
+window.enableEditMode = function() {
+    // Call original function first
+    if (typeof _originalEnableEditMode === 'function') {
+        _originalEnableEditMode();
+    }
+
+    // ✅ Enable all inputs/selects in the extra cards
+    const extraInputs = document.querySelectorAll(
+        '#personalDetailsForm input:not([data-always-readonly]), ' +
+        '#personalDetailsForm select:not([data-always-readonly])'
+    );
+
+    extraInputs.forEach(function(input) {
+        if (input.type === 'hidden') return;
+
+        // Skip always-readonly fields
+        const fieldName = input.name || '';
+        if (ALWAYS_READONLY.includes(fieldName)) return;
+
+        // Remove all disabled/readonly/pointer-events
+        input.removeAttribute('disabled');
+        input.removeAttribute('readonly');
+        input.style.removeProperty('pointer-events');
+        input.style.removeProperty('background-color');
+    });
+
+    // ✅ Special handle for checkbox - enable it
+    const nonResidentCheckbox = document.getElementById('is_non_resident');
+    if (nonResidentCheckbox) {
+        nonResidentCheckbox.removeAttribute('disabled');
+    }
+
+    // ✅ Special handle for language select - enable it
+    const langSelect = document.getElementById('language_known_ids');
+    if (langSelect) {
+        langSelect.removeAttribute('disabled');
+        langSelect.style.removeProperty('pointer-events');
+    }
+
+    console.log('Edit mode enabled - all extra fields unlocked');
+};
+
+// ✅ Override disableEditMode to handle extra fields
+const _originalDisableEditMode = window.disableEditMode;
+window.disableEditMode = function() {
+    // Call original function first
+    if (typeof _originalDisableEditMode === 'function') {
+        _originalDisableEditMode();
+    }
+
+    // ✅ Disable all selects in extra cards
+    const extraSelects = document.querySelectorAll('#personalDetailsForm select');
+    extraSelects.forEach(function(select) {
+        select.setAttribute('disabled', 'disabled');
+        select.style.removeProperty('pointer-events');
+    });
+
+    // ✅ Readonly all inputs in extra cards
+    const extraInputs = document.querySelectorAll('#personalDetailsForm input');
+    extraInputs.forEach(function(input) {
+        if (input.type === 'hidden' || input.type === 'file') return;
+        if (input.type === 'checkbox') {
+            input.setAttribute('disabled', 'disabled');
+            return;
+        }
+        input.setAttribute('readonly', 'readonly');
+        input.style.removeProperty('pointer-events');
+    });
+
+    console.log('Edit mode disabled - all extra fields locked');
+};
+
+// ✅ Fix form submit - remove disabled from selects before submitting
+// so their values are included in the POST
+document.getElementById('personalDetailsForm').addEventListener('submit', function(e) {
+    // Temporarily enable all disabled selects so values get submitted
+    const disabledSelects = this.querySelectorAll('select[disabled]');
+    disabledSelects.forEach(function(select) {
+        select.removeAttribute('disabled');
+    });
+
+    // Temporarily enable disabled checkboxes
+    const disabledCheckboxes = this.querySelectorAll('input[type="checkbox"][disabled]');
+    disabledCheckboxes.forEach(function(cb) {
+        cb.removeAttribute('disabled');
+    });
+}, true); // ✅ capture phase - runs BEFORE the existing submit handler
+
+                ]]>
+            </script>
+        </xpath>
+
     </template>
 </odoo>
