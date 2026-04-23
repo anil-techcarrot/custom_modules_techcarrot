@@ -1400,7 +1400,7 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Blood Group</label>
                                     <input type="text" class="form-control"
-                                           t-att-value="employee.blood_group.name if employee.blood_group else ''"
+                                           t-att-value="employee.blood_group or ''"
                                            data-always-readonly="1" readonly="readonly"/>
                                 </div>
 
