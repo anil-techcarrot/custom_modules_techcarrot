@@ -1422,6 +1422,7 @@ class PortalEmployee(http.Controller):
                     vals['dependent_child_passport_expiry_date_1'] = post.get('dependent_child_passport_expiry_date_1')
 
                 # Many2one - Passport Issuing Country
+                # Child 1 Passport Issuing Country - Many2one res.country
                 if post.get('dependent_child_passport_issuing_countries_1_id'):
                     try:
                         vals['dependent_child_passport_issuing_countries_1_id'] = int(
