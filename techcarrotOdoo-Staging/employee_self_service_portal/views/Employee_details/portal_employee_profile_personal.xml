@@ -888,7 +888,7 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Practice</label>
                                     <input type="text" class="form-control"
-                                           t-att-value="employee.private or ''"
+                                           t-att-value="employee.practice or ''"
                                            data-always-readonly="1" readonly="readonly"/>
                                 </div>
 
