@@ -1305,10 +1305,10 @@ class PortalEmployee(http.Controller):
         employee = self._get_employee()
 
         # ✅ Only active/installed languages
-        languages = request.env['res.lang'].sudo().search(
-            [('active', '=', True)], order='name'
-        )
+
         countries = request.env['res.country'].sudo().search([], order='name')
+
+        _logger.info("portal_employee_profile - Countries count: %s", len(countries))
 
 
         if request.httprequest.method == 'POST':
