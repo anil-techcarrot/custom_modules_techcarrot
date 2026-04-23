@@ -1442,8 +1442,8 @@ class PortalEmployee(http.Controller):
                     vals['emergency_contact_person_phone'] = post.get('emergency_contact_person_phone')
                 if post.get('alternate_mobile_number'):
                     vals['alternate_mobile_number'] = post.get('alternate_mobile_number')
-                if post.get('emegency_contact_person_name_1'):
-                    vals['emegency_contact_person_name_1'] = post.get('emegency_contact_person_name_1')
+                if post.get('emergency_contact_person_name_1'):
+                    vals['emergency_contact_person_name_1'] = post.get('emergency_contact_person_name_1')
                 if post.get('emergency_contact_person_phone_1'):
                     vals['emergency_contact_person_phone_1'] = post.get('emergency_contact_person_phone_1')
                 if post.get('second_alternative_number'):

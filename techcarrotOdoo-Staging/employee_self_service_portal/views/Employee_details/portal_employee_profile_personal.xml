@@ -1049,8 +1049,8 @@
 
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Contact Person Name (1)</label>
-                                    <input type="text" name="emegency_contact_person_name_1" class="form-control"
-                                           t-att-value="employee.emegency_contact_person_name_1 or ''"
+                                    <input type="text" name="emergency_contact_person_name_1" class="form-control"
+                                           t-att-value="employee.emergency_contact_person_name_1 or ''"
                                            readonly="readonly"/>
                                 </div>
 
