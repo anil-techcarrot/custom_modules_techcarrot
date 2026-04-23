@@ -814,7 +814,7 @@
                                             class="form-select"
                                             disabled="disabled">
                                         <option value="">-- Select Country --</option>
-                                        <t t-foreach="countries" t-as="country">
+                                        <t t-foreach="all_countries" t-as="country">
                                             <option t-att-value="country.id"
                                                     t-att-selected="'selected' if country.id == employee.dependent_child_passport_issuing_countries_1_id.id else None">
                                                 <t t-esc="country.name"/>
