@@ -1421,6 +1421,80 @@ class PortalEmployee(http.Controller):
                 if post.get('dependent_child_passport_expiry_date_1'):
                     vals['dependent_child_passport_expiry_date_1'] = post.get('dependent_child_passport_expiry_date_1')
 
+                # General Information
+                if post.get('u_private_city'):
+                    vals['u_private_city'] = post.get('u_private_city')
+                if post.get('industry_start_date'):
+                    vals['industry_start_date'] = post.get('industry_start_date')
+                if post.get('experience'):
+                    vals['experience'] = post.get('experience')
+                if post.get('current_role'):
+                    vals['current_role'] = post.get('current_role')
+                if post.get('current_address'):
+                    vals['current_address'] = post.get('current_address')
+                if post.get('phone_code_1'):
+                    vals['phone_code_1'] = post.get('phone_code_1')
+
+                # Emergency Contact UAE
+                if post.get('emergency_contact_person_name'):
+                    vals['emergency_contact_person_name'] = post.get('emergency_contact_person_name')
+                if post.get('emergency_contact_person_phone'):
+                    vals['emergency_contact_person_phone'] = post.get('emergency_contact_person_phone')
+                if post.get('alternate_mobile_number'):
+                    vals['alternate_mobile_number'] = post.get('alternate_mobile_number')
+                if post.get('emegency_contact_person_name_1'):
+                    vals['emegency_contact_person_name_1'] = post.get('emegency_contact_person_name_1')
+                if post.get('emergency_contact_person_phone_1'):
+                    vals['emergency_contact_person_phone_1'] = post.get('emergency_contact_person_phone_1')
+                if post.get('second_alternative_number'):
+                    vals['second_alternative_number'] = post.get('second_alternative_number')
+                if post.get('home_land_line_no'):
+                    vals['home_land_line_no'] = post.get('home_land_line_no')
+
+                # Spouse Info
+                if post.get('spouse_passport_no'):
+                    vals['spouse_passport_no'] = post.get('spouse_passport_no')
+                if post.get('spouse_passport_issue_date'):
+                    vals['spouse_passport_issue_date'] = post.get('spouse_passport_issue_date')
+                if post.get('spouse_passport_expiry_date'):
+                    vals['spouse_passport_expiry_date'] = post.get('spouse_passport_expiry_date')
+                if post.get('spouse_visa_no'):
+                    vals['spouse_visa_no'] = post.get('spouse_visa_no')
+                if post.get('spouse_visa_expire_date'):
+                    vals['spouse_visa_expire_date'] = post.get('spouse_visa_expire_date')
+                if post.get('spouse_emirates_id_no'):
+                    vals['spouse_emirates_id_no'] = post.get('spouse_emirates_id_no')
+                if post.get('spouse_emirates_issue_date'):
+                    vals['spouse_emirates_issue_date'] = post.get('spouse_emirates_issue_date')
+                if post.get('spouse_emirates_id_expiry_date'):
+                    vals['spouse_emirates_id_expiry_date'] = post.get('spouse_emirates_id_expiry_date')
+                if post.get('spouse_aadhar_no'):
+                    vals['spouse_aadhar_no'] = post.get('spouse_aadhar_no')
+
+                # Father Mother Info
+                if post.get('father_name'):
+                    vals['father_name'] = post.get('father_name')
+                if post.get('father_dob'):
+                    vals['father_dob'] = post.get('father_dob')
+                if post.get('mother_name'):
+                    vals['mother_name'] = post.get('mother_name')
+                if post.get('mother_dob'):
+                    vals['mother_dob'] = post.get('mother_dob')
+
+                # Employee Details
+                if post.get('employee_nominee_name'):
+                    vals['employee_nominee_name'] = post.get('employee_nominee_name')
+                if post.get('eployee_nominee_contact_no'):
+                    vals['eployee_nominee_contact_no'] = post.get('eployee_nominee_contact_no')
+                if post.get('domain_worked'):
+                    vals['domain_worked'] = post.get('domain_worked')
+                if post.get('primary_skill'):
+                    vals['primary_skill'] = post.get('primary_skill')
+                if post.get('secondary_skill'):
+                    vals['secondary_skill'] = post.get('secondary_skill')
+                if post.get('tool_used'):
+                    vals['tool_used'] = post.get('tool_used')
+
                 # Many2one - Passport Issuing Country
                 # Child 1 Passport Issuing Country - Many2one res.country
                 if post.get('dependent_child_passport_issuing_countries_1_id'):
