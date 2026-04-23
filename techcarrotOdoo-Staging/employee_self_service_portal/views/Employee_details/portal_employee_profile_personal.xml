@@ -483,7 +483,7 @@
                                     <label class="form-label fw-bold">State</label>
                                     <input type="text" class="form-control"
                                            name="states_id"
-                                            readonly="readonly"
+                                           readonly="readonly"
                                            t-att-value="employee.states_id.name or ''"
                                     />
                                 </div>
@@ -492,7 +492,7 @@
                                     <label class="form-label fw-bold">Zip Code</label>
                                     <input type="text" class="form-control"
                                            name="zip_code"
-                                            readonly="readonly"
+                                           readonly="readonly"
                                            t-att-value="employee.zip_code or ''"
                                     />
                                 </div>
@@ -501,7 +501,7 @@
                                     <label class="form-label fw-bold">LinkedIn</label>
                                     <input type="text" class="form-control"
                                            name="linkedin"
-                                            readonly="readonly"
+                                           readonly="readonly"
                                            t-att-value="employee.linkedin or ''"
                                     />
                                 </div>
@@ -733,6 +733,137 @@
                                            readonly="readonly"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ================= Dependent Details ================= -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">
+                                <i class="fa fa-child text-primary me-2"></i>Dependent Details
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Child 1 Name</label>
+                                    <input type="text" name="dependent_child_name_1"
+                                           class="form-control"
+                                           t-att-value="employee.dependent_child_name_1 or ''"
+                                           readonly="readonly"/>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Child 1 DOB</label>
+                                    <input type="date" name="dependent_child_dob_1"
+                                           class="form-control"
+                                           t-att-value="employee.dependent_child_dob_1 or ''"
+                                           readonly="readonly"/>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Child 1 Gender</label>
+                                    <select name="dependent_child_gender_1"
+                                            class="form-select"
+                                            disabled="disabled">
+                                        <option value="">Select Gender</option>
+                                        <option value="male"
+                                                t-att-selected="'selected' if employee.dependent_child_gender_1 == 'male' else None">
+                                            Male
+                                        </option>
+                                        <option value="female"
+                                                t-att-selected="'selected' if employee.dependent_child_gender_1 == 'female' else None">
+                                            Female
+                                        </option>
+                                        <option value="other"
+                                                t-att-selected="'selected' if employee.dependent_child_gender_1 == 'other' else None">
+                                            Other
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Child 1 Passport No</label>
+                                    <input type="text" name="dependent_child_passport_no"
+                                           class="form-control"
+                                           t-att-value="employee.dependent_child_passport_no or ''"
+                                           readonly="readonly"/>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Child 1 Passport Issue Date</label>
+                                    <input type="date" name="dependent_child_passport_issue_date_1"
+                                           class="form-control"
+                                           t-att-value="employee.dependent_child_passport_issue_date_1 or ''"
+                                           readonly="readonly"/>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Child 1 Passport Expiry Date</label>
+                                    <input type="date" name="dependent_child_passport_expiry_date_1"
+                                           class="form-control"
+                                           t-att-value="employee.dependent_child_passport_expiry_date_1 or ''"
+                                           readonly="readonly"/>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Child 1 Passport Issuing Country</label>
+                                    <input type="text" name="dependent_child_passport_issuing_countries_1_id"
+                                           class="form-control"
+                                           t-att-value="employee.dependent_child_passport_issuing_countries_1_id.name or ''"
+                                           readonly="readonly"/>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Child 1 Visa No</label>
+                                    <input type="text" name="dependent_child_visa_no_1"
+                                           class="form-control"
+                                           t-att-value="employee.dependent_child_visa_no_1 or ''"
+                                           readonly="readonly"/>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Child 1 Visa Expiration Date</label>
+                                    <input type="date" name="dependent_child_visa_expiration_date_1"
+                                           class="form-control"
+                                           t-att-value="employee.dependent_child_visa_expiration_date_1 or ''"
+                                           readonly="readonly"/>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Child 1 Emirates ID Number</label>
+                                    <input type="text" name="dependent_child_emirates_id_no_1"
+                                           class="form-control"
+                                           t-att-value="employee.dependent_child_emirates_id_no_1 or ''"
+                                           readonly="readonly"/>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Child 1 Emirates ID Issue Date</label>
+                                    <input type="date" name="dependent_child_emirates_id_issue_date_1"
+                                           class="form-control"
+                                           t-att-value="employee.dependent_child_emirates_id_issue_date_1 or ''"
+                                           readonly="readonly"/>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Child 1 Emirates ID Expiry Date</label>
+                                    <input type="date" name="dependent_child_emirates_id_expiry_date_1"
+                                           class="form-control"
+                                           t-att-value="employee.dependent_child_emirates_id_expiry_date_1 or ''"
+                                           readonly="readonly"/>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Child 1 Aadhar Number</label>
+                                    <input type="text" name="dependent_child_aadhar_no_1"
+                                           class="form-control"
+                                           t-att-value="employee.dependent_child_aadhar_no_1 or ''"
+                                           readonly="readonly"/>
+                                </div>
+
                             </div>
                         </div>
                     </div>

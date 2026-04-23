@@ -1402,6 +1402,58 @@ class PortalEmployee(http.Controller):
                 if post.get('emergency_phone'):
                     vals['emergency_phone'] = post.get('emergency_phone')
 
+                # Dependent Details - Child 1
+                if post.get('dependent_child_name_1') is not None:
+                    vals['dependent_child_name_1'] = post.get('dependent_child_name_1', '').strip()
+
+                if post.get('dependent_child_dob_1'):
+                    vals['dependent_child_dob_1'] = post.get('dependent_child_dob_1')
+
+                if post.get('dependent_child_gender_1'):
+                    vals['dependent_child_gender_1'] = post.get('dependent_child_gender_1')
+
+                if post.get('dependent_child_passport_no') is not None:
+                    vals['dependent_child_passport_no'] = post.get('dependent_child_passport_no', '').strip()
+
+                if post.get('dependent_child_passport_issue_date_1'):
+                    vals['dependent_child_passport_issue_date_1'] = post.get('dependent_child_passport_issue_date_1')
+
+                if post.get('dependent_child_passport_expiry_date_1'):
+                    vals['dependent_child_passport_expiry_date_1'] = post.get('dependent_child_passport_expiry_date_1')
+
+                # Many2one - Passport Issuing Country
+                if post.get('dependent_child_passport_issuing_countries_1_id'):
+                    try:
+                        vals['dependent_child_passport_issuing_countries_1_id'] = int(
+                            post.get('dependent_child_passport_issuing_countries_1_id')
+                        )
+                    except (ValueError, TypeError):
+                        country = request.env['res.country'].sudo().search([
+                            ('name', '=', post.get('dependent_child_passport_issuing_countries_1_id'))
+                        ], limit=1)
+                        if country:
+                            vals['dependent_child_passport_issuing_countries_1_id'] = country.id
+
+                if post.get('dependent_child_visa_no_1') is not None:
+                    vals['dependent_child_visa_no_1'] = post.get('dependent_child_visa_no_1', '').strip()
+
+                if post.get('dependent_child_visa_expiration_date_1'):
+                    vals['dependent_child_visa_expiration_date_1'] = post.get('dependent_child_visa_expiration_date_1')
+
+                if post.get('dependent_child_emirates_id_no_1') is not None:
+                    vals['dependent_child_emirates_id_no_1'] = post.get('dependent_child_emirates_id_no_1', '').strip()
+
+                if post.get('dependent_child_emirates_id_issue_date_1'):
+                    vals['dependent_child_emirates_id_issue_date_1'] = post.get(
+                        'dependent_child_emirates_id_issue_date_1')
+
+                if post.get('dependent_child_emirates_id_expiry_date_1'):
+                    vals['dependent_child_emirates_id_expiry_date_1'] = post.get(
+                        'dependent_child_emirates_id_expiry_date_1')
+
+                if post.get('dependent_child_aadhar_no_1') is not None:
+                    vals['dependent_child_aadhar_no_1'] = post.get('dependent_child_aadhar_no_1', '').strip()
+
                 # Personal information
                 if post.get('legal_name'):
                     vals['legal_name'] = post.get('legal_name')
