@@ -635,10 +635,9 @@
                                     <input type="date"
                                            name="expiry_date"
                                            class="form-control"
-                                           t-att-value="employee.expiry_date"
+                                           t-att-value="employee.expiry_date.strftime('%Y-%m-%d') if employee.expiry_date else ''"
                                            data-always-readonly="1"
-                                           readonly="readonly"
-                                           data-validation="future-date"/>
+                                           readonly="readonly"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
                             </div>
