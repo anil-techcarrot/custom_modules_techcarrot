@@ -1057,7 +1057,7 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Relationship with Employee (1)</label>
                                     <input type="text" class="form-control"
-                                           t-att-value="employee.second_relationship_with_employee or ''"
+                                           t-att-value="employee.second_relation_with_employee or ''"
                                            data-always-readonly="1" readonly="readonly"/>
                                 </div>
 
