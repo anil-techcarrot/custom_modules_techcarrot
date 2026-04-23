@@ -4,6 +4,8 @@
             <t t-set="section" t-value="'personal'"/>
             <t t-set="section_content">
 
+                <t t-set="all_countries" t-value="request.env['res.country'].sudo().search([], order='name')"/>
+
                 <!-- Success/Error Messages -->
                 <div id="messageContainer" style="display: none;">
                     <div id="successMessage" class="alert alert-success alert-dismissible fade" role="alert"
