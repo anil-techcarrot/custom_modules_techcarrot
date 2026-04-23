@@ -1259,8 +1259,8 @@
 
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Nominee Contact Number</label>
-                                    <input type="tel" name="eployee_nominee_contact_no" class="form-control"
-                                           t-att-value="employee.eployee_nominee_contact_no or ''"
+                                    <input type="tel" name="employee_nominee_contact_no" class="form-control"
+                                           t-att-value="employee.employee_nominee_contact_no or ''"
                                            readonly="readonly"/>
                                 </div>
 

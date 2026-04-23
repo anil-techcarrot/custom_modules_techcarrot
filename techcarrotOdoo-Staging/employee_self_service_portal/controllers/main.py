@@ -1484,8 +1484,8 @@ class PortalEmployee(http.Controller):
                 # Employee Details
                 if post.get('employee_nominee_name'):
                     vals['employee_nominee_name'] = post.get('employee_nominee_name')
-                if post.get('eployee_nominee_contact_no'):
-                    vals['eployee_nominee_contact_no'] = post.get('eployee_nominee_contact_no')
+                if post.get('employee_nominee_contact_no'):
+                    vals['employee_nominee_contact_no'] = post.get('employee_nominee_contact_no')
                 if post.get('domain_worked'):
                     vals['domain_worked'] = post.get('domain_worked')
                 if post.get('primary_skill'):
