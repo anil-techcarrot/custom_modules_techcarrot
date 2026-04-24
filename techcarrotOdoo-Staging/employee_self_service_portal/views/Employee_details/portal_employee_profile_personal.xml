@@ -1392,8 +1392,9 @@
 
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Candidate Source</label>
+                                    <!-- FIXED -->
                                     <input type="text" class="form-control"
-                                           t-att-value="employee.candidate_source.name if employee.candidate_source else ''"
+                                           t-att-value="employee.candidate_source or ''"
                                            data-always-readonly="1" readonly="readonly"/>
                                 </div>
 
