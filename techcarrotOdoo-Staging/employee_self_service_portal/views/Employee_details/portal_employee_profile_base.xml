@@ -343,6 +343,7 @@
                 </style>
 
                 <!-- Photo Upload JS -->
+                <!-- Photo Upload JS -->
                 <script type="text/javascript">
                     document.addEventListener('DOMContentLoaded', function () {
                     var input = document.getElementById('photoUploadInput');
@@ -355,7 +356,6 @@
                     var statusEl = document.getElementById('photoUploadStatus');
                     var imgEl = document.getElementById('employeePhotoImg');
 
-                    // Client-side size check (5MB)
                     if (file.size > 5 * 1024 * 1024) {
                     statusEl.innerHTML = '
                     <span class="text-danger"><i class="fa fa-times-circle me-1"></i>File too large. Max 5MB.
@@ -376,18 +376,12 @@
                     method: 'POST',
                     body: formData
                     })
-                    // ADD csrf_token to your fetch call
-                    fetch('/my/employee/upload-photo', {
-                    method: 'POST',
-                    headers: {
-                    'X-CSRFToken': odoo.csrf_token,
-                    },
-                    body: formData,
+                    .then(function(res) {
+                    if (!res.ok) throw new Error('Server error: ' + res.status);
+                    return res.json();
                     })
-                    .then(function (res) { return res.json(); })
-                    .then(function (data) {
+                    .then(function(data) {
                     if (data.success) {
-                    // ✅ Update image immediately without page reload
                     imgEl.src = data.image_url + '?t=' + Date.now();
                     imgEl.alt = 'Employee Photo';
                     imgEl.classList.remove('opacity-50');
@@ -395,15 +389,17 @@
                     <span class="text-success"><i class="fa fa-check-circle me-1"></i>Photo updated!
                     </span>
                     ';
-                    setTimeout(function () { statusEl.innerHTML = ''; }, 3000);
+                    setTimeout(function() { statusEl.innerHTML = ''; }, 3000);
                     } else {
                     statusEl.innerHTML = '
-                    <span class="text-danger"><i class="fa fa-times-circle me-1"></i>' + data.error + '
+                    <span class="text-danger"><i class="fa fa-times-circle me-1"></i>' + (data.error || 'Upload failed')
+                        + '
                     </span>
                     ';
                     }
                     })
-                    .catch(function () {
+                    .catch(function(err) {
+                    console.error('Upload error:', err);
                     statusEl.innerHTML = '
                     <span class="text-danger"><i class="fa fa-times-circle me-1"></i>Upload failed. Try again.
                     </span>
