@@ -1555,6 +1555,30 @@ class PortalEmployee(http.Controller):
                 if post.get('permit_no'):
                     vals['permit_no'] = post.get('permit_no')
 
+                # Social Media Details
+                if post.get('facebook_profile') is not None:
+                    vals['facebook_profile'] = post.get('facebook_profile', '').strip()
+                if post.get('insta_profile') is not None:
+                    vals['insta_profile'] = post.get('insta_profile', '').strip()
+                if post.get('twitter_profile') is not None:
+                    vals['twitter_profile'] = post.get('twitter_profile', '').strip()
+
+                # Career Details
+                if post.get('carrer_break_detail') is not None:
+                    vals['carrer_break_detail'] = post.get('carrer_break_detail', '').strip()
+
+                # Industry Details
+                if post.get('industry_ref_name') is not None:
+                    vals['industry_ref_name'] = post.get('industry_ref_name', '').strip()
+                if post.get('industry_ref_email') is not None:
+                    vals['industry_ref_email'] = post.get('industry_ref_email', '').strip()
+                if post.get('industry_ref_mob_no') is not None:
+                    vals['industry_ref_mob_no'] = post.get('industry_ref_mob_no', '').strip()
+                if post.get('home_country_id_name') is not None:
+                    vals['home_country_id_name'] = post.get('home_country_id_name', '').strip()
+                if post.get('home_country_id_number') is not None:
+                    vals['home_country_id_number'] = post.get('home_country_id_number', '').strip()
+
                 # Citizenship
                 if post.get('identification_id'):
                     vals['identification_id'] = post.get('identification_id')
