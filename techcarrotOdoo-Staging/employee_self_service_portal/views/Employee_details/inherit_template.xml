@@ -330,9 +330,9 @@
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">Exit Type</label>
+                            <label class="form-label fw-bold">Exit Reason</label>
                             <input type="text" class="form-control"
-                                   t-att-value="(employee.exit_type_id.name if hasattr(employee.exit_type_id, 'name') else (employee.exit_type_id or '')) if employee.exit_type_id else ''"
+                                   t-att-value="employee.exit_reason_id.name if employee.exit_reason_id and not isinstance(employee.exit_reason_id, str) else (employee.exit_reason_id or '')"
                                    data-always-readonly="1" readonly="readonly"/>
                         </div>
 
