@@ -330,18 +330,19 @@
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">Exit Reason</label>
+                            <label class="form-label fw-bold">Exit Type</label>
                             <input type="text" class="form-control"
-                                   t-att-value="employee.exit_reason_id.name if employee.exit_reason_id and employee.exit_reason_id != True else ''"
+                                   t-att-value="employee.exit_type_id.name if employee.exit_type_id else ''"
                                    data-always-readonly="1" readonly="readonly"/>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Exit Reason</label>
                             <input type="text" class="form-control"
-                                   t-att-value="(employee.exit_reason_id.name if hasattr(employee.exit_reason_id, 'name') else (employee.exit_reason_id or '')) if employee.exit_reason_id else ''"
+                                   t-att-value="employee.exit_reason_id.name if employee.exit_reason_id else ''"
                                    data-always-readonly="1" readonly="readonly"/>
                         </div>
+
 
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Home Country ID Name</label>
