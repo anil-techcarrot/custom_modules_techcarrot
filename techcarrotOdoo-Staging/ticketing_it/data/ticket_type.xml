@@ -1,0 +1,33 @@
+<odoo>
+
+    <!-- Ticket type for hardware-related issues -->
+    <record id="type_hardware" model="it.ticket.type">
+        <field name="name">Hardware Issue</field>
+        <field name="code">hardware</field>
+    </record>
+
+    <!-- Ticket type for software-related issues -->
+    <record id="type_software" model="it.ticket.type">
+        <field name="name">Software Issue</field>
+        <field name="code">software</field>
+    </record>
+
+    <!-- Ticket type for social media access requests -->
+    <record id="type_social" model="it.ticket.type">
+        <field name="name">Social Media Access</field>
+        <field name="code">social_media</field>
+    </record>
+
+    <!-- Ticket type for network-related issues -->
+    <record id="type_network" model="it.ticket.type">
+        <field name="name">Network Issue</field>
+        <field name="code">network</field>
+    </record>
+
+    <!-- Generic ticket type for any other issues -->
+    <record id="type_other" model="it.ticket.type">
+        <field name="name">Other</field>
+        <field name="code">other</field>
+    </record>
+
+</odoo>
