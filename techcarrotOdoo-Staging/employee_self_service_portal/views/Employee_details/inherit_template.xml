@@ -384,18 +384,17 @@
                             <div class="card-body">
                                 <div class="row g-3">
                                     <div class="col-md-6">
-                                        <label>Mother Tongue</label>
-                                        <input class="form-control"
-                                               t-att-value="employee.mother_tongue_name.name or ''"
-                                               data-always-readonly="1"
-                                               readonly="readonly"/>
+                                        <label class="form-label fw-bold">Practice</label>
+                                        <input type="text" class="form-control"
+                                               t-att-value="employee.practice.name if employee.practice else ''"
+                                               data-always-readonly="1" readonly="readonly"/>
                                     </div>
+
                                     <div class="col-md-6">
-                                        <label class="form-label fw-bold">Languages Known</label>
-                                        <input class="form-control"
-                                               t-att-value="', '.join(employee.language_known_name.mapped('name')) if employee.language_known_ids else ''"
-                                               data-always-readonly="1"
-                                               readonly="readonly"/>
+                                        <label class="form-label fw-bold">Sub Practice</label>
+                                        <input type="text" class="form-control"
+                                               t-att-value="employee.sub_practice.name if employee.sub_practice else ''"
+                                               data-always-readonly="1" readonly="readonly"/>
                                     </div>
                                 </div>
                             </div>
