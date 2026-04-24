@@ -55,7 +55,6 @@
                 const statusEl = document.getElementById('photoUploadStatus');
                 const imgEl = document.getElementById('employeePhotoImg');
 
-                // Client-side size check (5MB)
                 if (file.size > 5 * 1024 * 1024) {
                 statusEl.innerHTML = '
                 <span class="text-danger"><i class="fa fa-times-circle me-1"></i>File too large. Max 5MB.
@@ -72,31 +71,36 @@
                 const formData = new FormData();
                 formData.append('photo', file);
 
+                // FIXED: correct URL with no MY_EMPLOYEE_URL dependency
                 fetch('/my/employee/upload-photo', {
                 method: 'POST',
                 body: formData,
                 })
-                .then(function(res) { return res.json(); })
+                .then(function(res) {
+                if (!res.ok) {
+                throw new Error('Server error: ' + res.status);
+                }
+                return res.json();
+                })
                 .then(function(data) {
                 if (data.success) {
                 statusEl.innerHTML = '
                 <span class="text-success"><i class="fa fa-check-circle me-1"></i>Photo updated!
                 </span>
                 ';
-                // Update image src without page reload
                 imgEl.src = data.image_url + '?t=' + Date.now();
                 imgEl.alt = 'Employee Photo';
                 imgEl.classList.remove('opacity-50');
-                // Clear status after 3s
                 setTimeout(function() { statusEl.innerHTML = ''; }, 3000);
                 } else {
                 statusEl.innerHTML = '
-                <span class="text-danger"><i class="fa fa-times-circle me-1"></i>' + data.error + '
+                <span class="text-danger"><i class="fa fa-times-circle me-1"></i>' + (data.error || 'Upload failed') + '
                 </span>
                 ';
                 }
                 })
-                .catch(function() {
+                .catch(function(err) {
+                console.error('Photo upload error:', err);
                 statusEl.innerHTML = '
                 <span class="text-danger"><i class="fa fa-times-circle me-1"></i>Upload failed. Try again.
                 </span>

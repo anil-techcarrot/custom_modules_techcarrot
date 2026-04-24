@@ -5,6 +5,7 @@ from .access_helpers import check_portal_access, has_feature_access
 import html
 import json
 import logging
+import base64
 
 # Set up logger
 _logger = logging.getLogger(__name__)
@@ -1007,6 +1008,186 @@ class PortalEmployee(http.Controller):
     def portal_ess_dashboard_classic(self, **kwargs):
         # Keep the classic view accessible via /my/ess/classic
         return self._render_ess_dashboard('employee_self_service_portal.portal_ess_dashboard', **kwargs)
+
+
+    # ---------------------------------------------------------------------------
+    # IT Ticket routes (added from updated version)
+    # ---------------------------------------------------------------------------
+
+    @http.route('/my/ess/tickets/new', type='http', auth='user', website=True)
+    def portal_ess_ticket_new(self, **kw):
+        """Show create ticket form from ESS dashboard"""
+        employee = self._get_employee()
+        if not employee:
+            return request.redirect('/my/ess')
+
+        # Resolve line manager so the template can display it and
+        # disable the submit button when no manager is set.
+        # employee.parent_id  → manager's hr.employee record
+        # .user_id            → that manager's res.users record (has .name)
+        line_manager = None
+        if employee.parent_id and employee.parent_id.user_id:
+            line_manager = employee.parent_id.user_id
+        ticket_types = request.env['it.ticket.type'].sudo().search([])
+        values = {
+            'employee': employee,
+            'line_manager': line_manager,
+            'page_name': 'ess_dashboard',
+            'ticket_types': ticket_types,
+            'error': kw.get('error'),
+            'error_msg': kw.get('error_msg', ''),
+        }
+        return request.render('employee_self_service_portal.portal_ess_ticket_form', values)
+
+    @http.route(['/my/tickets', '/my/tickets/page/<int:page>'], type='http', auth='user', website=True)
+    def portal_my_tickets(self, page=1, sortby=None, filterby=None, **kw):
+        """Display all IT tickets for the current portal user"""
+
+        employee = self._get_employee()
+        if not employee:
+            return request.redirect('/my/ess')
+
+        # Base domain - tickets created by this employee
+        domain = [('employee_id', '=', employee.id)]
+
+        # Sorting options
+        searchbar_sortings = {
+            'date': {'label': 'Newest First', 'order': 'create_date desc'},
+            'name': {'label': 'Ticket Number', 'order': 'name'},
+            'state': {'label': 'Status', 'order': 'state'},
+        }
+
+        # Filter options
+        searchbar_filters = {
+            'all': {'label': 'All', 'domain': []},
+            'pending': {'label': 'Pending Approval', 'domain': [('state', 'in', ['manager_approval', 'it_approval'])]},
+            'active': {'label': 'Active', 'domain': [('state', 'in', ['assigned', 'in_progress'])]},
+            'done': {'label': 'Completed', 'domain': [('state', '=', 'done')]},
+            'rejected': {'label': 'Rejected', 'domain': [('state', '=', 'rejected')]},
+        }
+
+        # Default sort and filter
+        if not sortby:
+            sortby = 'date'
+        if not filterby:
+            filterby = 'all'
+
+        order = searchbar_sortings[sortby]['order']
+        domain += searchbar_filters[filterby]['domain']
+
+        # Get tickets
+        tickets = request.env['it.ticket'].sudo().search(domain, order=order)
+
+        values = {
+            'tickets': tickets,
+            'page_name': 'tickets',
+            'searchbar_sortings': searchbar_sortings,
+            'searchbar_filters': searchbar_filters,
+            'sortby': sortby,
+            'filterby': filterby,
+            'employee': employee,
+        }
+
+        return request.render('employee_self_service_portal.portal_my_tickets', values)
+
+    @http.route(['/my/tickets/<int:ticket_id>'], type='http', auth='user', website=True)
+    def portal_my_ticket_detail(self, ticket_id, **kw):
+        """Display single ticket details"""
+
+        employee = self._get_employee()
+        if not employee:
+            return request.redirect('/my/ess')
+
+        # Get ticket (only if it belongs to this employee)
+        ticket = request.env['it.ticket'].sudo().search([
+            ('id', '=', ticket_id),
+            ('employee_id', '=', employee.id)
+        ], limit=1)
+
+        if not ticket:
+            return request.redirect('/my/tickets')
+
+        attachments = request.env['ir.attachment'].sudo().search([
+            ('res_model', '=', 'it.ticket'),
+            ('res_id', '=', ticket.id)
+        ])
+
+        values = {
+            'ticket': ticket,
+            'page_name': 'tickets',
+            'ticket_attachments': attachments,
+            'employee': employee,
+        }
+
+        return request.render('employee_self_service_portal.portal_my_ticket_detail', values)
+
+    @http.route('/my/ess/tickets/submit', type='http', auth='user', website=True, methods=['POST'], csrf=True)
+    def portal_ess_ticket_submit(self, **post):
+        """Submit new IT ticket from ESS dashboard"""
+        employee = self._get_employee()
+        if not employee:
+            return request.redirect('/my/ess')
+
+        if not post.get('subject') or not post.get('ticket_type_id') or not post.get('description'):
+            return request.redirect('/my/ess/tickets/new?error=1&error_msg=Please+fill+all+required+fields')
+
+            # ✅✅✅ ADDED: Required Date Validation
+        required_date = post.get('required_date')
+        if required_date:
+            required_date_obj = fields.Date.from_string(required_date)
+            today_date = fields.Date.today()
+
+            _logger.info("ESS required_date_obj: %s | today: %s", required_date_obj, today_date)
+
+            if required_date_obj < today_date:
+                _logger.warning("ESS: Past required_date attempted: %s", required_date_obj)
+                return request.redirect(
+                    '/my/ess/tickets/new?error=1&error_msg=Required+Date+cannot+be+in+the+past'
+                )
+        # ✅✅✅ END ADDED VALIDATION
+        try:
+            ticket_type_id = post.get('ticket_type_id')
+            if ticket_type_id:
+                ticket_type_id = int(ticket_type_id)
+
+            ticket = request.env['it.ticket'].sudo().create({
+                'employee_id': employee.id,
+                'ticket_type_id': ticket_type_id,
+                'priority': post.get('priority', '1'),
+                'subject': post.get('subject'),
+                'description': post.get('description'),
+                'required_date': required_date or False,
+                'submitted_date': fields.Datetime.now(),
+            })
+            # ====================================================
+            # ✅✅✅ ADDED: ATTACHMENT HANDLING
+            # ====================================================
+            attachment = request.httprequest.files.get('attachment')
+            if attachment and attachment.filename:
+                attachment_content = attachment.read()
+
+                request.env['ir.attachment'].sudo().create({
+                    'name': attachment.filename,
+                    'type': 'binary',
+                    'datas': base64.b64encode(attachment_content),
+                    'res_model': 'it.ticket',
+                    'res_id': ticket.id,
+                    'mimetype': attachment.mimetype,
+                })
+                _logger.info("Attachment %s added to Ticket %s", attachment.filename, ticket.name)
+            # ====================================================
+            _logger.info("IT Ticket %s created from ESS portal by %s", ticket.name, employee.name)
+            return request.redirect('/my/ess?ticket_success=1')
+
+        except Exception as e:
+            _logger.error("Error creating IT ticket from ESS portal: %s", e)
+            request.env.cr.rollback()
+            return request.redirect('/my/ess/tickets/new?error=1&error_msg=Failed+to+create+ticket.+Please+try+again.')
+
+    # ---------------------------------------------------------------------------
+    # End IT Ticket routes
+    # ---------------------------------------------------------------------------
+
         
     @http.route('/my/ess/enhanced', type='http', auth='user', website=True)  
     def portal_ess_dashboard_enhanced(self, **kwargs):
@@ -1225,6 +1406,25 @@ class PortalEmployee(http.Controller):
             'weekly_hours': weekly_hours,
             'monthly_targets': self._get_monthly_targets(employee),
         }
+
+        # IT Tickets data for dashboard
+        it_tickets_count = 0
+        it_tickets_pending = 0
+        it_tickets_recent = None
+        try:
+            it_tickets_count = request.env['it.ticket'].search_count([
+                ('employee_id', '=', employee.id)
+            ])
+            it_tickets_pending = request.env['it.ticket'].search_count([
+                ('employee_id', '=', employee.id),
+                ('state', 'in', ['draft', 'manager_approval', 'it_approval'])
+            ])
+            it_tickets_recent = request.env['it.ticket'].search([
+                ('employee_id', '=', employee.id)
+            ], order='create_date desc', limit=3)
+        except Exception:
+            pass
+
         
         dashboard_data.update({
             'payslips_count': payslips_count,
@@ -1243,6 +1443,9 @@ class PortalEmployee(http.Controller):
             'expense_stats': expense_stats,
             'recent_activities': recent_activities[:5],  # Top 5 recent activities
             'performance_metrics': performance_metrics,
+            'it_tickets_count': it_tickets_count,
+            'it_tickets_pending': it_tickets_pending,
+            'it_tickets_recent': it_tickets_recent,
         })
         
         return dashboard_data
@@ -1304,7 +1507,7 @@ class PortalEmployee(http.Controller):
     def portal_employee_personal(self, **post):
         employee = self._get_employee()
 
-        # ✅ Only active/installed languages
+        #  Only active/installed languages
 
         countries = request.env['res.country'].sudo().search([], order='name')
 
@@ -1589,16 +1792,16 @@ class PortalEmployee(http.Controller):
                 if post.get('language_known_name') is not None:
                     vals['language_known_name'] = post.get('language_known_name', '').strip()
 
-                # ✅ Certificate - selection field with validation
+                #  Certificate - selection field with validation
                 allowed_certificates = ['graduate', 'bachelor', 'master', 'doctor', 'other']
                 if post.get('certificate') and post.get('certificate') in allowed_certificates:
                     vals['certificate'] = post.get('certificate')
 
 
-                # ✅ Checkbox field - always set True or False
+                #  Checkbox field - always set True or False
                 vals['is_non_resident'] = True if post.get('is_non_resident') == 'on' else False
 
-                # ✅ Single write call - all fields together
+                #  Single write call - all fields together
                 _logger.info("Writing vals to employee %s: %s", employee.id, list(vals.keys()))
                 employee.sudo().write(vals)
                 _logger.info("Successfully wrote vals for employee %s", employee.id)
@@ -1621,7 +1824,7 @@ class PortalEmployee(http.Controller):
                 })
 
 
-        # ✅ GET - pass all required variables to template
+        #  GET - pass all required variables to template
         return request.render('employee_self_service_portal.portal_employee_profile_personal', {
             'employee': employee,
             'section': 'personal',
@@ -1633,59 +1836,65 @@ class PortalEmployee(http.Controller):
             'section': 'personal',
         })
 
-    @http.route(MY_EMPLOYEE_URL + '/upload-photo', type='http', auth='user', website=True, methods=['POST'], csrf=False)
+    @http.route('/my/employee/upload-photo', type='http', auth='user', website=True, methods=['POST'], csrf=False)
     def portal_employee_upload_photo(self, **post):
-        """Handle employee photo upload"""
         try:
+            _logger.info("Photo upload request received")
             employee = self._get_employee()
-            
-            # Get uploaded file
+
+            if not employee:
+                return request.make_json_response({
+                    'success': False,
+                    'error': 'Employee not found'
+                })
+
             photo_file = request.httprequest.files.get('photo')
             if not photo_file:
+                _logger.warning("No photo file in request. Files: %s", request.httprequest.files)
                 return request.make_json_response({
                     'success': False,
                     'error': 'No photo file provided'
                 })
-            
-            # Validate file type
+
+            _logger.info("Photo file received: %s, type: %s", photo_file.filename, photo_file.content_type)
+
             allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif']
             if photo_file.content_type not in allowed_types:
                 return request.make_json_response({
                     'success': False,
                     'error': 'Invalid file type. Please upload JPG, PNG, or GIF only.'
                 })
-            
-            # Validate file size (5MB max)
-            max_size = 5 * 1024 * 1024  # 5MB
-            photo_file.seek(0, 2)  # Seek to end
+
+            photo_file.seek(0, 2)
             file_size = photo_file.tell()
-            photo_file.seek(0)  # Seek back to beginning
-            
-            if file_size > max_size:
+            photo_file.seek(0)
+
+            if file_size > 5 * 1024 * 1024:
                 return request.make_json_response({
                     'success': False,
                     'error': 'File too large. Maximum size is 5MB.'
                 })
-            
-            # Read and encode image
+
             import base64
-            photo_data = base64.b64encode(photo_file.read())
-            
-            # Update employee image
-            employee.sudo().write({
-                'image_1920': photo_data
-            })
-            
+            # FIXED: decode bytes to string
+            photo_data = base64.b64encode(photo_file.read()).decode('utf-8')
+
+            employee.sudo().write({'image_1920': photo_data})
+            _logger.info("Photo updated successfully for employee %s", employee.id)
+
             return request.make_json_response({
                 'success': True,
                 'message': 'Photo uploaded successfully',
-                'image_url': f'/web/image/hr.employee/{employee.id}/image_1920/150x150'
+                'image_url': '/web/image/hr.employee/%s/image_1920/150x150' % employee.id
             })
-            
+
         except Exception as e:
+            _logger.error("Photo upload error: %s", str(e))
+            import traceback
+            _logger.error("Traceback: %s", traceback.format_exc())
             return request.make_json_response({
                 'success': False,
-                'error': f'Upload failed: {str(e)}'
+                'error': 'Upload failed: %s' % str(e)
             })
 
     @http.route(MY_EMPLOYEE_URL + '/export-pdf', type='http', auth='user', website=True)
@@ -1789,14 +1998,14 @@ class PortalEmployee(http.Controller):
             try:
                 vals = {}
 
-                # ✅ No validation - just save whatever is provided
+                #  No validation - just save whatever is provided
                 if post.get('x_experience') is not None:
                     vals['x_experience'] = post.get('x_experience', '').strip()
 
                 if post.get('x_skills') is not None:
                     vals['x_skills'] = post.get('x_skills', '').strip()
 
-                # ✅ Write only if there are values to write
+                #  Write only if there are values to write
                 if vals:
                     _logger.info("Experience - Writing vals to employee %s: %s", employee.id, list(vals.keys()))
                     employee.sudo().write(vals)
@@ -1875,12 +2084,12 @@ class PortalEmployee(http.Controller):
                 if post.get('x_certifications') is not None:
                     vals['x_certifications'] = post.get('x_certifications', '').strip()
 
-                # ✅ Write text fields
+                #  Write text fields
                 if vals:
                     _logger.info("Certification - Writing vals to employee %s: %s", employee.id, list(vals.keys()))
                     employee.sudo().write(vals)
 
-                # ✅ Handle files uploads
+                #  Handle files uploads
                 import base64
                 files = request.httprequest.files
 

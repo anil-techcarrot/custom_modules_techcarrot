@@ -76,7 +76,7 @@
                                 </div>
                             </div>
 
-                            <!-- ✅ PHOTO UPLOAD SECTION -->
+                            <!--  PHOTO UPLOAD SECTION -->
                             <div class="col-md-4 text-center">
                                 <div class="position-relative mb-3" style="display:inline-block;">
 
@@ -129,7 +129,7 @@
                                     </small>
                                 </div>
                             </div>
-                            <!-- ✅ END PHOTO UPLOAD SECTION -->
+                            <!--  END PHOTO UPLOAD SECTION -->
 
 
                             <!-- ===== ORGANIZATION CHART ===== -->
@@ -375,6 +375,14 @@
                     fetch('/my/employee/upload-photo', {
                     method: 'POST',
                     body: formData
+                    })
+                    // ADD csrf_token to your fetch call
+                    fetch('/my/employee/upload-photo', {
+                    method: 'POST',
+                    headers: {
+                    'X-CSRFToken': odoo.csrf_token,
+                    },
+                    body: formData,
                     })
                     .then(function (res) { return res.json(); })
                     .then(function (data) {
