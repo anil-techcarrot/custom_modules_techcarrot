@@ -395,7 +395,6 @@
                                         <label class="form-label fw-bold">Languages Known</label>
                                         <input class="form-control"
                                                t-att-value="employee.language_known_name or ''"
-                                               data-always-readonly="1"
                                                readonly="readonly"/>
                                     </div>
                                 </div>
