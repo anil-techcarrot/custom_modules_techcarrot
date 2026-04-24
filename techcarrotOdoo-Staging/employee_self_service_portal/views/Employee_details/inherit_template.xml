@@ -332,7 +332,7 @@
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Exit Reason</label>
                             <input type="text" class="form-control"
-                                   t-att-value="employee.exit_reason_id.name if employee.exit_reason_id and not isinstance(employee.exit_reason_id, str) else (employee.exit_reason_id or '')"
+                                   t-att-value="employee.exit_reason_id.name if employee.exit_reason_id and employee.exit_reason_id != True else ''"
                                    data-always-readonly="1" readonly="readonly"/>
                         </div>
 
