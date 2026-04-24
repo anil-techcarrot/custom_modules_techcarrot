@@ -230,36 +230,36 @@
 
                         <div class="col-md-6">
                             <label class="form-label fw-bold">No. of Career Break</label>
-                            <input type="text" name="no_of_carrer_break" class="form-control"
-                                   t-att-value="employee.no_of_carrer_break or ''"
+                            <input type="text" name="no_of_career_break" class="form-control"
+                                   t-att-value="employee.no_of_career_break or ''"
                                    data-always-readonly="1" readonly="readonly"/>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Career Break</label>
-                            <input type="text" name="carrer_break" class="form-control"
-                                   t-att-value="employee.carrer_break or ''"
+                            <input type="text" name="career_break" class="form-control"
+                                   t-att-value="employee.career_break or ''"
                                    data-always-readonly="1" readonly="readonly"/>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Career Break Detail</label>
-                            <input type="text" name="carrer_break_detail" class="form-control"
-                                   t-att-value="employee.carrer_break_detail or ''"
+                            <input type="text" name="career_break_detail" class="form-control"
+                                   t-att-value="employee.career_break_detail or ''"
                                    readonly="readonly"/>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Career Break Start Date</label>
-                            <input type="date" name="carrer_break_start_date" class="form-control"
-                                   t-att-value="employee.carrer_break_start_date.strftime('%Y-%m-%d') if employee.carrer_break_start_date else ''"
+                            <input type="date" name="career_break_start_date" class="form-control"
+                                   t-att-value="employee.career_break_start_date.strftime('%Y-%m-%d') if employee.career_break_start_date else ''"
                                    data-always-readonly="1" readonly="readonly"/>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Career Break End Date</label>
-                            <input type="date" name="carrer_break_end_date" class="form-control"
-                                   t-att-value="employee.carrer_break_end_date.strftime('%Y-%m-%d') if employee.carrer_break_end_date else ''"
+                            <input type="date" name="career_break_end_date" class="form-control"
+                                   t-att-value="employee.career_break_end_date.strftime('%Y-%m-%d') if employee.career_break_end_date else ''"
                                    data-always-readonly="1" readonly="readonly"/>
                         </div>
 

@@ -1564,8 +1564,8 @@ class PortalEmployee(http.Controller):
                     vals['twitter_profile'] = post.get('twitter_profile', '').strip()
 
                 # Career Details
-                if post.get('carrer_break_detail') is not None:
-                    vals['carrer_break_detail'] = post.get('carrer_break_detail', '').strip()
+                if post.get('career_break_detail') is not None:
+                    vals['career_break_detail'] = post.get('career_break_detail', '').strip()
 
                 # Industry Details
                 if post.get('industry_ref_name') is not None:
