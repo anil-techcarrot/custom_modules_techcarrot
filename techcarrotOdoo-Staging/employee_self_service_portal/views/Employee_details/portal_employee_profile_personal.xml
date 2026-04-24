@@ -888,14 +888,14 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Practice</label>
                                     <input type="text" class="form-control"
-                                           t-att-value="employee.practice or ''"
+                                           t-att-value="employee.practice.name if employee.practice else ''"
                                            data-always-readonly="1" readonly="readonly"/>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Sub Practice</label>
                                     <input type="text" class="form-control"
-                                           t-att-value="employee.sub_practice or ''"
+                                           t-att-value="employee.sub_practice.name if employee.sub_practice else ''"
                                            data-always-readonly="1" readonly="readonly"/>
                                 </div>
 
