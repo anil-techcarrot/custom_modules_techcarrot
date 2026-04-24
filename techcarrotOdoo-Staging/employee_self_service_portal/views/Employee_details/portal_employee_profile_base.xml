@@ -348,62 +348,35 @@
                     document.addEventListener('DOMContentLoaded', function () {
                     var input = document.getElementById('photoUploadInput');
                     if (!input) return;
-
                     input.addEventListener('change', function () {
                     if (!this.files || !this.files[0]) return;
-
                     var file = this.files[0];
                     var statusEl = document.getElementById('photoUploadStatus');
                     var imgEl = document.getElementById('employeePhotoImg');
-
                     if (file.size > 5 * 1024 * 1024) {
-                    statusEl.innerHTML = '
-                    <span class="text-danger"><i class="fa fa-times-circle me-1"></i>File too large. Max 5MB.
-                    </span>
-                    ';
+                    statusEl.innerHTML = '<span class="text-danger">File too large. Max 5MB.</span>';
                     return;
                     }
-
-                    statusEl.innerHTML = '
-                    <span class="text-muted"><i class="fa fa-spinner fa-spin me-1"></i>Uploading...
-                    </span>
-                    ';
-
+                    statusEl.innerHTML = '<span class="text-muted">Uploading...</span>';
                     var formData = new FormData();
                     formData.append('photo', file);
-
                     fetch('/my/employee/upload-photo', {
                     method: 'POST',
                     body: formData
                     })
-                    .then(function(res) {
-                    if (!res.ok) throw new Error('Server error: ' + res.status);
-                    return res.json();
-                    })
+                    .then(function(res) { return res.json(); })
                     .then(function(data) {
                     if (data.success) {
                     imgEl.src = data.image_url + '?t=' + Date.now();
-                    imgEl.alt = 'Employee Photo';
                     imgEl.classList.remove('opacity-50');
-                    statusEl.innerHTML = '
-                    <span class="text-success"><i class="fa fa-check-circle me-1"></i>Photo updated!
-                    </span>
-                    ';
+                    statusEl.innerHTML = '<span class="text-success">Photo updated!</span>';
                     setTimeout(function() { statusEl.innerHTML = ''; }, 3000);
                     } else {
-                    statusEl.innerHTML = '
-                    <span class="text-danger"><i class="fa fa-times-circle me-1"></i>' + (data.error || 'Upload failed')
-                        + '
-                    </span>
-                    ';
+                    statusEl.innerHTML = '<span class="text-danger">' + (data.error || 'Upload failed') + '</span>';
                     }
                     })
-                    .catch(function(err) {
-                    console.error('Upload error:', err);
-                    statusEl.innerHTML = '
-                    <span class="text-danger"><i class="fa fa-times-circle me-1"></i>Upload failed. Try again.
-                    </span>
-                    ';
+                    .catch(function() {
+                    statusEl.innerHTML = '<span class="text-danger">Upload failed. Try again.</span>';
                     });
                     });
                     });

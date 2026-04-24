@@ -47,7 +47,7 @@
         # "views/portal_ess_ticket_form.xml",
         "views/Employee_details/inherit_template.xml",
         "views/Employee_details/portal_employee_profile_payroll.xml",
-        "views/Employee_details/profile_photo_upload.xml",
+        # "views/Employee_details/profile_photo_upload.xml",
     ],
     "installable": True,
     "application": True,
