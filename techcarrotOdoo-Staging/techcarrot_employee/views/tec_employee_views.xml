@@ -165,6 +165,8 @@
                             <field name="zip_code" string="Zip Code"/>
                             <field name="linkedin" string="LinkedIn"/>
                             <field name="religion" string="Religion"/>
+                            <field name="mother_tongue_name"/>
+                            <field name="language_known_name"/>
                         </group>
 
                         <group string="Dependent Details">

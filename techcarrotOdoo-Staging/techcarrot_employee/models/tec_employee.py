@@ -10,6 +10,9 @@ import phonenumbers
 class HrEmployeeInherit(models.Model):
     _inherit = 'hr.employee'
 
+    mother_tongue_name = fields.Char(string='Mother Tongue')
+    language_known_name = fields.Char(string='language known')
+
     bank_account_no = fields.Char(string='Bank Account Number')
 
     # Professional Development & Supporting Documents
