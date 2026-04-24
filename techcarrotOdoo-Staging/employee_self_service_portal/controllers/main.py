@@ -1586,8 +1586,8 @@ class PortalEmployee(http.Controller):
                     vals['passport_id'] = post.get('passport_id')
                 if post.get('mother_tongue_name'):
                     vals['mother_tongue_name'] = post.get('mother_tongue_name')
-                if post.get('language_known_name'):
-                    vals['language_known_name'] = post.get('language_known_name')
+                if post.get('language_known_name') is not None:
+                    vals['language_known_name'] = post.get('language_known_name', '').strip()
 
                 # ✅ Certificate - selection field with validation
                 allowed_certificates = ['graduate', 'bachelor', 'master', 'doctor', 'other']

@@ -385,15 +385,18 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label class="form-label fw-bold">Mother Tongue</label>
-                                        <input class="form-control"
+                                        <input type="text"
+                                               name="mother_tongue_name"
+                                               class="form-control"
                                                t-att-value="employee.mother_tongue_name or ''"
-                                               data-always-readonly="1"
                                                readonly="readonly"/>
                                     </div>
 
                                     <div class="col-md-6">
                                         <label class="form-label fw-bold">Languages Known</label>
-                                        <input class="form-control"
+                                        <input type="text"
+                                               name="language_known_name"
+                                               class="form-control"
                                                t-att-value="employee.language_known_name or ''"
                                                readonly="readonly"/>
                                     </div>
