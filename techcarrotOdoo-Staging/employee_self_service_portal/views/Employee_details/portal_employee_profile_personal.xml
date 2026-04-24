@@ -1379,7 +1379,7 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Customer / Account Name</label>
                                     <input type="text" class="form-control"
-                                           t-att-value="employee.customer_acc_name.name if employee.customer_acc_name else ''"
+                                           t-att-value="employee.customer_acc_name or ''"
                                            data-always-readonly="1" readonly="readonly"/>
                                 </div>
 
