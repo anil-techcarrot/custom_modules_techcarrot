@@ -136,13 +136,9 @@ class PortalEmployee(http.Controller):
             ], limit=1)
             return record.id if record else False
 
-    # In _get_employee(), make sure you're querying by user's partner:
+
     def _get_employee(self):
-        partner = request.env.user.partner_id
-        employee = request.env['hr.employee'].sudo().search([
-            ('user_id', '=', request.env.user.id)
-        ], limit=1)
-        return employee
+        return request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
 
     @http.route(MY_EMPLOYEE_URL, type='http', auth='user', website=True)
     def portal_employee_profile(self, **kw):
@@ -1840,28 +1836,21 @@ class PortalEmployee(http.Controller):
             'section': 'personal',
         })
 
-    @http.route('/my/employee/upload-photo', type='http', auth='user', website=True, methods=['POST'], csrf=False)
+    @http.route(MY_EMPLOYEE_URL + '/upload-photo', type='http', auth='user', website=True, methods=['POST'], csrf=False)
     def portal_employee_upload_photo(self, **post):
+        """Handle employee photo upload"""
         try:
-            _logger.info("Photo upload request received")
             employee = self._get_employee()
 
-            if not employee:
-                return request.make_json_response({
-                    'success': False,
-                    'error': 'Employee not found'
-                })
-
+            # Get uploaded file
             photo_file = request.httprequest.files.get('photo')
             if not photo_file:
-                _logger.warning("No photo file in request. Files: %s", request.httprequest.files)
                 return request.make_json_response({
                     'success': False,
                     'error': 'No photo file provided'
                 })
 
-            _logger.info("Photo file received: %s, type: %s", photo_file.filename, photo_file.content_type)
-
+            # Validate file type
             allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif']
             if photo_file.content_type not in allowed_types:
                 return request.make_json_response({
@@ -1869,36 +1858,37 @@ class PortalEmployee(http.Controller):
                     'error': 'Invalid file type. Please upload JPG, PNG, or GIF only.'
                 })
 
-            photo_file.seek(0, 2)
+            # Validate file size (5MB max)
+            max_size = 5 * 1024 * 1024  # 5MB
+            photo_file.seek(0, 2)  # Seek to end
             file_size = photo_file.tell()
-            photo_file.seek(0)
+            photo_file.seek(0)  # Seek back to beginning
 
-            if file_size > 5 * 1024 * 1024:
+            if file_size > max_size:
                 return request.make_json_response({
                     'success': False,
                     'error': 'File too large. Maximum size is 5MB.'
                 })
 
+            # Read and encode image
             import base64
-            # FIXED: decode bytes to string
-            photo_data = base64.b64encode(photo_file.read()).decode('utf-8')
+            photo_data = base64.b64encode(photo_file.read())
 
-            employee.sudo().write({'image_1920': photo_data})
-            _logger.info("Photo updated successfully for employee %s", employee.id)
+            # Update employee image
+            employee.sudo().write({
+                'image_1920': photo_data
+            })
 
             return request.make_json_response({
                 'success': True,
                 'message': 'Photo uploaded successfully',
-                'image_url': '/web/image/hr.employee/%s/image_1920/150x150' % employee.id
+                'image_url': f'/web/image/hr.employee/{employee.id}/image_1920/150x150'
             })
 
         except Exception as e:
-            _logger.error("Photo upload error: %s", str(e))
-            import traceback
-            _logger.error("Traceback: %s", traceback.format_exc())
             return request.make_json_response({
                 'success': False,
-                'error': 'Upload failed: %s' % str(e)
+                'error': f'Upload failed: {str(e)}'
             })
 
     @http.route(MY_EMPLOYEE_URL + '/export-pdf', type='http', auth='user', website=True)
