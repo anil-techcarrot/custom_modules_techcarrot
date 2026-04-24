@@ -45,15 +45,15 @@
         <xpath expr="//style" position="after">
             <script type="text/javascript">
                 document.addEventListener('DOMContentLoaded', function () {
-                const input = document.getElementById('photoUploadInput');
+                var input = document.getElementById('photoUploadInput');
                 if (!input) return;
 
                 input.addEventListener('change', function () {
                 if (!this.files || !this.files[0]) return;
 
-                const file = this.files[0];
-                const statusEl = document.getElementById('photoUploadStatus');
-                const imgEl = document.getElementById('employeePhotoImg');
+                var file = this.files[0];
+                var statusEl = document.getElementById('photoUploadStatus');
+                var imgEl = document.getElementById('employeePhotoImg');
 
                 if (file.size > 5 * 1024 * 1024) {
                 statusEl.innerHTML = '
@@ -68,29 +68,27 @@
                 </span>
                 ';
 
-                const formData = new FormData();
+                var formData = new FormData();
                 formData.append('photo', file);
 
-                // FIXED: correct URL with no MY_EMPLOYEE_URL dependency
+                // SINGLE fetch call — no duplicate
                 fetch('/my/employee/upload-photo', {
                 method: 'POST',
-                body: formData,
+                body: formData
                 })
                 .then(function(res) {
-                if (!res.ok) {
-                throw new Error('Server error: ' + res.status);
-                }
+                if (!res.ok) throw new Error('Server error: ' + res.status);
                 return res.json();
                 })
                 .then(function(data) {
                 if (data.success) {
+                imgEl.src = data.image_url + '?t=' + Date.now();
+                imgEl.alt = 'Employee Photo';
+                imgEl.classList.remove('opacity-50');
                 statusEl.innerHTML = '
                 <span class="text-success"><i class="fa fa-check-circle me-1"></i>Photo updated!
                 </span>
                 ';
-                imgEl.src = data.image_url + '?t=' + Date.now();
-                imgEl.alt = 'Employee Photo';
-                imgEl.classList.remove('opacity-50');
                 setTimeout(function() { statusEl.innerHTML = ''; }, 3000);
                 } else {
                 statusEl.innerHTML = '
@@ -100,7 +98,7 @@
                 }
                 })
                 .catch(function(err) {
-                console.error('Photo upload error:', err);
+                console.error('Upload error:', err);
                 statusEl.innerHTML = '
                 <span class="text-danger"><i class="fa fa-times-circle me-1"></i>Upload failed. Try again.
                 </span>

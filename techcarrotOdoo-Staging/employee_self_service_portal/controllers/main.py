@@ -136,9 +136,13 @@ class PortalEmployee(http.Controller):
             ], limit=1)
             return record.id if record else False
 
-
+    # In _get_employee(), make sure you're querying by user's partner:
     def _get_employee(self):
-        return request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
+        partner = request.env.user.partner_id
+        employee = request.env['hr.employee'].sudo().search([
+            ('user_id', '=', request.env.user.id)
+        ], limit=1)
+        return employee
 
     @http.route(MY_EMPLOYEE_URL, type='http', auth='user', website=True)
     def portal_employee_profile(self, **kw):
