@@ -1792,6 +1792,12 @@ class PortalEmployee(http.Controller):
                 if post.get('language_known_name') is not None:
                     vals['language_known_name'] = post.get('language_known_name', '').strip()
 
+                # Selection field with validation
+                allowed_blood_groups = ['a_pos', 'a_neg', 'b_pos', 'b_neg', 'ab_pos', 'ab_neg', 'o_pos', 'o_neg',
+                                        'unknown']
+                if post.get('blood_group') and post.get('blood_group') in allowed_blood_groups:
+                    vals['blood_group'] = post.get('blood_group')
+
                 #  Certificate - selection field with validation
                 allowed_certificates = ['graduate', 'bachelor', 'master', 'doctor', 'other']
                 if post.get('certificate') and post.get('certificate') in allowed_certificates:

@@ -229,9 +229,45 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Blood Group</label>
-                                    <input type="text" class="form-control"
-                                           t-att-value="{'a_pos': 'A+', 'a_neg': 'A-', 'b_pos': 'B+', 'b_neg': 'B-', 'ab_pos': 'AB+', 'ab_neg': 'AB-', 'o_pos': 'O+', 'o_neg': 'O-', 'unknown': 'Unknown'}.get(employee.blood_group, '')"
-                                           readonly="readonly"/>
+                                    <select name="blood_group" class="form-select" disabled="disabled">
+                                        <option value="">-- Select Blood Group --</option>
+                                        <option value="a_pos"
+                                                t-att-selected="'selected' if employee.blood_group == 'a_pos' else None">
+                                            A+
+                                        </option>
+                                        <option value="a_neg"
+                                                t-att-selected="'selected' if employee.blood_group == 'a_neg' else None">
+                                            A-
+                                        </option>
+                                        <option value="b_pos"
+                                                t-att-selected="'selected' if employee.blood_group == 'b_pos' else None">
+                                            B+
+                                        </option>
+                                        <option value="b_neg"
+                                                t-att-selected="'selected' if employee.blood_group == 'b_neg' else None">
+                                            B-
+                                        </option>
+                                        <option value="ab_pos"
+                                                t-att-selected="'selected' if employee.blood_group == 'ab_pos' else None">
+                                            AB+
+                                        </option>
+                                        <option value="ab_neg"
+                                                t-att-selected="'selected' if employee.blood_group == 'ab_neg' else None">
+                                            AB-
+                                        </option>
+                                        <option value="o_pos"
+                                                t-att-selected="'selected' if employee.blood_group == 'o_pos' else None">
+                                            O+
+                                        </option>
+                                        <option value="o_neg"
+                                                t-att-selected="'selected' if employee.blood_group == 'o_neg' else None">
+                                            O-
+                                        </option>
+                                        <option value="unknown"
+                                                t-att-selected="'selected' if employee.blood_group == 'unknown' else None">
+                                            Unknown
+                                        </option>
+                                    </select>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Religion</label>
@@ -409,12 +445,12 @@
                                            t-att-value="employee.whatsapp or ''"
                                            readonly="readonly"/>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">LinkedIn</label>
-                                    <input type="text" name="linkedin" class="form-control"
-                                           t-att-value="employee.linkedin or ''"
-                                           readonly="readonly"/>
-                                </div>
+                                <!--                                <div class="col-md-6">-->
+                                <!--                                    <label class="form-label fw-bold">LinkedIn</label>-->
+                                <!--                                    <input type="text" name="linkedin" class="form-control"-->
+                                <!--                                           t-att-value="employee.linkedin or ''"-->
+                                <!--                                           readonly="readonly"/>-->
+                                <!--                                </div>-->
                                 <div class="col-md-12">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-map-marker text-muted me-1"></i>Address Line 1
@@ -470,6 +506,13 @@
                             <h5 class="mb-0">
                                 <i class="fa fa-share-alt text-primary me-2"></i>Social Media Details
                             </h5>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">LinkedIn</label>
+                            <input type="text" name="linkedin" class="form-control"
+                                   t-att-value="employee.linkedin or ''"
+                                   readonly="readonly"/>
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
@@ -1005,6 +1048,14 @@
                                     <input type="text" name="e_private_city" class="form-control"
                                            t-att-value="employee.e_private_city or ''"
                                            readonly="readonly"/>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold">Country Code</label>
+                                    <input type="text" name="phone_code_1" class="form-control"
+                                           t-att-value="employee.phone_code_1 or ''"
+                                           readonly="readonly"
+                                           placeholder="+971"/>
                                 </div>
                             </div>
                         </div>
