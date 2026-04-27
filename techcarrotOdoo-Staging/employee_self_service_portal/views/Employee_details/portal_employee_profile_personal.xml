@@ -236,23 +236,41 @@
                                     <select name="blood_group" class="form-select" disabled="disabled">
                                         <option value="">-- Select Blood Group --</option>
                                         <option value="a_pos"
-                                                t-att-selected="'selected' if employee.blood_group == 'a_pos' else None">A+</option>
+                                                t-att-selected="'selected' if employee.blood_group == 'a_pos' else None">
+                                            A+
+                                        </option>
                                         <option value="a_neg"
-                                                t-att-selected="'selected' if employee.blood_group == 'a_neg' else None">A-</option>
+                                                t-att-selected="'selected' if employee.blood_group == 'a_neg' else None">
+                                            A-
+                                        </option>
                                         <option value="b_pos"
-                                                t-att-selected="'selected' if employee.blood_group == 'b_pos' else None">B+</option>
+                                                t-att-selected="'selected' if employee.blood_group == 'b_pos' else None">
+                                            B+
+                                        </option>
                                         <option value="b_neg"
-                                                t-att-selected="'selected' if employee.blood_group == 'b_neg' else None">B-</option>
+                                                t-att-selected="'selected' if employee.blood_group == 'b_neg' else None">
+                                            B-
+                                        </option>
                                         <option value="ab_pos"
-                                                t-att-selected="'selected' if employee.blood_group == 'ab_pos' else None">AB+</option>
+                                                t-att-selected="'selected' if employee.blood_group == 'ab_pos' else None">
+                                            AB+
+                                        </option>
                                         <option value="ab_neg"
-                                                t-att-selected="'selected' if employee.blood_group == 'ab_neg' else None">AB-</option>
+                                                t-att-selected="'selected' if employee.blood_group == 'ab_neg' else None">
+                                            AB-
+                                        </option>
                                         <option value="o_pos"
-                                                t-att-selected="'selected' if employee.blood_group == 'o_pos' else None">O+</option>
+                                                t-att-selected="'selected' if employee.blood_group == 'o_pos' else None">
+                                            O+
+                                        </option>
                                         <option value="o_neg"
-                                                t-att-selected="'selected' if employee.blood_group == 'o_neg' else None">O-</option>
+                                                t-att-selected="'selected' if employee.blood_group == 'o_neg' else None">
+                                            O-
+                                        </option>
                                         <option value="unknown"
-                                                t-att-selected="'selected' if employee.blood_group == 'unknown' else None">Unknown</option>
+                                                t-att-selected="'selected' if employee.blood_group == 'unknown' else None">
+                                            Unknown
+                                        </option>
                                     </select>
                                 </div>
                                 <div class="col-md-6">
@@ -860,6 +878,87 @@
                         </div>
                     </div>
 
+                    <!-- Last Organisation Info -->
+                    <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="professional">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">
+                                <i class="fa fa-building text-primary me-2"></i>Last Organisation Info
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Organisation Name</label>
+                                    <input type="text" name="last_organisation_name" class="form-control"
+                                           t-att-value="employee.last_organisation_name or ''"
+                                           readonly="readonly"/>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Location</label>
+                                    <input type="text" name="last_location" class="form-control"
+                                           t-att-value="employee.last_location or ''"
+                                           readonly="readonly"/>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Salary Per Annum Currency</label>
+                                    <input type="text" name="last_salary_per_annum_currency" class="form-control"
+                                           t-att-value="employee.last_salary_per_annum_currency or ''"
+                                           readonly="readonly"/>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Salary Per Annum Amount</label>
+                                    <input type="number" name="last_salary_per_annum_amt" class="form-control"
+                                           t-att-value="employee.last_salary_per_annum_amt or ''"
+                                           readonly="readonly"
+                                           min="0" step="0.01"
+                                           data-validation="positive-number"/>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Reason for Leaving</label>
+                                    <input type="text" name="reason_for_leaving" class="form-control"
+                                           t-att-value="employee.reason_for_leaving or ''"
+                                           readonly="readonly"/>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Reporting Manager Name</label>
+                                    <input type="text" name="last_report_manager_name" class="form-control"
+                                           t-att-value="employee.last_report_manager_name or ''"
+                                           readonly="readonly"/>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Reporting Manager Designation</label>
+                                    <input type="text" name="last_report_manager_designation" class="form-control"
+                                           t-att-value="employee.last_report_manager_designation or ''"
+                                           readonly="readonly"/>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Last Reporting Manager Mobile Number</label>
+                                    <input type="tel" name="last_report_manager_mob_no" class="form-control"
+                                           t-att-value="employee.last_report_manager_mob_no or ''"
+                                           readonly="readonly"
+                                           pattern="[+]?[0-9\s\-\(\)]*"
+                                           data-validation="phone"/>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Reporting Manager Email-ID</label>
+                                    <input type="email" name="last_report_manager_mail" class="form-control"
+                                           t-att-value="employee.last_report_manager_mail or ''"
+                                           readonly="readonly"
+                                           data-validation="email"/>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Employee Nominee and Details -->
                     <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="professional">
                         <div class="card-header bg-light">
@@ -1128,7 +1227,8 @@
                     <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="family">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
-                                <i class="fa fa-ambulance text-primary me-2"></i>Emergency Contact Person Address Inside UAE
+                                <i class="fa fa-ambulance text-primary me-2"></i>Emergency Contact Person Address Inside
+                                UAE
                             </h5>
                         </div>
                         <div class="card-body">
@@ -1340,11 +1440,17 @@
                                     <select name="dependent_child_gender_1" class="form-select" disabled="disabled">
                                         <option value="">Select Gender</option>
                                         <option value="male"
-                                                t-att-selected="'selected' if employee.dependent_child_gender_1 == 'male' else None">Male</option>
+                                                t-att-selected="'selected' if employee.dependent_child_gender_1 == 'male' else None">
+                                            Male
+                                        </option>
                                         <option value="female"
-                                                t-att-selected="'selected' if employee.dependent_child_gender_1 == 'female' else None">Female</option>
+                                                t-att-selected="'selected' if employee.dependent_child_gender_1 == 'female' else None">
+                                            Female
+                                        </option>
                                         <option value="other"
-                                                t-att-selected="'selected' if employee.dependent_child_gender_1 == 'other' else None">Other</option>
+                                                t-att-selected="'selected' if employee.dependent_child_gender_1 == 'other' else None">
+                                            Other
+                                        </option>
                                     </select>
                                 </div>
                                 <!-- PASSPORT NO: alphanumeric -->
@@ -1484,15 +1590,25 @@
                                             data-always-readonly="1" disabled="disabled">
                                         <option value="">Select Status</option>
                                         <option value="single"
-                                                t-att-selected="'selected' if employee.marital == 'single' else None">Single</option>
+                                                t-att-selected="'selected' if employee.marital == 'single' else None">
+                                            Single
+                                        </option>
                                         <option value="married"
-                                                t-att-selected="'selected' if employee.marital == 'married' else None">Married</option>
+                                                t-att-selected="'selected' if employee.marital == 'married' else None">
+                                            Married
+                                        </option>
                                         <option value="cohabitant"
-                                                t-att-selected="'selected' if employee.marital == 'cohabitant' else None">Legal Cohabitant</option>
+                                                t-att-selected="'selected' if employee.marital == 'cohabitant' else None">
+                                            Legal Cohabitant
+                                        </option>
                                         <option value="widower"
-                                                t-att-selected="'selected' if employee.marital == 'widower' else None">Widower</option>
+                                                t-att-selected="'selected' if employee.marital == 'widower' else None">
+                                            Widower
+                                        </option>
                                         <option value="divorced"
-                                                t-att-selected="'selected' if employee.marital == 'divorced' else None">Divorced</option>
+                                                t-att-selected="'selected' if employee.marital == 'divorced' else None">
+                                            Divorced
+                                        </option>
                                     </select>
                                     <div class="invalid-feedback"></div>
                                 </div>

@@ -1698,6 +1698,37 @@ class PortalEmployee(http.Controller):
                 if post.get('tool_used'):
                     vals['tool_used'] = post.get('tool_used')
 
+                    # Last Organisation Info
+                    if post.get('last_organisation_name'):
+                        vals['last_organisation_name'] = post.get('last_organisation_name')
+                    if post.get('last_location'):
+                        vals['last_location'] = post.get('last_location')
+                    if post.get('last_salary_per_annum_currency'):
+                        vals['last_salary_per_annum_currency'] = post.get('last_salary_per_annum_currency')
+                    if post.get('last_salary_per_annum_amt'):
+                        try:
+                            vals['last_salary_per_annum_amt'] = float(post.get('last_salary_per_annum_amt'))
+                        except (ValueError, TypeError):
+                            pass
+                    if post.get('reason_for_leaving'):
+                        vals['reason_for_leaving'] = post.get('reason_for_leaving')
+                    if post.get('last_report_manager_name'):
+                        vals['last_report_manager_name'] = post.get('last_report_manager_name')
+                    if post.get('last_report_manager_designation'):
+                        vals['last_report_manager_designation'] = post.get('last_report_manager_designation')
+                    if post.get('last_report_manager_mob_no'):
+                        vals['last_report_manager_mob_no'] = post.get('last_report_manager_mob_no')
+                    if post.get('last_report_manager_mail'):
+                        import re
+                        email_pattern = r'^[^\s@]+@[^\s@]+\.[^\s@]+$'
+                        if re.match(email_pattern, post.get('last_report_manager_mail')):
+                            vals['last_report_manager_mail'] = post.get('last_report_manager_mail')
+                        else:
+                            return request.make_json_response({
+                                'success': False,
+                                'error': 'Invalid Reporting Manager email format'
+                            })
+
                 # Many2one - Passport Issuing Country
                 # Child 1 Passport Issuing Country - Many2one res.country
                 if post.get('dependent_child_passport_issuing_countries_1_id'):
