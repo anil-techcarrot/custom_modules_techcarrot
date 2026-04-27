@@ -1674,102 +1674,7 @@
                         </div>
                     </div>
 
-                    <!-- At the bottom of EACH tab's last card, add this save bar -->
-                    <!-- Add this as the LAST card in BASIC tab -->
-                    <!--                    <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="basic">-->
-                    <!--                        <div class="card-body text-end">-->
-                    <!--                            <div class="tab-save-bar" id="saveBar-basic" style="display:none;">-->
-                    <!--                                <button type="button" class="btn btn-secondary me-2" onclick="cancelEdit()">-->
-                    <!--                                    <i class="fa fa-times me-1"></i>Cancel-->
-                    <!--                                </button>-->
-                    <!--                                <button type="button" class="btn btn-primary" onclick="submitCurrentTab('basic')">-->
-                    <!--                                    <i class="fa fa-check me-1"></i>Save Changes-->
-                    <!--                                </button>-->
-                    <!--                            </div>-->
-                    <!--                            <div class="tab-view-bar" id="viewBar-basic">-->
-                    <!--                                <button type="button" class="btn btn-outline-primary" onclick="enableEditMode()">-->
-                    <!--                                    <i class="fa fa-edit me-1"></i>Edit Profile-->
-                    <!--                                </button>-->
-                    <!--                            </div>-->
-                    <!--                        </div>-->
-                    <!--                    </div>-->
 
-                    <!--                    &lt;!&ndash; Add this as the LAST card in PROFESSIONAL tab &ndash;&gt;-->
-                    <!--                    <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="professional">-->
-                    <!--                        <div class="card-body text-end">-->
-                    <!--                            <div class="tab-save-bar" id="saveBar-professional" style="display:none;">-->
-                    <!--                                <button type="button" class="btn btn-secondary me-2" onclick="cancelEdit()">-->
-                    <!--                                    <i class="fa fa-times me-1"></i>Cancel-->
-                    <!--                                </button>-->
-                    <!--                                <button type="button" class="btn btn-primary"-->
-                    <!--                                        onclick="submitCurrentTab('professional')">-->
-                    <!--                                    <i class="fa fa-check me-1"></i>Save Changes-->
-                    <!--                                </button>-->
-                    <!--                            </div>-->
-                    <!--                            <div class="tab-view-bar" id="viewBar-professional">-->
-                    <!--                                <button type="button" class="btn btn-outline-primary" onclick="enableEditMode()">-->
-                    <!--                                    <i class="fa fa-edit me-1"></i>Edit Profile-->
-                    <!--                                </button>-->
-                    <!--                            </div>-->
-                    <!--                        </div>-->
-                    <!--                    </div>-->
-
-                    <!--                    &lt;!&ndash; Add this as the LAST card in FAMILY tab &ndash;&gt;-->
-                    <!--                    <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="family">-->
-                    <!--                        <div class="card-body text-end">-->
-                    <!--                            <div class="tab-save-bar" id="saveBar-family" style="display:none;">-->
-                    <!--                                <button type="button" class="btn btn-secondary me-2" onclick="cancelEdit()">-->
-                    <!--                                    <i class="fa fa-times me-1"></i>Cancel-->
-                    <!--                                </button>-->
-                    <!--                                <button type="button" class="btn btn-primary" onclick="submitCurrentTab('family')">-->
-                    <!--                                    <i class="fa fa-check me-1"></i>Save Changes-->
-                    <!--                                </button>-->
-                    <!--                            </div>-->
-                    <!--                            <div class="tab-view-bar" id="viewBar-family">-->
-                    <!--                                <button type="button" class="btn btn-outline-primary" onclick="enableEditMode()">-->
-                    <!--                                    <i class="fa fa-edit me-1"></i>Edit Profile-->
-                    <!--                                </button>-->
-                    <!--                            </div>-->
-                    <!--                        </div>-->
-                    <!--                    </div>-->
-
-                    <!--                    &lt;!&ndash; Add this as the LAST card in EDUCATION tab &ndash;&gt;-->
-                    <!--                    <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="education">-->
-                    <!--                        <div class="card-body text-end">-->
-                    <!--                            <div class="tab-save-bar" id="saveBar-education" style="display:none;">-->
-                    <!--                                <button type="button" class="btn btn-secondary me-2" onclick="cancelEdit()">-->
-                    <!--                                    <i class="fa fa-times me-1"></i>Cancel-->
-                    <!--                                </button>-->
-                    <!--                                <button type="button" class="btn btn-primary" onclick="submitCurrentTab('education')">-->
-                    <!--                                    <i class="fa fa-check me-1"></i>Save Changes-->
-                    <!--                                </button>-->
-                    <!--                            </div>-->
-                    <!--                            <div class="tab-view-bar" id="viewBar-education">-->
-                    <!--                                <button type="button" class="btn btn-outline-primary" onclick="enableEditMode()">-->
-                    <!--                                    <i class="fa fa-edit me-1"></i>Edit Profile-->
-                    <!--                                </button>-->
-                    <!--                            </div>-->
-                    <!--                        </div>-->
-                    <!--                    </div>-->
-
-                    <!--                    &lt;!&ndash; Add this as the LAST card in DOCUMENTS tab &ndash;&gt;-->
-                    <!--                    <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="documents">-->
-                    <!--                        <div class="card-body text-end">-->
-                    <!--                            <div class="tab-save-bar" id="saveBar-documents" style="display:none;">-->
-                    <!--                                <button type="button" class="btn btn-secondary me-2" onclick="cancelEdit()">-->
-                    <!--                                    <i class="fa fa-times me-1"></i>Cancel-->
-                    <!--                                </button>-->
-                    <!--                                <button type="button" class="btn btn-primary" onclick="submitCurrentTab('documents')">-->
-                    <!--                                    <i class="fa fa-check me-1"></i>Save Changes-->
-                    <!--                                </button>-->
-                    <!--                            </div>-->
-                    <!--                            <div class="tab-view-bar" id="viewBar-documents">-->
-                    <!--                                <button type="button" class="btn btn-outline-primary" onclick="enableEditMode()">-->
-                    <!--                                    <i class="fa fa-edit me-1"></i>Edit Profile-->
-                    <!--                                </button>-->
-                    <!--                            </div>-->
-                    <!--                        </div>-->
-                    <!--                    </div>-->
                 </form>
 
                 <!-- ===== JAVASCRIPT ===== -->
@@ -1781,7 +1686,14 @@ let activeProfileTab = 'basic';
 
 /* ─── Tab switching ─────────────────────────────────────────── */
 function switchProfileTab(tabKey) {
+    const previousTab = activeProfileTab;
     activeProfileTab = tabKey;
+
+    // Clear validation errors ONLY from the tab we are LEAVING
+    if (previousTab && previousTab !== tabKey) {
+        clearValidationStates(previousTab);
+    }
+
     document.querySelectorAll('#personalDetailsForm .profile-tab-section').forEach(card => {
         card.style.display = card.getAttribute('data-tab-group') === tabKey ? '' : 'none';
     });
@@ -1829,6 +1741,8 @@ function enableEditMode() {
     document.getElementById('formActions').style.display = 'block';
     document.getElementById('viewActions').style.display = 'none';
 
+    // Attach validation listeners only to fields in ALL tabs
+    // but validateField will only show errors for the field being interacted with
     document.querySelectorAll('#personalDetailsForm input, #personalDetailsForm select').forEach(input => {
         input.removeEventListener('input', validateField);
         input.removeEventListener('blur', validateField);
@@ -1866,7 +1780,9 @@ function disableEditMode() {
 
     document.getElementById('formActions').style.display = 'none';
     document.getElementById('viewActions').style.display = 'block';
-    clearValidationStates();
+
+    // Clear only the active tab's validation when disabling edit mode
+    clearValidationStates(activeProfileTab);
 }
 
 /* ─── Store original data ───────────────────────────────────── */
@@ -1884,6 +1800,8 @@ function cancelEdit() {
         const input = document.querySelector(`[name="${key}"]`);
         if (input) input.value = value;
     }
+    // Clear only active tab validation before disabling
+    clearValidationStates(activeProfileTab);
     disableEditMode();
     showTabMessage(activeProfileTab, 'Changes cancelled.', 'info');
 }
@@ -1902,14 +1820,27 @@ function saveAsDraft() {
 /* ─── Validate single field ─────────────────────────────────── */
 function validateField(event) {
     const field = event.target;
+
+    // CRITICAL: Only validate fields that belong to the currently active tab.
+    // This prevents errors from showing on hidden/other tabs.
+    const parentSection = field.closest('.profile-tab-section');
+    if (parentSection && parentSection.getAttribute('data-tab-group') !== activeProfileTab) {
+        return true; // Silently skip fields not in the active tab
+    }
+
     const validationType = field.getAttribute('data-validation');
     let isValid = true;
     let errorMessage = '';
 
+    // Remove previous states
     field.classList.remove('is-valid', 'is-invalid');
 
-    // Clear previous feedback
-    const feedback = field.parentNode.querySelector('.invalid-feedback');
+    // Remove any previously injected error message div (dynamic ones we appended)
+    const existingDynamic = field.parentNode.querySelector('.invalid-feedback.dynamic-error');
+    if (existingDynamic) existingDynamic.remove();
+
+    // Clear static feedback element
+    const feedback = field.parentNode.querySelector('.invalid-feedback:not(.dynamic-error)');
     if (feedback) {
         feedback.textContent = '';
         feedback.style.display = 'none';
@@ -1951,21 +1882,31 @@ function validateField(event) {
     }
 
     if (field.value) {
-        field.classList.add(isValid ? 'is-valid' : 'is-invalid');
-        if (!isValid) {
+        if (isValid) {
+            field.classList.add('is-valid');
+        } else {
+            field.classList.add('is-invalid');
+
+            // Show error message directly below the field
             if (feedback) {
+                // Use existing static feedback element
                 feedback.textContent = errorMessage;
                 feedback.style.display = 'block';
             } else {
+                // Inject a new error div right after the field
                 const errDiv = document.createElement('div');
-                errDiv.className = 'invalid-feedback';
+                errDiv.className = 'invalid-feedback dynamic-error';
                 errDiv.style.display = 'block';
+                errDiv.style.color = '#dc3545';
+                errDiv.style.fontSize = '0.8rem';
+                errDiv.style.marginTop = '3px';
                 errDiv.textContent = errorMessage;
-                field.parentNode.appendChild(errDiv);
+                field.insertAdjacentElement('afterend', errDiv);
             }
         }
     }
 
+    // Only update badges for the active tab to avoid cross-tab pollution
     updateTabErrorBadges();
     return isValid;
 }
@@ -1975,11 +1916,16 @@ function updateTabErrorBadges() {
     ['basic', 'professional', 'family', 'education', 'documents'].forEach(tabKey => {
         const tabBtn = document.querySelector(`.profile-tab-button[data-tab-target="${tabKey}"]`);
         if (!tabBtn) return;
+
+        // Remove existing badge
         const existing = tabBtn.querySelector('.tab-error-badge');
         if (existing) existing.remove();
+
+        // Count is-invalid fields in this tab's sections ONLY
         const count = document.querySelectorAll(
             `.profile-tab-section[data-tab-group="${tabKey}"] .is-invalid`
         ).length;
+
         if (count > 0) {
             const badge = document.createElement('span');
             badge.className = 'tab-error-badge badge bg-danger ms-1';
@@ -1989,25 +1935,55 @@ function updateTabErrorBadges() {
     });
 }
 
-/* ─── Clear all validation states ───────────────────────────── */
-function clearValidationStates() {
-    document.querySelectorAll('#personalDetailsForm input, #personalDetailsForm select')
-        .forEach(input => input.classList.remove('is-valid', 'is-invalid'));
-    document.querySelectorAll('#personalDetailsForm .invalid-feedback').forEach(el => {
+/* ─── Clear validation states — SCOPED to a specific tab ────── */
+// Pass tabKey to clear only that tab. Pass nothing to clear ALL tabs.
+function clearValidationStates(tabKey) {
+    let inputs, feedbacks, messages;
+
+    if (tabKey) {
+        // Scope to sections belonging to this tab only
+        const sections = document.querySelectorAll(
+            `.profile-tab-section[data-tab-group="${tabKey}"]`
+        );
+        inputs = [];
+        feedbacks = [];
+        messages = [];
+        sections.forEach(section => {
+            section.querySelectorAll('input, select').forEach(el => inputs.push(el));
+            section.querySelectorAll('.invalid-feedback').forEach(el => feedbacks.push(el));
+            section.querySelectorAll('.tab-message-box').forEach(el => messages.push(el));
+            // Also remove any dynamically injected error divs
+            section.querySelectorAll('.dynamic-error').forEach(el => el.remove());
+        });
+    } else {
+        // Full form clear (used only when truly needed)
+        inputs = document.querySelectorAll('#personalDetailsForm input, #personalDetailsForm select');
+        feedbacks = document.querySelectorAll('#personalDetailsForm .invalid-feedback');
+        messages = document.querySelectorAll('.tab-message-box');
+        document.querySelectorAll('.dynamic-error').forEach(el => el.remove());
+    }
+
+    inputs.forEach(input => input.classList.remove('is-valid', 'is-invalid'));
+    feedbacks.forEach(el => {
         el.textContent = '';
         el.style.display = 'none';
     });
-    document.querySelectorAll('.tab-error-badge').forEach(b => b.remove());
-    // Clear all tab-level messages
-    document.querySelectorAll('.tab-message-box').forEach(b => b.remove());
+    messages.forEach(el => el.remove());
+
+    // Always refresh ALL badge counts so they stay accurate across tabs
+    updateTabErrorBadges();
 }
 
 /* ─── Show message INSIDE current tab (not above tabs) ──────── */
 function showTabMessage(tabKey, text, type) {
-    // Remove any existing tab message in this tab
-    document.querySelectorAll('.tab-message-box').forEach(el => el.remove());
+    // Remove existing messages only in the target tab
+    const existingInTab = document.querySelectorAll(
+        `.profile-tab-section[data-tab-group="${tabKey}"] ~ .tab-message-box,
+         .tab-message-box`
+    );
+    existingInTab.forEach(el => el.remove());
 
-    // Find first card in active tab to insert before it
+    // Find first visible card in active tab to insert before it
     const firstCard = document.querySelector(
         `.profile-tab-section[data-tab-group="${tabKey}"]`
     );
@@ -2037,7 +2013,10 @@ function showTabMessage(tabKey, text, type) {
 document.getElementById('personalDetailsForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
-    // Validate only fields in the CURRENT active tab
+    // Step 1: Clear ONLY the active tab's previous validation state before re-validating
+    clearValidationStates(activeProfileTab);
+
+    // Step 2: Validate ONLY fields in the CURRENT active tab
     let isFormValid = true;
     document.querySelectorAll(
         `.profile-tab-section[data-tab-group="${activeProfileTab}"] input[data-validation],
@@ -2046,10 +2025,11 @@ document.getElementById('personalDetailsForm').addEventListener('submit', functi
         if (!validateField({ target: input })) isFormValid = false;
     });
 
+    // Step 3: Update badges (only active tab will have new errors)
     updateTabErrorBadges();
 
     if (!isFormValid) {
-        // Find first error field in current tab and scroll to it
+        // Scroll to and focus the first error field in the current tab
         const firstError = document.querySelector(
             `.profile-tab-section[data-tab-group="${activeProfileTab}"] .is-invalid`
         );
@@ -2063,7 +2043,7 @@ document.getElementById('personalDetailsForm').addEventListener('submit', functi
         return;
     }
 
-    // Temporarily enable selects/checkboxes for form submission
+    // Step 4: Temporarily enable selects/checkboxes so FormData picks them up
     const toReenable = [];
     document.querySelectorAll(
         '#personalDetailsForm select[disabled], #personalDetailsForm input[type="checkbox"][disabled]'
@@ -2077,6 +2057,7 @@ document.getElementById('personalDetailsForm').addEventListener('submit', functi
     const formData = new FormData(this);
     const csrfToken = document.querySelector('input[name="csrf_token"]').value;
 
+    // Re-disable after FormData is collected
     toReenable.forEach(el => el.setAttribute('disabled', 'disabled'));
 
     fetch('/my/employee/personal', {
@@ -2107,8 +2088,11 @@ document.addEventListener('DOMContentLoaded', function() {
             switchProfileTab(this.getAttribute('data-tab-target'));
         });
     });
+
+    // Show the default tab on load
     switchProfileTab(activeProfileTab);
 
+    // Load draft data if it exists
     const draftData = localStorage.getItem('profileDraft');
     if (draftData) {
         try {
