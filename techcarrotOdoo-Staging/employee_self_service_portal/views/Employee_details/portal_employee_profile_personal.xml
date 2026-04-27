@@ -6,7 +6,7 @@
 
                 <t t-set="all_countries" t-value="request.env['res.country'].sudo().search([], order='name')"/>
 
-                Success/Error Messages
+                <!-- Success/Error Messages -->
                 <div id="messageContainer" style="display: none;">
                     <div id="successMessage" class="alert alert-success alert-dismissible fade" role="alert"
                          style="display: none;">
@@ -1907,6 +1907,101 @@ function clearValidationStates() {
 
 /* ─── Show message INSIDE current tab (not above tabs) ──────── */
 function showTabMessage(tabKey, text, type) {
+    // Remove any existing tab message in this tab
+    document.querySelectorAll('.tab-message-box').forEach(el => el.remove());
+
+    // Find first card in active tab to insert before it
+    const firstCard = document.querySelector(
+        `.profile-tab-section[data-tab-group="${tabKey}"]`
+    );
+    if (!firstCard) return;
+
+    const alertClass = type === 'success' ? 'alert-success' :
+                       type === 'info'    ? 'alert-info' : 'alert-danger';
+    const icon = type === 'success' ? 'fa-check-circle' :
+                 type === 'info'    ? 'fa-info-circle' : 'fa-exclamation-triangle';
+
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `tab-message-box alert ${alertClass} alert-dismissible fade show mb-3`;
+    msgDiv.innerHTML = `
+        <i class="fa ${icon} me-2"></i>
+        <span>${text}</span>
+        <button type="button" class="btn-close" onclick="this.parentNode.remove()"></button>
+    `;
+
+    firstCard.parentNode.insertBefore(msgDiv, firstCard);
+    msgDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    // Auto dismiss after 5s
+    setTimeout(() => { if (msgDiv.parentNode) msgDiv.remove(); }, 5000);
+}
+
+/* ─── Form submit ───────────────────────────────────────────── */
+document.getElementById('personalDetailsForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    // Validate only fields in the CURRENT active tab
+    let isFormValid = true;
+    document.querySelectorAll(
+        `.profile-tab-section[data-tab-group="${activeProfileTab}"] input[data-validation],
+         .profile-tab-section[data-tab-group="${activeProfileTab}"] select[data-validation]`
+    ).forEach(input => {
+        if (!validateField({ target: input })) isFormValid = false;
+    });
+
+    updateTabErrorBadges();
+
+    if (!isFormValid) {
+        // Find first error field in current tab and scroll to it
+        const firstError = document.querySelector(
+            `.profile-tab-section[data-tab-group="${activeProfileTab}"] .is-invalid`
+        );
+        if (firstError) {
+            setTimeout(() => {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstError.focus();
+            }, 100);
+        }
+        showTabMessage(activeProfileTab, 'Please correct the highlighted errors in this tab.', 'error');
+        return;
+    }
+
+    // Temporarily enable selects/checkboxes for form submission
+    const toReenable = [];
+    document.querySelectorAll(
+        '#personalDetailsForm select[disabled], #personalDetailsForm input[type="checkbox"][disabled]'
+    ).forEach(el => {
+        if (!el.hasAttribute('data-always-readonly')) {
+            el.removeAttribute('disabled');
+            toReenable.push(el);
+        }
+    });
+
+    const formData = new FormData(this);
+    const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+
+    toReenable.forEach(el => el.setAttribute('disabled', 'disabled'));
+
+    fetch('/my/employee/personal', {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-CSRFToken': csrfToken }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showTabMessage(activeProfileTab, 'Profile updated successfully!', 'success');
+            disableEditMode();
+            localStorage.removeItem('profileDraft');
+        } else {
+            showTabMessage(activeProfileTab, 'Error: ' + (data.error || 'Unknown error'), 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showTabMessage(activeProfileTab, 'Network error. Please try again.', 'error');
+    });
+});
 
 /* ─── DOMContentLoaded ──────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', function() {
