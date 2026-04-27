@@ -1792,15 +1792,17 @@ class PortalEmployee(http.Controller):
                 if post.get('language_known_name') is not None:
                     vals['language_known_name'] = post.get('language_known_name', '').strip()
                 # Distance - only save if BOTH fields have valid values
-                distance_val = post.get('distance_home_work', '').strip()
-                if distance_val:
+                distance_raw = post.get('distance_home_work', '').strip()
+                if distance_raw and distance_raw not in ['km', 'mi', '']:
                     try:
-                        vals['distance_home_work'] = int(distance_val)
+                        vals['distance_home_work'] = int(distance_raw)
                     except (ValueError, TypeError):
-                        pass  # silently skip invalid value
+                        pass  # skip silently if not a valid integer
 
-                if post.get('km_home_work') and post.get('km_home_work') in ['km', 'mi']:
-                    vals['km_home_work'] = post.get('km_home_work')
+                # Unit - only km or mi allowed
+                km_val = post.get('km_home_work', '').strip()
+                if km_val in ['km', 'mi']:
+                    vals['km_home_work'] = km_val
 
 
 
