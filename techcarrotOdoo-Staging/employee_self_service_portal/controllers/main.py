@@ -1791,6 +1791,16 @@ class PortalEmployee(http.Controller):
                     vals['mother_tongue_name'] = post.get('mother_tongue_name')
                 if post.get('language_known_name') is not None:
                     vals['language_known_name'] = post.get('language_known_name', '').strip()
+                if post.get('distance_home_work'):
+                    try:
+                        vals['distance_home_work'] = int(post.get('distance_home_work'))
+                    except (ValueError, TypeError):
+                        pass
+
+                if post.get('km_home_work') and post.get('km_home_work') in ['km', 'mi']:
+                    vals['km_home_work'] = post.get('km_home_work')
+
+
 
                 # Selection field with validation
                 allowed_blood_groups = ['a_pos', 'a_neg', 'b_pos', 'b_neg', 'ab_pos', 'ab_neg', 'o_pos', 'o_neg',
