@@ -175,11 +175,14 @@
                                             data-always-readonly="1" readonly="readonly" disabled="">
                                         <option value="">Select Gender</option>
                                         <option value="male"
-                                                t-att-selected="'selected' if employee.sex == 'male' else None">Male</option>
+                                                t-att-selected="'selected' if employee.sex == 'male' else None">Male
+                                        </option>
                                         <option value="female"
-                                                t-att-selected="'selected' if employee.sex == 'female' else None">Female</option>
+                                                t-att-selected="'selected' if employee.sex == 'female' else None">Female
+                                        </option>
                                         <option value="other"
-                                                t-att-selected="'selected' if employee.sex == 'other' else None">Other</option>
+                                                t-att-selected="'selected' if employee.sex == 'other' else None">Other
+                                        </option>
                                     </select>
                                     <div class="invalid-feedback"></div>
                                 </div>
@@ -191,25 +194,6 @@
                                            t-att-value="employee.birthday"
                                            data-always-readonly="1" readonly="readonly"
                                            data-validation="date"/>
-                                    <div class="invalid-feedback"></div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">
-                                        <i class="fa fa-heart text-muted me-1"></i>Marital Status
-                                    </label>
-                                    <select name="marital" class="form-select" readonly="readonly">
-                                        <option value="">Select Status</option>
-                                        <option value="single"
-                                                t-att-selected="'selected' if employee.marital == 'single' else None">Single</option>
-                                        <option value="married"
-                                                t-att-selected="'selected' if employee.marital == 'married' else None">Married</option>
-                                        <option value="cohabitant"
-                                                t-att-selected="'selected' if employee.marital == 'cohabitant' else None">Legal Cohabitant</option>
-                                        <option value="widower"
-                                                t-att-selected="'selected' if employee.marital == 'widower' else None">Widower</option>
-                                        <option value="divorced"
-                                                t-att-selected="'selected' if employee.marital == 'divorced' else None">Divorced</option>
-                                    </select>
                                     <div class="invalid-feedback"></div>
                                 </div>
                             </div>
@@ -1030,7 +1014,8 @@
                     <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="family">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
-                                <i class="fa fa-ambulance text-primary me-2"></i>Emergency Contact Person Address Inside UAE
+                                <i class="fa fa-ambulance text-primary me-2"></i>Emergency Contact Person Address Inside
+                                UAE
                             </h5>
                         </div>
                         <div class="card-body">
@@ -1192,11 +1177,17 @@
                                     <select name="dependent_child_gender_1" class="form-select" disabled="disabled">
                                         <option value="">Select Gender</option>
                                         <option value="male"
-                                                t-att-selected="'selected' if employee.dependent_child_gender_1 == 'male' else None">Male</option>
+                                                t-att-selected="'selected' if employee.dependent_child_gender_1 == 'male' else None">
+                                            Male
+                                        </option>
                                         <option value="female"
-                                                t-att-selected="'selected' if employee.dependent_child_gender_1 == 'female' else None">Female</option>
+                                                t-att-selected="'selected' if employee.dependent_child_gender_1 == 'female' else None">
+                                            Female
+                                        </option>
                                         <option value="other"
-                                                t-att-selected="'selected' if employee.dependent_child_gender_1 == 'other' else None">Other</option>
+                                                t-att-selected="'selected' if employee.dependent_child_gender_1 == 'other' else None">
+                                            Other
+                                        </option>
                                     </select>
                                 </div>
                                 <div class="col-md-6">
@@ -1213,7 +1204,8 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Child 1 Passport Expiry Date</label>
-                                    <input type="date" name="dependent_child_passport_expiry_date_1" class="form-control"
+                                    <input type="date" name="dependent_child_passport_expiry_date_1"
+                                           class="form-control"
                                            t-att-value="employee.dependent_child_passport_expiry_date_1 or ''"
                                            readonly="readonly"/>
                                 </div>
@@ -1238,7 +1230,8 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Child 1 Visa Expiration Date</label>
-                                    <input type="date" name="dependent_child_visa_expiration_date_1" class="form-control"
+                                    <input type="date" name="dependent_child_visa_expiration_date_1"
+                                           class="form-control"
                                            t-att-value="employee.dependent_child_visa_expiration_date_1 or ''"
                                            readonly="readonly"/>
                                 </div>
@@ -1250,13 +1243,15 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Child 1 Emirates ID Issue Date</label>
-                                    <input type="date" name="dependent_child_emirates_id_issue_date_1" class="form-control"
+                                    <input type="date" name="dependent_child_emirates_id_issue_date_1"
+                                           class="form-control"
                                            t-att-value="employee.dependent_child_emirates_id_issue_date_1 or ''"
                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Child 1 Emirates ID Expiry Date</label>
-                                    <input type="date" name="dependent_child_emirates_id_expiry_date_1" class="form-control"
+                                    <input type="date" name="dependent_child_emirates_id_expiry_date_1"
+                                           class="form-control"
                                            t-att-value="employee.dependent_child_emirates_id_expiry_date_1 or ''"
                                            readonly="readonly"/>
                                 </div>
@@ -1270,15 +1265,83 @@
                         </div>
                     </div>
 
-                    <!-- Father, Mother and Dependent Info -->
+                    <!-- Family -->
                     <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="family">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
-                                <i class="fa fa-users text-primary me-2"></i>Father, Mother and Dependent Info
+                                <i class="fa fa-users text-primary me-2"></i>Family
                             </h5>
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Disabled</label>
+                                    <input class="form-control"
+                                           t-att-value="'Yes' if employee.disabled else 'No'"
+                                           data-always-readonly="1" readonly="readonly"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Dependent Children</label>
+                                    <input name="children" class="form-control"
+                                           t-att-value="employee.children or ''"
+                                           readonly="readonly"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">
+                                        <i class="fa fa-heart text-muted me-1"></i>Marital Status
+                                    </label>
+                                    <select name="marital" class="form-select"
+                                            data-always-readonly="1" disabled="disabled">
+                                        <option value="">Select Status</option>
+                                        <option value="single"
+                                                t-att-selected="'selected' if employee.marital == 'single' else None">
+                                            Single
+                                        </option>
+                                        <option value="married"
+                                                t-att-selected="'selected' if employee.marital == 'married' else None">
+                                            Married
+                                        </option>
+                                        <option value="cohabitant"
+                                                t-att-selected="'selected' if employee.marital == 'cohabitant' else None">
+                                            Legal Cohabitant
+                                        </option>
+                                        <option value="widower"
+                                                t-att-selected="'selected' if employee.marital == 'widower' else None">
+                                            Widower
+                                        </option>
+                                        <option value="divorced"
+                                                t-att-selected="'selected' if employee.marital == 'divorced' else None">
+                                            Divorced
+                                        </option>
+                                    </select>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Certificate</label>
+                                    <select name="certificate" class="form-select" disabled="disabled">
+                                        <option value="">Select Certificate</option>
+                                        <option value="graduate"
+                                                t-att-selected="'selected' if employee.certificate == 'graduate' else None">
+                                            Graduate
+                                        </option>
+                                        <option value="bachelor"
+                                                t-att-selected="'selected' if employee.certificate == 'bachelor' else None">
+                                            Bachelor
+                                        </option>
+                                        <option value="master"
+                                                t-att-selected="'selected' if employee.certificate == 'master' else None">
+                                            Master
+                                        </option>
+                                        <option value="doctor"
+                                                t-att-selected="'selected' if employee.certificate == 'doctor' else None">
+                                            Doctor
+                                        </option>
+                                        <option value="other"
+                                                t-att-selected="'selected' if employee.certificate == 'other' else None">
+                                            Other
+                                        </option>
+                                    </select>
+                                </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Father Name</label>
                                     <input type="text" name="father_name" class="form-control"
@@ -1326,34 +1389,6 @@
                                     <input type="text" name="dependent_status_1" class="form-control"
                                            t-att-value="employee.dependent_status_1 or ''"
                                            data-always-readonly="1" readonly="readonly"/>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Disabled</label>
-                                    <input class="form-control"
-                                           t-att-value="'Yes' if employee.disabled else 'No'"
-                                           data-always-readonly="1" readonly="readonly"/>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Children</label>
-                                    <input name="children" class="form-control"
-                                           t-att-value="employee.children or ''"
-                                           readonly="readonly"/>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Certificate</label>
-                                    <select name="certificate" class="form-select" disabled="disabled">
-                                        <option value="">Select Certificate</option>
-                                        <option value="graduate"
-                                                t-att-selected="'selected' if employee.certificate == 'graduate' else None">Graduate</option>
-                                        <option value="bachelor"
-                                                t-att-selected="'selected' if employee.certificate == 'bachelor' else None">Bachelor</option>
-                                        <option value="master"
-                                                t-att-selected="'selected' if employee.certificate == 'master' else None">Master</option>
-                                        <option value="doctor"
-                                                t-att-selected="'selected' if employee.certificate == 'doctor' else None">Doctor</option>
-                                        <option value="other"
-                                                t-att-selected="'selected' if employee.certificate == 'other' else None">Other</option>
-                                    </select>
                                 </div>
                             </div>
                         </div>
