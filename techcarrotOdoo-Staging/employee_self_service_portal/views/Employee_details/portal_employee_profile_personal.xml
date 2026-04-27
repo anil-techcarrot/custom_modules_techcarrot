@@ -1169,6 +1169,7 @@
                                     <label class="form-label fw-bold">Passport Expiry Date</label>
                                     <input type="date" name="spouse_passport_expiry_date" class="form-control"
                                            t-att-value="employee.spouse_passport_expiry_date.strftime('%Y-%m-%d') if employee.spouse_passport_expiry_date else ''"
+                                           data-validation="future-date"
                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
@@ -1187,6 +1188,7 @@
                                     <label class="form-label fw-bold">Visa Expiration Date</label>
                                     <input type="date" name="spouse_visa_expire_date" class="form-control"
                                            t-att-value="employee.spouse_visa_expire_date.strftime('%Y-%m-%d') if employee.spouse_visa_expire_date else ''"
+                                           data-validation="future-date"
                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
@@ -1205,6 +1207,7 @@
                                     <label class="form-label fw-bold">Emirates ID Expiry Date</label>
                                     <input type="date" name="spouse_emirates_id_expiry_date" class="form-control"
                                            t-att-value="employee.spouse_emirates_id_expiry_date.strftime('%Y-%m-%d') if employee.spouse_emirates_id_expiry_date else ''"
+                                           data-validation="future-date"
                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
@@ -1273,6 +1276,7 @@
                                     <input type="date" name="dependent_child_passport_expiry_date_1"
                                            class="form-control"
                                            t-att-value="employee.dependent_child_passport_expiry_date_1 or ''"
+                                           data-validation="future-date"
                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
@@ -1299,6 +1303,7 @@
                                     <input type="date" name="dependent_child_visa_expiration_date_1"
                                            class="form-control"
                                            t-att-value="employee.dependent_child_visa_expiration_date_1 or ''"
+                                           data-validation="future-date"
                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
@@ -1319,6 +1324,7 @@
                                     <input type="date" name="dependent_child_emirates_id_expiry_date_1"
                                            class="form-control"
                                            t-att-value="employee.dependent_child_emirates_id_expiry_date_1 or ''"
+                                           data-validation="future-date"
                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
