@@ -6,21 +6,21 @@
 
                 <t t-set="all_countries" t-value="request.env['res.country'].sudo().search([], order='name')"/>
 
-                <!-- Success/Error Messages -->
-<!--                <div id="messageContainer" style="display: none;">-->
-<!--                    <div id="successMessage" class="alert alert-success alert-dismissible fade" role="alert"-->
-<!--                         style="display: none;">-->
-<!--                        <i class="fa fa-check-circle me-2"></i>-->
-<!--                        <span id="successText"></span>-->
-<!--                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>-->
-<!--                    </div>-->
-<!--                    <div id="errorMessage" class="alert alert-danger alert-dismissible fade" role="alert"-->
-<!--                         style="display: none;">-->
-<!--                        <i class="fa fa-exclamation-triangle me-2"></i>-->
-<!--                        <span id="errorText"></span>-->
-<!--                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>-->
-<!--                    </div>-->
-<!--                </div>-->
+                Success/Error Messages
+                <div id="messageContainer" style="display: none;">
+                    <div id="successMessage" class="alert alert-success alert-dismissible fade" role="alert"
+                         style="display: none;">
+                        <i class="fa fa-check-circle me-2"></i>
+                        <span id="successText"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    <div id="errorMessage" class="alert alert-danger alert-dismissible fade" role="alert"
+                         style="display: none;">
+                        <i class="fa fa-exclamation-triangle me-2"></i>
+                        <span id="errorText"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                </div>
 
                 <!-- ===== MAIN FORM ===== -->
                 <form id="personalDetailsForm" action="/my/employee/personal" method="post"
