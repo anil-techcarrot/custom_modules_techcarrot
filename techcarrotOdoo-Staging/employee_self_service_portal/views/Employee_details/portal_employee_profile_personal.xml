@@ -412,107 +412,99 @@
                     </div>
 
                     <!-- Contact Information -->
+                    <!-- Contact Information -->
                     <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="basic">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0">
-                            <i class="fa fa-address-book text-primary me-2"></i>Contact Information
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">
-                                    <i class="fa fa-envelope text-muted me-1"></i>Personal Email
-                                </label>
-                                <input type="email" name="private_email" class="form-control"
-                                       t-att-value="employee.private_email"
-                                       readonly="readonly" data-validation="email"/>
-                                <div class="invalid-feedback"></div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">
-                                    <i class="fa fa-phone text-muted me-1"></i>Personal Phone
-                                </label>
-                                <input type="tel" name="private_phone" class="form-control"
-                                       t-att-value="employee.private_phone"
-                                       readonly="readonly"
-                                       pattern="[+]?[0-9\s\-\(\)]*" data-validation="phone"/>
-                                <div class="invalid-feedback"></div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">WhatsApp</label>
-                                <input type="text" name="whatsapp" class="form-control"
-                                       t-att-value="employee.whatsapp or ''"
-                                       readonly="readonly"/>
-                            </div>
-                            <!--                                <div class="col-md-6">-->
-                            <!--                                    <label class="form-label fw-bold">LinkedIn</label>-->
-                            <!--                                    <input type="text" name="linkedin" class="form-control"-->
-                            <!--                                           t-att-value="employee.linkedin or ''"-->
-                            <!--                                           readonly="readonly"/>-->
-                            <!--                                </div>-->
-                            <div class="col-md-12">
-                                <label class="form-label fw-bold">
-                                    <i class="fa fa-map-marker text-muted me-1"></i>Address Line 1
-                                </label>
-                                <input type="text" name="private_street" class="form-control"
-                                       t-att-value="employee.private_street"
-                                       readonly="readonly"/>
-                                <div class="invalid-feedback"></div>
-                            </div>
-                            <div class="col-md-12">
-                                <label class="form-label fw-bold">
-                                    <i class="fa fa-map-marker text-muted me-1"></i>Address Line 2
-                                </label>
-                                <input type="text" name="private_street2" class="form-control"
-                                       t-att-value="employee.private_street2"
-                                       readonly="readonly"/>
-                                <div class="invalid-feedback"></div>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">City</label>
-                                <input type="text" name="private_city" class="form-control"
-                                       t-att-value="employee.private_city"
-                                       readonly="readonly"/>
-                                <div class="invalid-feedback"></div>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">State/Province</label>
-                                <input type="text" name="private_state_id" class="form-control"
-                                       t-att-value="employee.private_state_id.name"
-                                       readonly="readonly"/>
-                                <div class="invalid-feedback"></div>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">ZIP/Postal Code</label>
-                                <input type="text" name="private_zip" class="form-control"
-                                       t-att-value="employee.private_zip"
-                                       readonly="readonly"/>
-                                <div class="invalid-feedback"></div>
-
-<!--                                <div class="col-md-4">-->
-<!--                                    <label class="form-label fw-bold">Home-Work Distance</label>-->
-<!--                                    <div class="input-group">-->
-<!--                                        <input type="number" name="distance_home_work" class="form-control"-->
-<!--                                               t-att-value="employee.distance_home_work or ''"-->
-<!--                                               readonly="readonly"-->
-<!--                                               min="0"-->
-<!--                                               placeholder="0"/>-->
-<!--                                        <select name="km_home_work" class="form-select" style="max-width: 80px;"-->
-<!--                                                disabled="disabled">-->
-<!--                                            <option value="km"-->
-<!--                                                    t-att-selected="'selected' if employee.km_home_work == 'km' else None">-->
-<!--                                                km-->
-<!--                                            </option>-->
-<!--                                            <option value="mi"-->
-<!--                                                    t-att-selected="'selected' if employee.km_home_work == 'mi' else None">-->
-<!--                                                mi-->
-<!--                                            </option>-->
-<!--                                        </select>-->
-<!--                                    </div>-->
-<!--                                    <div class="invalid-feedback"></div>-->
-<!--                                </div>-->
-
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">
+                                <i class="fa fa-address-book text-primary me-2"></i>Contact Information
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">
+                                        <i class="fa fa-envelope text-muted me-1"></i>Personal Email
+                                    </label>
+                                    <input type="email" name="private_email" class="form-control"
+                                           t-att-value="employee.private_email"
+                                           readonly="readonly" data-validation="email"/>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">
+                                        <i class="fa fa-phone text-muted me-1"></i>Personal Phone
+                                    </label>
+                                    <input type="tel" name="private_phone" class="form-control"
+                                           t-att-value="employee.private_phone"
+                                           readonly="readonly"
+                                           pattern="[+]?[0-9\s\-\(\)]*" data-validation="phone"/>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">WhatsApp</label>
+                                    <input type="text" name="whatsapp" class="form-control"
+                                           t-att-value="employee.whatsapp or ''"
+                                           readonly="readonly"/>
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label fw-bold">
+                                        <i class="fa fa-map-marker text-muted me-1"></i>Address Line 1
+                                    </label>
+                                    <input type="text" name="private_street" class="form-control"
+                                           t-att-value="employee.private_street"
+                                           readonly="readonly"/>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label fw-bold">
+                                        <i class="fa fa-map-marker text-muted me-1"></i>Address Line 2
+                                    </label>
+                                    <input type="text" name="private_street2" class="form-control"
+                                           t-att-value="employee.private_street2"
+                                           readonly="readonly"/>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold">City</label>
+                                    <input type="text" name="private_city" class="form-control"
+                                           t-att-value="employee.private_city"
+                                           readonly="readonly"/>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold">State/Province</label>
+                                    <input type="text" name="private_state_id" class="form-control"
+                                           t-att-value="employee.private_state_id.name"
+                                           readonly="readonly"/>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold">ZIP/Postal Code</label>
+                                    <input type="text" name="private_zip" class="form-control"
+                                           t-att-value="employee.private_zip"
+                                           readonly="readonly"/>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold">Home-Work Distance</label>
+                                    <div class="input-group">
+                                        <input type="number" name="distance_home_work" class="form-control"
+                                               t-att-value="employee.distance_home_work or ''"
+                                               readonly="readonly" min="0" placeholder="0"/>
+                                        <select name="km_home_work" class="form-select" style="max-width: 80px;"
+                                                disabled="disabled">
+                                            <option value="km"
+                                                    t-att-selected="'selected' if employee.km_home_work == 'km' else None">
+                                                km
+                                            </option>
+                                            <option value="mi"
+                                                    t-att-selected="'selected' if employee.km_home_work == 'mi' else None">
+                                                mi
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="invalid-feedback"></div>
+                                </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Bank Accounts</label>
                                     <input type="text" class="form-control"
@@ -524,21 +516,21 @@
                     </div>
 
                     <!-- Social Media -->
+                    <!-- Social Media -->
                     <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="basic">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
                                 <i class="fa fa-share-alt text-primary me-2"></i>Social Media Details
                             </h5>
                         </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">LinkedIn</label>
-                            <input type="text" name="linkedin" class="form-control"
-                                   t-att-value="employee.linkedin or ''"
-                                   readonly="readonly"/>
-                        </div>
                         <div class="card-body">
                             <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">LinkedIn</label>
+                                    <input type="text" name="linkedin" class="form-control"
+                                           t-att-value="employee.linkedin or ''"
+                                           readonly="readonly"/>
+                                </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Facebook Profile</label>
                                     <input type="text" name="facebook_profile" class="form-control"
@@ -1740,7 +1732,10 @@ function enableEditMode() {
     document.getElementById('formActions').style.display = 'block';
     document.getElementById('viewActions').style.display = 'none';
 
+    // Attach validation listeners
     document.querySelectorAll('#personalDetailsForm input, #personalDetailsForm select').forEach(input => {
+        input.removeEventListener('input', validateField);
+        input.removeEventListener('blur', validateField);
         input.addEventListener('input', validateField);
         input.addEventListener('blur', validateField);
     });
@@ -1808,60 +1803,113 @@ function saveAsDraft() {
     showMessage('Profile saved as draft.', 'info');
 }
 
-/* ─── Field validation ──────────────────────────────────────── */
+/* ─── Field validation with inline error + tab badge ───────── */
 function validateField(event) {
     const field = event.target;
     const validationType = field.getAttribute('data-validation');
     let isValid = true;
     let errorMessage = '';
+
     field.classList.remove('is-valid', 'is-invalid');
-    if (validationType) {
+
+    // Clear previous inline error message
+    const feedback = field.parentNode.querySelector('.invalid-feedback');
+    if (feedback) {
+        feedback.textContent = '';
+        feedback.style.display = 'none';
+    }
+
+    if (validationType && field.value) {
         switch (validationType) {
             case 'email':
-                if (field.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(field.value)) {
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(field.value)) {
                     isValid = false;
                     errorMessage = 'Please enter a valid email address.';
                 }
                 break;
             case 'phone':
-                if (field.value && !/^[+]?[0-9\s\-\(\)]+$/.test(field.value)) {
+                if (!/^[+]?[0-9\s\-\(\)]+$/.test(field.value)) {
                     isValid = false;
                     errorMessage = 'Please enter a valid phone number.';
                 }
                 break;
             case 'required':
-                if (!field.value || field.value.trim() === '') {
+                if (!field.value.trim()) {
                     isValid = false;
                     errorMessage = 'This field is required.';
                 }
                 break;
             case 'date':
-                if (field.value && isNaN(new Date(field.value).getTime())) {
+                if (isNaN(new Date(field.value).getTime())) {
                     isValid = false;
                     errorMessage = 'Please enter a valid date.';
                 }
                 break;
             case 'future-date':
-                if (field.value && new Date(field.value) <= new Date()) {
+                if (new Date(field.value) <= new Date()) {
                     isValid = false;
-                    errorMessage = 'Date must be in the future.';
+                    errorMessage = 'Expiry date must be in the future.';
                 }
                 break;
         }
     }
+
+    // Apply valid/invalid class and show message
     if (field.value) {
         field.classList.add(isValid ? 'is-valid' : 'is-invalid');
-        if (!isValid) {
-            const feedback = field.parentNode.querySelector('.invalid-feedback');
-            if (feedback) feedback.textContent = errorMessage;
+        if (!isValid && feedback) {
+            feedback.textContent = errorMessage;
+            feedback.style.display = 'block';
+        } else if (!isValid && !feedback) {
+            // Inject feedback div if missing
+            const errDiv = document.createElement('div');
+            errDiv.className = 'invalid-feedback';
+            errDiv.style.display = 'block';
+            errDiv.textContent = errorMessage;
+            field.parentNode.appendChild(errDiv);
         }
     }
+
+    // Update tab error badges after each field validation
+    updateTabErrorBadges();
     return isValid;
 }
 
+/* ─── Count errors per tab, show red badge on tab button ────── */
+function updateTabErrorBadges() {
+    const tabGroups = ['basic', 'professional', 'family', 'education', 'documents'];
+    tabGroups.forEach(tabKey => {
+        const tabBtn = document.querySelector(`.profile-tab-button[data-tab-target="${tabKey}"]`);
+        if (!tabBtn) return;
+
+        // Count invalid fields in this tab
+        const errorCount = document.querySelectorAll(
+            `.profile-tab-section[data-tab-group="${tabKey}"] .is-invalid`
+        ).length;
+
+        // Remove existing badge
+        const existingBadge = tabBtn.querySelector('.tab-error-badge');
+        if (existingBadge) existingBadge.remove();
+
+        // Add new badge if errors exist
+        if (errorCount > 0) {
+            const badge = document.createElement('span');
+            badge.className = 'tab-error-badge badge bg-danger ms-1';
+            badge.textContent = errorCount;
+            tabBtn.appendChild(badge);
+        }
+    });
+}
+
+/* ─── Clear all validation states ───────────────────────────── */
 function clearValidationStates() {
     document.querySelectorAll('#personalDetailsForm input, #personalDetailsForm select')
         .forEach(input => input.classList.remove('is-valid', 'is-invalid'));
+    document.querySelectorAll('#personalDetailsForm .invalid-feedback').forEach(el => {
+        el.textContent = '';
+        el.style.display = 'none';
+    });
+    document.querySelectorAll('.tab-error-badge').forEach(b => b.remove());
 }
 
 /* ─── Messages ──────────────────────────────────────────────── */
@@ -1869,6 +1917,7 @@ function showMessage(text, type) {
     const container = document.getElementById('messageContainer');
     const successMsg = document.getElementById('successMessage');
     const errorMsg = document.getElementById('errorMessage');
+
     successMsg.style.display = 'none';
     errorMsg.style.display = 'none';
     successMsg.classList.remove('show');
@@ -1895,24 +1944,47 @@ function showMessage(text, type) {
 document.getElementById('personalDetailsForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
+    // Validate ALL fields with data-validation across ALL tabs
     let isFormValid = true;
-    document.querySelectorAll('#personalDetailsForm input[data-validation], #personalDetailsForm select[data-validation]')
-        .forEach(input => { if (!validateField({ target: input })) isFormValid = false; });
+    document.querySelectorAll(
+        '#personalDetailsForm input[data-validation], #personalDetailsForm select[data-validation]'
+    ).forEach(input => {
+        if (!validateField({ target: input })) isFormValid = false;
+    });
+
+    // Update tab badges after full validation
+    updateTabErrorBadges();
 
     if (!isFormValid) {
-        showMessage('Please correct the errors in the form before submitting.', 'error');
+        // Auto-switch to the FIRST tab that has an error
+        const tabGroups = ['basic', 'professional', 'family', 'education', 'documents'];
+        for (const tabKey of tabGroups) {
+            const firstError = document.querySelector(
+                `.profile-tab-section[data-tab-group="${tabKey}"] .is-invalid`
+            );
+            if (firstError) {
+                switchProfileTab(tabKey);
+                setTimeout(() => {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstError.focus();
+                }, 150);
+                break;
+            }
+        }
+        showMessage('Please correct the highlighted errors before submitting.', 'error');
         return;
     }
 
-    // Temporarily enable non-always-readonly selects/checkboxes so they are submitted
+    // Temporarily enable non-always-readonly selects/checkboxes so they submit
     const toReenable = [];
-    document.querySelectorAll('#personalDetailsForm select[disabled], #personalDetailsForm input[type="checkbox"][disabled]')
-        .forEach(el => {
-            if (!el.hasAttribute('data-always-readonly')) {
-                el.removeAttribute('disabled');
-                toReenable.push(el);
-            }
-        });
+    document.querySelectorAll(
+        '#personalDetailsForm select[disabled], #personalDetailsForm input[type="checkbox"][disabled]'
+    ).forEach(el => {
+        if (!el.hasAttribute('data-always-readonly')) {
+            el.removeAttribute('disabled');
+            toReenable.push(el);
+        }
+    });
 
     const formData = new FormData(this);
     const csrfToken = document.querySelector('input[name="csrf_token"]').value;
@@ -1932,7 +2004,7 @@ document.getElementById('personalDetailsForm').addEventListener('submit', functi
             disableEditMode();
             localStorage.removeItem('profileDraft');
         } else {
-            showMessage('Error updating profile: ' + (data.error || 'Unknown error'), 'error');
+            showMessage('Error: ' + (data.error || 'Unknown error'), 'error');
         }
     })
     .catch(error => {
@@ -1988,18 +2060,54 @@ document.addEventListener('DOMContentLoaded', function() {
     color: #0d6efd;
 }
 
-.form-control:focus,
-.form-select:focus {
-    border-color: #80bdff;
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+/* ── Tab error badge ── */
+.tab-error-badge {
+    font-size: 0.65rem;
+    border-radius: 50%;
+    padding: 2px 6px;
+    vertical-align: middle;
+    animation: badgePop 0.2s ease;
+}
+
+@keyframes badgePop {
+    0%   { transform: scale(0); }
+    80%  { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* ── Invalid field shake + red border ── */
+.form-control.is-invalid,
+.form-select.is-invalid {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.2) !important;
+    animation: shake 0.35s ease;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%       { transform: translateX(-5px); }
+    40%       { transform: translateX(5px); }
+    60%       { transform: translateX(-3px); }
+    80%       { transform: translateX(3px); }
 }
 
 .form-control.is-valid {
     border-color: #198754;
 }
 
-.form-control.is-invalid {
-    border-color: #dc3545;
+/* ── Inline error message always visible when field invalid ── */
+.is-invalid ~ .invalid-feedback,
+.form-select.is-invalid ~ .invalid-feedback {
+    display: block !important;
+    color: #dc3545;
+    font-size: 0.8rem;
+    margin-top: 3px;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
 }
 
 .card {
