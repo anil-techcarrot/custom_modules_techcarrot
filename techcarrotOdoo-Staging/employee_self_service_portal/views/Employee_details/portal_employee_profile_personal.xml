@@ -79,6 +79,7 @@
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
+                                <!-- NAME FIELDS: text only, always-readonly -->
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">Employee First Name</label>
                                     <input type="text" name="employee_first_name" class="form-control"
@@ -139,6 +140,7 @@
                                            t-att-value="employee.nationality_at_birth_id.name or ''"
                                            data-always-readonly="1" readonly="readonly"/>
                                 </div>
+                                <!-- WORK EMAIL: email validation -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-envelope text-muted me-1"></i>Work Email
@@ -150,6 +152,7 @@
                                            data-validation="email"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
+                                <!-- WORK PHONE: digits + optional + only -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-phone text-muted me-1"></i>Work Phone
@@ -157,9 +160,9 @@
                                     <input type="tel" name="work_phone" class="form-control"
                                            t-att-value="employee.work_phone"
                                            readonly="readonly"
-                                           pattern="[+]?[0-9\s\-\(\)]*"
                                            data-validation="phone"/>
                                     <div class="invalid-feedback"></div>
+                                    <small class="text-muted">Digits only, optional leading + for country code</small>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Nationality</label>
@@ -186,6 +189,7 @@
                                     </select>
                                     <div class="invalid-feedback"></div>
                                 </div>
+                                <!-- DATE OF BIRTH: past date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-calendar text-muted me-1"></i>Date of Birth
@@ -193,7 +197,7 @@
                                     <input type="date" name="birthday" class="form-control"
                                            t-att-value="employee.birthday"
                                            data-always-readonly="1" readonly="readonly"
-                                           data-validation="date"/>
+                                           data-validation="past-date"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
                             </div>
@@ -232,41 +236,23 @@
                                     <select name="blood_group" class="form-select" disabled="disabled">
                                         <option value="">-- Select Blood Group --</option>
                                         <option value="a_pos"
-                                                t-att-selected="'selected' if employee.blood_group == 'a_pos' else None">
-                                            A+
-                                        </option>
+                                                t-att-selected="'selected' if employee.blood_group == 'a_pos' else None">A+</option>
                                         <option value="a_neg"
-                                                t-att-selected="'selected' if employee.blood_group == 'a_neg' else None">
-                                            A-
-                                        </option>
+                                                t-att-selected="'selected' if employee.blood_group == 'a_neg' else None">A-</option>
                                         <option value="b_pos"
-                                                t-att-selected="'selected' if employee.blood_group == 'b_pos' else None">
-                                            B+
-                                        </option>
+                                                t-att-selected="'selected' if employee.blood_group == 'b_pos' else None">B+</option>
                                         <option value="b_neg"
-                                                t-att-selected="'selected' if employee.blood_group == 'b_neg' else None">
-                                            B-
-                                        </option>
+                                                t-att-selected="'selected' if employee.blood_group == 'b_neg' else None">B-</option>
                                         <option value="ab_pos"
-                                                t-att-selected="'selected' if employee.blood_group == 'ab_pos' else None">
-                                            AB+
-                                        </option>
+                                                t-att-selected="'selected' if employee.blood_group == 'ab_pos' else None">AB+</option>
                                         <option value="ab_neg"
-                                                t-att-selected="'selected' if employee.blood_group == 'ab_neg' else None">
-                                            AB-
-                                        </option>
+                                                t-att-selected="'selected' if employee.blood_group == 'ab_neg' else None">AB-</option>
                                         <option value="o_pos"
-                                                t-att-selected="'selected' if employee.blood_group == 'o_pos' else None">
-                                            O+
-                                        </option>
+                                                t-att-selected="'selected' if employee.blood_group == 'o_pos' else None">O+</option>
                                         <option value="o_neg"
-                                                t-att-selected="'selected' if employee.blood_group == 'o_neg' else None">
-                                            O-
-                                        </option>
+                                                t-att-selected="'selected' if employee.blood_group == 'o_neg' else None">O-</option>
                                         <option value="unknown"
-                                                t-att-selected="'selected' if employee.blood_group == 'unknown' else None">
-                                            Unknown
-                                        </option>
+                                                t-att-selected="'selected' if employee.blood_group == 'unknown' else None">Unknown</option>
                                     </select>
                                 </div>
                                 <div class="col-md-6">
@@ -288,6 +274,7 @@
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
+                                <!-- EMIRATES ID: digits-and-dashes format only -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-id-badge text-muted me-1"></i>Emirates ID
@@ -295,10 +282,11 @@
                                     <input type="text" name="emirates_id_number" class="form-control"
                                            t-att-value="employee.emirates_id_number"
                                            data-always-readonly="1" readonly="readonly"
-                                           pattern="[0-9]{3}-[0-9]{4}-[0-9]{7}-[0-9]{1}"/>
+                                           data-validation="emirates-id"/>
                                     <div class="invalid-feedback"></div>
                                     <small class="text-muted">Format: 784-1234-1234567-1</small>
                                 </div>
+                                <!-- EMIRATES EXPIRY: must be future date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-calendar-times text-muted me-1"></i>Emirates ID Expiry
@@ -309,14 +297,17 @@
                                            data-validation="future-date"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
+                                <!-- PASSPORT NUMBER: alphanumeric, no spaces -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-passport text-muted me-1"></i>Passport Number
                                     </label>
                                     <input type="text" name="passport_id" class="form-control"
                                            t-att-value="employee.passport_id"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                           data-always-readonly="1" readonly="readonly"
+                                           data-validation="alphanumeric"/>
                                     <div class="invalid-feedback"></div>
+                                    <small class="text-muted">Letters and digits only, no spaces</small>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
@@ -327,35 +318,47 @@
                                            data-always-readonly="1" readonly="readonly"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
+                                <!-- PASSPORT ISSUE DATE: must be past -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-calendar text-muted me-1"></i>Passport Issue Date
                                     </label>
                                     <input type="date" name="issue_date" class="form-control"
                                            t-att-value="employee.issue_date"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                           data-always-readonly="1" readonly="readonly"
+                                           data-validation="past-date"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
+                                <!-- PASSPORT EXPIRY: must be future -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-calendar-times text-muted me-1"></i>Passport Expiry Date
                                     </label>
                                     <input type="date" name="expiry_date" class="form-control"
                                            t-att-value="employee.expiry_date.strftime('%Y-%m-%d') if employee.expiry_date else ''"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                           data-always-readonly="1" readonly="readonly"
+                                           data-validation="future-date"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
+                                <!-- IDENTIFICATION NO: alphanumeric -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Identification No</label>
                                     <input name="identification_id" class="form-control"
                                            t-att-value="employee.identification_id or ''"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                           data-always-readonly="1" readonly="readonly"
+                                           data-validation="alphanumeric"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">Letters and digits only</small>
                                 </div>
+                                <!-- SSN: digits only -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">SSN No</label>
                                     <input name="ssnid" class="form-control"
                                            t-att-value="employee.ssnid or ''"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                           data-always-readonly="1" readonly="readonly"
+                                           data-validation="digits-only"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">Digits only</small>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Non Resident</label>
@@ -383,17 +386,25 @@
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
+                                <!-- VISA NO: alphanumeric -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Visa No</label>
                                     <input name="visa_no" class="form-control"
                                            t-att-value="employee.visa_no or ''"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                           data-always-readonly="1" readonly="readonly"
+                                           data-validation="alphanumeric"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">Letters and digits only</small>
                                 </div>
+                                <!-- PERMIT NO: alphanumeric -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Work Permit No</label>
                                     <input name="permit_no" class="form-control"
                                            t-att-value="employee.permit_no or ''"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                           data-always-readonly="1" readonly="readonly"
+                                           data-validation="alphanumeric"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">Letters and digits only</small>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Work Permit File</label>
@@ -412,7 +423,6 @@
                     </div>
 
                     <!-- Contact Information -->
-                    <!-- Contact Information -->
                     <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="basic">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
@@ -421,15 +431,18 @@
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
+                                <!-- PERSONAL EMAIL -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-envelope text-muted me-1"></i>Personal Email
                                     </label>
                                     <input type="email" name="private_email" class="form-control"
                                            t-att-value="employee.private_email"
-                                           readonly="readonly" data-validation="email"/>
+                                           readonly="readonly"
+                                           data-validation="email"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
+                                <!-- PERSONAL PHONE: digits only + optional + -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-phone text-muted me-1"></i>Personal Phone
@@ -437,14 +450,19 @@
                                     <input type="tel" name="private_phone" class="form-control"
                                            t-att-value="employee.private_phone"
                                            readonly="readonly"
-                                           pattern="[+]?[0-9\s\-\(\)]*" data-validation="phone"/>
+                                           data-validation="phone"/>
                                     <div class="invalid-feedback"></div>
+                                    <small class="text-muted">Digits only, optional leading + for country code</small>
                                 </div>
+                                <!-- WHATSAPP: digits only + optional + -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">WhatsApp</label>
                                     <input type="text" name="whatsapp" class="form-control"
                                            t-att-value="employee.whatsapp or ''"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="phone"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">Digits only, optional leading + for country code</small>
                                 </div>
                                 <div class="col-md-12">
                                     <label class="form-label fw-bold">
@@ -478,33 +496,16 @@
                                            readonly="readonly"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
+                                <!-- ZIP: digits only -->
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">ZIP/Postal Code</label>
                                     <input type="text" name="private_zip" class="form-control"
                                            t-att-value="employee.private_zip"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="digits-only"/>
                                     <div class="invalid-feedback"></div>
+                                    <small class="text-muted">Digits only</small>
                                 </div>
-                                <!--                                <div class="col-md-4">-->
-                                <!--                                    <label class="form-label fw-bold">Home-Work Distance</label>-->
-                                <!--                                    <div class="input-group">-->
-                                <!--                                        <input type="number" name="distance_home_work" class="form-control"-->
-                                <!--                                               t-att-value="employee.distance_home_work or ''"-->
-                                <!--                                               readonly="readonly" min="0" placeholder="0"/>-->
-                                <!--                                        <select name="km_home_work" class="form-select" style="max-width: 80px;"-->
-                                <!--                                                disabled="disabled">-->
-                                <!--                                            <option value="km"-->
-                                <!--                                                    t-att-selected="'selected' if employee.km_home_work == 'km' else None">-->
-                                <!--                                                km-->
-                                <!--                                            </option>-->
-                                <!--                                            <option value="mi"-->
-                                <!--                                                    t-att-selected="'selected' if employee.km_home_work == 'mi' else None">-->
-                                <!--                                                mi-->
-                                <!--                                            </option>-->
-                                <!--                                        </select>-->
-                                <!--                                    </div>-->
-                                <!--                                    <div class="invalid-feedback"></div>-->
-                                <!--                                </div>-->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Bank Accounts</label>
                                     <input type="text" class="form-control"
@@ -516,7 +517,6 @@
                     </div>
 
                     <!-- Social Media -->
-                    <!-- Social Media -->
                     <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="basic">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
@@ -525,6 +525,7 @@
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
+                                <!-- Social media: text/URL fields, no integer validation needed -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">LinkedIn</label>
                                     <input type="text" name="linkedin" class="form-control"
@@ -613,11 +614,15 @@
                                            t-att-value="employee.employment_status_id.name if employee.employment_status_id else ''"
                                            data-always-readonly="1" readonly="readonly"/>
                                 </div>
+                                <!-- NOTICE PERIOD: digits only (number of days) -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Notice Period (in days)</label>
                                     <input type="text" name="notice_period" class="form-control"
                                            t-att-value="employee.notice_period or ''"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                           data-always-readonly="1" readonly="readonly"
+                                           data-validation="digits-only"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">Digits only</small>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">DOJ</label>
@@ -686,11 +691,15 @@
                                            t-att-value="employee.current_address or ''"
                                            readonly="readonly"/>
                                 </div>
+                                <!-- ISD CODE: digits + optional + -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">ISD Code</label>
                                     <input type="text" name="phone_code_1" class="form-control"
                                            t-att-value="employee.phone_code_1 or ''"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="phone"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">E.g. +91, +971</small>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">House Number and Building Name</label>
@@ -728,11 +737,15 @@
                                            t-att-value="employee.states_id.name or ''"
                                            readonly="readonly"/>
                                 </div>
+                                <!-- ZIP CODE: digits only -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Zip Code</label>
                                     <input type="text" name="zip_code" class="form-control"
                                            t-att-value="employee.zip_code or ''"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="digits-only"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">Digits only</small>
                                 </div>
                             </div>
                         </div>
@@ -775,7 +788,9 @@
                                     <label class="form-label fw-bold">Industry Start Date</label>
                                     <input type="date" name="industry_start_date" class="form-control"
                                            t-att-value="employee.industry_start_date.strftime('%Y-%m-%d') if employee.industry_start_date else ''"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="past-date"/>
+                                    <div class="invalid-feedback"></div>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Experience</label>
@@ -789,29 +804,45 @@
                                            t-att-value="employee.current_role or ''"
                                            readonly="readonly"/>
                                 </div>
+                                <!-- AADHAR: 12 digits only -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Aadhar Number</label>
                                     <input type="text" class="form-control"
                                            t-att-value="employee.aadhar_no or ''"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                           data-always-readonly="1" readonly="readonly"
+                                           data-validation="aadhar"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">12 digits only</small>
                                 </div>
+                                <!-- PAN: alphanumeric, 10 chars -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">PAN</label>
                                     <input type="text" class="form-control"
                                            t-att-value="employee.pan or ''"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                           data-always-readonly="1" readonly="readonly"
+                                           data-validation="pan"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">Format: ABCDE1234F (10 characters)</small>
                                 </div>
+                                <!-- UAN: 12 digits -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">UAN</label>
                                     <input type="text" class="form-control"
                                            t-att-value="employee.uan or ''"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                           data-always-readonly="1" readonly="readonly"
+                                           data-validation="digits-only"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">Digits only</small>
                                 </div>
+                                <!-- PF NUMBER: alphanumeric -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">PF Number</label>
                                     <input type="text" class="form-control"
                                            t-att-value="employee.pf_number or ''"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                           data-always-readonly="1" readonly="readonly"
+                                           data-validation="alphanumeric"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">Letters and digits only</small>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Payroll</label>
@@ -829,7 +860,7 @@
                         </div>
                     </div>
 
-
+                    <!-- Employee Nominee and Details -->
                     <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="professional">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
@@ -844,11 +875,15 @@
                                            t-att-value="employee.employee_nominee_name or ''"
                                            readonly="readonly"/>
                                 </div>
+                                <!-- NOMINEE CONTACT: phone digits only -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Nominee Contact Number</label>
                                     <input type="tel" name="employee_nominee_contact_no" class="form-control"
                                            t-att-value="employee.employee_nominee_contact_no or ''"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="phone"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">Digits only, optional leading + for country code</small>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Total IT Experience</label>
@@ -893,11 +928,15 @@
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
+                                <!-- NO. OF CAREER BREAK: digits only -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">No. of Career Break</label>
                                     <input type="text" name="no_of_career_break" class="form-control"
                                            t-att-value="employee.no_of_career_break or ''"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                           data-always-readonly="1" readonly="readonly"
+                                           data-validation="digits-only"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">Digits only</small>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Career Break</label>
@@ -915,13 +954,17 @@
                                     <label class="form-label fw-bold">Career Break Start Date</label>
                                     <input type="date" name="career_break_start_date" class="form-control"
                                            t-att-value="employee.career_break_start_date.strftime('%Y-%m-%d') if employee.career_break_start_date else ''"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                           data-always-readonly="1" readonly="readonly"
+                                           data-validation="past-date"/>
+                                    <div class="invalid-feedback"></div>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Career Break End Date</label>
                                     <input type="date" name="career_break_end_date" class="form-control"
                                            t-att-value="employee.career_break_end_date.strftime('%Y-%m-%d') if employee.career_break_end_date else ''"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                           data-always-readonly="1" readonly="readonly"
+                                           data-validation="past-date"/>
+                                    <div class="invalid-feedback"></div>
                                 </div>
                             </div>
                         </div>
@@ -942,17 +985,24 @@
                                            t-att-value="employee.industry_ref_name or ''"
                                            readonly="readonly"/>
                                 </div>
+                                <!-- REFERENCE EMAIL -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Reference Email</label>
                                     <input type="email" name="industry_ref_email" class="form-control"
                                            t-att-value="employee.industry_ref_email or ''"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="email"/>
+                                    <div class="invalid-feedback"></div>
                                 </div>
+                                <!-- REFERENCE MOBILE: phone digits only -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Reference Mobile Number</label>
                                     <input type="tel" name="industry_ref_mob_no" class="form-control"
                                            t-att-value="employee.industry_ref_mob_no or ''"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="phone"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">Digits only, optional leading + for country code</small>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Previous Company Name</label>
@@ -996,11 +1046,15 @@
                                            t-att-value="employee.home_country_id_name or ''"
                                            readonly="readonly"/>
                                 </div>
+                                <!-- HOME COUNTRY ID NUMBER: alphanumeric -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Home Country ID Number</label>
                                     <input type="text" name="home_country_id_number" class="form-control"
                                            t-att-value="employee.home_country_id_number or ''"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="alphanumeric"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">Letters and digits only</small>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Customer / Account Name</label>
@@ -1036,17 +1090,7 @@
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
-                                <!--                                <div class="col-md-6">-->
-                                <!--                                    <label class="form-label fw-bold">-->
-                                <!--                                        <i class="fa fa-user text-muted me-1"></i>Relationship-->
-                                <!--                                        <span class="text-danger">*</span>-->
-                                <!--                                    </label>-->
-                                <!--                                    <input type="text" name="l10n_in_relationship" class="form-control"-->
-                                <!--                                           t-att-value="employee.l10n_in_relationship"-->
-                                <!--                                           readonly="readonly" required="required"-->
-                                <!--                                           data-validation="required"/>-->
-                                <!--                                    <div class="invalid-feedback"></div>-->
-                                <!--                                </div>-->
+                                <!-- EMERGENCY PHONE: digits only -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-phone text-muted me-1"></i>Emergency Contact Phone
@@ -1055,8 +1099,9 @@
                                     <input type="tel" name="emergency_phone" class="form-control"
                                            t-att-value="employee.emergency_phone"
                                            readonly="readonly" required="required"
-                                           pattern="[+]?[0-9\s\-\(\)]*" data-validation="phone"/>
+                                           data-validation="phone"/>
                                     <div class="invalid-feedback"></div>
+                                    <small class="text-muted">Digits only, optional leading + for country code</small>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Emergency Address</label>
@@ -1064,13 +1109,16 @@
                                            t-att-value="employee.e_private_city or ''"
                                            readonly="readonly"/>
                                 </div>
-
+                                <!-- COUNTRY CODE: phone format -->
                                 <div class="col-md-3">
                                     <label class="form-label fw-bold">Country Code</label>
                                     <input type="text" name="phone_code_1" class="form-control"
                                            t-att-value="employee.phone_code_1 or ''"
                                            readonly="readonly"
-                                           placeholder="+971"/>
+                                           placeholder="+971"
+                                           data-validation="phone"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">E.g. +971</small>
                                 </div>
                             </div>
                         </div>
@@ -1080,8 +1128,7 @@
                     <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="family">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
-                                <i class="fa fa-ambulance text-primary me-2"></i>Emergency Contact Person Address Inside
-                                UAE
+                                <i class="fa fa-ambulance text-primary me-2"></i>Emergency Contact Person Address Inside UAE
                             </h5>
                         </div>
                         <div class="card-body">
@@ -1098,17 +1145,24 @@
                                            t-att-value="employee.relationship_with_emp_id.name if employee.relationship_with_emp_id else ''"
                                            readonly="readonly"/>
                                 </div>
+                                <!-- ALL PHONE FIELDS: digits only -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Contact Person Phone Number</label>
                                     <input type="tel" name="emergency_contact_person_phone" class="form-control"
                                            t-att-value="employee.emergency_contact_person_phone or ''"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="phone"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">Digits only, optional leading + for country code</small>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Alternate Mobile Number</label>
                                     <input type="tel" name="alternate_mobile_number" class="form-control"
                                            t-att-value="employee.alternate_mobile_number or ''"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="phone"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">Digits only, optional leading + for country code</small>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Contact Person Name (1)</label>
@@ -1126,19 +1180,28 @@
                                     <label class="form-label fw-bold">Contact Person Phone Number (1)</label>
                                     <input type="tel" name="emergency_contact_person_phone_1" class="form-control"
                                            t-att-value="employee.emergency_contact_person_phone_1 or ''"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="phone"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">Digits only, optional leading + for country code</small>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Second Alternative Number</label>
                                     <input type="tel" name="second_alternative_number" class="form-control"
                                            t-att-value="employee.second_alternative_number or ''"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="phone"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">Digits only, optional leading + for country code</small>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Home Land Line Number</label>
                                     <input type="tel" name="home_land_line_no" class="form-control"
                                            t-att-value="employee.home_land_line_no or ''"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="phone"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">Digits only, optional leading + for country code</small>
                                 </div>
                             </div>
                         </div>
@@ -1153,24 +1216,33 @@
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
+                                <!-- PASSPORT NO: alphanumeric -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Spouse Passport No</label>
                                     <input type="text" name="spouse_passport_no" class="form-control"
                                            t-att-value="employee.spouse_passport_no or ''"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="alphanumeric"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">Letters and digits only</small>
                                 </div>
+                                <!-- PASSPORT ISSUE: past date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Passport Issue Date</label>
                                     <input type="date" name="spouse_passport_issue_date" class="form-control"
                                            t-att-value="employee.spouse_passport_issue_date.strftime('%Y-%m-%d') if employee.spouse_passport_issue_date else ''"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="past-date"/>
+                                    <div class="invalid-feedback"></div>
                                 </div>
+                                <!-- PASSPORT EXPIRY: future date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Passport Expiry Date</label>
                                     <input type="date" name="spouse_passport_expiry_date" class="form-control"
                                            t-att-value="employee.spouse_passport_expiry_date.strftime('%Y-%m-%d') if employee.spouse_passport_expiry_date else ''"
-                                           data-validation="future-date"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="future-date"/>
+                                    <div class="invalid-feedback"></div>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Passport Issuing Country</label>
@@ -1178,49 +1250,68 @@
                                            t-att-value="employee.spouse_passport_issuing_countries_id.name if employee.spouse_passport_issuing_countries_id else ''"
                                            readonly="readonly"/>
                                 </div>
+                                <!-- VISA NO: alphanumeric -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Visa No</label>
                                     <input type="text" name="spouse_visa_no" class="form-control"
                                            t-att-value="employee.spouse_visa_no or ''"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="alphanumeric"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">Letters and digits only</small>
                                 </div>
+                                <!-- VISA EXPIRY: future date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Visa Expiration Date</label>
                                     <input type="date" name="spouse_visa_expire_date" class="form-control"
                                            t-att-value="employee.spouse_visa_expire_date.strftime('%Y-%m-%d') if employee.spouse_visa_expire_date else ''"
-                                           data-validation="future-date"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="future-date"/>
+                                    <div class="invalid-feedback"></div>
                                 </div>
+                                <!-- EMIRATES ID: format validation -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Emirates ID Number</label>
                                     <input type="text" name="spouse_emirates_id_no" class="form-control"
                                            t-att-value="employee.spouse_emirates_id_no or ''"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="emirates-id"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">Format: 784-1234-1234567-1</small>
                                 </div>
+                                <!-- EMIRATES ISSUE: past date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Emirates Issue Date</label>
                                     <input type="date" name="spouse_emirates_issue_date" class="form-control"
                                            t-att-value="employee.spouse_emirates_issue_date.strftime('%Y-%m-%d') if employee.spouse_emirates_issue_date else ''"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="past-date"/>
+                                    <div class="invalid-feedback"></div>
                                 </div>
+                                <!-- EMIRATES EXPIRY: future date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Emirates ID Expiry Date</label>
                                     <input type="date" name="spouse_emirates_id_expiry_date" class="form-control"
                                            t-att-value="employee.spouse_emirates_id_expiry_date.strftime('%Y-%m-%d') if employee.spouse_emirates_id_expiry_date else ''"
-                                           data-validation="future-date"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="future-date"/>
+                                    <div class="invalid-feedback"></div>
                                 </div>
+                                <!-- AADHAR: 12 digits -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Aadhar Number</label>
                                     <input type="text" name="spouse_aadhar_no" class="form-control"
                                            t-att-value="employee.spouse_aadhar_no or ''"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="aadhar"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">12 digits only</small>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Dependent Details -->
+                    <!-- Dependent Details Child 1 -->
                     <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="family">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
@@ -1235,49 +1326,55 @@
                                            t-att-value="employee.dependent_child_name_1 or ''"
                                            readonly="readonly"/>
                                 </div>
+                                <!-- CHILD DOB: past date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Child 1 DOB</label>
                                     <input type="date" name="dependent_child_dob_1" class="form-control"
                                            t-att-value="employee.dependent_child_dob_1 or ''"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="past-date"/>
+                                    <div class="invalid-feedback"></div>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Child 1 Gender</label>
                                     <select name="dependent_child_gender_1" class="form-select" disabled="disabled">
                                         <option value="">Select Gender</option>
                                         <option value="male"
-                                                t-att-selected="'selected' if employee.dependent_child_gender_1 == 'male' else None">
-                                            Male
-                                        </option>
+                                                t-att-selected="'selected' if employee.dependent_child_gender_1 == 'male' else None">Male</option>
                                         <option value="female"
-                                                t-att-selected="'selected' if employee.dependent_child_gender_1 == 'female' else None">
-                                            Female
-                                        </option>
+                                                t-att-selected="'selected' if employee.dependent_child_gender_1 == 'female' else None">Female</option>
                                         <option value="other"
-                                                t-att-selected="'selected' if employee.dependent_child_gender_1 == 'other' else None">
-                                            Other
-                                        </option>
+                                                t-att-selected="'selected' if employee.dependent_child_gender_1 == 'other' else None">Other</option>
                                     </select>
                                 </div>
+                                <!-- PASSPORT NO: alphanumeric -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Child 1 Passport No</label>
                                     <input type="text" name="dependent_child_passport_no" class="form-control"
                                            t-att-value="employee.dependent_child_passport_no or ''"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="alphanumeric"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">Letters and digits only</small>
                                 </div>
+                                <!-- PASSPORT ISSUE: past date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Child 1 Passport Issue Date</label>
                                     <input type="date" name="dependent_child_passport_issue_date_1" class="form-control"
                                            t-att-value="employee.dependent_child_passport_issue_date_1 or ''"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="past-date"/>
+                                    <div class="invalid-feedback"></div>
                                 </div>
+                                <!-- PASSPORT EXPIRY: future date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Child 1 Passport Expiry Date</label>
                                     <input type="date" name="dependent_child_passport_expiry_date_1"
                                            class="form-control"
                                            t-att-value="employee.dependent_child_passport_expiry_date_1 or ''"
-                                           data-validation="future-date"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="future-date"/>
+                                    <div class="invalid-feedback"></div>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Child 1 Passport Issuing Country</label>
@@ -1292,46 +1389,65 @@
                                         </t>
                                     </select>
                                 </div>
+                                <!-- VISA NO: alphanumeric -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Child 1 Visa No</label>
                                     <input type="text" name="dependent_child_visa_no_1" class="form-control"
                                            t-att-value="employee.dependent_child_visa_no_1 or ''"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="alphanumeric"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">Letters and digits only</small>
                                 </div>
+                                <!-- VISA EXPIRY: future date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Child 1 Visa Expiration Date</label>
                                     <input type="date" name="dependent_child_visa_expiration_date_1"
                                            class="form-control"
                                            t-att-value="employee.dependent_child_visa_expiration_date_1 or ''"
-                                           data-validation="future-date"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="future-date"/>
+                                    <div class="invalid-feedback"></div>
                                 </div>
+                                <!-- EMIRATES ID: format -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Child 1 Emirates ID Number</label>
                                     <input type="text" name="dependent_child_emirates_id_no_1" class="form-control"
                                            t-att-value="employee.dependent_child_emirates_id_no_1 or ''"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="emirates-id"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">Format: 784-1234-1234567-1</small>
                                 </div>
+                                <!-- EMIRATES ISSUE: past date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Child 1 Emirates ID Issue Date</label>
                                     <input type="date" name="dependent_child_emirates_id_issue_date_1"
                                            class="form-control"
                                            t-att-value="employee.dependent_child_emirates_id_issue_date_1 or ''"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="past-date"/>
+                                    <div class="invalid-feedback"></div>
                                 </div>
+                                <!-- EMIRATES EXPIRY: future date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Child 1 Emirates ID Expiry Date</label>
                                     <input type="date" name="dependent_child_emirates_id_expiry_date_1"
                                            class="form-control"
                                            t-att-value="employee.dependent_child_emirates_id_expiry_date_1 or ''"
-                                           data-validation="future-date"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="future-date"/>
+                                    <div class="invalid-feedback"></div>
                                 </div>
+                                <!-- AADHAR: 12 digits -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Child 1 Aadhar Number</label>
                                     <input type="text" name="dependent_child_aadhar_no_1" class="form-control"
                                            t-att-value="employee.dependent_child_aadhar_no_1 or ''"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="aadhar"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">12 digits only</small>
                                 </div>
                             </div>
                         </div>
@@ -1352,68 +1468,34 @@
                                            t-att-value="'Yes' if employee.disabled else 'No'"
                                            data-always-readonly="1" readonly="readonly"/>
                                 </div>
+                                <!-- DEPENDENT CHILDREN: digits only (integer count) -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Dependent Children</label>
                                     <input name="children" class="form-control"
                                            t-att-value="employee.children or ''"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="digits-only"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">Digits only</small>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label fw-bold">
-                                        Marital Status
-                                    </label>
+                                    <label class="form-label fw-bold">Marital Status</label>
                                     <select name="marital" class="form-select"
                                             data-always-readonly="1" disabled="disabled">
                                         <option value="">Select Status</option>
                                         <option value="single"
-                                                t-att-selected="'selected' if employee.marital == 'single' else None">
-                                            Single
-                                        </option>
+                                                t-att-selected="'selected' if employee.marital == 'single' else None">Single</option>
                                         <option value="married"
-                                                t-att-selected="'selected' if employee.marital == 'married' else None">
-                                            Married
-                                        </option>
+                                                t-att-selected="'selected' if employee.marital == 'married' else None">Married</option>
                                         <option value="cohabitant"
-                                                t-att-selected="'selected' if employee.marital == 'cohabitant' else None">
-                                            Legal Cohabitant
-                                        </option>
+                                                t-att-selected="'selected' if employee.marital == 'cohabitant' else None">Legal Cohabitant</option>
                                         <option value="widower"
-                                                t-att-selected="'selected' if employee.marital == 'widower' else None">
-                                            Widower
-                                        </option>
+                                                t-att-selected="'selected' if employee.marital == 'widower' else None">Widower</option>
                                         <option value="divorced"
-                                                t-att-selected="'selected' if employee.marital == 'divorced' else None">
-                                            Divorced
-                                        </option>
+                                                t-att-selected="'selected' if employee.marital == 'divorced' else None">Divorced</option>
                                     </select>
                                     <div class="invalid-feedback"></div>
                                 </div>
-                                <!--                                <div class="col-md-6">-->
-                                <!--                                    <label class="form-label fw-bold">Certificate</label>-->
-                                <!--                                    <select name="certificate" class="form-select" disabled="disabled">-->
-                                <!--                                        <option value="">Select Certificate</option>-->
-                                <!--                                        <option value="graduate"-->
-                                <!--                                                t-att-selected="'selected' if employee.certificate == 'graduate' else None">-->
-                                <!--                                            Graduate-->
-                                <!--                                        </option>-->
-                                <!--                                        <option value="bachelor"-->
-                                <!--                                                t-att-selected="'selected' if employee.certificate == 'bachelor' else None">-->
-                                <!--                                            Bachelor-->
-                                <!--                                        </option>-->
-                                <!--                                        <option value="master"-->
-                                <!--                                                t-att-selected="'selected' if employee.certificate == 'master' else None">-->
-                                <!--                                            Master-->
-                                <!--                                        </option>-->
-                                <!--                                        <option value="doctor"-->
-                                <!--                                                t-att-selected="'selected' if employee.certificate == 'doctor' else None">-->
-                                <!--                                            Doctor-->
-                                <!--                                        </option>-->
-                                <!--                                        <option value="other"-->
-                                <!--                                                t-att-selected="'selected' if employee.certificate == 'other' else None">-->
-                                <!--                                            Other-->
-                                <!--                                        </option>-->
-                                <!--                                    </select>-->
-                                <!--                                </div>-->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Father Name</label>
                                     <input type="text" name="father_name" class="form-control"
@@ -1426,11 +1508,14 @@
                                            t-att-value="employee.father_nationalities_id.name if employee.father_nationalities_id else ''"
                                            data-always-readonly="1" readonly="readonly"/>
                                 </div>
+                                <!-- FATHER DOB: past date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Father DOB</label>
                                     <input type="date" name="father_dob" class="form-control"
                                            t-att-value="employee.father_dob.strftime('%Y-%m-%d') if employee.father_dob else ''"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="past-date"/>
+                                    <div class="invalid-feedback"></div>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Dependent Status</label>
@@ -1450,11 +1535,14 @@
                                            t-att-value="employee.mother_nationalities_id.name if employee.mother_nationalities_id else ''"
                                            data-always-readonly="1" readonly="readonly"/>
                                 </div>
+                                <!-- MOTHER DOB: past date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Mother DOB</label>
                                     <input type="date" name="mother_dob" class="form-control"
                                            t-att-value="employee.mother_dob.strftime('%Y-%m-%d') if employee.mother_dob else ''"
-                                           readonly="readonly"/>
+                                           readonly="readonly"
+                                           data-validation="past-date"/>
+                                    <div class="invalid-feedback"></div>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Dependent Status (1)</label>
@@ -1533,23 +1621,33 @@
                                            t-att-value="employee.study_field or ''"
                                            data-always-readonly="1" readonly="readonly"/>
                                 </div>
+                                <!-- DEGREE START: past date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Start Date of Degree</label>
                                     <input type="date" name="start_date_of_degree" class="form-control"
                                            t-att-value="employee.start_date_of_degree.strftime('%Y-%m-%d') if employee.start_date_of_degree else ''"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                           data-always-readonly="1" readonly="readonly"
+                                           data-validation="past-date"/>
+                                    <div class="invalid-feedback"></div>
                                 </div>
+                                <!-- DEGREE COMPLETION: past date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Completion Date of Degree</label>
                                     <input type="date" name="completion_date_of_degree" class="form-control"
                                            t-att-value="employee.completion_date_of_degree.strftime('%Y-%m-%d') if employee.completion_date_of_degree else ''"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                           data-always-readonly="1" readonly="readonly"
+                                           data-validation="past-date"/>
+                                    <div class="invalid-feedback"></div>
                                 </div>
+                                <!-- YEAR OF PASSING: 4-digit year -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Year of Passing</label>
                                     <input type="text" name="year_of_passing" class="form-control"
                                            t-att-value="employee.year_of_passing or ''"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                           data-always-readonly="1" readonly="readonly"
+                                           data-validation="year"/>
+                                    <div class="invalid-feedback"></div>
+                                    <small class="text-muted">4-digit year e.g. 2020</small>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Score</label>
@@ -1603,7 +1701,8 @@
                                             </a>
                                         </div>
                                     </t>
-                                    <input type="file" name="emirates_id_file" class="form-control"/>
+                                    <input type="file" name="emirates_id_file" class="form-control"
+                                           accept=".pdf,.jpg,.jpeg,.png"/>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">
@@ -1617,7 +1716,8 @@
                                             </a>
                                         </div>
                                     </t>
-                                    <input type="file" name="passport_file" class="form-control"/>
+                                    <input type="file" name="passport_file" class="form-control"
+                                           accept=".pdf,.jpg,.jpeg,.png"/>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">
@@ -1631,7 +1731,8 @@
                                             </a>
                                         </div>
                                     </t>
-                                    <input type="file" name="other_documents" class="form-control"/>
+                                    <input type="file" name="other_documents" class="form-control"
+                                           accept=".pdf,.jpg,.jpeg,.png"/>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">
@@ -1645,13 +1746,14 @@
                                             </a>
                                         </div>
                                     </t>
-                                    <input type="file" name="has_work_permit" class="form-control"/>
+                                    <input type="file" name="has_work_permit" class="form-control"
+                                           accept=".pdf,.jpg,.jpeg,.png"/>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!--                     ===== FORM ACTIONS ===== -->
+                    <!-- ===== FORM ACTIONS ===== -->
                     <div class="card shadow-sm">
                         <div class="card-body text-center">
                             <div id="formActions" style="display: none;">
@@ -1680,7 +1782,6 @@
                         </div>
                     </div>
 
-
                 </form>
 
                 <!-- ===== JAVASCRIPT ===== -->
@@ -1694,12 +1795,9 @@ let activeProfileTab = 'basic';
 function switchProfileTab(tabKey) {
     const previousTab = activeProfileTab;
     activeProfileTab = tabKey;
-
-    // Clear validation errors ONLY from the tab we are LEAVING
     if (previousTab && previousTab !== tabKey) {
         clearValidationStates(previousTab);
     }
-
     document.querySelectorAll('#personalDetailsForm .profile-tab-section').forEach(card => {
         card.style.display = card.getAttribute('data-tab-group') === tabKey ? '' : 'none';
     });
@@ -1723,32 +1821,23 @@ function enableEditMode() {
     isEditMode = true;
     document.querySelectorAll('.edit-mode-toggle').forEach(t => t.checked = true);
     storeOriginalFormData();
-
     document.querySelectorAll('#personalDetailsForm input, #personalDetailsForm select').forEach(input => {
         if (input.type === 'hidden') return;
         if (input.classList.contains('edit-mode-toggle')) return;
-
         if (input.hasAttribute('data-always-readonly')) {
             input.setAttribute('readonly', 'readonly');
-            if (input.tagName === 'SELECT' || input.type === 'checkbox') {
-                input.setAttribute('disabled', 'disabled');
-            }
+            if (input.tagName === 'SELECT' || input.type === 'checkbox') input.setAttribute('disabled', 'disabled');
             input.style.setProperty('pointer-events', 'none');
             input.style.setProperty('background-color', '#e9ecef');
             return;
         }
-
         input.removeAttribute('readonly');
         input.removeAttribute('disabled');
         input.style.removeProperty('pointer-events');
         input.style.removeProperty('background-color');
     });
-
     document.getElementById('formActions').style.display = 'block';
     document.getElementById('viewActions').style.display = 'none';
-
-    // Attach validation listeners only to fields in ALL tabs
-    // but validateField will only show errors for the field being interacted with
     document.querySelectorAll('#personalDetailsForm input, #personalDetailsForm select').forEach(input => {
         input.removeEventListener('input', validateField);
         input.removeEventListener('blur', validateField);
@@ -1761,33 +1850,23 @@ function enableEditMode() {
 function disableEditMode() {
     isEditMode = false;
     document.querySelectorAll('.edit-mode-toggle').forEach(t => t.checked = false);
-
     document.querySelectorAll('#personalDetailsForm input, #personalDetailsForm select').forEach(input => {
         if (input.type === 'hidden') return;
         if (input.classList.contains('edit-mode-toggle')) return;
-
         if (input.hasAttribute('data-always-readonly')) {
             input.setAttribute('readonly', 'readonly');
-            if (input.tagName === 'SELECT' || input.type === 'checkbox') {
-                input.setAttribute('disabled', 'disabled');
-            }
+            if (input.tagName === 'SELECT' || input.type === 'checkbox') input.setAttribute('disabled', 'disabled');
             input.style.setProperty('pointer-events', 'none');
             input.style.setProperty('background-color', '#e9ecef');
             return;
         }
-
         input.setAttribute('readonly', 'readonly');
-        if (input.tagName === 'SELECT' || input.type === 'checkbox') {
-            input.setAttribute('disabled', 'disabled');
-        }
+        if (input.tagName === 'SELECT' || input.type === 'checkbox') input.setAttribute('disabled', 'disabled');
         input.style.removeProperty('pointer-events');
         input.style.removeProperty('background-color');
     });
-
     document.getElementById('formActions').style.display = 'none';
     document.getElementById('viewActions').style.display = 'block';
-
-    // Clear only the active tab's validation when disabling edit mode
     clearValidationStates(activeProfileTab);
 }
 
@@ -1795,9 +1874,7 @@ function disableEditMode() {
 function storeOriginalFormData() {
     const formData = new FormData(document.getElementById('personalDetailsForm'));
     originalFormData = {};
-    for (let [key, value] of formData.entries()) {
-        originalFormData[key] = value;
-    }
+    for (let [key, value] of formData.entries()) originalFormData[key] = value;
 }
 
 /* ─── Cancel ────────────────────────────────────────────────── */
@@ -1806,7 +1883,6 @@ function cancelEdit() {
         const input = document.querySelector(`[name="${key}"]`);
         if (input) input.value = value;
     }
-    // Clear only active tab validation before disabling
     clearValidationStates(activeProfileTab);
     disableEditMode();
     showTabMessage(activeProfileTab, 'Changes cancelled.', 'info');
@@ -1816,9 +1892,7 @@ function cancelEdit() {
 function saveAsDraft() {
     const formData = new FormData(document.getElementById('personalDetailsForm'));
     const draftData = {};
-    for (let [key, value] of formData.entries()) {
-        draftData[key] = value;
-    }
+    for (let [key, value] of formData.entries()) draftData[key] = value;
     localStorage.setItem('profileDraft', JSON.stringify(draftData));
     showTabMessage(activeProfileTab, 'Profile saved as draft.', 'info');
 }
@@ -1827,25 +1901,23 @@ function saveAsDraft() {
 function validateField(event) {
     const field = event.target;
 
-    // CRITICAL: Only validate fields that belong to the currently active tab.
-    // This prevents errors from showing on hidden/other tabs.
+    // Only validate fields in the currently active tab
     const parentSection = field.closest('.profile-tab-section');
     if (parentSection && parentSection.getAttribute('data-tab-group') !== activeProfileTab) {
-        return true; // Silently skip fields not in the active tab
+        return true;
     }
 
     const validationType = field.getAttribute('data-validation');
     let isValid = true;
     let errorMessage = '';
 
-    // Remove previous states
     field.classList.remove('is-valid', 'is-invalid');
 
-    // Remove any previously injected error message div (dynamic ones we appended)
+    // Remove previously injected dynamic error
     const existingDynamic = field.parentNode.querySelector('.invalid-feedback.dynamic-error');
     if (existingDynamic) existingDynamic.remove();
 
-    // Clear static feedback element
+    // Clear static feedback
     const feedback = field.parentNode.querySelector('.invalid-feedback:not(.dynamic-error)');
     if (feedback) {
         feedback.textContent = '';
@@ -1853,53 +1925,135 @@ function validateField(event) {
     }
 
     if (validationType && field.value) {
+        const val = field.value.trim();
+
         switch (validationType) {
+
+            /* ── EMAIL ── */
             case 'email':
-                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(field.value)) {
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
                     isValid = false;
-                    errorMessage = 'Please enter a valid email address.';
+                    errorMessage = 'Please enter a valid email address (e.g. name@example.com).';
                 }
                 break;
+
+            /* ── PHONE: digits only, optional leading + ── */
             case 'phone':
-                if (!/^[+]?[0-9\s\-\(\)]+$/.test(field.value)) {
+                const phoneCleaned = val.replace(/\s/g, '');
+                if (!/^\+?[0-9]+$/.test(phoneCleaned)) {
                     isValid = false;
-                    errorMessage = 'Please enter a valid phone number.';
+                    errorMessage = 'Phone number must contain digits only. A leading + is allowed for country code (e.g. +971501234567).';
+                } else {
+                    const digitsOnly = phoneCleaned.replace('+', '');
+                    if (digitsOnly.length < 7 || digitsOnly.length > 15) {
+                        isValid = false;
+                        errorMessage = 'Phone number must be between 7 and 15 digits.';
+                    }
                 }
                 break;
-            case 'required':
-                if (!field.value.trim()) {
+
+            /* ── DIGITS ONLY: pure integers, no letters ── */
+            case 'digits-only':
+                if (!/^[0-9]+$/.test(val)) {
                     isValid = false;
-                    errorMessage = 'This field is required.';
+                    errorMessage = 'This field must contain digits only (no letters or special characters).';
                 }
                 break;
-            case 'date':
-                if (isNaN(new Date(field.value).getTime())) {
+
+            /* ── ALPHANUMERIC: letters and digits, no spaces or special chars ── */
+            case 'alphanumeric':
+                if (!/^[A-Za-z0-9]+$/.test(val)) {
+                    isValid = false;
+                    errorMessage = 'This field must contain letters and digits only (no spaces or special characters).';
+                }
+                break;
+
+            /* ── EMIRATES ID: 784-XXXX-XXXXXXX-X ── */
+            case 'emirates-id':
+                if (!/^[0-9]{3}-[0-9]{4}-[0-9]{7}-[0-9]{1}$/.test(val)) {
+                    isValid = false;
+                    errorMessage = 'Emirates ID must be in format: 784-1234-1234567-1';
+                }
+                break;
+
+            /* ── AADHAR: exactly 12 digits ── */
+            case 'aadhar':
+                if (!/^[0-9]{12}$/.test(val)) {
+                    isValid = false;
+                    errorMessage = 'Aadhar number must be exactly 12 digits.';
+                }
+                break;
+
+            /* ── PAN: 5 letters + 4 digits + 1 letter = 10 chars ── */
+            case 'pan':
+                if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(val.toUpperCase())) {
+                    isValid = false;
+                    errorMessage = 'PAN must be in format: ABCDE1234F (5 letters, 4 digits, 1 letter).';
+                }
+                break;
+
+            /* ── YEAR: 4-digit year, not in future ── */
+            case 'year':
+                if (!/^[0-9]{4}$/.test(val)) {
+                    isValid = false;
+                    errorMessage = 'Please enter a valid 4-digit year (e.g. 2020).';
+                } else {
+                    const yr = parseInt(val, 10);
+                    const currentYear = new Date().getFullYear();
+                    if (yr < 1900 || yr > currentYear) {
+                        isValid = false;
+                        errorMessage = `Year must be between 1900 and ${currentYear}.`;
+                    }
+                }
+                break;
+
+            /* ── PAST DATE: must be today or earlier ── */
+            case 'past-date':
+                const pastInput = new Date(val);
+                const todayForPast = new Date();
+                todayForPast.setHours(0, 0, 0, 0);
+                if (isNaN(pastInput.getTime())) {
                     isValid = false;
                     errorMessage = 'Please enter a valid date.';
+                } else if (pastInput > todayForPast) {
+                    isValid = false;
+                    errorMessage = 'This date cannot be in the future.';
                 }
                 break;
+
+            /* ── FUTURE DATE: must be after today ── */
             case 'future-date':
-                if (new Date(field.value) <= new Date()) {
+                const futureInput = new Date(val);
+                const todayForFuture = new Date();
+                todayForFuture.setHours(0, 0, 0, 0);
+                if (isNaN(futureInput.getTime())) {
                     isValid = false;
-                    errorMessage = 'Expiry date must be in the future.';
+                    errorMessage = 'Please enter a valid date.';
+                } else if (futureInput <= todayForFuture) {
+                    isValid = false;
+                    errorMessage = 'Expiry date must be a future date. Entered: ' + futureInput.toDateString() + ' | Today: ' + todayForFuture.toDateString();
+                }
+                break;
+
+            /* ── REQUIRED ── */
+            case 'required':
+                if (!val) {
+                    isValid = false;
+                    errorMessage = 'This field is required.';
                 }
                 break;
         }
     }
 
-    if (field.value) {
+    if (field.value.trim()) {
         if (isValid) {
             field.classList.add('is-valid');
         } else {
             field.classList.add('is-invalid');
-
-            // Show error message directly below the field
             if (feedback) {
-                // Use existing static feedback element
                 feedback.textContent = errorMessage;
                 feedback.style.display = 'block';
             } else {
-                // Inject a new error div right after the field
                 const errDiv = document.createElement('div');
                 errDiv.className = 'invalid-feedback dynamic-error';
                 errDiv.style.display = 'block';
@@ -1912,7 +2066,6 @@ function validateField(event) {
         }
     }
 
-    // Only update badges for the active tab to avoid cross-tab pollution
     updateTabErrorBadges();
     return isValid;
 }
@@ -1922,16 +2075,11 @@ function updateTabErrorBadges() {
     ['basic', 'professional', 'family', 'education', 'documents'].forEach(tabKey => {
         const tabBtn = document.querySelector(`.profile-tab-button[data-tab-target="${tabKey}"]`);
         if (!tabBtn) return;
-
-        // Remove existing badge
         const existing = tabBtn.querySelector('.tab-error-badge');
         if (existing) existing.remove();
-
-        // Count is-invalid fields in this tab's sections ONLY
         const count = document.querySelectorAll(
             `.profile-tab-section[data-tab-group="${tabKey}"] .is-invalid`
         ).length;
-
         if (count > 0) {
             const badge = document.createElement('span');
             badge.className = 'tab-error-badge badge bg-danger ms-1';
@@ -1941,65 +2089,36 @@ function updateTabErrorBadges() {
     });
 }
 
-/* ─── Clear validation states — SCOPED to a specific tab ────── */
-// Pass tabKey to clear only that tab. Pass nothing to clear ALL tabs.
+/* ─── Clear validation states — scoped to a tab ────────────── */
 function clearValidationStates(tabKey) {
-    let inputs, feedbacks, messages;
-
+    let inputs = [], feedbacks = [], messages = [];
     if (tabKey) {
-        // Scope to sections belonging to this tab only
-        const sections = document.querySelectorAll(
-            `.profile-tab-section[data-tab-group="${tabKey}"]`
-        );
-        inputs = [];
-        feedbacks = [];
-        messages = [];
+        const sections = document.querySelectorAll(`.profile-tab-section[data-tab-group="${tabKey}"]`);
         sections.forEach(section => {
             section.querySelectorAll('input, select').forEach(el => inputs.push(el));
             section.querySelectorAll('.invalid-feedback').forEach(el => feedbacks.push(el));
             section.querySelectorAll('.tab-message-box').forEach(el => messages.push(el));
-            // Also remove any dynamically injected error divs
             section.querySelectorAll('.dynamic-error').forEach(el => el.remove());
         });
     } else {
-        // Full form clear (used only when truly needed)
         inputs = document.querySelectorAll('#personalDetailsForm input, #personalDetailsForm select');
         feedbacks = document.querySelectorAll('#personalDetailsForm .invalid-feedback');
         messages = document.querySelectorAll('.tab-message-box');
         document.querySelectorAll('.dynamic-error').forEach(el => el.remove());
     }
-
     inputs.forEach(input => input.classList.remove('is-valid', 'is-invalid'));
-    feedbacks.forEach(el => {
-        el.textContent = '';
-        el.style.display = 'none';
-    });
+    feedbacks.forEach(el => { el.textContent = ''; el.style.display = 'none'; });
     messages.forEach(el => el.remove());
-
-    // Always refresh ALL badge counts so they stay accurate across tabs
     updateTabErrorBadges();
 }
 
-/* ─── Show message INSIDE current tab (not above tabs) ──────── */
+/* ─── Show message inside active tab ───────────────────────── */
 function showTabMessage(tabKey, text, type) {
-    // Remove existing messages only in the target tab
-    const existingInTab = document.querySelectorAll(
-        `.profile-tab-section[data-tab-group="${tabKey}"] ~ .tab-message-box,
-         .tab-message-box`
-    );
-    existingInTab.forEach(el => el.remove());
-
-    // Find first visible card in active tab to insert before it
-    const firstCard = document.querySelector(
-        `.profile-tab-section[data-tab-group="${tabKey}"]`
-    );
+    document.querySelectorAll('.tab-message-box').forEach(el => el.remove());
+    const firstCard = document.querySelector(`.profile-tab-section[data-tab-group="${tabKey}"]`);
     if (!firstCard) return;
-
-    const alertClass = type === 'success' ? 'alert-success' :
-                       type === 'info'    ? 'alert-info' : 'alert-danger';
-    const icon = type === 'success' ? 'fa-check-circle' :
-                 type === 'info'    ? 'fa-info-circle' : 'fa-exclamation-triangle';
-
+    const alertClass = type === 'success' ? 'alert-success' : type === 'info' ? 'alert-info' : 'alert-danger';
+    const icon = type === 'success' ? 'fa-check-circle' : type === 'info' ? 'fa-info-circle' : 'fa-exclamation-triangle';
     const msgDiv = document.createElement('div');
     msgDiv.className = `tab-message-box alert ${alertClass} alert-dismissible fade show mb-3`;
     msgDiv.innerHTML = `
@@ -2007,22 +2126,16 @@ function showTabMessage(tabKey, text, type) {
         <span>${text}</span>
         <button type="button" class="btn-close" onclick="this.parentNode.remove()"></button>
     `;
-
     firstCard.parentNode.insertBefore(msgDiv, firstCard);
     msgDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-    // Auto dismiss after 5s
     setTimeout(() => { if (msgDiv.parentNode) msgDiv.remove(); }, 5000);
 }
 
 /* ─── Form submit ───────────────────────────────────────────── */
 document.getElementById('personalDetailsForm').addEventListener('submit', function(e) {
     e.preventDefault();
-
-    // Step 1: Clear ONLY the active tab's previous validation state before re-validating
     clearValidationStates(activeProfileTab);
 
-    // Step 2: Validate ONLY fields in the CURRENT active tab
     let isFormValid = true;
     document.querySelectorAll(
         `.profile-tab-section[data-tab-group="${activeProfileTab}"] input[data-validation],
@@ -2031,25 +2144,19 @@ document.getElementById('personalDetailsForm').addEventListener('submit', functi
         if (!validateField({ target: input })) isFormValid = false;
     });
 
-    // Step 3: Update badges (only active tab will have new errors)
     updateTabErrorBadges();
 
     if (!isFormValid) {
-        // Scroll to and focus the first error field in the current tab
         const firstError = document.querySelector(
             `.profile-tab-section[data-tab-group="${activeProfileTab}"] .is-invalid`
         );
         if (firstError) {
-            setTimeout(() => {
-                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                firstError.focus();
-            }, 100);
+            setTimeout(() => { firstError.scrollIntoView({ behavior: 'smooth', block: 'center' }); firstError.focus(); }, 100);
         }
         showTabMessage(activeProfileTab, 'Please correct the highlighted errors in this tab.', 'error');
         return;
     }
 
-    // Step 4: Temporarily enable selects/checkboxes so FormData picks them up
     const toReenable = [];
     document.querySelectorAll(
         '#personalDetailsForm select[disabled], #personalDetailsForm input[type="checkbox"][disabled]'
@@ -2062,8 +2169,6 @@ document.getElementById('personalDetailsForm').addEventListener('submit', functi
 
     const formData = new FormData(this);
     const csrfToken = document.querySelector('input[name="csrf_token"]').value;
-
-    // Re-disable after FormData is collected
     toReenable.forEach(el => el.setAttribute('disabled', 'disabled'));
 
     fetch('/my/employee/personal', {
@@ -2094,11 +2199,8 @@ document.addEventListener('DOMContentLoaded', function() {
             switchProfileTab(this.getAttribute('data-tab-target'));
         });
     });
-
-    // Show the default tab on load
     switchProfileTab(activeProfileTab);
 
-    // Load draft data if it exists
     const draftData = localStorage.getItem('profileDraft');
     if (draftData) {
         try {
@@ -2119,11 +2221,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <!-- ===== CSS ===== -->
                 <style>
                     <![CDATA[
-.form-label {
-    font-weight: 600;
-    color: #495057;
-    margin-bottom: 0.5rem;
-}
+.form-label { font-weight: 600; color: #495057; margin-bottom: 0.5rem; }
 
 .profile-tab-navigation .nav-link {
     border-radius: 0.5rem 0.5rem 0 0;
@@ -2131,12 +2229,8 @@ document.addEventListener('DOMContentLoaded', function() {
     color: #495057;
     transition: color 0.2s;
 }
+.profile-tab-navigation .nav-link.active { color: #0d6efd; }
 
-.profile-tab-navigation .nav-link.active {
-    color: #0d6efd;
-}
-
-/* ── Tab error badge ── */
 .tab-error-badge {
     font-size: 0.65rem;
     border-radius: 50%;
@@ -2144,34 +2238,27 @@ document.addEventListener('DOMContentLoaded', function() {
     vertical-align: middle;
     animation: badgePop 0.2s ease;
 }
-
 @keyframes badgePop {
     0%   { transform: scale(0); }
     80%  { transform: scale(1.2); }
     100% { transform: scale(1); }
 }
 
-/* ── Invalid field shake + red border ── */
 .form-control.is-invalid,
 .form-select.is-invalid {
     border-color: #dc3545 !important;
-    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.2) !important;
+    box-shadow: 0 0 0 0.2rem rgba(220,53,69,0.2) !important;
     animation: shake 0.35s ease;
 }
-
 @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    20%       { transform: translateX(-5px); }
-    40%       { transform: translateX(5px); }
-    60%       { transform: translateX(-3px); }
-    80%       { transform: translateX(3px); }
+    0%,100% { transform: translateX(0); }
+    20%      { transform: translateX(-5px); }
+    40%      { transform: translateX(5px); }
+    60%      { transform: translateX(-3px); }
+    80%      { transform: translateX(3px); }
 }
+.form-control.is-valid { border-color: #198754; }
 
-.form-control.is-valid {
-    border-color: #198754;
-}
-
-/* ── Inline error message always visible when field invalid ── */
 .is-invalid ~ .invalid-feedback,
 .form-select.is-invalid ~ .invalid-feedback {
     display: block !important;
@@ -2183,70 +2270,22 @@ document.addEventListener('DOMContentLoaded', function() {
 .form-control:focus,
 .form-select:focus {
     border-color: #80bdff;
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    box-shadow: 0 0 0 0.2rem rgba(13,110,253,0.25);
 }
 
-.card {
-    transition: box-shadow 0.3s ease;
-}
+.card { transition: box-shadow 0.3s ease; }
+.card:hover { box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important; }
 
-.card:hover {
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
-}
+.form-switch .form-check-input { background-color: #6c757d; }
+.form-switch .form-check-input:checked { background-color: #0d6efd; border-color: #0d6efd; }
 
-.form-switch .form-check-input {
-    background-color: #6c757d;
-}
-
-.form-switch .form-check-input:checked {
-    background-color: #0d6efd;
-    border-color: #0d6efd;
-}
+.tab-message-box { border-radius: 0.5rem; font-weight: 500; }
 
 @media (max-width: 768px) {
     .card-body { padding: 1rem; }
     .row.g-3 > * { margin-bottom: 1rem; }
     .profile-tab-navigation .nav-link { font-size: 0.85rem; padding: 0.4rem 0.6rem; }
 }
-
-/* Tab-level message box (inside tab, not above all tabs) */
-.tab-message-box {
-    border-radius: 0.5rem;
-    font-weight: 500;
-}
-
-/* Tab error badge */
-.tab-error-badge {
-    font-size: 0.65rem;
-    border-radius: 50%;
-    padding: 2px 6px;
-    vertical-align: middle;
-}
-
-/* Invalid field */
-.form-control.is-invalid,
-.form-select.is-invalid {
-    border-color: #dc3545 !important;
-    box-shadow: 0 0 0 0.2rem rgba(220,53,69,0.2) !important;
-    animation: shake 0.35s ease;
-}
-
-@keyframes shake {
-    0%,100% { transform: translateX(0); }
-    20%      { transform: translateX(-5px); }
-    40%      { transform: translateX(5px); }
-    60%      { transform: translateX(-3px); }
-    80%      { transform: translateX(3px); }
-}
-
-.is-invalid ~ .invalid-feedback {
-    display: block !important;
-    color: #dc3545;
-    font-size: 0.8rem;
-    margin-top: 3px;
-}
-
-.form-control.is-valid { border-color: #198754; }
                     ]]>
                 </style>
             </t>
