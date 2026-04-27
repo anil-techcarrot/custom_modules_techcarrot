@@ -1695,7 +1695,7 @@ function switchProfileTab(tabKey) {
     });
 }
 
-/* ─── Sync all toggles and fire enable/disable ──────────────── */
+/* ─── Sync all toggles ──────────────────────────────────────── */
 function syncAndToggleEditMode(sourceCheckbox) {
     document.querySelectorAll('.edit-mode-toggle').forEach(t => {
         t.checked = sourceCheckbox.checked;
@@ -1732,7 +1732,6 @@ function enableEditMode() {
     document.getElementById('formActions').style.display = 'block';
     document.getElementById('viewActions').style.display = 'none';
 
-    // Attach validation listeners
     document.querySelectorAll('#personalDetailsForm input, #personalDetailsForm select').forEach(input => {
         input.removeEventListener('input', validateField);
         input.removeEventListener('blur', validateField);
@@ -1773,7 +1772,7 @@ function disableEditMode() {
     clearValidationStates();
 }
 
-/* ─── Store original data for cancel ───────────────────────── */
+/* ─── Store original data ───────────────────────────────────── */
 function storeOriginalFormData() {
     const formData = new FormData(document.getElementById('personalDetailsForm'));
     originalFormData = {};
@@ -1789,7 +1788,7 @@ function cancelEdit() {
         if (input) input.value = value;
     }
     disableEditMode();
-    showMessage('Changes cancelled successfully.', 'info');
+    showTabMessage(activeProfileTab, 'Changes cancelled.', 'info');
 }
 
 /* ─── Save as draft ─────────────────────────────────────────── */
@@ -1800,10 +1799,10 @@ function saveAsDraft() {
         draftData[key] = value;
     }
     localStorage.setItem('profileDraft', JSON.stringify(draftData));
-    showMessage('Profile saved as draft.', 'info');
+    showTabMessage(activeProfileTab, 'Profile saved as draft.', 'info');
 }
 
-/* ─── Field validation with inline error + tab badge ───────── */
+/* ─── Validate single field ─────────────────────────────────── */
 function validateField(event) {
     const field = event.target;
     const validationType = field.getAttribute('data-validation');
@@ -1812,7 +1811,7 @@ function validateField(event) {
 
     field.classList.remove('is-valid', 'is-invalid');
 
-    // Clear previous inline error message
+    // Clear previous feedback
     const feedback = field.parentNode.querySelector('.invalid-feedback');
     if (feedback) {
         feedback.textContent = '';
@@ -1854,48 +1853,40 @@ function validateField(event) {
         }
     }
 
-    // Apply valid/invalid class and show message
     if (field.value) {
         field.classList.add(isValid ? 'is-valid' : 'is-invalid');
-        if (!isValid && feedback) {
-            feedback.textContent = errorMessage;
-            feedback.style.display = 'block';
-        } else if (!isValid && !feedback) {
-            // Inject feedback div if missing
-            const errDiv = document.createElement('div');
-            errDiv.className = 'invalid-feedback';
-            errDiv.style.display = 'block';
-            errDiv.textContent = errorMessage;
-            field.parentNode.appendChild(errDiv);
+        if (!isValid) {
+            if (feedback) {
+                feedback.textContent = errorMessage;
+                feedback.style.display = 'block';
+            } else {
+                const errDiv = document.createElement('div');
+                errDiv.className = 'invalid-feedback';
+                errDiv.style.display = 'block';
+                errDiv.textContent = errorMessage;
+                field.parentNode.appendChild(errDiv);
+            }
         }
     }
 
-    // Update tab error badges after each field validation
     updateTabErrorBadges();
     return isValid;
 }
 
-/* ─── Count errors per tab, show red badge on tab button ────── */
+/* ─── Tab error badges ──────────────────────────────────────── */
 function updateTabErrorBadges() {
-    const tabGroups = ['basic', 'professional', 'family', 'education', 'documents'];
-    tabGroups.forEach(tabKey => {
+    ['basic', 'professional', 'family', 'education', 'documents'].forEach(tabKey => {
         const tabBtn = document.querySelector(`.profile-tab-button[data-tab-target="${tabKey}"]`);
         if (!tabBtn) return;
-
-        // Count invalid fields in this tab
-        const errorCount = document.querySelectorAll(
+        const existing = tabBtn.querySelector('.tab-error-badge');
+        if (existing) existing.remove();
+        const count = document.querySelectorAll(
             `.profile-tab-section[data-tab-group="${tabKey}"] .is-invalid`
         ).length;
-
-        // Remove existing badge
-        const existingBadge = tabBtn.querySelector('.tab-error-badge');
-        if (existingBadge) existingBadge.remove();
-
-        // Add new badge if errors exist
-        if (errorCount > 0) {
+        if (count > 0) {
             const badge = document.createElement('span');
             badge.className = 'tab-error-badge badge bg-danger ms-1';
-            badge.textContent = errorCount;
+            badge.textContent = count;
             tabBtn.appendChild(badge);
         }
     });
@@ -1910,72 +1901,72 @@ function clearValidationStates() {
         el.style.display = 'none';
     });
     document.querySelectorAll('.tab-error-badge').forEach(b => b.remove());
+    // Clear all tab-level messages
+    document.querySelectorAll('.tab-message-box').forEach(b => b.remove());
 }
 
-/* ─── Messages ──────────────────────────────────────────────── */
-function showMessage(text, type) {
-    const container = document.getElementById('messageContainer');
-    const successMsg = document.getElementById('successMessage');
-    const errorMsg = document.getElementById('errorMessage');
+/* ─── Show message INSIDE current tab (not above tabs) ──────── */
+function showTabMessage(tabKey, text, type) {
+    // Remove any existing tab message in this tab
+    document.querySelectorAll('.tab-message-box').forEach(el => el.remove());
 
-    successMsg.style.display = 'none';
-    errorMsg.style.display = 'none';
-    successMsg.classList.remove('show');
-    errorMsg.classList.remove('show');
+    // Find first card in active tab to insert before it
+    const firstCard = document.querySelector(
+        `.profile-tab-section[data-tab-group="${tabKey}"]`
+    );
+    if (!firstCard) return;
 
-    if (type === 'success') {
-        document.getElementById('successText').textContent = text;
-        successMsg.style.display = 'block';
-        successMsg.classList.add('show');
-    } else {
-        document.getElementById('errorText').textContent = text;
-        errorMsg.style.display = 'block';
-        errorMsg.classList.add('show');
-    }
-    container.style.display = 'block';
-    container.scrollIntoView({ behavior: 'smooth' });
-    setTimeout(() => {
-        successMsg.classList.remove('show');
-        errorMsg.classList.remove('show');
-    }, 5000);
+    const alertClass = type === 'success' ? 'alert-success' :
+                       type === 'info'    ? 'alert-info' : 'alert-danger';
+    const icon = type === 'success' ? 'fa-check-circle' :
+                 type === 'info'    ? 'fa-info-circle' : 'fa-exclamation-triangle';
+
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `tab-message-box alert ${alertClass} alert-dismissible fade show mb-3`;
+    msgDiv.innerHTML = `
+        <i class="fa ${icon} me-2"></i>
+        <span>${text}</span>
+        <button type="button" class="btn-close" onclick="this.parentNode.remove()"></button>
+    `;
+
+    firstCard.parentNode.insertBefore(msgDiv, firstCard);
+    msgDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    // Auto dismiss after 5s
+    setTimeout(() => { if (msgDiv.parentNode) msgDiv.remove(); }, 5000);
 }
 
 /* ─── Form submit ───────────────────────────────────────────── */
 document.getElementById('personalDetailsForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
-    // Validate ALL fields with data-validation across ALL tabs
+    // Validate only fields in the CURRENT active tab
     let isFormValid = true;
     document.querySelectorAll(
-        '#personalDetailsForm input[data-validation], #personalDetailsForm select[data-validation]'
+        `.profile-tab-section[data-tab-group="${activeProfileTab}"] input[data-validation],
+         .profile-tab-section[data-tab-group="${activeProfileTab}"] select[data-validation]`
     ).forEach(input => {
         if (!validateField({ target: input })) isFormValid = false;
     });
 
-    // Update tab badges after full validation
     updateTabErrorBadges();
 
     if (!isFormValid) {
-        // Auto-switch to the FIRST tab that has an error
-        const tabGroups = ['basic', 'professional', 'family', 'education', 'documents'];
-        for (const tabKey of tabGroups) {
-            const firstError = document.querySelector(
-                `.profile-tab-section[data-tab-group="${tabKey}"] .is-invalid`
-            );
-            if (firstError) {
-                switchProfileTab(tabKey);
-                setTimeout(() => {
-                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    firstError.focus();
-                }, 150);
-                break;
-            }
+        // Find first error field in current tab and scroll to it
+        const firstError = document.querySelector(
+            `.profile-tab-section[data-tab-group="${activeProfileTab}"] .is-invalid`
+        );
+        if (firstError) {
+            setTimeout(() => {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstError.focus();
+            }, 100);
         }
-        showMessage('Please correct the highlighted errors before submitting.', 'error');
+        showTabMessage(activeProfileTab, 'Please correct the highlighted errors in this tab.', 'error');
         return;
     }
 
-    // Temporarily enable non-always-readonly selects/checkboxes so they submit
+    // Temporarily enable selects/checkboxes for form submission
     const toReenable = [];
     document.querySelectorAll(
         '#personalDetailsForm select[disabled], #personalDetailsForm input[type="checkbox"][disabled]'
@@ -1989,7 +1980,6 @@ document.getElementById('personalDetailsForm').addEventListener('submit', functi
     const formData = new FormData(this);
     const csrfToken = document.querySelector('input[name="csrf_token"]').value;
 
-    // Re-disable after capturing formData
     toReenable.forEach(el => el.setAttribute('disabled', 'disabled'));
 
     fetch('/my/employee/personal', {
@@ -2000,16 +1990,16 @@ document.getElementById('personalDetailsForm').addEventListener('submit', functi
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            showMessage('Profile updated successfully!', 'success');
+            showTabMessage(activeProfileTab, 'Profile updated successfully!', 'success');
             disableEditMode();
             localStorage.removeItem('profileDraft');
         } else {
-            showMessage('Error: ' + (data.error || 'Unknown error'), 'error');
+            showTabMessage(activeProfileTab, 'Error: ' + (data.error || 'Unknown error'), 'error');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showMessage('Network error. Please try again.', 'error');
+        showTabMessage(activeProfileTab, 'Network error. Please try again.', 'error');
     });
 });
 
@@ -2022,7 +2012,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     switchProfileTab(activeProfileTab);
 
-    // Restore draft if any
     const draftData = localStorage.getItem('profileDraft');
     if (draftData) {
         try {
@@ -2031,7 +2020,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const input = document.querySelector(`[name="${key}"]`);
                 if (input && input.type !== 'hidden') input.value = value;
             });
-            showMessage('Draft data loaded. You can continue editing or discard changes.', 'info');
+            showTabMessage(activeProfileTab, 'Draft data loaded.', 'info');
         } catch (e) {
             console.error('Error loading draft:', e);
         }
@@ -2132,6 +2121,45 @@ document.addEventListener('DOMContentLoaded', function() {
     .row.g-3 > * { margin-bottom: 1rem; }
     .profile-tab-navigation .nav-link { font-size: 0.85rem; padding: 0.4rem 0.6rem; }
 }
+
+/* Tab-level message box (inside tab, not above all tabs) */
+.tab-message-box {
+    border-radius: 0.5rem;
+    font-weight: 500;
+}
+
+/* Tab error badge */
+.tab-error-badge {
+    font-size: 0.65rem;
+    border-radius: 50%;
+    padding: 2px 6px;
+    vertical-align: middle;
+}
+
+/* Invalid field */
+.form-control.is-invalid,
+.form-select.is-invalid {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220,53,69,0.2) !important;
+    animation: shake 0.35s ease;
+}
+
+@keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%      { transform: translateX(-5px); }
+    40%      { transform: translateX(5px); }
+    60%      { transform: translateX(-3px); }
+    80%      { transform: translateX(3px); }
+}
+
+.is-invalid ~ .invalid-feedback {
+    display: block !important;
+    color: #dc3545;
+    font-size: 0.8rem;
+    margin-top: 3px;
+}
+
+.form-control.is-valid { border-color: #198754; }
                     ]]>
                 </style>
             </t>

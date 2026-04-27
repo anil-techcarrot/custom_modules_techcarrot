@@ -12,6 +12,7 @@ class HrEmployeeInherit(models.Model):
 
     mother_tongue_name = fields.Char(string='Mother Tongue')
     language_known_name = fields.Char(string='language known')
+    spouse_passport_expiry_date = fields.Datetime(string='Spouse Passport Expiry Date')
 
     bank_account_no = fields.Char(string='Bank Account Number')
 
