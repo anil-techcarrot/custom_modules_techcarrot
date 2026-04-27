@@ -230,8 +230,8 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Blood Group</label>
                                     <input type="text" class="form-control"
-                                           t-att-value="employee.blood_group or ''"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                           t-att-value="{'a_pos': 'A+', 'a_neg': 'A-', 'b_pos': 'B+', 'b_neg': 'B-', 'ab_pos': 'AB+', 'ab_neg': 'AB-', 'o_pos': 'O+', 'o_neg': 'O-', 'unknown': 'Unknown'}.get(employee.blood_group, '')"
+                                           readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Religion</label>
@@ -771,11 +771,11 @@
                         </div>
                     </div>
 
-                    <!-- Employee Skills -->
+                    Employee Skills
                     <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="professional">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
-                                <i class="fa fa-user-circle text-primary me-2"></i>Employee Skills &amp; Details
+                                <i class="fa fa-user-circle text-primary me-2"></i>Employee Nominee &amp; Details
                             </h5>
                         </div>
                         <div class="card-body">
@@ -978,17 +978,17 @@
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">
-                                        <i class="fa fa-user text-muted me-1"></i>Relationship
-                                        <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="text" name="l10n_in_relationship" class="form-control"
-                                           t-att-value="employee.l10n_in_relationship"
-                                           readonly="readonly" required="required"
-                                           data-validation="required"/>
-                                    <div class="invalid-feedback"></div>
-                                </div>
+                                <!--                                <div class="col-md-6">-->
+                                <!--                                    <label class="form-label fw-bold">-->
+                                <!--                                        <i class="fa fa-user text-muted me-1"></i>Relationship-->
+                                <!--                                        <span class="text-danger">*</span>-->
+                                <!--                                    </label>-->
+                                <!--                                    <input type="text" name="l10n_in_relationship" class="form-control"-->
+                                <!--                                           t-att-value="employee.l10n_in_relationship"-->
+                                <!--                                           readonly="readonly" required="required"-->
+                                <!--                                           data-validation="required"/>-->
+                                <!--                                    <div class="invalid-feedback"></div>-->
+                                <!--                                </div>-->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-phone text-muted me-1"></i>Emergency Contact Phone
@@ -1030,7 +1030,7 @@
                                     <label class="form-label fw-bold">Relationship with Employee</label>
                                     <input type="text" class="form-control"
                                            t-att-value="employee.relationship_with_emp_id.name if employee.relationship_with_emp_id else ''"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                           readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Contact Person Phone Number</label>
@@ -1054,7 +1054,7 @@
                                     <label class="form-label fw-bold">Relationship with Employee (1)</label>
                                     <input type="text" class="form-control"
                                            t-att-value="employee.second_relation_with_employee or ''"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                           readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Contact Person Phone Number (1)</label>
@@ -1109,7 +1109,7 @@
                                     <label class="form-label fw-bold">Passport Issuing Country</label>
                                     <input type="text" class="form-control"
                                            t-att-value="employee.spouse_passport_issuing_countries_id.name if employee.spouse_passport_issuing_countries_id else ''"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                           readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Visa No</label>
@@ -1288,7 +1288,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
-                                        <i class="fa fa-heart text-muted me-1"></i>Marital Status
+                                        Marital Status
                                     </label>
                                     <select name="marital" class="form-select"
                                             data-always-readonly="1" disabled="disabled">
@@ -1316,32 +1316,32 @@
                                     </select>
                                     <div class="invalid-feedback"></div>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Certificate</label>
-                                    <select name="certificate" class="form-select" disabled="disabled">
-                                        <option value="">Select Certificate</option>
-                                        <option value="graduate"
-                                                t-att-selected="'selected' if employee.certificate == 'graduate' else None">
-                                            Graduate
-                                        </option>
-                                        <option value="bachelor"
-                                                t-att-selected="'selected' if employee.certificate == 'bachelor' else None">
-                                            Bachelor
-                                        </option>
-                                        <option value="master"
-                                                t-att-selected="'selected' if employee.certificate == 'master' else None">
-                                            Master
-                                        </option>
-                                        <option value="doctor"
-                                                t-att-selected="'selected' if employee.certificate == 'doctor' else None">
-                                            Doctor
-                                        </option>
-                                        <option value="other"
-                                                t-att-selected="'selected' if employee.certificate == 'other' else None">
-                                            Other
-                                        </option>
-                                    </select>
-                                </div>
+                                <!--                                <div class="col-md-6">-->
+                                <!--                                    <label class="form-label fw-bold">Certificate</label>-->
+                                <!--                                    <select name="certificate" class="form-select" disabled="disabled">-->
+                                <!--                                        <option value="">Select Certificate</option>-->
+                                <!--                                        <option value="graduate"-->
+                                <!--                                                t-att-selected="'selected' if employee.certificate == 'graduate' else None">-->
+                                <!--                                            Graduate-->
+                                <!--                                        </option>-->
+                                <!--                                        <option value="bachelor"-->
+                                <!--                                                t-att-selected="'selected' if employee.certificate == 'bachelor' else None">-->
+                                <!--                                            Bachelor-->
+                                <!--                                        </option>-->
+                                <!--                                        <option value="master"-->
+                                <!--                                                t-att-selected="'selected' if employee.certificate == 'master' else None">-->
+                                <!--                                            Master-->
+                                <!--                                        </option>-->
+                                <!--                                        <option value="doctor"-->
+                                <!--                                                t-att-selected="'selected' if employee.certificate == 'doctor' else None">-->
+                                <!--                                            Doctor-->
+                                <!--                                        </option>-->
+                                <!--                                        <option value="other"-->
+                                <!--                                                t-att-selected="'selected' if employee.certificate == 'other' else None">-->
+                                <!--                                            Other-->
+                                <!--                                        </option>-->
+                                <!--                                    </select>-->
+                                <!--                                </div>-->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Father Name</label>
                                     <input type="text" name="father_name" class="form-control"
