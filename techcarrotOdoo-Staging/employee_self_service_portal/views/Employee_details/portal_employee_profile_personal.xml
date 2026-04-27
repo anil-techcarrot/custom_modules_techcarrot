@@ -27,8 +27,41 @@
                       enctype="multipart/form-data">
                     <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
 
+                    <ul class="nav nav-tabs mb-4 profile-tab-navigation" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button type="button" class="nav-link profile-tab-button active"
+                                    data-tab-target="basic" aria-selected="true">
+                                Basic Info
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button type="button" class="nav-link profile-tab-button"
+                                    data-tab-target="professional" aria-selected="false">
+                                Professional Details
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button type="button" class="nav-link profile-tab-button"
+                                    data-tab-target="family" aria-selected="false">
+                                Family Details
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button type="button" class="nav-link profile-tab-button"
+                                    data-tab-target="education" aria-selected="false">
+                                Education
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button type="button" class="nav-link profile-tab-button"
+                                    data-tab-target="documents" aria-selected="false">
+                                Documents
+                            </button>
+                        </li>
+                    </ul>
+
                     <!-- Basic Information Section -->
-                    <div class="card mb-4 shadow-sm">
+                    <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="basic">
                         <div class="card-header bg-light d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">
                                 <i class="fa fa-user text-primary me-2"></i>Basic Information
@@ -243,7 +276,7 @@
 
 
                     <!-- Emergency Contact Person Address Section -->
-                    <div class="card mb-4 shadow-sm">
+                    <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="family">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
                                 <i class="fa fa-home text-primary me-2"></i>
@@ -270,7 +303,7 @@
 
 
                     <!--  Work Information Section  -->
-                    <div class="card mb-4 shadow-sm">
+                    <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="professional">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
                                 <i class="fa fa-briefcase text-primary me-2"/>
@@ -326,7 +359,7 @@
                     </div>
 
                     <!-- Location Section -->
-                    <div class="card mb-4 shadow-sm">
+                    <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="professional">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
                                 <i class="fa fa-map-marker text-primary me-2"></i>Location
@@ -360,7 +393,7 @@
                     </div>
 
 
-                    <div class="card mb-4 shadow-sm">
+                    <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="professional">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
                                 <i class="fa fa-id-card text-primary me-2"></i>Document and Personal Details
@@ -522,7 +555,7 @@
                     </div>
 
 
-                    <div class="card mb-4 shadow-sm">
+                    <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="basic">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">Personal Information</h5>
                         </div>
@@ -560,7 +593,7 @@
 
 
                     <!-- Identity Documents Section -->
-                    <div class="card mb-4 shadow-sm">
+                    <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="basic">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
                                 <i class="fa fa-id-card text-primary me-2"></i>Identity Documents
@@ -646,7 +679,7 @@
                         </div>
                     </div>
                     <!-- Contact Information Section -->
-                    <div class="card mb-4 shadow-sm">
+                    <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="basic">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
                                 <i class="fa fa-address-book text-primary me-2"></i>Contact Information
@@ -739,7 +772,7 @@
                     </div>
 
                     <!-- ================= Dependent Details ================= -->
-                    <div class="card mb-4 shadow-sm">
+                    <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="family">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
                                 <i class="fa fa-child text-primary me-2"></i>Dependent Details
@@ -877,7 +910,7 @@
                     </div>
 
                     <!-- ================= General Information ================= -->
-                    <div class="card mb-4 shadow-sm">
+                    <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="professional">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
                                 <i class="fa fa-info-circle text-primary me-2"></i>General Information
@@ -919,7 +952,7 @@
                     </div>
 
                     <!-- ================= Full Address Inside UAE ================= -->
-                    <div class="card mb-4 shadow-sm">
+                    <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="professional">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
                                 <i class="fa fa-map-marker text-primary me-2"></i>Full Address Inside UAE
@@ -1010,7 +1043,7 @@
                     </div>
 
                     <!-- ================= Emergency Contact Person Address Inside UAE ================= -->
-                    <div class="card mb-4 shadow-sm">
+                    <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="family">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
                                 <i class="fa fa-ambulance text-primary me-2"></i>Emergency Contact Person Address Inside
@@ -1088,7 +1121,7 @@
                     </div>
 
                     <!-- ================= Spouse Info ================= -->
-                    <div class="card mb-4 shadow-sm">
+                    <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="family">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
                                 <i class="fa fa-heart text-primary me-2"></i>Spouse Info
@@ -1172,7 +1205,7 @@
                     </div>
 
                     <!-- ================= Father, Mother and Dependent Info ================= -->
-                    <div class="card mb-4 shadow-sm">
+                    <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="family">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
                                 <i class="fa fa-users text-primary me-2"></i>Father, Mother and Dependent Info
@@ -1242,7 +1275,7 @@
                     </div>
 
                     <!-- ================= Employee Details ================= -->
-                    <div class="card mb-4 shadow-sm">
+                    <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="professional">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
                                 <i class="fa fa-user-circle text-primary me-2"></i>Employee Details
@@ -1305,7 +1338,7 @@
                     </div>
 
                     <!-- ================= Employee Education Details ================= -->
-                    <div class="card mb-4 shadow-sm">
+                    <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="education">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
                                 <i class="fa fa-graduation-cap text-primary me-2"></i>Employee Education Details
@@ -1411,7 +1444,7 @@
                     </div>
 
                     <!-- Emergency Contact Section -->
-                    <div class="card mb-4 shadow-sm">
+                    <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="family">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
                                 <i class="fa fa-ambulance text-primary me-2"></i>Emergency Contact
@@ -1452,7 +1485,7 @@
                         </div>
                     </div>
 
-                    <div class="card mb-4 shadow-sm">
+                    <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="documents">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">
                                 <i class="fa fa-folder-open text-primary me-2"></i>Document Management
@@ -1562,6 +1595,24 @@
                     <![CDATA[
           let isEditMode = false;
 let originalFormData = {};
+let activeProfileTab = 'basic';
+
+function switchProfileTab(tabKey) {
+    activeProfileTab = tabKey;
+
+    const sectionCards = document.querySelectorAll('#personalDetailsForm .profile-tab-section');
+    sectionCards.forEach(card => {
+        const cardTab = card.getAttribute('data-tab-group');
+        card.style.display = cardTab === tabKey ? '' : 'none';
+    });
+
+    const tabButtons = document.querySelectorAll('#personalDetailsForm .profile-tab-button');
+    tabButtons.forEach(button => {
+        const isActive = button.getAttribute('data-tab-target') === tabKey;
+        button.classList.toggle('active', isActive);
+        button.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+}
 
 function toggleEditMode() {
     const editMode = document.getElementById('editMode').checked;
@@ -1792,6 +1843,14 @@ document.getElementById('personalDetailsForm').addEventListener('submit', functi
 });
 
 document.addEventListener('DOMContentLoaded', function() {
+    const tabButtons = document.querySelectorAll('#personalDetailsForm .profile-tab-button');
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            switchProfileTab(this.getAttribute('data-tab-target'));
+        });
+    });
+    switchProfileTab(activeProfileTab);
+
     const draftData = localStorage.getItem('profileDraft');
     if (draftData) {
         try {
@@ -1816,6 +1875,16 @@ document.addEventListener('DOMContentLoaded', function() {
             font-weight: 600;
             color: #495057;
             margin-bottom: 0.5rem;
+          }
+
+          .profile-tab-navigation .nav-link {
+            border-radius: 0.5rem 0.5rem 0 0;
+            font-weight: 600;
+            color: #495057;
+          }
+
+          .profile-tab-navigation .nav-link.active {
+            color: #0d6efd;
           }
 
           .form-control:focus, .form-select:focus {
