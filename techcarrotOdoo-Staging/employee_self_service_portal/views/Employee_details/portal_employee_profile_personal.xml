@@ -485,26 +485,26 @@
                                            readonly="readonly"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
-                                <div class="col-md-4">
-                                    <label class="form-label fw-bold">Home-Work Distance</label>
-                                    <div class="input-group">
-                                        <input type="number" name="distance_home_work" class="form-control"
-                                               t-att-value="employee.distance_home_work or ''"
-                                               readonly="readonly" min="0" placeholder="0"/>
-                                        <select name="km_home_work" class="form-select" style="max-width: 80px;"
-                                                disabled="disabled">
-                                            <option value="km"
-                                                    t-att-selected="'selected' if employee.km_home_work == 'km' else None">
-                                                km
-                                            </option>
-                                            <option value="mi"
-                                                    t-att-selected="'selected' if employee.km_home_work == 'mi' else None">
-                                                mi
-                                            </option>
-                                        </select>
-                                    </div>
-                                    <div class="invalid-feedback"></div>
-                                </div>
+<!--                                <div class="col-md-4">-->
+<!--                                    <label class="form-label fw-bold">Home-Work Distance</label>-->
+<!--                                    <div class="input-group">-->
+<!--                                        <input type="number" name="distance_home_work" class="form-control"-->
+<!--                                               t-att-value="employee.distance_home_work or ''"-->
+<!--                                               readonly="readonly" min="0" placeholder="0"/>-->
+<!--                                        <select name="km_home_work" class="form-select" style="max-width: 80px;"-->
+<!--                                                disabled="disabled">-->
+<!--                                            <option value="km"-->
+<!--                                                    t-att-selected="'selected' if employee.km_home_work == 'km' else None">-->
+<!--                                                km-->
+<!--                                            </option>-->
+<!--                                            <option value="mi"-->
+<!--                                                    t-att-selected="'selected' if employee.km_home_work == 'mi' else None">-->
+<!--                                                mi-->
+<!--                                            </option>-->
+<!--                                        </select>-->
+<!--                                    </div>-->
+<!--                                    <div class="invalid-feedback"></div>-->
+<!--                                </div>-->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Bank Accounts</label>
                                     <input type="text" class="form-control"
