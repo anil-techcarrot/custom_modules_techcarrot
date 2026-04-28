@@ -741,7 +741,7 @@
                                     <label class="form-label fw-bold">Country of Residency</label>
                                     <input type="text" class="form-control"
                                            t-att-value="employee.country_residences_id.name or ''"
-                                            readonly="readonly"/>
+                                           readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Country</label>
@@ -1113,31 +1113,31 @@
                                     <label class="form-label fw-bold">Designation</label>
                                     <input type="text" name="designation" class="form-control"
                                            t-att-value="employee.designation or ''"
-                                            readonly="readonly"/>
+                                           readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Period in Company</label>
                                     <input type="text" name="period_in_company" class="form-control"
                                            t-att-value="employee.period_in_company or ''"
-                                            readonly="readonly"/>
+                                           readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Reason of Leaving</label>
                                     <input type="text" name="reason_of_leaving" class="form-control"
                                            t-att-value="employee.reason_of_leaving or ''"
-                                            readonly="readonly"/>
+                                           readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Exit Type</label>
                                     <input type="text" class="form-control"
                                            t-att-value="employee.exit_type_id.name if employee.exit_type_id else ''"
-                                            readonly="readonly"/>
+                                           readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Exit Reason</label>
                                     <input type="text" class="form-control"
                                            t-att-value="employee.exit_reason_id.name if employee.exit_reason_id else ''"
-                                            readonly="readonly"/>
+                                           readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Home Country ID Name</label>
@@ -1159,13 +1159,13 @@
                                     <label class="form-label fw-bold">Customer / Account Name</label>
                                     <input type="text" class="form-control"
                                            t-att-value="employee.customer_acc_name or ''"
-                                            readonly="readonly"/>
+                                           readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Candidate Source</label>
                                     <input type="text" class="form-control"
                                            t-att-value="employee.candidate_source or ''"
-                                            readonly="readonly"/>
+                                           readonly="readonly"/>
                                 </div>
                             </div>
                         </div>
@@ -2294,14 +2294,22 @@ document.getElementById('personalDetailsForm').addEventListener('submit', functi
     })
     .then(response => response.json())
     .then(data => {
-        if (data.success) {
-            showTabMessage(activeProfileTab, 'Profile updated successfully!', 'success');
-            disableEditMode();
-            localStorage.removeItem('profileDraft');
-        } else {
-            showTabMessage(activeProfileTab, 'Error: ' + (data.error || 'Unknown error'), 'error');
-        }
-    })
+    if (data.success) {
+        disableEditMode();
+        localStorage.removeItem('profileDraft');
+        // Show pending approval message instead of "updated successfully"
+        const ref = data.reference || '';
+        showTabMessage(
+            activeProfileTab,
+            ' Your changes have been submitted to HR for review and approval.' +
+            (ref ? ' Reference: <strong>' + ref + '</strong>' : '') +
+            ' You will receive an email once HR approves or rejects your request.',
+            'success'
+        );
+    } else {
+        showTabMessage(activeProfileTab, 'Error: ' + (data.error || 'Unknown error'), 'error');
+    }
+})
     .catch(error => {
         console.error('Error:', error);
         showTabMessage(activeProfileTab, 'Network error. Please try again.', 'error');
