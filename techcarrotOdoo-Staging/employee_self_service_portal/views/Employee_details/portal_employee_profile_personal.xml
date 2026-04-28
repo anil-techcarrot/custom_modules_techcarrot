@@ -741,7 +741,7 @@
                                     <label class="form-label fw-bold">Country of Residency</label>
                                     <input type="text" class="form-control"
                                            t-att-value="employee.country_residences_id.name or ''"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Country</label>
@@ -1107,37 +1107,37 @@
                                     <label class="form-label fw-bold">Previous Company Name</label>
                                     <input type="text" name="previous_company_name" class="form-control"
                                            t-att-value="employee.previous_company_name or ''"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                           readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Designation</label>
                                     <input type="text" name="designation" class="form-control"
                                            t-att-value="employee.designation or ''"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Period in Company</label>
                                     <input type="text" name="period_in_company" class="form-control"
                                            t-att-value="employee.period_in_company or ''"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Reason of Leaving</label>
                                     <input type="text" name="reason_of_leaving" class="form-control"
                                            t-att-value="employee.reason_of_leaving or ''"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Exit Type</label>
                                     <input type="text" class="form-control"
                                            t-att-value="employee.exit_type_id.name if employee.exit_type_id else ''"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Exit Reason</label>
                                     <input type="text" class="form-control"
                                            t-att-value="employee.exit_reason_id.name if employee.exit_reason_id else ''"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Home Country ID Name</label>
@@ -1159,13 +1159,13 @@
                                     <label class="form-label fw-bold">Customer / Account Name</label>
                                     <input type="text" class="form-control"
                                            t-att-value="employee.customer_acc_name or ''"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Candidate Source</label>
                                     <input type="text" class="form-control"
                                            t-att-value="employee.candidate_source or ''"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                            readonly="readonly"/>
                                 </div>
                             </div>
                         </div>

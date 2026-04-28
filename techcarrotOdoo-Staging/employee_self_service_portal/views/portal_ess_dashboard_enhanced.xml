@@ -60,12 +60,12 @@
                                     <li>
                                         <hr class="dropdown-divider"/>
                                     </li>
-                                    <li>
-                                        <a class="dropdown-item" href="/my/employee">
-                                            <i class="fa fa-user"></i>
-                                            Profile Settings
-                                        </a>
-                                    </li>
+                                    <!--                                    <li>-->
+                                    <!--                                        <a class="dropdown-item" href="/my/employee">-->
+                                    <!--                                            <i class="fa fa-user"></i>-->
+                                    <!--                                            Profile Settings-->
+                                    <!--                                        </a>-->
+                                    <!--                                    </li>-->
                                 </ul>
                             </div>
                         </div>
@@ -107,6 +107,51 @@
                                         <i class="fa fa-clock-o fa-2x"></i>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Card -->
+                    <div class="col-md-6">
+                        <div class="module-card card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="icon-circle bg-secondary bg-opacity-10 me-3">
+                                        <i class="fa fa-user-circle fa-lg text-secondary"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-1">My Profile</h5>
+                                        <p class="text-muted mb-0 small">View and update your information</p>
+                                    </div>
+                                </div>
+
+                                <!-- Employee quick info -->
+                                <div class="profile-summary mb-3">
+                                    <div class="d-flex justify-content-between mt-1">
+                                        <span class="text-muted small">Name</span>
+                                        <strong class="small" t-esc="employee.name if employee else '—'"/>
+                                    </div>
+                                    <div class="d-flex justify-content-between mt-1">
+                                        <span class="text-muted small">Department</span>
+                                        <strong class="small"
+                                                t-esc="employee.department_id.name if employee and employee.department_id else '—'"/>
+                                    </div>
+                                    <div class="d-flex justify-content-between mt-1">
+                                        <span class="text-muted small">Job Title</span>
+                                        <strong class="small"
+                                                t-esc="employee.job_title if employee and employee.job_title else '—'"/>
+                                    </div>
+                                    <div class="d-flex justify-content-between mt-1">
+                                        <span class="text-muted small">Work Email</span>
+                                        <strong class="small"
+                                                t-esc="employee.work_email if employee and employee.work_email else '—'"/>
+                                    </div>
+                                </div>
+
+                                <a href="/my/employee" class="btn btn-outline-secondary btn-sm w-100">
+                                    <i class="fa fa-edit me-1"></i>
+                                    Edit Profile
+                                </a>
                             </div>
                         </div>
                     </div>
