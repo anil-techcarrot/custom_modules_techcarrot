@@ -112,6 +112,8 @@
                 <field name="name" string="Reference"/>
                 <field name="employee_id" string="Employee"/>
 
+                <separator/>
+
                 <filter string="Pending Review"
                         name="filter_pending"
                         domain="[('state','=','pending')]"/>
@@ -124,20 +126,20 @@
                         name="filter_rejected"
                         domain="[('state','=','rejected')]"/>
 
-                <!-- ✅ Odoo 19 FIX -->
-                <groupby>
-                    <filter string="Status"
-                            name="group_state"
-                            context="{'group_by': 'state'}"/>
+                <separator string="Group By"/>
 
-                    <filter string="Department"
-                            name="group_dept"
-                            context="{'group_by': 'department_id'}"/>
+                <!-- ✅ CORRECT WAY -->
+                <filter string="Status"
+                        name="group_state"
+                        context="{'group_by': 'state'}"/>
 
-                    <filter string="Employee"
-                            name="group_employee"
-                            context="{'group_by': 'employee_id'}"/>
-                </groupby>
+                <filter string="Department"
+                        name="group_dept"
+                        context="{'group_by': 'department_id'}"/>
+
+                <filter string="Employee"
+                        name="group_employee"
+                        context="{'group_by': 'employee_id'}"/>
 
             </search>
         </field>
