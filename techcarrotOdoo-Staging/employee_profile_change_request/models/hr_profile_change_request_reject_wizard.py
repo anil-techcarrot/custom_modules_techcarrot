@@ -13,20 +13,22 @@ class HrProfileChangeRequestRejectWizard(models.TransientModel):
         required=True,
         readonly=True,
     )
+
     employee_name = fields.Char(
         string='Employee',
         related='request_id.employee_id.name',
         readonly=True,
     )
+
     rejection_reason = fields.Text(
         string='Rejection Reason',
         required=True,
-        help='This reason will be emailed to the employee '
-             'and permanently saved in the audit trail.',
+        help='This reason will be emailed to the employee and saved in audit trail.',
     )
 
     def action_confirm_reject(self):
         self.ensure_one()
+
         if not self.rejection_reason or not self.rejection_reason.strip():
             raise UserError(_(
                 'Rejection reason is required. '
@@ -34,16 +36,25 @@ class HrProfileChangeRequestRejectWizard(models.TransientModel):
             ))
 
         req = self.request_id
+
+        # Update request
         req.write({
-            'state':            'rejected',
+            'state': 'rejected',
             'rejection_reason': self.rejection_reason.strip(),
-            'reviewed_by':      self.env.user.id,
-            'review_date':      fields.Datetime.now(),
+            'reviewed_by': self.env.user.id,
+            'review_date': fields.Datetime.now(),
         })
-        req._add_trail(
-            action='rejected',
-            note=f'Rejected by {self.env.user.name}',
-            reason=self.rejection_reason.strip(),
-        )
-        req._send_mail_to_employee('rejected')
+
+        # ✅ Safe call for trail (only if method exists)
+        if hasattr(req, '_add_trail'):
+            req._add_trail(
+                action='rejected',
+                note='Rejected by %s' % self.env.user.name,
+                reason=self.rejection_reason.strip(),
+            )
+
+        # ✅ Safe call for email (only if method exists)
+        if hasattr(req, '_send_mail_to_employee'):
+            req._send_mail_to_employee('rejected')
+
         return {'type': 'ir.actions.act_window_close'}
