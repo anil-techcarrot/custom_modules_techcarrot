@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- ── List View ── -->
     <record id="view_profile_change_request_list" model="ir.ui.view">
         <field name="name">hr.profile.change.request.list</field>
         <field name="model">hr.profile.change.request</field>
@@ -24,7 +23,6 @@
         </field>
     </record>
 
-    <!-- ── Form View ── -->
     <record id="view_profile_change_request_form" model="ir.ui.view">
         <field name="name">hr.profile.change.request.form</field>
         <field name="model">hr.profile.change.request</field>
@@ -93,7 +91,6 @@
         </field>
     </record>
 
-    <!-- ── Search View ── -->
     <record id="view_profile_change_request_search" model="ir.ui.view">
         <field name="name">hr.profile.change.request.search</field>
         <field name="model">hr.profile.change.request</field>
@@ -110,7 +107,7 @@
                 <filter string="Rejected"
                         name="filter_rejected"
                         domain="[('state','=','rejected')]"/>
-                <group expand="1" string="Group By">
+                <group string="Group By">
                     <filter string="Status"
                             name="group_state"
                             context="{'group_by':'state'}"/>
@@ -125,7 +122,6 @@
         </field>
     </record>
 
-    <!-- ── Window Actions ── -->
     <record id="action_profile_change_request_all" model="ir.actions.act_window">
         <field name="name">All Change Requests</field>
         <field name="res_model">hr.profile.change.request</field>
@@ -145,7 +141,6 @@
         <field name="search_view_id" ref="view_profile_change_request_search"/>
     </record>
 
-    <!-- ── Menus ── -->
     <menuitem id="menu_profile_change_root"
               name="Profile Change Requests"
               parent="hr.menu_hr_root"
