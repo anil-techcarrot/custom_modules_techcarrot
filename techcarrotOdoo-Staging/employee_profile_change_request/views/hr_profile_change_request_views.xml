@@ -168,8 +168,7 @@
     <!-- MENUS -->
     <menuitem id="menu_profile_change_root"
               name="Profile Change Requests"
-              parent="hr.menu_hr_root"
-              sequence="99"/>
+              sequence="1"/>
 
     <menuitem id="menu_profile_change_all"
               name="All Requests"
