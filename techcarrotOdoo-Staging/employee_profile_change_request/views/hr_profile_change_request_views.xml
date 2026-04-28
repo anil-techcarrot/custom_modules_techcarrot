@@ -75,7 +75,7 @@
                     <field name="changed_fields_display" widget="html" readonly="1"/>
                     <separator string="Audit Trail"/>
                     <field name="trail_ids" readonly="1">
-                        <list editable="0">
+                        <list>
                             <field name="action_date"/>
                             <field name="action" widget="badge"
                                    decoration-success="action == 'approved'"
