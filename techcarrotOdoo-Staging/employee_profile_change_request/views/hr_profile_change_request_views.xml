@@ -16,12 +16,10 @@
                 <field name="submission_date"/>
                 <field name="review_date"/>
                 <field name="reviewed_by"/>
-                <field name="state"
-                       widget="badge"
+                <field name="state" widget="badge"
                        decoration-warning="state == 'pending'"
                        decoration-success="state == 'approved'"
-                       decoration-danger="state == 'rejected'"
-                       decoration-secondary="state == 'draft'"/>
+                       decoration-danger="state == 'rejected'"/>
             </list>
         </field>
     </record>
@@ -74,15 +72,12 @@
                         </group>
                     </group>
                     <separator string="Submitted Changes (Current vs New)"/>
-                    <field name="changed_fields_display"
-                           widget="html"
-                           readonly="1"/>
+                    <field name="changed_fields_display" widget="html" readonly="1"/>
                     <separator string="Audit Trail"/>
                     <field name="trail_ids" readonly="1">
                         <list editable="0">
                             <field name="action_date"/>
-                            <field name="action"
-                                   widget="badge"
+                            <field name="action" widget="badge"
                                    decoration-success="action == 'approved'"
                                    decoration-danger="action == 'rejected'"
                                    decoration-info="action == 'submitted'"
@@ -131,32 +126,23 @@
     </record>
 
     <!-- ── Window Actions ── -->
-    <record id="action_profile_change_request_all"
-            model="ir.actions.act_window">
+    <record id="action_profile_change_request_all" model="ir.actions.act_window">
         <field name="name">All Change Requests</field>
         <field name="res_model">hr.profile.change.request</field>
         <field name="view_mode">list,form</field>
-        <field name="search_view_id"
-               ref="view_profile_change_request_search"/>
+        <field name="search_view_id" ref="view_profile_change_request_search"/>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                No profile change requests yet.
-            </p>
-            <p>
-                Requests will appear here when employees submit
-                profile updates from the self-service portal.
-            </p>
+            <p class="o_view_nocontent_smiling_face">No profile change requests yet.</p>
+            <p>Requests will appear here when employees submit profile updates from the portal.</p>
         </field>
     </record>
 
-    <record id="action_profile_change_request_pending"
-            model="ir.actions.act_window">
+    <record id="action_profile_change_request_pending" model="ir.actions.act_window">
         <field name="name">Pending Review</field>
         <field name="res_model">hr.profile.change.request</field>
         <field name="view_mode">list,form</field>
         <field name="domain">[('state','=','pending')]</field>
-        <field name="search_view_id"
-               ref="view_profile_change_request_search"/>
+        <field name="search_view_id" ref="view_profile_change_request_search"/>
     </record>
 
     <!-- ── Menus ── -->
