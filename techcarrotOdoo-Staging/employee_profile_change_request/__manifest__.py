@@ -17,7 +17,7 @@
         'data/mail_template_data.xml',
         # 'views/email_templates.xml',
         # 'views/hr_profile_change_request_wizard_views.xml',
-        'views/hr_profile_change_request_views.xml',
+        # 'views/hr_profile_change_request_views.xml',
     ],
     'installable': True,
     'auto_install': False,
