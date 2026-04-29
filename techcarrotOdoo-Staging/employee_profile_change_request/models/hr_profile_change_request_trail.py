@@ -66,7 +66,6 @@ class HrProfileChangeRequestTrail(models.Model):
     )
 
     work_location_id = fields.Many2one(
-        'hr.work.location',
         related='employee_id.work_location_id',
         string='Work Location',
         store=True,
