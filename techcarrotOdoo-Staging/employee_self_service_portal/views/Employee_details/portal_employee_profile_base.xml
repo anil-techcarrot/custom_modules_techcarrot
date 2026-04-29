@@ -127,13 +127,13 @@
                                 <span class="d-md-none">Personal</span>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a t-attf-class="nav-link rounded {{'active fw-bold' if section == 'payroll' else 'text-muted'}}"
-                               href="/my/employee/payroll">
-                                <i class="fa fa-money me-2"></i>
-                                Payroll
-                            </a>
-                        </li>
+<!--                        <li class="nav-item">-->
+<!--                            <a t-attf-class="nav-link rounded {{'active fw-bold' if section == 'payroll' else 'text-muted'}}"-->
+<!--                               href="/my/employee/payroll">-->
+<!--                                <i class="fa fa-money me-2"></i>-->
+<!--                                Payroll-->
+<!--                            </a>-->
+<!--                        </li>-->
                         <li class="nav-item">
                             <a t-attf-class="nav-link rounded {{'active fw-bold' if section == 'experience' else 'text-muted'}}"
                                href="/my/employee/experience">
