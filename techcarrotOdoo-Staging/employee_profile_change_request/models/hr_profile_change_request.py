@@ -388,33 +388,42 @@ class HrProfileChangeRequest(models.Model):
         })
 
     def _send_mail_to_hr(self):
-        template = self.env.ref(
-            'employee_profile_change_request'
-            '.email_template_submit_to_hr',
-            raise_if_not_found=False,
-        )
-        if template:
-            try:
-                template.send_mail(self.id, force_send=True)
-            except Exception as e:
-                _logger.warning(
-                    'Failed to send HR notification email: %s', e
-                )
+        try:
+            hr_email = self.employee_id.department_id.manager_id.work_email
+            if not hr_email:
+                _logger.warning('No HR manager email found for %s', self.employee_id.name)
+                return
+            mail = self.env['mail.mail'].sudo().create({
+                'subject': f'New Profile Change Request: {self.name} - {self.employee_id.name}',
+                'email_to': hr_email,
+                'email_from': 'notifications@techcarrot-fz-llc1.odoo.com',
+                'auto_delete': False,
+                'body_html': f'<p>Dear HR,</p><p><b>{self.employee_id.name}</b> submitted profile change request <b>{self.name}</b> on {self.submission_date}.</p><p>Login to Odoo → Human Resources → Profile Change Requests to review.</p>',
+            })
+            mail.sudo().send()
+            _logger.info('HR notification sent to %s', hr_email)
+        except Exception as e:
+            _logger.warning('Failed to send HR notification: %s', e)
 
     def _send_mail_to_employee(self, status):
-        ref = (
-            'employee_profile_change_request'
-            '.email_template_approved_to_employee'
-            if status == 'approved'
-            else
-            'employee_profile_change_request'
-            '.email_template_rejected_to_employee'
-        )
-        template = self.env.ref(ref, raise_if_not_found=False)
-        if template:
-            try:
-                template.send_mail(self.id, force_send=True)
-            except Exception as e:
-                _logger.warning(
-                    'Failed to send employee notification email: %s', e
-                )
+        try:
+            emp_email = self.employee_id.work_email or self.employee_id.private_email
+            if not emp_email:
+                return
+            if status == 'approved':
+                subject = f'Profile Update Approved - {self.name}'
+                body = f'<p>Dear <b>{self.employee_id.name}</b>,</p><p>Your request <b>{self.name}</b> has been <b style="color:green">APPROVED</b>. Your record has been updated.</p>'
+            else:
+                subject = f'Profile Update Rejected - {self.name}'
+                body = f'<p>Dear <b>{self.employee_id.name}</b>,</p><p>Your request <b>{self.name}</b> has been <b style="color:red">REJECTED</b>.</p><p>Reason: {self.rejection_reason or "No reason provided"}</p>'
+            mail = self.env['mail.mail'].sudo().create({
+                'subject': subject,
+                'email_to': emp_email,
+                'email_from': 'notifications@techcarrot-fz-llc1.odoo.com',
+                'auto_delete': False,
+                'body_html': body,
+            })
+            mail.sudo().send()
+            _logger.info('Employee notification sent to %s', emp_email)
+        except Exception as e:
+            _logger.warning('Failed to send employee notification: %s', e)
