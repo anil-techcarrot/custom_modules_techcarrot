@@ -389,21 +389,91 @@ class HrProfileChangeRequest(models.Model):
 
     def _send_mail_to_hr(self):
         try:
-            hr_email = self.employee_id.department_id.manager_id.work_email
+            hr_person = self.employee_id.hr_manager_id
+            hr_email = hr_person.work_email if hr_person else None
+
             if not hr_email:
-                _logger.warning('No HR manager email found for %s', self.employee_id.name)
+                _logger.warning(
+                    'No HR manager assigned for employee %s. '
+                    'Please set Assigned HR Manager on the employee record.',
+                    self.employee_id.name
+                )
                 return
+
             mail = self.env['mail.mail'].sudo().create({
-                'subject': f'New Profile Change Request: {self.name} - {self.employee_id.name}',
+                'subject': (
+                    f'New Profile Change Request: '
+                    f'{self.name} — {self.employee_id.name}'
+                ),
                 'email_to': hr_email,
-                'email_from': 'notifications@techcarrot-fz-llc1.odoo.com',
+                'email_from': (
+                        self.employee_id.company_id.email
+                        or 'notifications@techcarrot-fz-llc1.odoo.com'
+                ),
                 'auto_delete': False,
-                'body_html': f'<p>Dear HR,</p><p><b>{self.employee_id.name}</b> submitted profile change request <b>{self.name}</b> on {self.submission_date}.</p><p>Login to Odoo → Human Resources → Profile Change Requests to review.</p>',
+                'body_html': f'''
+                    <div style="font-family:Arial,sans-serif;max-width:600px;">
+                        <div style="background:#4e73df;padding:20px;">
+                            <h2 style="color:white;margin:0;">
+                                📋 New Profile Change Request
+                            </h2>
+                        </div>
+                        <div style="padding:20px;background:#f9f9f9;">
+                            <p>Dear {hr_person.name},</p>
+                            <p>
+                                <b>{self.employee_id.name}</b> has submitted
+                                a profile update request that requires your review.
+                            </p>
+                            <table style="width:100%;border-collapse:collapse;">
+                                <tr style="background:#eef2ff;">
+                                    <td style="padding:8px;border:1px solid #ddd;
+                                               font-weight:bold;width:35%;">
+                                        Reference
+                                    </td>
+                                    <td style="padding:8px;border:1px solid #ddd;">
+                                        {self.name}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:8px;border:1px solid #ddd;
+                                               font-weight:bold;">Employee</td>
+                                    <td style="padding:8px;border:1px solid #ddd;">
+                                        {self.employee_id.name}
+                                    </td>
+                                </tr>
+                                <tr style="background:#eef2ff;">
+                                    <td style="padding:8px;border:1px solid #ddd;
+                                               font-weight:bold;">Department</td>
+                                    <td style="padding:8px;border:1px solid #ddd;">
+                                        {self.department_id.name or '—'}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:8px;border:1px solid #ddd;
+                                               font-weight:bold;">Submitted On</td>
+                                    <td style="padding:8px;border:1px solid #ddd;">
+                                        {self.submission_date}
+                                    </td>
+                                </tr>
+                            </table>
+                            <p>
+                                Please login to Odoo →
+                                Human Resources → Profile Change Requests
+                                to review and approve or reject.
+                            </p>
+                        </div>
+                    </div>
+                ''',
             })
             mail.sudo().send()
-            _logger.info('HR notification sent to %s', hr_email)
+            _logger.info(
+                'HR notification sent to %s for request %s',
+                hr_email, self.name
+            )
         except Exception as e:
-            _logger.warning('Failed to send HR notification: %s', e)
+            _logger.warning(
+                'Failed to send HR notification: %s', e
+            )
 
     def _send_mail_to_employee(self, status):
         try:
