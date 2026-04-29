@@ -124,6 +124,13 @@ class HrProfileChangeRequest(models.Model):
         readonly=True,
     )
 
+    work_location_id = fields.Many2one(
+        related='employee_id.work_location_id',
+        string='Work Location',
+        store=True,
+        readonly=True
+    )
+
     # ── State ─────────────────────────────────────────────────────
     state = fields.Selection(
         selection=[
