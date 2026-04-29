@@ -35,6 +35,9 @@
             </xpath>
             <xpath expr="//field[@name='department_id']" position="before">
                 <field name="emp_code"/>
+                <field name="hr_manager_id"
+                       string="Assigned HR Manager"
+                       placeholder="Select HR Manager..."/>
             </xpath>
             <xpath expr="//field[@name='mobile_phone']" position="before">
                 <field name="country_code_for_work_mobile"/>
