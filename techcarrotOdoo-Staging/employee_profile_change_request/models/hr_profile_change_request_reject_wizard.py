@@ -45,7 +45,7 @@ class HrProfileChangeRequestRejectWizard(models.TransientModel):
             'review_date': fields.Datetime.now(),
         })
 
-        # ✅ Safe call for trail (only if method exists)
+        #  Safe call for trail (only if method exists)
         if hasattr(req, '_add_trail'):
             req._add_trail(
                 action='rejected',
@@ -53,7 +53,7 @@ class HrProfileChangeRequestRejectWizard(models.TransientModel):
                 reason=self.rejection_reason.strip(),
             )
 
-        # ✅ Safe call for email (only if method exists)
+        #  Safe call for email (only if method exists)
         if hasattr(req, '_send_mail_to_employee'):
             req._send_mail_to_employee('rejected')
 

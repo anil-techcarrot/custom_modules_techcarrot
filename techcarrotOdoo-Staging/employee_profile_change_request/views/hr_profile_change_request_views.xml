@@ -128,7 +128,7 @@
 
                 <separator string="Group By"/>
 
-                <!-- ✅ CORRECT WAY -->
+                <!--  CORRECT WAY -->
                 <filter string="Status"
                         name="group_state"
                         context="{'group_by': 'state'}"/>

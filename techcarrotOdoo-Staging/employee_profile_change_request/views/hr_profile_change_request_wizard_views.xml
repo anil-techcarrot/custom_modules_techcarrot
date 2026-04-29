@@ -21,7 +21,7 @@
                                placeholder="Clearly explain why this request is being rejected. This message will be emailed to the employee and saved permanently in the audit trail."/>
                     </group>
 
-                    <!-- ✅ SAFE ALERT -->
+                    <!--  SAFE ALERT -->
                     <group>
                         <div class="alert alert-warning" role="alert">
                             <i class="fa fa-exclamation-triangle me-2"/>

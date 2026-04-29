@@ -23,7 +23,7 @@
                             overflow:hidden;">
                     <div style="background:#4e73df;padding:24px 28px;">
                         <h2 style="color:white;margin:0;font-size:20px;">
-                            📋 New Profile Change Request
+                             New Profile Change Request
                         </h2>
                         <p style="color:#c8d8ff;margin:6px 0 0;font-size:13px;">
                             Action required — please review and approve or reject
@@ -97,7 +97,7 @@
             <field name="name">PCR: Approved → Employee</field>
             <field name="model_id" ref="model_hr_profile_change_request"/>
             <field name="subject">
-                ✅ Your Profile Update Has Been Approved — {{ object.name }}
+                 Your Profile Update Has Been Approved — {{ object.name }}
             </field>
             <field name="email_to">
                 {{ object.employee_id.work_email or object.employee_id.private_email or '' }}
@@ -111,7 +111,7 @@
                             overflow:hidden;">
                     <div style="background:#1cc88a;padding:24px 28px;">
                         <h2 style="color:white;margin:0;font-size:20px;">
-                            ✅ Profile Update Approved
+                             Profile Update Approved
                         </h2>
                         <p style="color:#c8fff0;margin:6px 0 0;font-size:13px;">
                             Your information has been successfully updated
@@ -175,7 +175,7 @@
             <field name="name">PCR: Rejected → Employee</field>
             <field name="model_id" ref="model_hr_profile_change_request"/>
             <field name="subject">
-                ❌ Your Profile Update Needs Correction — {{ object.name }}
+                 Your Profile Update Needs Correction — {{ object.name }}
             </field>
             <field name="email_to">
                 {{ object.employee_id.work_email or object.employee_id.private_email or '' }}
@@ -189,7 +189,7 @@
                             overflow:hidden;">
                     <div style="background:#e74a3b;padding:24px 28px;">
                         <h2 style="color:white;margin:0;font-size:20px;">
-                            ❌ Profile Update Needs Correction
+                             Profile Update Needs Correction
                         </h2>
                         <p style="color:#ffd5d5;margin:6px 0 0;font-size:13px;">
                             Please review the reason and resubmit
@@ -239,7 +239,7 @@
                         </table>
                         <div style="background:#fff8e1;border-left:4px solid #ffc107;
                                     padding:12px 16px;border-radius:4px;margin:16px 0;">
-                            <strong>📋 Note:</strong> This rejection has been permanently
+                            <strong> Note:</strong> This rejection has been permanently
                             recorded in the audit trail of your request.
                         </div>
                         <div style="text-align:center;margin:28px 0 8px;">
