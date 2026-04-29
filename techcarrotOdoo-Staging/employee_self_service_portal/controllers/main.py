@@ -2192,6 +2192,20 @@ class PortalEmployee(http.Controller):
             'section': 'bank',
         })
 
+    @http.route(
+        MY_EMPLOYEE_URL + '/orgchart',
+        type='http', auth='user', website=True, methods=['GET']
+    )
+    def portal_employee_orgchart(self, **post):
+        employee = self._get_employee()
+        return request.render(
+            'employee_self_service_portal.portal_employee_profile_orgchart',
+            {
+                'employee': employee,
+                'section': 'orgchart',
+            }
+        )
+
     @http.route('/my/employee/crm', type='http', auth='user', website=True)
     @check_portal_access('crm')
     def portal_employee_crm(self, **kwargs):
