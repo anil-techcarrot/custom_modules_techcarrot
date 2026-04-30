@@ -6,7 +6,7 @@ from datetime import datetime
 import re
 import phonenumbers
 from odoo.tools.safe_eval import safe_eval, datetime as safe_eval_datetime, dateutil as safe_eval_dateutil
-
+from num2words import num2words
 
 
 # class HrPayslipEmployees(models.TransientModel):
@@ -120,7 +120,51 @@ class HrAttendance(models.Model):
 class HrPayslip(models.Model):
     _inherit = 'hr.payslip'
     # _order = 'number desc'
-
+    
+    def get_amount_in_words(self,amount):
+        whole = int(amount)
+        decimal = int(round((amount - whole) * 100))
+     
+        currency_code = self.employee_id.currency_id.name or ''
+     
+        words = ""
+     
+     
+        if whole:
+    
+            words += num2words(whole, lang='en_IN')
+    
+            words = words.replace(',', '')
+    
+            words = words.replace('-', ' ')
+    
+            words = words.capitalize()
+     
+     
+        if decimal:
+    
+            decimal_words = num2words(decimal, lang='en_IN')
+    
+            decimal_words = decimal_words.replace(',', '')
+    
+            decimal_words = decimal_words.replace('-', ' ')
+    
+            decimal_words = decimal_words.lower()
+     
+            if words:
+    
+                words += f" decimal {decimal_words}"
+    
+            else:
+    
+                words = f"zero decimal {decimal_words}"
+     
+        if not words:
+    
+            words = "zero"
+     
+        return f"{currency_code} {words.title()} only"
+ 
 
     def _prepare_line_values(self, line, account_id, date, debit, credit):
         # if not self.company_id.batch_payroll_move_lines and line.code == "NET":
