@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="1">
+    <data noupdate="0">
         <record id="seq_profile_change_request" model="ir.sequence">
             <field name="name">Profile Change Request</field>
             <field name="code">hr.profile.change.request</field>

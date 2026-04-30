@@ -1949,19 +1949,45 @@
                     </div>
 
                     <!-- ===== FORM ACTIONS ===== -->
+                    <!-- ===== FORM ACTIONS ===== -->
                     <div class="card shadow-sm">
-                        <div class="card-body text-center">
-                            <div id="formActions" style="display: none;">
-                                <button type="button" class="btn btn-secondary me-2" onclick="cancelEdit()">
-                                    <i class="fa fa-times me-1"></i>Cancel
-                                </button>
-                                <button type="button" class="btn btn-info me-2" onclick="saveAsDraft()">
-                                    <i class="fa fa-save me-1"></i>Save as Draft
-                                </button>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fa fa-check me-1"></i>Save Changes
-                                </button>
+                    <div class="card-body text-center">
+                        <div id="formActions" style="display: none;">
+                            <!-- Disclaimer -->
+                            <div class="alert alert-warning text-start mb-3"
+                                 style="border-left: 4px solid #ffc107; border-radius: 6px;">
+                                <div class="form-check d-flex align-items-start gap-2">
+                                    <input type="checkbox"
+                                           id="personalDisclaimer"
+                                           class="form-check-input mt-1"
+                                           onchange="toggleSaveBtn('personalDisclaimer','personalSaveBtn')"/>
+                                    <label class="form-check-label" for="personalDisclaimer"
+                                           style="font-size:0.875rem;">
+                                        <strong>Employee Disclaimer</strong>
+                                        – I, hereby confirm that the information updated by me is accurate and complete
+                                        to the best of my knowledge. I agree to keep my data updated at all times and
+                                        consent to the collection and use of such information, for employment
+                                        administration and legal compliances. I acknowledge that any false or incomplete
+                                        information may lead to actions in accordance with company policies and
+                                        applicable laws.
+                                    </label>
+                                </div>
                             </div>
+                            <button type="button" class="btn btn-secondary me-2" onclick="cancelEdit()">
+                                <i class="fa fa-times me-1"></i>Cancel
+                            </button>
+                            <button type="button" class="btn btn-info me-2" onclick="saveAsDraft()">
+                                <i class="fa fa-save me-1"></i>Save as Draft
+                            </button>
+                            <button type="submit"
+                                    id="personalSaveBtn"
+                                    class="btn btn-primary"
+                                    disabled="disabled"
+                                    style="opacity:0.6;">
+                                <i class="fa fa-check me-1"></i>Save Changes
+                            </button>
+                        </div>
+                        <div id="viewActions">
                             <div id="viewActions">
                                 <p class="text-muted mb-3">
                                     <i class="fa fa-info-circle me-1"></i>
@@ -2033,6 +2059,11 @@ function enableEditMode() {
     });
     document.getElementById('formActions').style.display = 'block';
     document.getElementById('viewActions').style.display = 'none';
+    /* ── Reset disclaimer & save button whenever edit mode opens ── */
+    const disc = document.getElementById('personalDisclaimer');
+    if (disc) disc.checked = false;
+    const btn = document.getElementById('personalSaveBtn');
+    if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
     document.querySelectorAll('#personalDetailsForm input, #personalDetailsForm select').forEach(input => {
         input.removeEventListener('input', validateField);
         input.removeEventListener('blur', validateField);
@@ -2063,6 +2094,19 @@ function disableEditMode() {
     document.getElementById('formActions').style.display = 'none';
     document.getElementById('viewActions').style.display = 'block';
     clearValidationStates(activeProfileTab);
+    /* ── Reset disclaimer & save button ── */
+    const disc = document.getElementById('personalDisclaimer');
+    if (disc) disc.checked = false;
+    const btn = document.getElementById('personalSaveBtn');
+    if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
+}
+
+/* ─── Disclaimer toggle ─────────────────────────────────────── */
+function toggleSaveBtn(checkboxId, btnId) {
+    const checked = document.getElementById(checkboxId).checked;
+    const btn = document.getElementById(btnId);
+    btn.disabled = !checked;
+    btn.style.opacity = checked ? '1' : '0.6';
 }
 
 /* ─── Store original data ───────────────────────────────────── */
@@ -2096,7 +2140,6 @@ function saveAsDraft() {
 function validateField(event) {
     const field = event.target;
 
-    // Only validate fields in the currently active tab
     const parentSection = field.closest('.profile-tab-section');
     if (parentSection && parentSection.getAttribute('data-tab-group') !== activeProfileTab) {
         return true;
@@ -2108,11 +2151,9 @@ function validateField(event) {
 
     field.classList.remove('is-valid', 'is-invalid');
 
-    // Remove previously injected dynamic error
     const existingDynamic = field.parentNode.querySelector('.invalid-feedback.dynamic-error');
     if (existingDynamic) existingDynamic.remove();
 
-    // Clear static feedback
     const feedback = field.parentNode.querySelector('.invalid-feedback:not(.dynamic-error)');
     if (feedback) {
         feedback.textContent = '';
@@ -2124,7 +2165,6 @@ function validateField(event) {
 
         switch (validationType) {
 
-            /* ── EMAIL ── */
             case 'email':
                 if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
                     isValid = false;
@@ -2132,7 +2172,6 @@ function validateField(event) {
                 }
                 break;
 
-            /* ── PHONE: digits only, optional leading + ── */
             case 'phone':
                 const phoneCleaned = val.replace(/\s/g, '');
                 if (!/^\+?[0-9]+$/.test(phoneCleaned)) {
@@ -2147,7 +2186,6 @@ function validateField(event) {
                 }
                 break;
 
-            /* ── DIGITS ONLY: pure integers, no letters ── */
             case 'digits-only':
                 if (!/^[0-9]+$/.test(val)) {
                     isValid = false;
@@ -2155,7 +2193,6 @@ function validateField(event) {
                 }
                 break;
 
-            /* ── ALPHANUMERIC: letters and digits, no spaces or special chars ── */
             case 'alphanumeric':
                 if (!/^[A-Za-z0-9]+$/.test(val)) {
                     isValid = false;
@@ -2163,7 +2200,6 @@ function validateField(event) {
                 }
                 break;
 
-            /* ── EMIRATES ID: 784-XXXX-XXXXXXX-X ── */
             case 'emirates-id':
                 if (!/^[0-9]{3}-[0-9]{4}-[0-9]{7}-[0-9]{1}$/.test(val)) {
                     isValid = false;
@@ -2171,7 +2207,6 @@ function validateField(event) {
                 }
                 break;
 
-            /* ── AADHAR: exactly 12 digits ── */
             case 'aadhar':
                 if (!/^[0-9]{12}$/.test(val)) {
                     isValid = false;
@@ -2179,7 +2214,6 @@ function validateField(event) {
                 }
                 break;
 
-            /* ── PAN: 5 letters + 4 digits + 1 letter = 10 chars ── */
             case 'pan':
                 if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(val.toUpperCase())) {
                     isValid = false;
@@ -2187,7 +2221,6 @@ function validateField(event) {
                 }
                 break;
 
-            /* ── YEAR: 4-digit year, not in future ── */
             case 'year':
                 if (!/^[0-9]{4}$/.test(val)) {
                     isValid = false;
@@ -2202,7 +2235,6 @@ function validateField(event) {
                 }
                 break;
 
-            /* ── PAST DATE: must be today or earlier ── */
             case 'past-date':
                 const pastInput = new Date(val);
                 const todayForPast = new Date();
@@ -2216,7 +2248,6 @@ function validateField(event) {
                 }
                 break;
 
-            /* ── FUTURE DATE: must be after today ── */
             case 'future-date':
                 const futureInput = new Date(val);
                 const todayForFuture = new Date();
@@ -2230,7 +2261,6 @@ function validateField(event) {
                 }
                 break;
 
-            /* ── REQUIRED ── */
             case 'required':
                 if (!val) {
                     isValid = false;
@@ -2329,6 +2359,16 @@ function showTabMessage(tabKey, text, type) {
 /* ─── Form submit ───────────────────────────────────────────── */
 document.getElementById('personalDetailsForm').addEventListener('submit', function(e) {
     e.preventDefault();
+
+    /* ── Guard: disclaimer must be checked ── */
+    const disc = document.getElementById('personalDisclaimer');
+    if (disc && !disc.checked) {
+        showTabMessage(activeProfileTab, 'Please read and accept the Employee Disclaimer before saving.', 'error');
+        disc.closest('.alert').style.animation = 'shake 0.35s ease';
+        setTimeout(() => disc.closest('.alert').style.animation = '', 400);
+        return;
+    }
+
     clearValidationStates(activeProfileTab);
 
     let isFormValid = true;
@@ -2373,22 +2413,21 @@ document.getElementById('personalDetailsForm').addEventListener('submit', functi
     })
     .then(response => response.json())
     .then(data => {
-    if (data.success) {
-        disableEditMode();
-        localStorage.removeItem('profileDraft');
-        // Show pending approval message instead of "updated successfully"
-        const ref = data.reference || '';
-        showTabMessage(
-            activeProfileTab,
-            ' Your changes have been submitted to HR for review and approval.' +
-            (ref ? ' Reference: <strong>' + ref + '</strong>' : '') +
-            ' You will receive an email once HR approves or rejects your request.',
-            'success'
-        );
-    } else {
-        showTabMessage(activeProfileTab, 'Error: ' + (data.error || 'Unknown error'), 'error');
-    }
-})
+        if (data.success) {
+            disableEditMode();
+            localStorage.removeItem('profileDraft');
+            const ref = data.reference || '';
+            showTabMessage(
+                activeProfileTab,
+                ' Your changes have been submitted to HR for review and approval.' +
+                (ref ? ' Reference: <strong>' + ref + '</strong>' : '') +
+                ' You will receive an email once HR approves or rejects your request.',
+                'success'
+            );
+        } else {
+            showTabMessage(activeProfileTab, 'Error: ' + (data.error || 'Unknown error'), 'error');
+        }
+    })
     .catch(error => {
         console.error('Error:', error);
         showTabMessage(activeProfileTab, 'Network error. Please try again.', 'error');
