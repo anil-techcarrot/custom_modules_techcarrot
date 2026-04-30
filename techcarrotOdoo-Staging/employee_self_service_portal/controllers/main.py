@@ -1502,6 +1502,60 @@ class PortalEmployee(http.Controller):
             'expense_budget': 2000,   # $2000 monthly expense budget
         }
 
+    def _get_notification(self, latest_request):
+        """Return notification dict based on latest HR change request state."""
+        if not latest_request:
+            return None
+
+        if latest_request.state == 'approved':
+            reviewed_by = latest_request.reviewed_by.name or 'HR'
+            review_date = (
+                latest_request.review_date.strftime('%d %b %Y')
+                if latest_request.review_date else ''
+            )
+            return {
+                'type': 'success',
+                'message': (
+                    f'Your profile change request '
+                    f'<strong>{latest_request.name}</strong> '
+                    f'was <strong>approved</strong> by '
+                    f'<strong>{reviewed_by}</strong>'
+                    f'{" on " + review_date if review_date else ""}. '
+                    f'Your records have been updated.'
+                ),
+                'reason': None,
+                'request_name': latest_request.name,
+            }
+
+        elif latest_request.state == 'rejected':
+            reviewed_by = latest_request.reviewed_by.name or 'HR'
+            return {
+                'type': 'danger',
+                'message': (
+                    f'Your profile change request '
+                    f'<strong>{latest_request.name}</strong> '
+                    f'was <strong>rejected</strong> by '
+                    f'<strong>{reviewed_by}</strong>. '
+                    f'Please correct and resubmit.'
+                ),
+                'reason': latest_request.rejection_reason or 'No reason provided.',
+                'request_name': latest_request.name,
+            }
+
+        elif latest_request.state == 'pending':
+            return {
+                'type': 'warning',
+                'message': (
+                    f'Your profile change request '
+                    f'<strong>{latest_request.name}</strong> '
+                    f'is awaiting HR review.'
+                ),
+                'reason': None,
+                'request_name': latest_request.name,
+            }
+
+        return None
+
     @http.route(MY_EMPLOYEE_URL + '/personal', type='http', auth='user', website=True, methods=['GET', 'POST'],
                 csrf=False)
     def portal_employee_personal(self, **post):
@@ -1876,11 +1930,20 @@ class PortalEmployee(http.Controller):
 
 
         #  GET - pass all required variables to template
+        latest_request = request.env['hr.profile.change.request'].sudo().search(
+            [('employee_id', '=', employee.id)],
+            order='id desc',
+            limit=1
+        )
+        notification = self._get_notification(latest_request)
+
         return request.render('employee_self_service_portal.portal_employee_profile_personal', {
             'employee': employee,
             'section': 'personal',
             'countries': countries,
+            'notification': notification,
         })
+
         
         return request.render('employee_self_service_portal.portal_employee_profile_personal', {
             'employee': employee,
