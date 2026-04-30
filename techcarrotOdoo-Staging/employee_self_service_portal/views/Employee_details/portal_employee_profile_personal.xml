@@ -33,7 +33,7 @@
                         <!-- Rejected -->
                         <t t-if="notification['type'] == 'danger'">
                             <div class="d-flex align-items-start">
-                                <div class="me-3" style="font-size:28px;">❌</div>
+                                <div class="me-3" style="font-size:28px;"></div>
                                 <div class="flex-grow-1">
                                     <h5 class="alert-heading mb-1">Profile Update Rejected</h5>
                                     <p class="mb-1">
