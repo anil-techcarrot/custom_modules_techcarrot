@@ -78,11 +78,11 @@ class EmployeePortalProfileSubmit(http.Controller):
         )
 
 
-        # return request.render(
-        #     'employee_self_service_portal'
-        #     '.portal_employee_profile_personal',
-        #     {'employee': employee, 'countries': countries},
-        # )
+        return request.render(
+            'employee_self_service_portal'
+            '.portal_employee_profile_personal',
+            {'employee': employee, 'countries': countries},
+        )
 
     def _handle_post(self, employee, post):
         try:

@@ -19,11 +19,13 @@ CRM_LEAD_MODEL = 'crm.lead'
 CRM_STAGE_MODEL = 'crm.stage'
 MY_EMPLOYEE_URL = '/my/employee'
 
+
 def get_user_timezone():
     """Get the user's timezone (or fallback to company or UTC)."""
     import pytz
     user_tz = request.env.user.tz or request.env.company.timezone or 'UTC'
     return user_tz
+
 
 def get_local_datetime(dt=None):
     """Convert UTC datetime to user's local timezone."""
@@ -43,6 +45,7 @@ def get_local_datetime(dt=None):
         # Assume the datetime is UTC if no tzinfo
         utc_dt = dt.replace(tzinfo=pytz.UTC)
         return utc_dt.astimezone(user_pytz)
+
 
 def _process_tag_ids(post):
     """Refactored to reduce cognitive complexity."""
@@ -72,6 +75,7 @@ def _process_tag_ids(post):
     _logger = logging.getLogger(__name__)
     _logger.info('ESS Portal: tag_id_list to write: %s', tag_id_list)
     return tag_id_list
+
 
 def _process_partner_field(field_value, field_name='partner_id'):
     """Process partner field - handle existing IDs or create new partners."""
@@ -122,6 +126,7 @@ def _process_partner_field(field_value, field_name='partner_id'):
 
     return False
 
+
 class PortalEmployee(http.Controller):
 
     def _get_many2one_id(self, value, model_name, field_name='name'):
@@ -135,7 +140,6 @@ class PortalEmployee(http.Controller):
                 (field_name, '=', value)
             ], limit=1)
             return record.id if record else False
-
 
     def _get_employee(self):
         return request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
@@ -201,7 +205,8 @@ class PortalEmployee(http.Controller):
             # Log location data for debugging
             import logging
             _logger = logging.getLogger(__name__)
-            _logger.info(f"Check-in location data - lat: {in_latitude}, long: {in_longitude}, location: {check_in_location}")
+            _logger.info(
+                f"Check-in location data - lat: {in_latitude}, long: {in_longitude}, location: {check_in_location}")
             _logger.info(f"User timezone: {user_tz}, Local time: {local_now}")
 
             # Check if it's a late arrival (after 9:30 AM)
@@ -245,7 +250,8 @@ class PortalEmployee(http.Controller):
             _logger.error("Check-in failed: %s", e)
             return request.redirect(MY_EMPLOYEE_URL + '/attendance?error=checkin_failed')
 
-    @http.route(MY_EMPLOYEE_URL + '/attendance/quick-checkin', type='http', auth='user', methods=['POST'], website=True, csrf=False)
+    @http.route(MY_EMPLOYEE_URL + '/attendance/quick-checkin', type='http', auth='user', methods=['POST'], website=True,
+                csrf=False)
     def quick_check_in(self, **post):
         """Quick check-in from dashboard"""
         employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
@@ -357,7 +363,8 @@ class PortalEmployee(http.Controller):
             # Log location data for debugging
             import logging
             _logger = logging.getLogger(__name__)
-            _logger.info(f"Check-out location data - lat: {out_latitude}, long: {out_longitude}, location: {check_out_location}")
+            _logger.info(
+                f"Check-out location data - lat: {out_latitude}, long: {out_longitude}, location: {check_out_location}")
             _logger.info(f"User timezone: {user_tz}, Local time: {local_now}")
 
             # Check if it's an early departure (before 5:30 PM)
@@ -395,7 +402,8 @@ class PortalEmployee(http.Controller):
             updated_attendance = request.env[HR_ATTENDANCE_MODEL].sudo().browse(last_attendance.id)
 
             # Log successful check-out with worked hours
-            _logger.info(f"Check-out successful for employee {employee.name}. Worked hours: {updated_attendance.worked_hours}")
+            _logger.info(
+                f"Check-out successful for employee {employee.name}. Worked hours: {updated_attendance.worked_hours}")
 
             return request.redirect(MY_EMPLOYEE_URL + '/attendance?success=checked_out')
 
@@ -405,7 +413,8 @@ class PortalEmployee(http.Controller):
             _logger.error("Check-out failed: %s", e)
             return request.redirect(MY_EMPLOYEE_URL + '/attendance?error=checkout_failed')
 
-    @http.route(MY_EMPLOYEE_URL + '/attendance/quick-checkout', type='http', auth='user', methods=['POST'], website=True, csrf=False)
+    @http.route(MY_EMPLOYEE_URL + '/attendance/quick-checkout', type='http', auth='user', methods=['POST'],
+                website=True, csrf=False)
     def quick_check_out(self, **post):
         """Quick check-out from dashboard"""
         employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
@@ -452,7 +461,8 @@ class PortalEmployee(http.Controller):
             # Get location data from POST request
             out_latitude = post.get('out_latitude')
             out_longitude = post.get('out_longitude')
-            check_out_location = post.get('check_out_location') or post.get('location') or 'Quick Check-out from Dashboard'
+            check_out_location = post.get('check_out_location') or post.get(
+                'location') or 'Quick Check-out from Dashboard'
 
             # Update attendance record
             vals = {
@@ -573,9 +583,12 @@ class PortalEmployee(http.Controller):
             'success_message': success_message,
             'error_message': error_message,
             'user_timezone': user_timezone,
-            'format_datetime': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime('%I:%M %p') if dt else '',
-            'format_date': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime('%d/%m/%Y') if dt else '',
-            'format_day': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime('%A') if dt else '',
+            'format_datetime': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime(
+                '%I:%M %p') if dt else '',
+            'format_date': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime(
+                '%d/%m/%Y') if dt else '',
+            'format_day': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime(
+                '%A') if dt else '',
         })
 
     def _get_attendance_analytics(self, employee, month, year):
@@ -737,7 +750,7 @@ class PortalEmployee(http.Controller):
         analytics_months = []
         for i in range(4):
             from datetime import timedelta
-            month_date = local_now.replace(day=1) - timedelta(days=i*30)
+            month_date = local_now.replace(day=1) - timedelta(days=i * 30)
             month_analytics = self._get_attendance_analytics(employee, month_date.month, month_date.year)
             analytics_months.append(month_analytics)
 
@@ -746,9 +759,12 @@ class PortalEmployee(http.Controller):
             'analytics_months': analytics_months,
             'current_month': analytics_months[0] if analytics_months else {},
             'user_timezone': user_timezone,
-            'format_datetime': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime('%I:%M %p') if dt else '',
-            'format_date': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime('%d/%m/%Y') if dt else '',
-            'format_day': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime('%A') if dt else '',
+            'format_datetime': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime(
+                '%I:%M %p') if dt else '',
+            'format_date': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime(
+                '%d/%m/%Y') if dt else '',
+            'format_day': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime(
+                '%A') if dt else '',
         })
 
     @http.route(MY_EMPLOYEE_URL + '/attendance/export', type='http', auth='user', website=True)
@@ -837,9 +853,11 @@ class PortalEmployee(http.Controller):
             worksheet.write(summary_row + 1, 0, 'Total Days:')
             worksheet.write(summary_row + 1, 1, len(attendances))
             worksheet.write(summary_row + 2, 0, 'Total Hours:')
-            worksheet.write(summary_row + 2, 1, sum(att.worked_hours for att in attendances if att.worked_hours), hours_format)
+            worksheet.write(summary_row + 2, 1, sum(att.worked_hours for att in attendances if att.worked_hours),
+                            hours_format)
             worksheet.write(summary_row + 3, 0, 'Average Hours/Day:')
-            avg_hours = sum(att.worked_hours for att in attendances if att.worked_hours) / len(attendances) if attendances else 0
+            avg_hours = sum(att.worked_hours for att in attendances if att.worked_hours) / len(
+                attendances) if attendances else 0
             worksheet.write(summary_row + 3, 1, avg_hours, hours_format)
 
             # Auto-adjust column widths
@@ -1015,7 +1033,6 @@ class PortalEmployee(http.Controller):
     def portal_ess_dashboard_classic(self, **kwargs):
         # Keep the classic view accessible via /my/ess/classic
         return self._render_ess_dashboard('employee_self_service_portal.portal_ess_dashboard', **kwargs)
-
 
     # ---------------------------------------------------------------------------
     # IT Ticket routes (added from updated version)
@@ -1195,7 +1212,6 @@ class PortalEmployee(http.Controller):
     # End IT Ticket routes
     # ---------------------------------------------------------------------------
 
-
     @http.route('/my/ess/enhanced', type='http', auth='user', website=True)
     def portal_ess_dashboard_enhanced(self, **kwargs):
         # Maintain this route for backward compatibility
@@ -1229,9 +1245,12 @@ class PortalEmployee(http.Controller):
         user_timezone = get_user_timezone()
         dashboard_data.update({
             'user_timezone': user_timezone,
-            'format_datetime': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime('%I:%M %p') if dt else '',
-            'format_date': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime('%d/%m/%Y') if dt else '',
-            'format_day': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime('%A') if dt else '',
+            'format_datetime': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime(
+                '%I:%M %p') if dt else '',
+            'format_date': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime(
+                '%d/%m/%Y') if dt else '',
+            'format_day': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime(
+                '%A') if dt else '',
         })
 
         return request.render(template_name, dashboard_data)
@@ -1432,7 +1451,6 @@ class PortalEmployee(http.Controller):
         except Exception:
             pass
 
-
         dashboard_data.update({
             'payslips_count': payslips_count,
             'latest_payslip': latest_payslip,
@@ -1505,8 +1523,8 @@ class PortalEmployee(http.Controller):
         """Get monthly targets for the employee (placeholder)"""
         return {
             'attendance_target': 95,  # 95% attendance rate
-            'crm_leads_target': 10,   # 10 leads per month
-            'expense_budget': 2000,   # $2000 monthly expense budget
+            'crm_leads_target': 10,  # 10 leads per month
+            'expense_budget': 2000,  # $2000 monthly expense budget
         }
 
     def _get_notification(self, latest_request):
@@ -1567,200 +1585,195 @@ class PortalEmployee(http.Controller):
     @http.route(MY_EMPLOYEE_URL + '/personal', type='http', auth='user', website=True, methods=['GET', 'POST'],
                 csrf=False)
     def portal_employee_personal(self, **post):
-        employee = self._get_employee()
+        try:
+            employee = self._get_employee()
 
-        #  Only active/installed languages
+            countries = request.env['res.country'].sudo().search([], order='name')
 
-        countries = request.env['res.country'].sudo().search([], order='name')
+            _logger.info("portal_employee_profile - Countries count: %s", len(countries))
 
-        _logger.info("portal_employee_profile - Countries count: %s", len(countries))
+            if request.httprequest.method == 'POST':
+                try:
+                    vals = {}
 
+                    # Basic information
+                    if post.get('work_email'):
+                        import re
+                        email_pattern = r'^[^\s@]+@[^\s@]+\.[^\s@]+$'
+                        if re.match(email_pattern, post.get('work_email')):
+                            vals['work_email'] = post.get('work_email')
+                        else:
+                            return request.make_json_response({
+                                'success': False,
+                                'error': 'Invalid email format'
+                            })
 
-        if request.httprequest.method == 'POST':
-            try:
-                vals = {}
+                    if post.get('work_phone'):
+                        vals['work_phone'] = post.get('work_phone')
+                    if post.get('birthday'):
+                        vals['birthday'] = post.get('birthday')
+                    if post.get('sex'):
+                        vals['sex'] = post.get('sex')
+                    if post.get('marital'):
+                        vals['marital'] = post.get('marital')
+                    if post.get('children'):
+                        try:
+                            vals['children'] = int(post.get('children'))
+                        except (ValueError, TypeError):
+                            pass
+                    if post.get('study_field'):
+                        vals['study_field'] = post.get('study_field')
+                    if post.get('l10n_in_relationship'):
+                        vals['l10n_in_relationship'] = post.get('l10n_in_relationship')
 
-                # Basic information
-                if post.get('work_email'):
-                    import re
-                    email_pattern = r'^[^\s@]+@[^\s@]+\.[^\s@]+$'
-                    if re.match(email_pattern, post.get('work_email')):
-                        vals['work_email'] = post.get('work_email')
-                    else:
-                        return request.make_json_response({
-                            'success': False,
-                            'error': 'Invalid email format'
-                        })
+                    # Identity documents
+                    if post.get('emirates_id_number'):
+                        vals['emirates_id_number'] = post.get('emirates_id_number')
+                    if post.get('emirates_issue_date'):
+                        vals['emirates_issue_date'] = post.get('emirates_issue_date')
+                    if post.get('emirates_expiry_date'):
+                        vals['emirates_expiry_date'] = post.get('emirates_expiry_date')
+                    if post.get('ssnid'):
+                        vals['ssnid'] = post.get('ssnid')
+                    if post.get('issue_date'):
+                        vals['issue_date'] = post.get('issue_date')
+                    if post.get('expiry_date'):
+                        vals['expiry_date'] = post.get('expiry_date')
 
-                if post.get('work_phone'):
-                    vals['work_phone'] = post.get('work_phone')
-                if post.get('birthday'):
-                    vals['birthday'] = post.get('birthday')
-                if post.get('sex'):
-                    vals['sex'] = post.get('sex')
-                if post.get('marital'):
-                    vals['marital'] = post.get('marital')
-                if post.get('children'):
-                    try:
-                        vals['children'] = int(post.get('children'))
-                    except (ValueError, TypeError):
-                        pass
-                if post.get('study_field'):
-                    vals['study_field'] = post.get('study_field')
-                if post.get('l10n_in_relationship'):
-                    vals['l10n_in_relationship'] = post.get('l10n_in_relationship')
+                    if post.get('issue_countries_id'):
+                        try:
+                            vals['issue_countries_id'] = int(post.get('issue_countries_id'))
+                        except (ValueError, TypeError):
+                            country = request.env['res.country'].sudo().search([
+                                ('name', '=', post.get('issue_countries_id'))
+                            ], limit=1)
+                            if country:
+                                vals['issue_countries_id'] = country.id
 
-                # Identity documents
-                if post.get('emirates_id_number'):
-                    vals['emirates_id_number'] = post.get('emirates_id_number')
-                if post.get('emirates_issue_date'):
-                    vals['emirates_issue_date'] = post.get('emirates_issue_date')
-                if post.get('emirates_expiry_date'):
-                    vals['emirates_expiry_date'] = post.get('emirates_expiry_date')
-                if post.get('ssnid'):
-                    vals['ssnid'] = post.get('ssnid')
-                if post.get('issue_date'):
-                    vals['issue_date'] = post.get('issue_date')
-                if post.get('expiry_date'):
-                    vals['expiry_date'] = post.get('expiry_date')
+                    # Nationality
+                    if post.get('country_id'):
+                        try:
+                            vals['country_id'] = int(post.get('country_id'))
+                        except (ValueError, TypeError):
+                            country = request.env['res.country'].sudo().search([
+                                ('name', '=', post.get('country_id'))
+                            ], limit=1)
+                            if country:
+                                vals['country_id'] = country.id
 
-                if post.get('issue_countries_id'):
-                    try:
-                        vals['issue_countries_id'] = int(post.get('issue_countries_id'))
-                    except (ValueError, TypeError):
-                        country = request.env['res.country'].sudo().search([
-                            ('name', '=', post.get('issue_countries_id'))
-                        ], limit=1)
-                        if country:
-                            vals['issue_countries_id'] = country.id
+                    # Contact information
+                    if post.get('private_email'):
+                        vals['private_email'] = post.get('private_email')
+                    if post.get('private_phone'):
+                        vals['private_phone'] = post.get('private_phone')
+                    if post.get('private_street'):
+                        vals['private_street'] = post.get('private_street')
+                    if post.get('private_street2'):
+                        vals['private_street2'] = post.get('private_street2')
+                    if post.get('private_city'):
+                        vals['private_city'] = post.get('private_city')
+                    if post.get('private_zip'):
+                        vals['private_zip'] = post.get('private_zip')
+                    if post.get('e_private_city'):
+                        vals['e_private_city'] = post.get('e_private_city')
 
-                # Nationality
-                if post.get('country_id'):
-                    try:
-                        vals['country_id'] = int(post.get('country_id'))
-                    except (ValueError, TypeError):
-                        country = request.env['res.country'].sudo().search([
-                            ('name', '=', post.get('country_id'))
-                        ], limit=1)
-                        if country:
-                            vals['country_id'] = country.id
+                    # Emergency contact
+                    if post.get('emergency_contact'):
+                        vals['emergency_contact'] = post.get('emergency_contact')
+                    if post.get('emergency_phone'):
+                        vals['emergency_phone'] = post.get('emergency_phone')
 
-                # Contact information
-                if post.get('private_email'):
-                    vals['private_email'] = post.get('private_email')
-                if post.get('private_phone'):
-                    vals['private_phone'] = post.get('private_phone')
-                if post.get('private_street'):
-                    vals['private_street'] = post.get('private_street')
-                if post.get('private_street2'):
-                    vals['private_street2'] = post.get('private_street2')
-                if post.get('private_city'):
-                    vals['private_city'] = post.get('private_city')
-                if post.get('private_zip'):
-                    vals['private_zip'] = post.get('private_zip')
-                if post.get('e_private_city'):
-                    vals['e_private_city'] = post.get('e_private_city')
+                    # Dependent Details - Child 1
+                    if post.get('dependent_child_name_1') is not None:
+                        vals['dependent_child_name_1'] = post.get('dependent_child_name_1', '').strip()
+                    if post.get('dependent_child_dob_1'):
+                        vals['dependent_child_dob_1'] = post.get('dependent_child_dob_1')
+                    if post.get('dependent_child_gender_1'):
+                        vals['dependent_child_gender_1'] = post.get('dependent_child_gender_1')
+                    if post.get('dependent_child_passport_no') is not None:
+                        vals['dependent_child_passport_no'] = post.get('dependent_child_passport_no', '').strip()
+                    if post.get('dependent_child_passport_issue_date_1'):
+                        vals['dependent_child_passport_issue_date_1'] = post.get(
+                            'dependent_child_passport_issue_date_1')
+                    if post.get('dependent_child_passport_expiry_date_1'):
+                        vals['dependent_child_passport_expiry_date_1'] = post.get(
+                            'dependent_child_passport_expiry_date_1')
 
-                # Emergency contact
-                if post.get('emergency_contact'):
-                    vals['emergency_contact'] = post.get('emergency_contact')
-                if post.get('emergency_phone'):
-                    vals['emergency_phone'] = post.get('emergency_phone')
+                    # General Information
+                    if post.get('u_private_city'):
+                        vals['u_private_city'] = post.get('u_private_city')
+                    if post.get('industry_start_date'):
+                        vals['industry_start_date'] = post.get('industry_start_date')
+                    if post.get('experience'):
+                        vals['experience'] = post.get('experience')
+                    if post.get('current_role'):
+                        vals['current_role'] = post.get('current_role')
+                    if post.get('current_address'):
+                        vals['current_address'] = post.get('current_address')
+                    if post.get('phone_code_1'):
+                        vals['phone_code_1'] = post.get('phone_code_1')
 
-                # Dependent Details - Child 1
-                if post.get('dependent_child_name_1') is not None:
-                    vals['dependent_child_name_1'] = post.get('dependent_child_name_1', '').strip()
+                    # Emergency Contact UAE
+                    if post.get('emergency_contact_person_name'):
+                        vals['emergency_contact_person_name'] = post.get('emergency_contact_person_name')
+                    if post.get('emergency_contact_person_phone'):
+                        vals['emergency_contact_person_phone'] = post.get('emergency_contact_person_phone')
+                    if post.get('alternate_mobile_number'):
+                        vals['alternate_mobile_number'] = post.get('alternate_mobile_number')
+                    if post.get('emergency_contact_person_name_1'):
+                        vals['emergency_contact_person_name_1'] = post.get('emergency_contact_person_name_1')
+                    if post.get('emergency_contact_person_phone_1'):
+                        vals['emergency_contact_person_phone_1'] = post.get('emergency_contact_person_phone_1')
+                    if post.get('second_alternative_number'):
+                        vals['second_alternative_number'] = post.get('second_alternative_number')
+                    if post.get('home_land_line_no'):
+                        vals['home_land_line_no'] = post.get('home_land_line_no')
 
-                if post.get('dependent_child_dob_1'):
-                    vals['dependent_child_dob_1'] = post.get('dependent_child_dob_1')
+                    # Spouse Info
+                    if post.get('spouse_passport_no'):
+                        vals['spouse_passport_no'] = post.get('spouse_passport_no')
+                    if post.get('spouse_passport_issue_date'):
+                        vals['spouse_passport_issue_date'] = post.get('spouse_passport_issue_date')
+                    if post.get('spouse_passport_expiry_date'):
+                        vals['spouse_passport_expiry_date'] = post.get('spouse_passport_expiry_date')
+                    if post.get('spouse_visa_no'):
+                        vals['spouse_visa_no'] = post.get('spouse_visa_no')
+                    if post.get('spouse_visa_expire_date'):
+                        vals['spouse_visa_expire_date'] = post.get('spouse_visa_expire_date')
+                    if post.get('spouse_emirates_id_no'):
+                        vals['spouse_emirates_id_no'] = post.get('spouse_emirates_id_no')
+                    if post.get('spouse_emirates_issue_date'):
+                        vals['spouse_emirates_issue_date'] = post.get('spouse_emirates_issue_date')
+                    if post.get('spouse_emirates_id_expiry_date'):
+                        vals['spouse_emirates_id_expiry_date'] = post.get('spouse_emirates_id_expiry_date')
+                    if post.get('spouse_aadhar_no'):
+                        vals['spouse_aadhar_no'] = post.get('spouse_aadhar_no')
 
-                if post.get('dependent_child_gender_1'):
-                    vals['dependent_child_gender_1'] = post.get('dependent_child_gender_1')
+                    # Father Mother Info
+                    if post.get('father_name'):
+                        vals['father_name'] = post.get('father_name')
+                    if post.get('father_dob'):
+                        vals['father_dob'] = post.get('father_dob')
+                    if post.get('mother_name'):
+                        vals['mother_name'] = post.get('mother_name')
+                    if post.get('mother_dob'):
+                        vals['mother_dob'] = post.get('mother_dob')
 
-                if post.get('dependent_child_passport_no') is not None:
-                    vals['dependent_child_passport_no'] = post.get('dependent_child_passport_no', '').strip()
+                    # Employee Details
+                    if post.get('employee_nominee_name'):
+                        vals['employee_nominee_name'] = post.get('employee_nominee_name')
+                    if post.get('employee_nominee_contact_no'):
+                        vals['employee_nominee_contact_no'] = post.get('employee_nominee_contact_no')
+                    if post.get('domain_worked'):
+                        vals['domain_worked'] = post.get('domain_worked')
+                    if post.get('primary_skill'):
+                        vals['primary_skill'] = post.get('primary_skill')
+                    if post.get('secondary_skill'):
+                        vals['secondary_skill'] = post.get('secondary_skill')
+                    if post.get('tool_used'):
+                        vals['tool_used'] = post.get('tool_used')
 
-                if post.get('dependent_child_passport_issue_date_1'):
-                    vals['dependent_child_passport_issue_date_1'] = post.get('dependent_child_passport_issue_date_1')
-
-                if post.get('dependent_child_passport_expiry_date_1'):
-                    vals['dependent_child_passport_expiry_date_1'] = post.get('dependent_child_passport_expiry_date_1')
-
-                # General Information
-                if post.get('u_private_city'):
-                    vals['u_private_city'] = post.get('u_private_city')
-                if post.get('industry_start_date'):
-                    vals['industry_start_date'] = post.get('industry_start_date')
-                if post.get('experience'):
-                    vals['experience'] = post.get('experience')
-                if post.get('current_role'):
-                    vals['current_role'] = post.get('current_role')
-                if post.get('current_address'):
-                    vals['current_address'] = post.get('current_address')
-                if post.get('phone_code_1'):
-                    vals['phone_code_1'] = post.get('phone_code_1')
-
-                # Emergency Contact UAE
-                if post.get('emergency_contact_person_name'):
-                    vals['emergency_contact_person_name'] = post.get('emergency_contact_person_name')
-                if post.get('emergency_contact_person_phone'):
-                    vals['emergency_contact_person_phone'] = post.get('emergency_contact_person_phone')
-                if post.get('alternate_mobile_number'):
-                    vals['alternate_mobile_number'] = post.get('alternate_mobile_number')
-                if post.get('emergency_contact_person_name_1'):
-                    vals['emergency_contact_person_name_1'] = post.get('emergency_contact_person_name_1')
-                if post.get('emergency_contact_person_phone_1'):
-                    vals['emergency_contact_person_phone_1'] = post.get('emergency_contact_person_phone_1')
-                if post.get('second_alternative_number'):
-                    vals['second_alternative_number'] = post.get('second_alternative_number')
-                if post.get('home_land_line_no'):
-                    vals['home_land_line_no'] = post.get('home_land_line_no')
-
-                # Spouse Info
-                if post.get('spouse_passport_no'):
-                    vals['spouse_passport_no'] = post.get('spouse_passport_no')
-                if post.get('spouse_passport_issue_date'):
-                    vals['spouse_passport_issue_date'] = post.get('spouse_passport_issue_date')
-                if post.get('spouse_passport_expiry_date'):
-                    vals['spouse_passport_expiry_date'] = post.get('spouse_passport_expiry_date')
-                if post.get('spouse_visa_no'):
-                    vals['spouse_visa_no'] = post.get('spouse_visa_no')
-                if post.get('spouse_visa_expire_date'):
-                    vals['spouse_visa_expire_date'] = post.get('spouse_visa_expire_date')
-                if post.get('spouse_emirates_id_no'):
-                    vals['spouse_emirates_id_no'] = post.get('spouse_emirates_id_no')
-                if post.get('spouse_emirates_issue_date'):
-                    vals['spouse_emirates_issue_date'] = post.get('spouse_emirates_issue_date')
-                if post.get('spouse_emirates_id_expiry_date'):
-                    vals['spouse_emirates_id_expiry_date'] = post.get('spouse_emirates_id_expiry_date')
-                if post.get('spouse_aadhar_no'):
-                    vals['spouse_aadhar_no'] = post.get('spouse_aadhar_no')
-
-                # Father Mother Info
-                if post.get('father_name'):
-                    vals['father_name'] = post.get('father_name')
-                if post.get('father_dob'):
-                    vals['father_dob'] = post.get('father_dob')
-                if post.get('mother_name'):
-                    vals['mother_name'] = post.get('mother_name')
-                if post.get('mother_dob'):
-                    vals['mother_dob'] = post.get('mother_dob')
-
-                # Employee Details
-                if post.get('employee_nominee_name'):
-                    vals['employee_nominee_name'] = post.get('employee_nominee_name')
-                if post.get('employee_nominee_contact_no'):
-                    vals['employee_nominee_contact_no'] = post.get('employee_nominee_contact_no')
-                if post.get('domain_worked'):
-                    vals['domain_worked'] = post.get('domain_worked')
-                if post.get('primary_skill'):
-                    vals['primary_skill'] = post.get('primary_skill')
-                if post.get('secondary_skill'):
-                    vals['secondary_skill'] = post.get('secondary_skill')
-                if post.get('tool_used'):
-                    vals['tool_used'] = post.get('tool_used')
-
-                    # Last Organisation Info
+                    # Last Organisation Info  ← FIXED: was wrongly indented inside tool_used block
                     if post.get('last_organisation_name'):
                         vals['last_organisation_name'] = post.get('last_organisation_name')
                     if post.get('last_location'):
@@ -1791,167 +1804,154 @@ class PortalEmployee(http.Controller):
                                 'error': 'Invalid Reporting Manager email format'
                             })
 
-                # Many2one - Passport Issuing Country
-                # Child 1 Passport Issuing Country - Many2one res.country
-                if post.get('dependent_child_passport_issuing_countries_1_id'):
-                    try:
-                        vals['dependent_child_passport_issuing_countries_1_id'] = int(
-                            post.get('dependent_child_passport_issuing_countries_1_id')
-                        )
-                    except (ValueError, TypeError):
-                        country = request.env['res.country'].sudo().search([
-                            ('name', '=', post.get('dependent_child_passport_issuing_countries_1_id'))
-                        ], limit=1)
-                        if country:
-                            vals['dependent_child_passport_issuing_countries_1_id'] = country.id
+                    # Many2one - Child 1 Passport Issuing Country
+                    if post.get('dependent_child_passport_issuing_countries_1_id'):
+                        try:
+                            vals['dependent_child_passport_issuing_countries_1_id'] = int(
+                                post.get('dependent_child_passport_issuing_countries_1_id')
+                            )
+                        except (ValueError, TypeError):
+                            country = request.env['res.country'].sudo().search([
+                                ('name', '=', post.get('dependent_child_passport_issuing_countries_1_id'))
+                            ], limit=1)
+                            if country:
+                                vals['dependent_child_passport_issuing_countries_1_id'] = country.id
 
-                if post.get('dependent_child_visa_no_1') is not None:
-                    vals['dependent_child_visa_no_1'] = post.get('dependent_child_visa_no_1', '').strip()
+                    if post.get('dependent_child_visa_no_1') is not None:
+                        vals['dependent_child_visa_no_1'] = post.get('dependent_child_visa_no_1', '').strip()
+                    if post.get('dependent_child_visa_expiration_date_1'):
+                        vals['dependent_child_visa_expiration_date_1'] = post.get(
+                            'dependent_child_visa_expiration_date_1')
+                    if post.get('dependent_child_emirates_id_no_1') is not None:
+                        vals['dependent_child_emirates_id_no_1'] = post.get('dependent_child_emirates_id_no_1',
+                                                                            '').strip()
+                    if post.get('dependent_child_emirates_id_issue_date_1'):
+                        vals['dependent_child_emirates_id_issue_date_1'] = post.get(
+                            'dependent_child_emirates_id_issue_date_1')
+                    if post.get('dependent_child_emirates_id_expiry_date_1'):
+                        vals['dependent_child_emirates_id_expiry_date_1'] = post.get(
+                            'dependent_child_emirates_id_expiry_date_1')
+                    if post.get('dependent_child_aadhar_no_1') is not None:
+                        vals['dependent_child_aadhar_no_1'] = post.get('dependent_child_aadhar_no_1', '').strip()
 
-                if post.get('dependent_child_visa_expiration_date_1'):
-                    vals['dependent_child_visa_expiration_date_1'] = post.get('dependent_child_visa_expiration_date_1')
+                    # Personal information
+                    if post.get('legal_name'):
+                        vals['legal_name'] = post.get('legal_name')
+                    if post.get('place_of_birth'):
+                        vals['place_of_birth'] = post.get('place_of_birth')
 
-                if post.get('dependent_child_emirates_id_no_1') is not None:
-                    vals['dependent_child_emirates_id_no_1'] = post.get('dependent_child_emirates_id_no_1', '').strip()
+                    # Document and personal details
+                    if post.get('whatsapp'):
+                        vals['whatsapp'] = post.get('whatsapp')
+                    if post.get('house_no'):
+                        vals['house_no'] = post.get('house_no')
+                    if post.get('area_name'):
+                        vals['area_name'] = post.get('area_name')
+                    if post.get('city'):
+                        vals['city'] = post.get('city')
+                    if post.get('zip_code'):
+                        vals['zip_code'] = post.get('zip_code')
+                    if post.get('linkedin'):
+                        vals['linkedin'] = post.get('linkedin')
 
-                if post.get('dependent_child_emirates_id_issue_date_1'):
-                    vals['dependent_child_emirates_id_issue_date_1'] = post.get(
-                        'dependent_child_emirates_id_issue_date_1')
+                    # Visa and work permit
+                    if post.get('visa_no'):
+                        vals['visa_no'] = post.get('visa_no')
+                    if post.get('permit_no'):
+                        vals['permit_no'] = post.get('permit_no')
 
-                if post.get('dependent_child_emirates_id_expiry_date_1'):
-                    vals['dependent_child_emirates_id_expiry_date_1'] = post.get(
-                        'dependent_child_emirates_id_expiry_date_1')
+                    # Social Media Details
+                    if post.get('facebook_profile') is not None:
+                        vals['facebook_profile'] = post.get('facebook_profile', '').strip()
+                    if post.get('insta_profile') is not None:
+                        vals['insta_profile'] = post.get('insta_profile', '').strip()
+                    if post.get('twitter_profile') is not None:
+                        vals['twitter_profile'] = post.get('twitter_profile', '').strip()
 
-                if post.get('dependent_child_aadhar_no_1') is not None:
-                    vals['dependent_child_aadhar_no_1'] = post.get('dependent_child_aadhar_no_1', '').strip()
+                    # Career Details
+                    if post.get('career_break_detail') is not None:
+                        vals['career_break_detail'] = post.get('career_break_detail', '').strip()
 
-                # Personal information
-                if post.get('legal_name'):
-                    vals['legal_name'] = post.get('legal_name')
-                if post.get('place_of_birth'):
-                    vals['place_of_birth'] = post.get('place_of_birth')
+                    # Industry Details
+                    if post.get('industry_ref_name') is not None:
+                        vals['industry_ref_name'] = post.get('industry_ref_name', '').strip()
+                    if post.get('industry_ref_email') is not None:
+                        vals['industry_ref_email'] = post.get('industry_ref_email', '').strip()
+                    if post.get('industry_ref_mob_no') is not None:
+                        vals['industry_ref_mob_no'] = post.get('industry_ref_mob_no', '').strip()
+                    if post.get('home_country_id_name') is not None:
+                        vals['home_country_id_name'] = post.get('home_country_id_name', '').strip()
+                    if post.get('home_country_id_number') is not None:
+                        vals['home_country_id_number'] = post.get('home_country_id_number', '').strip()
 
-                # Document and personal details
-                if post.get('whatsapp'):
-                    vals['whatsapp'] = post.get('whatsapp')
-                if post.get('house_no'):
-                    vals['house_no'] = post.get('house_no')
-                if post.get('area_name'):
-                    vals['area_name'] = post.get('area_name')
-                if post.get('city'):
-                    vals['city'] = post.get('city')
-                if post.get('zip_code'):
-                    vals['zip_code'] = post.get('zip_code')
-                if post.get('linkedin'):
-                    vals['linkedin'] = post.get('linkedin')
+                    # Citizenship
+                    if post.get('identification_id'):
+                        vals['identification_id'] = post.get('identification_id')
+                    if post.get('passport_id'):
+                        vals['passport_id'] = post.get('passport_id')
+                    if post.get('mother_tongue_name'):
+                        vals['mother_tongue_name'] = post.get('mother_tongue_name')
+                    if post.get('language_known_name') is not None:
+                        vals['language_known_name'] = post.get('language_known_name', '').strip()
 
-                # Visa and work permit
-                if post.get('visa_no'):
-                    vals['visa_no'] = post.get('visa_no')
-                if post.get('permit_no'):
-                    vals['permit_no'] = post.get('permit_no')
+                    # Selection field with validation
+                    allowed_blood_groups = ['a_pos', 'a_neg', 'b_pos', 'b_neg', 'ab_pos', 'ab_neg', 'o_pos', 'o_neg',
+                                            'unknown']
+                    if post.get('blood_group') and post.get('blood_group') in allowed_blood_groups:
+                        vals['blood_group'] = post.get('blood_group')
 
-                # Social Media Details
-                if post.get('facebook_profile') is not None:
-                    vals['facebook_profile'] = post.get('facebook_profile', '').strip()
-                if post.get('insta_profile') is not None:
-                    vals['insta_profile'] = post.get('insta_profile', '').strip()
-                if post.get('twitter_profile') is not None:
-                    vals['twitter_profile'] = post.get('twitter_profile', '').strip()
+                    # Certificate - selection field with validation
+                    allowed_certificates = ['graduate', 'bachelor', 'master', 'doctor', 'other']
+                    if post.get('certificate') and post.get('certificate') in allowed_certificates:
+                        vals['certificate'] = post.get('certificate')
 
-                # Career Details
-                if post.get('career_break_detail') is not None:
-                    vals['career_break_detail'] = post.get('career_break_detail', '').strip()
+                    # Checkbox field - always set True or False
+                    vals['is_non_resident'] = True if post.get('is_non_resident') == 'on' else False
 
-                # Industry Details
-                if post.get('industry_ref_name') is not None:
-                    vals['industry_ref_name'] = post.get('industry_ref_name', '').strip()
-                if post.get('industry_ref_email') is not None:
-                    vals['industry_ref_email'] = post.get('industry_ref_email', '').strip()
-                if post.get('industry_ref_mob_no') is not None:
-                    vals['industry_ref_mob_no'] = post.get('industry_ref_mob_no', '').strip()
-                if post.get('home_country_id_name') is not None:
-                    vals['home_country_id_name'] = post.get('home_country_id_name', '').strip()
-                if post.get('home_country_id_number') is not None:
-                    vals['home_country_id_number'] = post.get('home_country_id_number', '').strip()
+                    # Single write call - all fields together
+                    _logger.info("Writing vals to employee %s: %s", employee.id, list(vals.keys()))
+                    employee.sudo().write(vals)
+                    _logger.info("Successfully wrote vals for employee %s", employee.id)
 
-                # Citizenship
-                if post.get('identification_id'):
-                    vals['identification_id'] = post.get('identification_id')
-                if post.get('passport_id'):
-                    vals['passport_id'] = post.get('passport_id')
-                if post.get('mother_tongue_name'):
-                    vals['mother_tongue_name'] = post.get('mother_tongue_name')
-                if post.get('language_known_name') is not None:
-                    vals['language_known_name'] = post.get('language_known_name', '').strip()
-                # Distance - only save if BOTH fields have valid values
-                # distance_raw = post.get('distance_home_work', '').strip()
-                # if distance_raw and distance_raw not in ['km', 'mi', '']:
-                #     try:
-                #         vals['distance_home_work'] = int(distance_raw)
-                #     except (ValueError, TypeError):
-                #         pass  # skip silently if not a valid integer
-                #
-                # # Unit - only km or mi allowed
-                # km_val = post.get('km_home_work', '').strip()
-                # if km_val in ['km', 'mi']:
-                #     vals['km_home_work'] = km_val
+                    # Handle document uploads
+                    self._handle_document_uploads(employee, request.httprequest.files)
 
+                    return request.make_json_response({
+                        'success': True,
+                        'message': 'Personal details updated successfully'
+                    })
 
+                except Exception as e:
+                    _logger.error("Error in portal_employee_personal POST: %s", str(e))
+                    import traceback
+                    _logger.error("Traceback: %s", traceback.format_exc())
+                    return request.make_json_response({
+                        'success': False,
+                        'error': str(e)
+                    })
 
-                # Selection field with validation
-                allowed_blood_groups = ['a_pos', 'a_neg', 'b_pos', 'b_neg', 'ab_pos', 'ab_neg', 'o_pos', 'o_neg',
-                                        'unknown']
-                if post.get('blood_group') and post.get('blood_group') in allowed_blood_groups:
-                    vals['blood_group'] = post.get('blood_group')
-
-                #  Certificate - selection field with validation
-                allowed_certificates = ['graduate', 'bachelor', 'master', 'doctor', 'other']
-                if post.get('certificate') and post.get('certificate') in allowed_certificates:
-                    vals['certificate'] = post.get('certificate')
-
-
-                #  Checkbox field - always set True or False
-                vals['is_non_resident'] = True if post.get('is_non_resident') == 'on' else False
-
-                #  Single write call - all fields together
-                _logger.info("Writing vals to employee %s: %s", employee.id, list(vals.keys()))
-                employee.sudo().write(vals)
-                _logger.info("Successfully wrote vals for employee %s", employee.id)
-
-                # Handle document uploads
-                self._handle_document_uploads(employee, request.httprequest.files)
-
-                return request.make_json_response({
-                    'success': True,
-                    'message': 'Personal details updated successfully'
-                })
-
+            # GET - pass all required variables to template
+            notification = None
+            try:
+                latest_request = request.env['hr.profile.change.request'].sudo().search(
+                    [('employee_id', '=', employee.id)], order='id desc', limit=1
+                )
+                notification = self._get_notification(latest_request)
             except Exception as e:
-                _logger.error("Error in portal_employee_personal POST: %s", str(e))
-                import traceback
-                _logger.error("Traceback: %s", traceback.format_exc())
-                return request.make_json_response({
-                    'success': False,
-                    'error': str(e)
-                })
+                _logger.warning("Could not load notification for employee %s: %s", employee.id, str(e))
 
+            return request.render('employee_self_service_portal.portal_employee_profile_personal', {
+                'employee': employee,
+                'section': 'personal',
+                'countries': countries,
+                'notification': notification,
+            })
 
-        #  GET - pass all required variables to template
-        latest_request = request.env['hr.profile.change.request'].sudo().search(
-            [('employee_id', '=', employee.id)],
-            order='id desc',
-            limit=1
-        )
-        notification = self._get_notification(latest_request)
-
-        return request.render('employee_self_service_portal.portal_employee_profile_personal', {
-            'employee': employee,
-            'section': 'personal',
-            'countries': countries,
-            'notification': notification,
-        })
-
+        except Exception as e:
+            _logger.error("Fatal error in portal_employee_personal: %s", str(e))
+            import traceback
+            _logger.error("Traceback: %s", traceback.format_exc())
+            return request.redirect('/my/employee')
 
         return request.render('employee_self_service_portal.portal_employee_profile_personal', {
             'employee': employee,
@@ -2395,8 +2395,8 @@ class PortalEmployee(http.Controller):
         from datetime import date
         leads = leads.sorted(key=lambda lead: (
             get_next_activity_date(lead),  # Nearest activity first
-            -int(lead.priority or '0'),    # Higher priority first (reversed)
-            -lead.id                       # Newer leads first (reversed by ID)
+            -int(lead.priority or '0'),  # Higher priority first (reversed)
+            -lead.id  # Newer leads first (reversed by ID)
         ))
 
         # Get filter options for dropdowns - show ALL available options, not just used ones
@@ -2591,7 +2591,8 @@ class PortalEmployee(http.Controller):
 
         # Count leads by stage
         new_leads = leads.filtered(lambda l: l.stage_id.name in ['New', 'Qualification'] if l.stage_id else False)
-        in_progress_leads = leads.filtered(lambda l: l.stage_id.name in ['Qualified', 'Proposition'] if l.stage_id else False)
+        in_progress_leads = leads.filtered(
+            lambda l: l.stage_id.name in ['Qualified', 'Proposition'] if l.stage_id else False)
         won_leads = leads.filtered(lambda l: l.stage_id.name == 'Won' if l.stage_id else False)
 
         # Calculate revenue
@@ -2665,7 +2666,7 @@ class PortalEmployee(http.Controller):
             # Always update tag_ids, even if empty (to allow clearing all tags)
             lead.sudo().write({'tag_ids': [(6, 0, tag_id_list)]})
             return request.redirect(CRM_REDIRECT_URL)
-        partners = request.env['res.partner'].sudo().search([('active', '=', True),('is_company', '=', True)])
+        partners = request.env['res.partner'].sudo().search([('active', '=', True), ('is_company', '=', True)])
         # Get contacts for point of contact field
         contacts = request.env['res.partner'].sudo().search([('is_company', '=', False)])
         stages = request.env['crm.stage'].sudo().search([])
@@ -2756,7 +2757,9 @@ class PortalEmployee(http.Controller):
         lead_types = request.env['crm.lead.type'].sudo().search([('active', '=', True)])
         employees = request.env['hr.employee'].sudo().search([('active', '=', True)])
         activity_types = request.env['mail.activity.type'].sudo().search([])
-        default_activity_type_id = request.env.ref('mail.mail_activity_data_todo').id if request.env.ref('mail.mail_activity_data_todo', raise_if_not_found=False) else (activity_types and activity_types[0].id or False)
+        default_activity_type_id = request.env.ref('mail.mail_activity_data_todo').id if request.env.ref(
+            'mail.mail_activity_data_todo', raise_if_not_found=False) else (
+                    activity_types and activity_types[0].id or False)
         return request.render('employee_self_service_portal.portal_employee_crm_edit', {
             'lead': lead,
             'stages': stages,
@@ -2798,7 +2801,8 @@ class PortalEmployee(http.Controller):
                 files = [file]
         _logger.info('ESS Portal: Number of files in attachments: %s', len(files))
         for f in files:
-            _logger.info('ESS Portal: File received: filename=%s content_type=%s', getattr(f, 'filename', None), getattr(f, 'content_type', None))
+            _logger.info('ESS Portal: File received: filename=%s content_type=%s', getattr(f, 'filename', None),
+                         getattr(f, 'content_type', None))
         # Allow log note with or without text, as long as there are files or a note
         if lead and (note or files) and lead.user_id.id == user.id:
             msg = lead.message_post(body=note or '', message_type='comment', author_id=user.partner_id.id)
@@ -2824,7 +2828,8 @@ class PortalEmployee(http.Controller):
                         'public': True,
                     })
                     attachment_ids.append(attachment.id)
-                    _logger.info('ESS Portal: Created attachment id=%s name=%s res_model=%s res_id=%s', attachment.id, attachment.name, attachment.res_model, attachment.res_id)
+                    _logger.info('ESS Portal: Created attachment id=%s name=%s res_model=%s res_id=%s', attachment.id,
+                                 attachment.name, attachment.res_model, attachment.res_id)
             if attachment_ids:
                 msg.sudo().write({'attachment_ids': [(4, att_id) for att_id in attachment_ids]})
         return request.redirect(f'/my/employee/crm/edit/{lead_id}')
@@ -2871,7 +2876,8 @@ class PortalEmployee(http.Controller):
         else:
             return request.redirect(f'/my/employee/crm/edit/{lead_id}')
 
-    @http.route('/my/employee/crm/activity_done/<int:activity_id>', type='http', auth='user', website=True, methods=['POST'])
+    @http.route('/my/employee/crm/activity_done/<int:activity_id>', type='http', auth='user', website=True,
+                methods=['POST'])
     def portal_employee_crm_activity_done(self, activity_id, **post):
         activity = request.env['mail.activity'].sudo().browse(activity_id)
         lead_id = int(request.params.get('lead_id', 0))
@@ -2891,13 +2897,15 @@ class PortalEmployee(http.Controller):
         else:
             return request.redirect(f'/my/employee/crm/edit/{lead_id}')
 
-    @http.route('/my/employee/crm/activity_edit/<int:activity_id>', type='http', auth='user', website=True, methods=['GET', 'POST'])
+    @http.route('/my/employee/crm/activity_edit/<int:activity_id>', type='http', auth='user', website=True,
+                methods=['GET', 'POST'])
     def portal_employee_crm_activity_edit(self, activity_id, **post):
         activity = request.env['mail.activity'].sudo().browse(activity_id)
         lead_id = int(request.params.get('lead_id', 0))
         lead = request.env['crm.lead'].sudo().browse(lead_id)
         user = request.env.user
-        if not (activity and lead and lead.user_id.id == user.id and activity.res_model == 'crm.lead' and activity.res_id == lead.id):
+        if not (
+                activity and lead and lead.user_id.id == user.id and activity.res_model == 'crm.lead' and activity.res_id == lead.id):
             return request.redirect(f'/my/employee/crm/edit/{lead_id}')
         if request.httprequest.method == 'POST':
             vals = {}
@@ -2931,7 +2939,8 @@ class PortalEmployee(http.Controller):
             'salespersons': salespersons,
         })
 
-    @http.route('/my/employee/crm/activity_delete/<int:activity_id>', type='http', auth='user', website=True, methods=['POST'])
+    @http.route('/my/employee/crm/activity_delete/<int:activity_id>', type='http', auth='user', website=True,
+                methods=['POST'])
     def portal_employee_crm_activity_delete(self, activity_id, **post):
         activity = request.env['mail.activity'].sudo().browse(activity_id)
         lead_id = int(request.params.get('lead_id', 0))
@@ -2971,7 +2980,9 @@ class PortalEmployee(http.Controller):
 
         # Common data for both views
         activity_types = request.env['mail.activity.type'].sudo().search([])
-        default_activity_type_id = request.env.ref('mail.mail_activity_data_todo').id if request.env.ref('mail.mail_activity_data_todo', raise_if_not_found=False) else (activity_types and activity_types[0].id or False)
+        default_activity_type_id = request.env.ref('mail.mail_activity_data_todo').id if request.env.ref(
+            'mail.mail_activity_data_todo', raise_if_not_found=False) else (
+                    activity_types and activity_types[0].id or False)
         salespersons = request.env['res.users'].sudo().search([('active', '=', True)])
 
         # Get today's date for comparison
@@ -3171,7 +3182,8 @@ class PortalEmployee(http.Controller):
                 ], limit=1)
 
                 if existing_expense:
-                    errors.append('A similar expense already exists for the same date, amount, and category. Please verify this is not a duplicate.')
+                    errors.append(
+                        'A similar expense already exists for the same date, amount, and category. Please verify this is not a duplicate.')
                     _logger.warning("Potential duplicate expense detected for employee %s", employee.name)
 
             except Exception as duplicate_check_error:
@@ -3298,7 +3310,7 @@ class PortalEmployee(http.Controller):
         # Only show confirmed payslips - no status filter needed
         domain = [
             ('employee_id', '=', employee.id),
-            ('state', 'in', ['validated','done', 'paid'])
+            ('state', 'in', ['validated', 'done', 'paid'])
         ]
 
         # Only month/year filtering allowed
@@ -3317,7 +3329,8 @@ class PortalEmployee(http.Controller):
                 end_date = datetime(int(year), int(month), monthrange(int(year), int(month))[1], 23, 59, 59)
                 domain += [('date_from', '>=', start_date.strftime('%Y-%m-%d')),
                            ('date_to', '<=', end_date.strftime('%Y-%m-%d'))]
-                _logger.info("Date filter applied: %s to %s", start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
+                _logger.info("Date filter applied: %s to %s", start_date.strftime('%Y-%m-%d'),
+                             end_date.strftime('%Y-%m-%d'))
             except (ValueError, TypeError) as e:
                 _logger.warning("Invalid date filter values - month: %s, year: %s, error: %s", month, year, e)
 
@@ -3355,11 +3368,12 @@ class PortalEmployee(http.Controller):
 
             # Security check - only allow access to own payslips
             if not payslip.exists() or not employee or payslip.employee_id.id != employee.id:
-                _logger.warning("Unauthorized payslip access attempt by user %s for payslip %s", request.env.uid, payslip_id)
+                _logger.warning("Unauthorized payslip access attempt by user %s for payslip %s", request.env.uid,
+                                payslip_id)
                 return request.redirect(MY_EMPLOYEE_URL + '/payslips?error=access_denied')
 
             # Only allow download of confirmed payslips
-            if payslip.state not in ['validated','done', 'paid']:
+            if payslip.state not in ['validated', 'done', 'paid']:
                 _logger.warning("Download attempt for unconfirmed payslip %s by user %s", payslip_id, request.env.uid)
                 return request.redirect(MY_EMPLOYEE_URL + '/payslips?error=not_confirmed')
 
@@ -3468,7 +3482,8 @@ class PortalEmployee(http.Controller):
                 if pdf_content and len(pdf_content) > 1000:
                     _logger.info("Successfully generated PDF using Odoo report, size: %d bytes", len(pdf_content))
                 else:
-                    _logger.warning("PDF content is empty or too small: %s bytes", len(pdf_content) if pdf_content else 0)
+                    _logger.warning("PDF content is empty or too small: %s bytes",
+                                    len(pdf_content) if pdf_content else 0)
                     pdf_content = None
 
             except Exception as render_error:
@@ -3659,7 +3674,8 @@ Payslip Details:
             'employee': employee,
         })
 
-    @http.route('/my/employee/crm/update_stage/<int:lead_id>', type='http', auth='user', website=True, methods=['POST'], csrf=True)
+    @http.route('/my/employee/crm/update_stage/<int:lead_id>', type='http', auth='user', website=True, methods=['POST'],
+                csrf=True)
     def portal_employee_crm_update_stage(self, lead_id, **post):
         """Route to handle stage updates via AJAX"""
         import json
@@ -3717,7 +3733,8 @@ Payslip Details:
             response = json.dumps({'success': False, 'error': 'Failed to fetch KPIs'})
             return request.make_response(response, headers={'Content-Type': 'application/json'})
 
-    @http.route('/my/employee/crm/api/quick_action', type='http', auth='user', website=True, methods=['POST'], csrf=True)
+    @http.route('/my/employee/crm/api/quick_action', type='http', auth='user', website=True, methods=['POST'],
+                csrf=True)
     def portal_employee_crm_quick_action(self, **post):
         """API endpoint for quick actions on leads"""
         import json
