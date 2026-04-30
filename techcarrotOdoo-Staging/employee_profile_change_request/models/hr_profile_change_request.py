@@ -105,7 +105,7 @@ class HrProfileChangeRequest(models.Model):
         required=True,
         copy=False,
         readonly=True,
-        default=lambda self: _('New'),
+        default='New',
     )
 
     # ── Employee ──────────────────────────────────────────────────
@@ -193,12 +193,19 @@ class HrProfileChangeRequest(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
-            if not vals.get('name') or vals.get('name') == 'New':
-                vals['name'] = (
-                        self.env['ir.sequence'].sudo().next_by_code(
-                            'hr.profile.change.request'
-                        ) or 'New'
+            name_val = vals.get('name', '')
+            # Assign sequence if name is missing, 'New', or any translated variant
+            if not name_val or not name_val.startswith('PCR/'):
+                seq = self.env['ir.sequence'].sudo().next_by_code(
+                    'hr.profile.change.request'
                 )
+                if seq:
+                    vals['name'] = seq
+                else:
+                    _logger.error(
+                        'Sequence hr.profile.change.request not found! '
+                        'Record will be saved as "New".'
+                    )
         return super().create(vals_list)
 
     # ── Compute changed fields HTML table ─────────────────────────
