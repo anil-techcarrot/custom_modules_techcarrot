@@ -1515,43 +1515,44 @@ class PortalEmployee(http.Controller):
             )
             return {
                 'type': 'success',
+                'title': 'Profile Update Approved',
                 'message': (
-                    f'Your profile change request '
-                    f'<strong>{latest_request.name}</strong> '
-                    f'was <strong>approved</strong> by '
-                    f'<strong>{reviewed_by}</strong>'
+                    f'Your profile change request {latest_request.name} '
+                    f'was approved by {reviewed_by}'
                     f'{" on " + review_date if review_date else ""}. '
                     f'Your records have been updated.'
                 ),
                 'reason': None,
                 'request_name': latest_request.name,
+                'reviewed_by': reviewed_by,
             }
 
         elif latest_request.state == 'rejected':
             reviewed_by = latest_request.reviewed_by.name or 'HR'
             return {
                 'type': 'danger',
+                'title': 'Profile Update Rejected',
                 'message': (
-                    f'Your profile change request '
-                    f'<strong>{latest_request.name}</strong> '
-                    f'was <strong>rejected</strong> by '
-                    f'<strong>{reviewed_by}</strong>. '
+                    f'Your profile change request {latest_request.name} '
+                    f'was rejected by {reviewed_by}. '
                     f'Please correct and resubmit.'
                 ),
                 'reason': latest_request.rejection_reason or 'No reason provided.',
                 'request_name': latest_request.name,
+                'reviewed_by': reviewed_by,
             }
 
         elif latest_request.state == 'pending':
             return {
                 'type': 'warning',
+                'title': 'Profile Update Pending',
                 'message': (
-                    f'Your profile change request '
-                    f'<strong>{latest_request.name}</strong> '
+                    f'Your profile change request {latest_request.name} '
                     f'is awaiting HR review.'
                 ),
                 'reason': None,
                 'request_name': latest_request.name,
+                'reviewed_by': '',
             }
 
         return None
