@@ -338,6 +338,8 @@
             </div>
         </xpath>
         <xpath expr="//div[@id='to_pay']" position="after">
+            <strong>Amount in Words:</strong>
+            <span t-esc="o.get_amount_in_words(o.net_wage)"/>
             <br></br>
             <br></br>
             <span>This is a system generated document &amp; does not require a signature.</span>
