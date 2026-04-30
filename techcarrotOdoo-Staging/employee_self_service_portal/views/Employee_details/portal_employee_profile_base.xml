@@ -112,6 +112,11 @@
                                            onchange="validateAndUploadPhoto(this)"/>
                                 </div>
                                 <div id="photoUploadStatus" class="small mt-1" style="min-height:18px;"></div>
+                                <div class="text-center mt-1">
+                                    <small class="text-muted">
+                                        <i class="fa fa-info-circle me-1"></i>Max photo size: 5MB (JPG, PNG, GIF)
+                                    </small>
+                                </div>
                                 <div class="text-center">
                                     <h6 class="mb-1">
                                         <t t-esc="employee.name"/>
