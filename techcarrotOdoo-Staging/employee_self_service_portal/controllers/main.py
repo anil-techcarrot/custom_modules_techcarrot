@@ -143,9 +143,16 @@ class PortalEmployee(http.Controller):
     @http.route(MY_EMPLOYEE_URL, type='http', auth='user', website=True)
     def portal_employee_profile(self, **kw):
         employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
+        countries = request.env['res.country'].sudo().search([], order='name')
+        latest_request = request.env['hr.profile.change.request'].sudo().search(
+            [('employee_id', '=', employee.id)], order='id desc', limit=1
+        )
+        notification = self._get_notification(latest_request)
         return request.render('employee_self_service_portal.portal_employee_profile_personal', {
             'employee': employee,
             'section': 'personal',
+            'countries': countries,
+            'notification': notification,
         })
 
     @http.route(MY_EMPLOYEE_URL + '/attendance/checkin', type='http', auth='user', methods=['POST'], website=True)
@@ -1932,12 +1939,9 @@ class PortalEmployee(http.Controller):
 
         #  GET - pass all required variables to template
         latest_request = request.env['hr.profile.change.request'].sudo().search(
-            [('employee_id', '=', employee.id)],
-            order='id desc',
-            limit=1
+            [('employee_id', '=', employee.id)], order='id desc', limit=1
         )
         notification = self._get_notification(latest_request)
-
         return request.render('employee_self_service_portal.portal_employee_profile_personal', {
             'employee': employee,
             'section': 'personal',
