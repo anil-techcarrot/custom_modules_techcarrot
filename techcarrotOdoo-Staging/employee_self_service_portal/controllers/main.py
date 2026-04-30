@@ -1567,200 +1567,195 @@ class PortalEmployee(http.Controller):
     @http.route(MY_EMPLOYEE_URL + '/personal', type='http', auth='user', website=True, methods=['GET', 'POST'],
                 csrf=False)
     def portal_employee_personal(self, **post):
-        employee = self._get_employee()
+        try:
+            employee = self._get_employee()
 
-        #  Only active/installed languages
+            countries = request.env['res.country'].sudo().search([], order='name')
 
-        countries = request.env['res.country'].sudo().search([], order='name')
+            _logger.info("portal_employee_profile - Countries count: %s", len(countries))
 
-        _logger.info("portal_employee_profile - Countries count: %s", len(countries))
+            if request.httprequest.method == 'POST':
+                try:
+                    vals = {}
 
+                    # Basic information
+                    if post.get('work_email'):
+                        import re
+                        email_pattern = r'^[^\s@]+@[^\s@]+\.[^\s@]+$'
+                        if re.match(email_pattern, post.get('work_email')):
+                            vals['work_email'] = post.get('work_email')
+                        else:
+                            return request.make_json_response({
+                                'success': False,
+                                'error': 'Invalid email format'
+                            })
 
-        if request.httprequest.method == 'POST':
-            try:
-                vals = {}
+                    if post.get('work_phone'):
+                        vals['work_phone'] = post.get('work_phone')
+                    if post.get('birthday'):
+                        vals['birthday'] = post.get('birthday')
+                    if post.get('sex'):
+                        vals['sex'] = post.get('sex')
+                    if post.get('marital'):
+                        vals['marital'] = post.get('marital')
+                    if post.get('children'):
+                        try:
+                            vals['children'] = int(post.get('children'))
+                        except (ValueError, TypeError):
+                            pass
+                    if post.get('study_field'):
+                        vals['study_field'] = post.get('study_field')
+                    if post.get('l10n_in_relationship'):
+                        vals['l10n_in_relationship'] = post.get('l10n_in_relationship')
 
-                # Basic information
-                if post.get('work_email'):
-                    import re
-                    email_pattern = r'^[^\s@]+@[^\s@]+\.[^\s@]+$'
-                    if re.match(email_pattern, post.get('work_email')):
-                        vals['work_email'] = post.get('work_email')
-                    else:
-                        return request.make_json_response({
-                            'success': False,
-                            'error': 'Invalid email format'
-                        })
+                    # Identity documents
+                    if post.get('emirates_id_number'):
+                        vals['emirates_id_number'] = post.get('emirates_id_number')
+                    if post.get('emirates_issue_date'):
+                        vals['emirates_issue_date'] = post.get('emirates_issue_date')
+                    if post.get('emirates_expiry_date'):
+                        vals['emirates_expiry_date'] = post.get('emirates_expiry_date')
+                    if post.get('ssnid'):
+                        vals['ssnid'] = post.get('ssnid')
+                    if post.get('issue_date'):
+                        vals['issue_date'] = post.get('issue_date')
+                    if post.get('expiry_date'):
+                        vals['expiry_date'] = post.get('expiry_date')
 
-                if post.get('work_phone'):
-                    vals['work_phone'] = post.get('work_phone')
-                if post.get('birthday'):
-                    vals['birthday'] = post.get('birthday')
-                if post.get('sex'):
-                    vals['sex'] = post.get('sex')
-                if post.get('marital'):
-                    vals['marital'] = post.get('marital')
-                if post.get('children'):
-                    try:
-                        vals['children'] = int(post.get('children'))
-                    except (ValueError, TypeError):
-                        pass
-                if post.get('study_field'):
-                    vals['study_field'] = post.get('study_field')
-                if post.get('l10n_in_relationship'):
-                    vals['l10n_in_relationship'] = post.get('l10n_in_relationship')
+                    if post.get('issue_countries_id'):
+                        try:
+                            vals['issue_countries_id'] = int(post.get('issue_countries_id'))
+                        except (ValueError, TypeError):
+                            country = request.env['res.country'].sudo().search([
+                                ('name', '=', post.get('issue_countries_id'))
+                            ], limit=1)
+                            if country:
+                                vals['issue_countries_id'] = country.id
 
-                # Identity documents
-                if post.get('emirates_id_number'):
-                    vals['emirates_id_number'] = post.get('emirates_id_number')
-                if post.get('emirates_issue_date'):
-                    vals['emirates_issue_date'] = post.get('emirates_issue_date')
-                if post.get('emirates_expiry_date'):
-                    vals['emirates_expiry_date'] = post.get('emirates_expiry_date')
-                if post.get('ssnid'):
-                    vals['ssnid'] = post.get('ssnid')
-                if post.get('issue_date'):
-                    vals['issue_date'] = post.get('issue_date')
-                if post.get('expiry_date'):
-                    vals['expiry_date'] = post.get('expiry_date')
+                    # Nationality
+                    if post.get('country_id'):
+                        try:
+                            vals['country_id'] = int(post.get('country_id'))
+                        except (ValueError, TypeError):
+                            country = request.env['res.country'].sudo().search([
+                                ('name', '=', post.get('country_id'))
+                            ], limit=1)
+                            if country:
+                                vals['country_id'] = country.id
 
-                if post.get('issue_countries_id'):
-                    try:
-                        vals['issue_countries_id'] = int(post.get('issue_countries_id'))
-                    except (ValueError, TypeError):
-                        country = request.env['res.country'].sudo().search([
-                            ('name', '=', post.get('issue_countries_id'))
-                        ], limit=1)
-                        if country:
-                            vals['issue_countries_id'] = country.id
+                    # Contact information
+                    if post.get('private_email'):
+                        vals['private_email'] = post.get('private_email')
+                    if post.get('private_phone'):
+                        vals['private_phone'] = post.get('private_phone')
+                    if post.get('private_street'):
+                        vals['private_street'] = post.get('private_street')
+                    if post.get('private_street2'):
+                        vals['private_street2'] = post.get('private_street2')
+                    if post.get('private_city'):
+                        vals['private_city'] = post.get('private_city')
+                    if post.get('private_zip'):
+                        vals['private_zip'] = post.get('private_zip')
+                    if post.get('e_private_city'):
+                        vals['e_private_city'] = post.get('e_private_city')
 
-                # Nationality
-                if post.get('country_id'):
-                    try:
-                        vals['country_id'] = int(post.get('country_id'))
-                    except (ValueError, TypeError):
-                        country = request.env['res.country'].sudo().search([
-                            ('name', '=', post.get('country_id'))
-                        ], limit=1)
-                        if country:
-                            vals['country_id'] = country.id
+                    # Emergency contact
+                    if post.get('emergency_contact'):
+                        vals['emergency_contact'] = post.get('emergency_contact')
+                    if post.get('emergency_phone'):
+                        vals['emergency_phone'] = post.get('emergency_phone')
 
-                # Contact information
-                if post.get('private_email'):
-                    vals['private_email'] = post.get('private_email')
-                if post.get('private_phone'):
-                    vals['private_phone'] = post.get('private_phone')
-                if post.get('private_street'):
-                    vals['private_street'] = post.get('private_street')
-                if post.get('private_street2'):
-                    vals['private_street2'] = post.get('private_street2')
-                if post.get('private_city'):
-                    vals['private_city'] = post.get('private_city')
-                if post.get('private_zip'):
-                    vals['private_zip'] = post.get('private_zip')
-                if post.get('e_private_city'):
-                    vals['e_private_city'] = post.get('e_private_city')
+                    # Dependent Details - Child 1
+                    if post.get('dependent_child_name_1') is not None:
+                        vals['dependent_child_name_1'] = post.get('dependent_child_name_1', '').strip()
+                    if post.get('dependent_child_dob_1'):
+                        vals['dependent_child_dob_1'] = post.get('dependent_child_dob_1')
+                    if post.get('dependent_child_gender_1'):
+                        vals['dependent_child_gender_1'] = post.get('dependent_child_gender_1')
+                    if post.get('dependent_child_passport_no') is not None:
+                        vals['dependent_child_passport_no'] = post.get('dependent_child_passport_no', '').strip()
+                    if post.get('dependent_child_passport_issue_date_1'):
+                        vals['dependent_child_passport_issue_date_1'] = post.get(
+                            'dependent_child_passport_issue_date_1')
+                    if post.get('dependent_child_passport_expiry_date_1'):
+                        vals['dependent_child_passport_expiry_date_1'] = post.get(
+                            'dependent_child_passport_expiry_date_1')
 
-                # Emergency contact
-                if post.get('emergency_contact'):
-                    vals['emergency_contact'] = post.get('emergency_contact')
-                if post.get('emergency_phone'):
-                    vals['emergency_phone'] = post.get('emergency_phone')
+                    # General Information
+                    if post.get('u_private_city'):
+                        vals['u_private_city'] = post.get('u_private_city')
+                    if post.get('industry_start_date'):
+                        vals['industry_start_date'] = post.get('industry_start_date')
+                    if post.get('experience'):
+                        vals['experience'] = post.get('experience')
+                    if post.get('current_role'):
+                        vals['current_role'] = post.get('current_role')
+                    if post.get('current_address'):
+                        vals['current_address'] = post.get('current_address')
+                    if post.get('phone_code_1'):
+                        vals['phone_code_1'] = post.get('phone_code_1')
 
-                # Dependent Details - Child 1
-                if post.get('dependent_child_name_1') is not None:
-                    vals['dependent_child_name_1'] = post.get('dependent_child_name_1', '').strip()
+                    # Emergency Contact UAE
+                    if post.get('emergency_contact_person_name'):
+                        vals['emergency_contact_person_name'] = post.get('emergency_contact_person_name')
+                    if post.get('emergency_contact_person_phone'):
+                        vals['emergency_contact_person_phone'] = post.get('emergency_contact_person_phone')
+                    if post.get('alternate_mobile_number'):
+                        vals['alternate_mobile_number'] = post.get('alternate_mobile_number')
+                    if post.get('emergency_contact_person_name_1'):
+                        vals['emergency_contact_person_name_1'] = post.get('emergency_contact_person_name_1')
+                    if post.get('emergency_contact_person_phone_1'):
+                        vals['emergency_contact_person_phone_1'] = post.get('emergency_contact_person_phone_1')
+                    if post.get('second_alternative_number'):
+                        vals['second_alternative_number'] = post.get('second_alternative_number')
+                    if post.get('home_land_line_no'):
+                        vals['home_land_line_no'] = post.get('home_land_line_no')
 
-                if post.get('dependent_child_dob_1'):
-                    vals['dependent_child_dob_1'] = post.get('dependent_child_dob_1')
+                    # Spouse Info
+                    if post.get('spouse_passport_no'):
+                        vals['spouse_passport_no'] = post.get('spouse_passport_no')
+                    if post.get('spouse_passport_issue_date'):
+                        vals['spouse_passport_issue_date'] = post.get('spouse_passport_issue_date')
+                    if post.get('spouse_passport_expiry_date'):
+                        vals['spouse_passport_expiry_date'] = post.get('spouse_passport_expiry_date')
+                    if post.get('spouse_visa_no'):
+                        vals['spouse_visa_no'] = post.get('spouse_visa_no')
+                    if post.get('spouse_visa_expire_date'):
+                        vals['spouse_visa_expire_date'] = post.get('spouse_visa_expire_date')
+                    if post.get('spouse_emirates_id_no'):
+                        vals['spouse_emirates_id_no'] = post.get('spouse_emirates_id_no')
+                    if post.get('spouse_emirates_issue_date'):
+                        vals['spouse_emirates_issue_date'] = post.get('spouse_emirates_issue_date')
+                    if post.get('spouse_emirates_id_expiry_date'):
+                        vals['spouse_emirates_id_expiry_date'] = post.get('spouse_emirates_id_expiry_date')
+                    if post.get('spouse_aadhar_no'):
+                        vals['spouse_aadhar_no'] = post.get('spouse_aadhar_no')
 
-                if post.get('dependent_child_gender_1'):
-                    vals['dependent_child_gender_1'] = post.get('dependent_child_gender_1')
+                    # Father Mother Info
+                    if post.get('father_name'):
+                        vals['father_name'] = post.get('father_name')
+                    if post.get('father_dob'):
+                        vals['father_dob'] = post.get('father_dob')
+                    if post.get('mother_name'):
+                        vals['mother_name'] = post.get('mother_name')
+                    if post.get('mother_dob'):
+                        vals['mother_dob'] = post.get('mother_dob')
 
-                if post.get('dependent_child_passport_no') is not None:
-                    vals['dependent_child_passport_no'] = post.get('dependent_child_passport_no', '').strip()
+                    # Employee Details
+                    if post.get('employee_nominee_name'):
+                        vals['employee_nominee_name'] = post.get('employee_nominee_name')
+                    if post.get('employee_nominee_contact_no'):
+                        vals['employee_nominee_contact_no'] = post.get('employee_nominee_contact_no')
+                    if post.get('domain_worked'):
+                        vals['domain_worked'] = post.get('domain_worked')
+                    if post.get('primary_skill'):
+                        vals['primary_skill'] = post.get('primary_skill')
+                    if post.get('secondary_skill'):
+                        vals['secondary_skill'] = post.get('secondary_skill')
+                    if post.get('tool_used'):
+                        vals['tool_used'] = post.get('tool_used')
 
-                if post.get('dependent_child_passport_issue_date_1'):
-                    vals['dependent_child_passport_issue_date_1'] = post.get('dependent_child_passport_issue_date_1')
-
-                if post.get('dependent_child_passport_expiry_date_1'):
-                    vals['dependent_child_passport_expiry_date_1'] = post.get('dependent_child_passport_expiry_date_1')
-
-                # General Information
-                if post.get('u_private_city'):
-                    vals['u_private_city'] = post.get('u_private_city')
-                if post.get('industry_start_date'):
-                    vals['industry_start_date'] = post.get('industry_start_date')
-                if post.get('experience'):
-                    vals['experience'] = post.get('experience')
-                if post.get('current_role'):
-                    vals['current_role'] = post.get('current_role')
-                if post.get('current_address'):
-                    vals['current_address'] = post.get('current_address')
-                if post.get('phone_code_1'):
-                    vals['phone_code_1'] = post.get('phone_code_1')
-
-                # Emergency Contact UAE
-                if post.get('emergency_contact_person_name'):
-                    vals['emergency_contact_person_name'] = post.get('emergency_contact_person_name')
-                if post.get('emergency_contact_person_phone'):
-                    vals['emergency_contact_person_phone'] = post.get('emergency_contact_person_phone')
-                if post.get('alternate_mobile_number'):
-                    vals['alternate_mobile_number'] = post.get('alternate_mobile_number')
-                if post.get('emergency_contact_person_name_1'):
-                    vals['emergency_contact_person_name_1'] = post.get('emergency_contact_person_name_1')
-                if post.get('emergency_contact_person_phone_1'):
-                    vals['emergency_contact_person_phone_1'] = post.get('emergency_contact_person_phone_1')
-                if post.get('second_alternative_number'):
-                    vals['second_alternative_number'] = post.get('second_alternative_number')
-                if post.get('home_land_line_no'):
-                    vals['home_land_line_no'] = post.get('home_land_line_no')
-
-                # Spouse Info
-                if post.get('spouse_passport_no'):
-                    vals['spouse_passport_no'] = post.get('spouse_passport_no')
-                if post.get('spouse_passport_issue_date'):
-                    vals['spouse_passport_issue_date'] = post.get('spouse_passport_issue_date')
-                if post.get('spouse_passport_expiry_date'):
-                    vals['spouse_passport_expiry_date'] = post.get('spouse_passport_expiry_date')
-                if post.get('spouse_visa_no'):
-                    vals['spouse_visa_no'] = post.get('spouse_visa_no')
-                if post.get('spouse_visa_expire_date'):
-                    vals['spouse_visa_expire_date'] = post.get('spouse_visa_expire_date')
-                if post.get('spouse_emirates_id_no'):
-                    vals['spouse_emirates_id_no'] = post.get('spouse_emirates_id_no')
-                if post.get('spouse_emirates_issue_date'):
-                    vals['spouse_emirates_issue_date'] = post.get('spouse_emirates_issue_date')
-                if post.get('spouse_emirates_id_expiry_date'):
-                    vals['spouse_emirates_id_expiry_date'] = post.get('spouse_emirates_id_expiry_date')
-                if post.get('spouse_aadhar_no'):
-                    vals['spouse_aadhar_no'] = post.get('spouse_aadhar_no')
-
-                # Father Mother Info
-                if post.get('father_name'):
-                    vals['father_name'] = post.get('father_name')
-                if post.get('father_dob'):
-                    vals['father_dob'] = post.get('father_dob')
-                if post.get('mother_name'):
-                    vals['mother_name'] = post.get('mother_name')
-                if post.get('mother_dob'):
-                    vals['mother_dob'] = post.get('mother_dob')
-
-                # Employee Details
-                if post.get('employee_nominee_name'):
-                    vals['employee_nominee_name'] = post.get('employee_nominee_name')
-                if post.get('employee_nominee_contact_no'):
-                    vals['employee_nominee_contact_no'] = post.get('employee_nominee_contact_no')
-                if post.get('domain_worked'):
-                    vals['domain_worked'] = post.get('domain_worked')
-                if post.get('primary_skill'):
-                    vals['primary_skill'] = post.get('primary_skill')
-                if post.get('secondary_skill'):
-                    vals['secondary_skill'] = post.get('secondary_skill')
-                if post.get('tool_used'):
-                    vals['tool_used'] = post.get('tool_used')
-
-                    # Last Organisation Info
+                    # Last Organisation Info  ← FIXED: was wrongly indented inside tool_used block
                     if post.get('last_organisation_name'):
                         vals['last_organisation_name'] = post.get('last_organisation_name')
                     if post.get('last_location'):
@@ -1791,163 +1786,154 @@ class PortalEmployee(http.Controller):
                                 'error': 'Invalid Reporting Manager email format'
                             })
 
-                # Many2one - Passport Issuing Country
-                # Child 1 Passport Issuing Country - Many2one res.country
-                if post.get('dependent_child_passport_issuing_countries_1_id'):
-                    try:
-                        vals['dependent_child_passport_issuing_countries_1_id'] = int(
-                            post.get('dependent_child_passport_issuing_countries_1_id')
-                        )
-                    except (ValueError, TypeError):
-                        country = request.env['res.country'].sudo().search([
-                            ('name', '=', post.get('dependent_child_passport_issuing_countries_1_id'))
-                        ], limit=1)
-                        if country:
-                            vals['dependent_child_passport_issuing_countries_1_id'] = country.id
+                    # Many2one - Child 1 Passport Issuing Country
+                    if post.get('dependent_child_passport_issuing_countries_1_id'):
+                        try:
+                            vals['dependent_child_passport_issuing_countries_1_id'] = int(
+                                post.get('dependent_child_passport_issuing_countries_1_id')
+                            )
+                        except (ValueError, TypeError):
+                            country = request.env['res.country'].sudo().search([
+                                ('name', '=', post.get('dependent_child_passport_issuing_countries_1_id'))
+                            ], limit=1)
+                            if country:
+                                vals['dependent_child_passport_issuing_countries_1_id'] = country.id
 
-                if post.get('dependent_child_visa_no_1') is not None:
-                    vals['dependent_child_visa_no_1'] = post.get('dependent_child_visa_no_1', '').strip()
+                    if post.get('dependent_child_visa_no_1') is not None:
+                        vals['dependent_child_visa_no_1'] = post.get('dependent_child_visa_no_1', '').strip()
+                    if post.get('dependent_child_visa_expiration_date_1'):
+                        vals['dependent_child_visa_expiration_date_1'] = post.get(
+                            'dependent_child_visa_expiration_date_1')
+                    if post.get('dependent_child_emirates_id_no_1') is not None:
+                        vals['dependent_child_emirates_id_no_1'] = post.get('dependent_child_emirates_id_no_1',
+                                                                            '').strip()
+                    if post.get('dependent_child_emirates_id_issue_date_1'):
+                        vals['dependent_child_emirates_id_issue_date_1'] = post.get(
+                            'dependent_child_emirates_id_issue_date_1')
+                    if post.get('dependent_child_emirates_id_expiry_date_1'):
+                        vals['dependent_child_emirates_id_expiry_date_1'] = post.get(
+                            'dependent_child_emirates_id_expiry_date_1')
+                    if post.get('dependent_child_aadhar_no_1') is not None:
+                        vals['dependent_child_aadhar_no_1'] = post.get('dependent_child_aadhar_no_1', '').strip()
 
-                if post.get('dependent_child_visa_expiration_date_1'):
-                    vals['dependent_child_visa_expiration_date_1'] = post.get('dependent_child_visa_expiration_date_1')
+                    # Personal information
+                    if post.get('legal_name'):
+                        vals['legal_name'] = post.get('legal_name')
+                    if post.get('place_of_birth'):
+                        vals['place_of_birth'] = post.get('place_of_birth')
 
-                if post.get('dependent_child_emirates_id_no_1') is not None:
-                    vals['dependent_child_emirates_id_no_1'] = post.get('dependent_child_emirates_id_no_1', '').strip()
+                    # Document and personal details
+                    if post.get('whatsapp'):
+                        vals['whatsapp'] = post.get('whatsapp')
+                    if post.get('house_no'):
+                        vals['house_no'] = post.get('house_no')
+                    if post.get('area_name'):
+                        vals['area_name'] = post.get('area_name')
+                    if post.get('city'):
+                        vals['city'] = post.get('city')
+                    if post.get('zip_code'):
+                        vals['zip_code'] = post.get('zip_code')
+                    if post.get('linkedin'):
+                        vals['linkedin'] = post.get('linkedin')
 
-                if post.get('dependent_child_emirates_id_issue_date_1'):
-                    vals['dependent_child_emirates_id_issue_date_1'] = post.get(
-                        'dependent_child_emirates_id_issue_date_1')
+                    # Visa and work permit
+                    if post.get('visa_no'):
+                        vals['visa_no'] = post.get('visa_no')
+                    if post.get('permit_no'):
+                        vals['permit_no'] = post.get('permit_no')
 
-                if post.get('dependent_child_emirates_id_expiry_date_1'):
-                    vals['dependent_child_emirates_id_expiry_date_1'] = post.get(
-                        'dependent_child_emirates_id_expiry_date_1')
+                    # Social Media Details
+                    if post.get('facebook_profile') is not None:
+                        vals['facebook_profile'] = post.get('facebook_profile', '').strip()
+                    if post.get('insta_profile') is not None:
+                        vals['insta_profile'] = post.get('insta_profile', '').strip()
+                    if post.get('twitter_profile') is not None:
+                        vals['twitter_profile'] = post.get('twitter_profile', '').strip()
 
-                if post.get('dependent_child_aadhar_no_1') is not None:
-                    vals['dependent_child_aadhar_no_1'] = post.get('dependent_child_aadhar_no_1', '').strip()
+                    # Career Details
+                    if post.get('career_break_detail') is not None:
+                        vals['career_break_detail'] = post.get('career_break_detail', '').strip()
 
-                # Personal information
-                if post.get('legal_name'):
-                    vals['legal_name'] = post.get('legal_name')
-                if post.get('place_of_birth'):
-                    vals['place_of_birth'] = post.get('place_of_birth')
+                    # Industry Details
+                    if post.get('industry_ref_name') is not None:
+                        vals['industry_ref_name'] = post.get('industry_ref_name', '').strip()
+                    if post.get('industry_ref_email') is not None:
+                        vals['industry_ref_email'] = post.get('industry_ref_email', '').strip()
+                    if post.get('industry_ref_mob_no') is not None:
+                        vals['industry_ref_mob_no'] = post.get('industry_ref_mob_no', '').strip()
+                    if post.get('home_country_id_name') is not None:
+                        vals['home_country_id_name'] = post.get('home_country_id_name', '').strip()
+                    if post.get('home_country_id_number') is not None:
+                        vals['home_country_id_number'] = post.get('home_country_id_number', '').strip()
 
-                # Document and personal details
-                if post.get('whatsapp'):
-                    vals['whatsapp'] = post.get('whatsapp')
-                if post.get('house_no'):
-                    vals['house_no'] = post.get('house_no')
-                if post.get('area_name'):
-                    vals['area_name'] = post.get('area_name')
-                if post.get('city'):
-                    vals['city'] = post.get('city')
-                if post.get('zip_code'):
-                    vals['zip_code'] = post.get('zip_code')
-                if post.get('linkedin'):
-                    vals['linkedin'] = post.get('linkedin')
+                    # Citizenship
+                    if post.get('identification_id'):
+                        vals['identification_id'] = post.get('identification_id')
+                    if post.get('passport_id'):
+                        vals['passport_id'] = post.get('passport_id')
+                    if post.get('mother_tongue_name'):
+                        vals['mother_tongue_name'] = post.get('mother_tongue_name')
+                    if post.get('language_known_name') is not None:
+                        vals['language_known_name'] = post.get('language_known_name', '').strip()
 
-                # Visa and work permit
-                if post.get('visa_no'):
-                    vals['visa_no'] = post.get('visa_no')
-                if post.get('permit_no'):
-                    vals['permit_no'] = post.get('permit_no')
+                    # Selection field with validation
+                    allowed_blood_groups = ['a_pos', 'a_neg', 'b_pos', 'b_neg', 'ab_pos', 'ab_neg', 'o_pos', 'o_neg',
+                                            'unknown']
+                    if post.get('blood_group') and post.get('blood_group') in allowed_blood_groups:
+                        vals['blood_group'] = post.get('blood_group')
 
-                # Social Media Details
-                if post.get('facebook_profile') is not None:
-                    vals['facebook_profile'] = post.get('facebook_profile', '').strip()
-                if post.get('insta_profile') is not None:
-                    vals['insta_profile'] = post.get('insta_profile', '').strip()
-                if post.get('twitter_profile') is not None:
-                    vals['twitter_profile'] = post.get('twitter_profile', '').strip()
+                    # Certificate - selection field with validation
+                    allowed_certificates = ['graduate', 'bachelor', 'master', 'doctor', 'other']
+                    if post.get('certificate') and post.get('certificate') in allowed_certificates:
+                        vals['certificate'] = post.get('certificate')
 
-                # Career Details
-                if post.get('career_break_detail') is not None:
-                    vals['career_break_detail'] = post.get('career_break_detail', '').strip()
+                    # Checkbox field - always set True or False
+                    vals['is_non_resident'] = True if post.get('is_non_resident') == 'on' else False
 
-                # Industry Details
-                if post.get('industry_ref_name') is not None:
-                    vals['industry_ref_name'] = post.get('industry_ref_name', '').strip()
-                if post.get('industry_ref_email') is not None:
-                    vals['industry_ref_email'] = post.get('industry_ref_email', '').strip()
-                if post.get('industry_ref_mob_no') is not None:
-                    vals['industry_ref_mob_no'] = post.get('industry_ref_mob_no', '').strip()
-                if post.get('home_country_id_name') is not None:
-                    vals['home_country_id_name'] = post.get('home_country_id_name', '').strip()
-                if post.get('home_country_id_number') is not None:
-                    vals['home_country_id_number'] = post.get('home_country_id_number', '').strip()
+                    # Single write call - all fields together
+                    _logger.info("Writing vals to employee %s: %s", employee.id, list(vals.keys()))
+                    employee.sudo().write(vals)
+                    _logger.info("Successfully wrote vals for employee %s", employee.id)
 
-                # Citizenship
-                if post.get('identification_id'):
-                    vals['identification_id'] = post.get('identification_id')
-                if post.get('passport_id'):
-                    vals['passport_id'] = post.get('passport_id')
-                if post.get('mother_tongue_name'):
-                    vals['mother_tongue_name'] = post.get('mother_tongue_name')
-                if post.get('language_known_name') is not None:
-                    vals['language_known_name'] = post.get('language_known_name', '').strip()
-                # Distance - only save if BOTH fields have valid values
-                # distance_raw = post.get('distance_home_work', '').strip()
-                # if distance_raw and distance_raw not in ['km', 'mi', '']:
-                #     try:
-                #         vals['distance_home_work'] = int(distance_raw)
-                #     except (ValueError, TypeError):
-                #         pass  # skip silently if not a valid integer
-                #
-                # # Unit - only km or mi allowed
-                # km_val = post.get('km_home_work', '').strip()
-                # if km_val in ['km', 'mi']:
-                #     vals['km_home_work'] = km_val
+                    # Handle document uploads
+                    self._handle_document_uploads(employee, request.httprequest.files)
 
+                    return request.make_json_response({
+                        'success': True,
+                        'message': 'Personal details updated successfully'
+                    })
 
+                except Exception as e:
+                    _logger.error("Error in portal_employee_personal POST: %s", str(e))
+                    import traceback
+                    _logger.error("Traceback: %s", traceback.format_exc())
+                    return request.make_json_response({
+                        'success': False,
+                        'error': str(e)
+                    })
 
-                # Selection field with validation
-                allowed_blood_groups = ['a_pos', 'a_neg', 'b_pos', 'b_neg', 'ab_pos', 'ab_neg', 'o_pos', 'o_neg',
-                                        'unknown']
-                if post.get('blood_group') and post.get('blood_group') in allowed_blood_groups:
-                    vals['blood_group'] = post.get('blood_group')
-
-                #  Certificate - selection field with validation
-                allowed_certificates = ['graduate', 'bachelor', 'master', 'doctor', 'other']
-                if post.get('certificate') and post.get('certificate') in allowed_certificates:
-                    vals['certificate'] = post.get('certificate')
-
-
-                #  Checkbox field - always set True or False
-                vals['is_non_resident'] = True if post.get('is_non_resident') == 'on' else False
-
-                #  Single write call - all fields together
-                _logger.info("Writing vals to employee %s: %s", employee.id, list(vals.keys()))
-                employee.sudo().write(vals)
-                _logger.info("Successfully wrote vals for employee %s", employee.id)
-
-                # Handle document uploads
-                self._handle_document_uploads(employee, request.httprequest.files)
-
-                return request.make_json_response({
-                    'success': True,
-                    'message': 'Personal details updated successfully'
-                })
-
+            # GET - pass all required variables to template
+            notification = None
+            try:
+                latest_request = request.env['hr.profile.change.request'].sudo().search(
+                    [('employee_id', '=', employee.id)], order='id desc', limit=1
+                )
+                notification = self._get_notification(latest_request)
             except Exception as e:
-                _logger.error("Error in portal_employee_personal POST: %s", str(e))
-                import traceback
-                _logger.error("Traceback: %s", traceback.format_exc())
-                return request.make_json_response({
-                    'success': False,
-                    'error': str(e)
-                })
+                _logger.warning("Could not load notification for employee %s: %s", employee.id, str(e))
 
+            return request.render('employee_self_service_portal.portal_employee_profile_personal', {
+                'employee': employee,
+                'section': 'personal',
+                'countries': countries,
+                'notification': notification,
+            })
 
-        #  GET - pass all required variables to template
-        latest_request = request.env['hr.profile.change.request'].sudo().search(
-            [('employee_id', '=', employee.id)], order='id desc', limit=1
-        )
-        notification = self._get_notification(latest_request)
-        return request.render('employee_self_service_portal.portal_employee_profile_personal', {
-            'employee': employee,
-            'section': 'personal',
-            'countries': countries,
-            'notification': notification,
-        })
+        except Exception as e:
+            _logger.error("Fatal error in portal_employee_personal: %s", str(e))
+            import traceback
+            _logger.error("Traceback: %s", traceback.format_exc())
+            return request.redirect('/my/employee')
 
         
         return request.render('employee_self_service_portal.portal_employee_profile_personal', {
