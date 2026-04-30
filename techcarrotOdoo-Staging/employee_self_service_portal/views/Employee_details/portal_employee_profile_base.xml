@@ -10,7 +10,8 @@
                          style="background:#2C5832;">
                         <div>
                             <h4 class="mb-1" style="color:#ffffff;">Employee Profile</h4>
-                            <small style="color:rgba(255,255,255,0.8);">Manage your personal information and settings</small>
+                            <small style="color:rgba(255,255,255,0.8);">Manage your personal information and settings
+                            </small>
                         </div>
                         <div class="d-flex gap-2">
                             <span class="badge" style="background:#ffffff;color:#2C5832;font-weight:600;">
@@ -33,7 +34,9 @@
                                             </div>
                                             <div>
                                                 <small class="text-muted d-block">Full Name</small>
-                                                <strong><t t-esc="employee.name"/></strong>
+                                                <strong>
+                                                    <t t-esc="employee.name"/>
+                                                </strong>
                                             </div>
                                         </div>
                                     </div>
@@ -45,7 +48,9 @@
                                             </div>
                                             <div>
                                                 <small class="text-muted d-block">Employee ID</small>
-                                                <strong><t t-esc="employee.emp_code or 'Not Set'"/></strong>
+                                                <strong>
+                                                    <t t-esc="employee.emp_code or 'Not Set'"/>
+                                                </strong>
                                             </div>
                                         </div>
                                     </div>
@@ -57,7 +62,9 @@
                                             </div>
                                             <div>
                                                 <small class="text-muted d-block">Department</small>
-                                                <strong><t t-esc="employee.department_id.name or 'Not Assigned'"/></strong>
+                                                <strong>
+                                                    <t t-esc="employee.department_id.name or 'Not Assigned'"/>
+                                                </strong>
                                             </div>
                                         </div>
                                     </div>
@@ -69,7 +76,9 @@
                                             </div>
                                             <div>
                                                 <small class="text-muted d-block">Designation</small>
-                                                <strong><t t-esc="employee.job_id.name or employee.job_title or 'Not Set'"/></strong>
+                                                <strong>
+                                                    <t t-esc="employee.job_id.name or employee.job_title or 'Not Set'"/>
+                                                </strong>
                                             </div>
                                         </div>
                                     </div>
@@ -115,7 +124,9 @@
                                     </small>
                                 </div>
                                 <div class="text-center">
-                                    <h6 class="mb-1"><t t-esc="employee.name"/></h6>
+                                    <h6 class="mb-1">
+                                        <t t-esc="employee.name"/>
+                                    </h6>
                                     <small style="color:#2C5832;font-weight:600;">
                                         <i class="fa fa-circle me-1" style="font-size:8px;"></i>
                                         Active Employee
@@ -180,153 +191,153 @@
 
                 <!-- Section Content -->
                 <div class="section-content">
-                    <t t-raw="section_content"/>
+                    <t t-out="section_content"/>
                 </div>
 
                 <!-- CSS -->
                 <style>
                     .icon-box {
-                        width: 40px;
-                        height: 40px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        font-size: 16px;
+                    width: 40px;
+                    height: 40px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 16px;
                     }
                     .nav-pills .nav-link {
-                        transition: all 0.3s ease;
-                        border: 1px solid transparent;
-                        color: #2B2B6B !important;
-                        font-weight: 500;
+                    transition: all 0.3s ease;
+                    border: 1px solid transparent;
+                    color: #2B2B6B !important;
+                    font-weight: 500;
                     }
                     .nav-pills .nav-link:hover {
-                        background-color: rgba(43,43,107,0.08);
-                        border-color: rgba(43,43,107,0.2);
-                        color: #2B2B6B !important;
+                    background-color: rgba(43,43,107,0.08);
+                    border-color: rgba(43,43,107,0.2);
+                    color: #2B2B6B !important;
                     }
                     .nav-pills .nav-link.active {
-                        background: #E74C2D !important;
-                        border-color: #c93d21 !important;
-                        color: #ffffff !important;
-                        box-shadow: 0 2px 8px rgba(231,76,45,0.4);
+                    background: #E74C2D !important;
+                    border-color: #c93d21 !important;
+                    color: #ffffff !important;
+                    box-shadow: 0 2px 8px rgba(231,76,45,0.4);
                     }
                     .card {
-                        transition: box-shadow 0.3s ease;
-                        border: 1px solid rgba(43,43,107,0.1);
+                    transition: box-shadow 0.3s ease;
+                    border: 1px solid rgba(43,43,107,0.1);
                     }
                     .card:hover { box-shadow: 0 4px 15px rgba(43,43,107,0.15) !important; }
                     .card-header.bg-light {
-                        background: #f8f8fb !important;
-                        border-bottom: 2px solid rgba(43,43,107,0.1);
+                    background: #f8f8fb !important;
+                    border-bottom: 2px solid rgba(43,43,107,0.1);
                     }
                     .card-header.bg-light h5 { color: #2B2B6B; }
                     .card-header.bg-light .text-primary { color: #E74C2D !important; }
                     .btn-outline-primary {
-                        border-color: #2B2B6B !important;
-                        color: #2B2B6B !important;
+                    border-color: #2B2B6B !important;
+                    color: #2B2B6B !important;
                     }
                     .btn-outline-primary:hover {
-                        background: #2B2B6B !important;
-                        color: #fff !important;
+                    background: #2B2B6B !important;
+                    color: #fff !important;
                     }
                     .btn-primary {
-                        background: #2C5832 !important;
-                        border-color: #2C5832 !important;
-                        color: #fff !important;
+                    background: #2C5832 !important;
+                    border-color: #2C5832 !important;
+                    color: #fff !important;
                     }
                     .btn-primary:hover {
-                        background: #1e3d22 !important;
-                        border-color: #1e3d22 !important;
+                    background: #1e3d22 !important;
+                    border-color: #1e3d22 !important;
                     }
                     .btn-info {
-                        background: #2B2B6B !important;
-                        border-color: #2B2B6B !important;
-                        color: #fff !important;
+                    background: #2B2B6B !important;
+                    border-color: #2B2B6B !important;
+                    color: #fff !important;
                     }
                     .btn-info:hover {
-                        background: #1e1e4f !important;
-                        border-color: #1e1e4f !important;
+                    background: #1e1e4f !important;
+                    border-color: #1e1e4f !important;
                     }
                     .btn-outline-success {
-                        border-color: #2C5832 !important;
-                        color: #2C5832 !important;
+                    border-color: #2C5832 !important;
+                    color: #2C5832 !important;
                     }
                     .btn-outline-success:hover {
-                        background: #2C5832 !important;
-                        color: #fff !important;
+                    background: #2C5832 !important;
+                    color: #fff !important;
                     }
                     .badge.bg-primary { background: #2B2B6B !important; }
                     .badge.bg-success { background: #2C5832 !important; }
-                    .badge.bg-info    { background: #E74C2D !important; }
+                    .badge.bg-info { background: #E74C2D !important; }
                     .form-switch .form-check-input:checked {
-                        background-color: #E74C2D;
-                        border-color: #E74C2D;
+                    background-color: #E74C2D;
+                    border-color: #E74C2D;
                     }
                     .nav-tabs .profile-tab-button {
-                        color: #2B2B6B;
-                        font-weight: 600;
-                        border-radius: 0.5rem 0.5rem 0 0;
+                    color: #2B2B6B;
+                    font-weight: 600;
+                    border-radius: 0.5rem 0.5rem 0 0;
                     }
                     .nav-tabs .profile-tab-button.active {
-                        color: #E74C2D !important;
-                        border-bottom-color: #E74C2D !important;
-                        border-bottom-width: 3px;
+                    color: #E74C2D !important;
+                    border-bottom-color: #E74C2D !important;
+                    border-bottom-width: 3px;
                     }
                     .profile-tab-navigation .nav-link.active { color: #E74C2D !important; }
                     /* Org Chart */
                     .org-node {
-                        display: flex; align-items: center; gap: 10px;
-                        background: #fff;
-                        border: 1px solid #dee2e6;
-                        border-radius: 10px;
-                        padding: 10px 16px;
-                        min-width: 180px;
-                        box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+                    display: flex; align-items: center; gap: 10px;
+                    background: #fff;
+                    border: 1px solid #dee2e6;
+                    border-radius: 10px;
+                    padding: 10px 16px;
+                    min-width: 180px;
+                    box-shadow: 0 2px 6px rgba(0,0,0,0.07);
                     }
-                    .org-node.org-self    { border-color: #2B2B6B; background: rgba(43,43,107,0.06); }
+                    .org-node.org-self { border-color: #2B2B6B; background: rgba(43,43,107,0.06); }
                     .org-node.org-manager { border-color: #E74C2D; background: rgba(231,76,45,0.06); }
-                    .org-node.org-child   { border-color: #2C5832; background: rgba(44,88,50,0.06); }
+                    .org-node.org-child { border-color: #2C5832; background: rgba(44,88,50,0.06); }
                     .org-name { font-weight: 600; font-size: 14px; }
                     .org-role { font-size: 12px; color: #6c757d; }
                     @media (max-width: 768px) {
-                        .icon-box { width: 35px; height: 35px; font-size: 14px; }
-                        .org-node { min-width: 140px; padding: 8px 10px; }
+                    .icon-box { width: 35px; height: 35px; font-size: 14px; }
+                    .org-node { min-width: 140px; padding: 8px 10px; }
                     }
                 </style>
 
                 <!-- Photo Upload JS -->
                 <script type="text/javascript">
                     document.addEventListener('DOMContentLoaded', function () {
-                        var input = document.getElementById('photoUploadInput');
-                        if (!input) return;
-                        input.addEventListener('change', function () {
-                            if (!this.files || !this.files[0]) return;
-                            var file = this.files[0];
-                            var statusEl = document.getElementById('photoUploadStatus');
-                            var imgEl = document.getElementById('employeePhotoImg');
-                            if (file.size > 5 * 1024 * 1024) {
-                                statusEl.innerHTML = '<span class="text-danger">File too large. Max 5MB.</span>';
-                                return;
-                            }
-                            statusEl.innerHTML = '<span class="text-muted">Uploading...</span>';
-                            var formData = new FormData();
-                            formData.append('photo', file);
-                            fetch('/my/employee/upload-photo', { method: 'POST', body: formData })
-                            .then(function(res) { return res.json(); })
-                            .then(function(data) {
-                                if (data.success) {
-                                    imgEl.src = data.image_url + '?t=' + Date.now();
-                                    imgEl.classList.remove('opacity-50');
-                                    statusEl.innerHTML = '<span style="color:#2C5832;">Photo updated!</span>';
-                                    setTimeout(function() { statusEl.innerHTML = ''; }, 3000);
-                                } else {
-                                    statusEl.innerHTML = '<span class="text-danger">' + (data.error || 'Upload failed') + '</span>';
-                                }
-                            })
-                            .catch(function() {
-                                statusEl.innerHTML = '<span class="text-danger">Upload failed. Try again.</span>';
-                            });
-                        });
+                    var input = document.getElementById('photoUploadInput');
+                    if (!input) return;
+                    input.addEventListener('change', function () {
+                    if (!this.files || !this.files[0]) return;
+                    var file = this.files[0];
+                    var statusEl = document.getElementById('photoUploadStatus');
+                    var imgEl = document.getElementById('employeePhotoImg');
+                    if (file.size > 5 * 1024 * 1024) {
+                    statusEl.innerHTML = '<span class="text-danger">File too large. Max 5MB.</span>';
+                    return;
+                    }
+                    statusEl.innerHTML = '<span class="text-muted">Uploading...</span>';
+                    var formData = new FormData();
+                    formData.append('photo', file);
+                    fetch('/my/employee/upload-photo', { method: 'POST', body: formData })
+                    .then(function(res) { return res.json(); })
+                    .then(function(data) {
+                    if (data.success) {
+                    imgEl.src = data.image_url + '?t=' + Date.now();
+                    imgEl.classList.remove('opacity-50');
+                    statusEl.innerHTML = '<span style="color:#2C5832;">Photo updated!</span>';
+                    setTimeout(function() { statusEl.innerHTML = ''; }, 3000);
+                    } else {
+                    statusEl.innerHTML = '<span class="text-danger">' + (data.error || 'Upload failed') + '</span>';
+                    }
+                    })
+                    .catch(function() {
+                    statusEl.innerHTML = '<span class="text-danger">Upload failed. Try again.</span>';
+                    });
+                    });
                     });
                 </script>
 
