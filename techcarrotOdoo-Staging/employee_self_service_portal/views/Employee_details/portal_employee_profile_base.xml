@@ -6,21 +6,19 @@
 
                 <!-- Header Section -->
                 <div class="card mb-4 shadow-sm">
-                    <div class="card-header d-flex justify-content-between align-items-center"
-                         style="background:#2C5832;">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                         <div>
-                            <h4 class="mb-1" style="color:#ffffff;">Employee Profile</h4>
-                            <small style="color:rgba(255,255,255,0.8);">Manage your personal information and settings
-                            </small>
+                            <h4 class="mb-1">Employee Profile</h4>
+                            <small class="opacity-75">Manage your personal information and settings</small>
                         </div>
                         <div class="d-flex gap-2">
-                            <span class="badge" style="background:#ffffff;color:#2C5832;font-weight:600;">
+                            <span class="badge bg-light text-dark">
                                 <i class="fa fa-chart-pie me-1"></i>
                                 Profile Management
                             </span>
                         </div>
                     </div>
-                    <div class="card-body p-4" style="background:#ffffff;">
+                    <div class="card-body p-4">
                         <div class="row align-items-center">
 
                             <!-- Left: Employee Info -->
@@ -28,8 +26,7 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <div class="d-flex align-items-center">
-                                            <div class="icon-box rounded-circle p-2 me-3"
-                                                 style="background:rgba(43,43,107,0.1);color:#2B2B6B;">
+                                            <div class="icon-box bg-primary bg-opacity-10 text-primary rounded-circle p-2 me-3">
                                                 <i class="fa fa-user"></i>
                                             </div>
                                             <div>
@@ -42,8 +39,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="d-flex align-items-center">
-                                            <div class="icon-box rounded-circle p-2 me-3"
-                                                 style="background:rgba(44,88,50,0.12);color:#2C5832;">
+                                            <div class="icon-box bg-success bg-opacity-10 text-success rounded-circle p-2 me-3">
                                                 <i class="fa fa-id-badge"></i>
                                             </div>
                                             <div>
@@ -56,8 +52,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="d-flex align-items-center">
-                                            <div class="icon-box rounded-circle p-2 me-3"
-                                                 style="background:rgba(231,76,45,0.1);color:#E74C2D;">
+                                            <div class="icon-box bg-info bg-opacity-10 text-info rounded-circle p-2 me-3">
                                                 <i class="fa fa-building"></i>
                                             </div>
                                             <div>
@@ -70,12 +65,11 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="d-flex align-items-center">
-                                            <div class="icon-box rounded-circle p-2 me-3"
-                                                 style="background:rgba(43,43,107,0.1);color:#2B2B6B;">
+                                            <div class="icon-box bg-warning bg-opacity-10 text-warning rounded-circle p-2 me-3">
                                                 <i class="fa fa-briefcase"></i>
                                             </div>
                                             <div>
-                                                <small class="text-muted d-block">Designation</small>
+                                                <small class="text-muted d-block">Position</small>
                                                 <strong>
                                                     <t t-esc="employee.job_id.name or employee.job_title or 'Not Set'"/>
                                                 </strong>
@@ -92,17 +86,17 @@
                                          t-attf-src="/web/image/hr.employee/{{employee.id}}/image_1920/150x150"
                                          id="employeePhotoImg"
                                          class="rounded-circle shadow"
-                                         style="width:120px;height:120px;object-fit:cover;border:3px solid #2C5832;"
+                                         style="width:120px;height:120px;object-fit:cover;"
                                          alt="Employee Photo"/>
                                     <img t-else=""
                                          src="/web/static/src/img/avatar.png"
                                          id="employeePhotoImg"
                                          class="rounded-circle shadow opacity-50"
-                                         style="width:120px;height:120px;object-fit:cover;border:3px solid #2C5832;"
+                                         style="width:120px;height:120px;object-fit:cover;"
                                          alt="Default Avatar"/>
                                     <label for="photoUploadInput"
                                            style="position:absolute;bottom:4px;right:4px;
-                                                  background:#E74C2D;border-radius:50%;
+                                                  background:#6f42c1;border-radius:50%;
                                                   width:34px;height:34px;
                                                   display:flex;align-items:center;justify-content:center;
                                                   cursor:pointer;
@@ -127,8 +121,8 @@
                                     <h6 class="mb-1">
                                         <t t-esc="employee.name"/>
                                     </h6>
-                                    <small style="color:#2C5832;font-weight:600;">
-                                        <i class="fa fa-circle me-1" style="font-size:8px;"></i>
+                                    <small class="text-muted">
+                                        <i class="fa fa-circle text-success me-1" style="font-size:8px;"></i>
                                         Active Employee
                                     </small>
                                 </div>
@@ -140,47 +134,50 @@
 
                 <!-- Navigation Tabs -->
                 <div class="mb-4">
-                    <ul class="nav nav-pills nav-fill p-2 rounded shadow-sm" style="background:#f4f4f4;">
+                    <ul class="nav nav-pills nav-fill bg-light p-2 rounded shadow-sm">
                         <li class="nav-item">
-                            <a t-attf-class="nav-link rounded {{'active fw-bold' if section == 'personal' else ''}}"
-                               href="/my/employee/personal"
-                               style="color:#2B2B6B;">
+                            <a t-attf-class="nav-link rounded {{'active fw-bold' if section == 'personal' else 'text-muted'}}"
+                               href="/my/employee/personal">
                                 <i class="fa fa-user me-2"></i>
                                 <span class="d-none d-md-inline">Personal Details</span>
                                 <span class="d-md-none">Personal</span>
                             </a>
                         </li>
+                        <!--                        <li class="nav-item">-->
+                        <!--                            <a t-attf-class="nav-link rounded {{'active fw-bold' if section == 'payroll' else 'text-muted'}}"-->
+                        <!--                               href="/my/employee/payroll">-->
+                        <!--                                <i class="fa fa-money me-2"></i>-->
+                        <!--                                Payroll-->
+                        <!--                            </a>-->
+                        <!--                        </li>-->
                         <li class="nav-item">
-                            <a t-attf-class="nav-link rounded {{'active fw-bold' if section == 'experience' else ''}}"
-                               href="/my/employee/experience"
-                               style="color:#2B2B6B;">
+                            <a t-attf-class="nav-link rounded {{'active fw-bold' if section == 'experience' else 'text-muted'}}"
+                               href="/my/employee/experience">
                                 <i class="fa fa-briefcase me-2"></i>
                                 <span class="d-none d-md-inline">Experience and Skills</span>
                                 <span class="d-md-none">Experience</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a t-attf-class="nav-link rounded {{'active fw-bold' if section == 'certification' else ''}}"
-                               href="/my/employee/certification"
-                               style="color:#2B2B6B;">
+                            <a t-attf-class="nav-link rounded {{'active fw-bold' if section == 'certification' else 'text-muted'}}"
+                               href="/my/employee/certification">
                                 <i class="fa fa-certificate me-2"></i>
                                 <span class="d-none d-md-inline">Certifications</span>
                                 <span class="d-md-none">Certs</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a t-attf-class="nav-link rounded {{'active fw-bold' if section == 'bank' else ''}}"
-                               href="/my/employee/bank"
-                               style="color:#2B2B6B;">
+                            <a t-attf-class="nav-link rounded {{'active fw-bold' if section == 'bank' else 'text-muted'}}"
+                               href="/my/employee/bank">
                                 <i class="fa fa-university me-2"></i>
                                 <span class="d-none d-md-inline">Bank Details</span>
                                 <span class="d-md-none">Banking</span>
                             </a>
                         </li>
+                        <!-- NEW ORG CHART TAB -->
                         <li class="nav-item">
-                            <a t-attf-class="nav-link rounded {{'active fw-bold' if section == 'orgchart' else ''}}"
-                               href="/my/employee/orgchart"
-                               style="color:#2B2B6B;">
+                            <a t-attf-class="nav-link rounded {{'active fw-bold' if section == 'orgchart' else 'text-muted'}}"
+                               href="/my/employee/orgchart">
                                 <i class="fa fa-sitemap me-2"></i>
                                 <span class="d-none d-md-inline">Org Chart</span>
                                 <span class="d-md-none">Org</span>
@@ -191,8 +188,80 @@
 
                 <!-- Section Content -->
                 <div class="section-content">
-                    <t t-out="section_content"/>
+                    <t t-raw="section_content"/>
                 </div>
+
+                <script>
+                    function validateAndUploadPhoto(input) {
+                    const statusDiv = document.getElementById('photoUploadStatus');
+                    const file = input.files[0];
+
+                    if (!file) return;
+
+                    // Check file size - 5MB max
+                    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+                    if (file.size > maxSize) {
+                    statusDiv.innerHTML = '
+                    <span style="color:red;"><i class="fa fa-times-circle me-1"></i>File too large. Maximum size is 5MB.
+                    </span>
+                    ';
+                    input.value = '';
+                    return;
+                    }
+
+                    // Check file type
+                    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                    if (!allowedTypes.includes(file.type)) {
+                    statusDiv.innerHTML = '
+                    <span style="color:red;"><i class="fa fa-times-circle me-1"></i>Only JPG, PNG, GIF allowed.
+                    </span>
+                    ';
+                    input.value = '';
+                    return;
+                    }
+
+                    // Show uploading status
+                    statusDiv.innerHTML = '
+                    <span style="color:#6f42c1;"><i class="fa fa-spinner fa-spin me-1"></i>Uploading...
+                    </span>
+                    ';
+
+                    // Upload via fetch
+                    const formData = new FormData();
+                    formData.append('photo', file);
+                    formData.append('csrf_token', document.querySelector('input[name="csrf_token"]').value);
+
+                    fetch('/my/employee/upload-photo', {
+                    method: 'POST',
+                    body: formData,
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                    if (data.success) {
+                    statusDiv.innerHTML = '
+                    <span style="color:green;"><i class="fa fa-check-circle me-1"></i>Photo updated!
+                    </span>
+                    ';
+                    // Refresh photo
+                    const img = document.getElementById('employeePhotoImg');
+                    img.src = img.src.split('?')[0] + '?t=' + new Date().getTime();
+                    setTimeout(() => { statusDiv.innerHTML = ''; }, 3000);
+                    } else {
+                    statusDiv.innerHTML = '
+                    <span style="color:red;"><i class="fa fa-times-circle me-1"></i>' + (data.error || 'Upload failed')
+                        + '
+                    </span>
+                    ';
+                    }
+                    })
+                    .catch(() => {
+                    statusDiv.innerHTML = '
+                    <span style="color:red;"><i class="fa fa-times-circle me-1"></i>Upload failed. Try again.
+                    </span>
+                    ';
+                    });
+                    }
+                </script>
 
                 <!-- CSS -->
                 <style>
@@ -207,86 +276,23 @@
                     .nav-pills .nav-link {
                     transition: all 0.3s ease;
                     border: 1px solid transparent;
-                    color: #2B2B6B !important;
-                    font-weight: 500;
                     }
                     .nav-pills .nav-link:hover {
-                    background-color: rgba(43,43,107,0.08);
-                    border-color: rgba(43,43,107,0.2);
-                    color: #2B2B6B !important;
+                    background-color: rgba(13, 110, 253, 0.1);
+                    border-color: rgba(13, 110, 253, 0.2);
                     }
                     .nav-pills .nav-link.active {
-                    background: #E74C2D !important;
-                    border-color: #c93d21 !important;
-                    color: #ffffff !important;
-                    box-shadow: 0 2px 8px rgba(231,76,45,0.4);
+                    background: linear-gradient(135deg, #0d6efd, #0056b3);
+                    border-color: #0056b3;
+                    box-shadow: 0 2px 4px rgba(13, 110, 253, 0.3);
                     }
-                    .card {
-                    transition: box-shadow 0.3s ease;
-                    border: 1px solid rgba(43,43,107,0.1);
-                    }
-                    .card:hover { box-shadow: 0 4px 15px rgba(43,43,107,0.15) !important; }
-                    .card-header.bg-light {
-                    background: #f8f8fb !important;
-                    border-bottom: 2px solid rgba(43,43,107,0.1);
-                    }
-                    .card-header.bg-light h5 { color: #2B2B6B; }
-                    .card-header.bg-light .text-primary { color: #E74C2D !important; }
-                    .btn-outline-primary {
-                    border-color: #2B2B6B !important;
-                    color: #2B2B6B !important;
-                    }
-                    .btn-outline-primary:hover {
-                    background: #2B2B6B !important;
-                    color: #fff !important;
-                    }
-                    .btn-primary {
-                    background: #2C5832 !important;
-                    border-color: #2C5832 !important;
-                    color: #fff !important;
-                    }
-                    .btn-primary:hover {
-                    background: #1e3d22 !important;
-                    border-color: #1e3d22 !important;
-                    }
-                    .btn-info {
-                    background: #2B2B6B !important;
-                    border-color: #2B2B6B !important;
-                    color: #fff !important;
-                    }
-                    .btn-info:hover {
-                    background: #1e1e4f !important;
-                    border-color: #1e1e4f !important;
-                    }
-                    .btn-outline-success {
-                    border-color: #2C5832 !important;
-                    color: #2C5832 !important;
-                    }
-                    .btn-outline-success:hover {
-                    background: #2C5832 !important;
-                    color: #fff !important;
-                    }
-                    .badge.bg-primary { background: #2B2B6B !important; }
-                    .badge.bg-success { background: #2C5832 !important; }
-                    .badge.bg-info { background: #E74C2D !important; }
-                    .form-switch .form-check-input:checked {
-                    background-color: #E74C2D;
-                    border-color: #E74C2D;
-                    }
-                    .nav-tabs .profile-tab-button {
-                    color: #2B2B6B;
-                    font-weight: 600;
-                    border-radius: 0.5rem 0.5rem 0 0;
-                    }
-                    .nav-tabs .profile-tab-button.active {
-                    color: #E74C2D !important;
-                    border-bottom-color: #E74C2D !important;
-                    border-bottom-width: 3px;
-                    }
-                    .profile-tab-navigation .nav-link.active { color: #E74C2D !important; }
-                    /* Org Chart */
+                    .card { transition: box-shadow 0.3s ease; }
+                    .card:hover { box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important; }
+                    /* Org Chart Styles */
                     .org-node {
-                    display: flex; align-items: center; gap: 10px;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
                     background: #fff;
                     border: 1px solid #dee2e6;
                     border-radius: 10px;
@@ -294,11 +300,26 @@
                     min-width: 180px;
                     box-shadow: 0 2px 6px rgba(0,0,0,0.07);
                     }
-                    .org-node.org-self { border-color: #2B2B6B; background: rgba(43,43,107,0.06); }
-                    .org-node.org-manager { border-color: #E74C2D; background: rgba(231,76,45,0.06); }
-                    .org-node.org-child { border-color: #2C5832; background: rgba(44,88,50,0.06); }
-                    .org-name { font-weight: 600; font-size: 14px; }
-                    .org-role { font-size: 12px; color: #6c757d; }
+                    .org-node.org-self {
+                    border-color: #0d6efd;
+                    background: #f0f6ff;
+                    }
+                    .org-node.org-manager {
+                    border-color: #6f42c1;
+                    background: #f8f4ff;
+                    }
+                    .org-node.org-child {
+                    border-color: #198754;
+                    background: #f0fff4;
+                    }
+                    .org-name {
+                    font-weight: 600;
+                    font-size: 14px;
+                    }
+                    .org-role {
+                    font-size: 12px;
+                    color: #6c757d;
+                    }
                     @media (max-width: 768px) {
                     .icon-box { width: 35px; height: 35px; font-size: 14px; }
                     .org-node { min-width: 140px; padding: 8px 10px; }
@@ -322,13 +343,16 @@
                     statusEl.innerHTML = '<span class="text-muted">Uploading...</span>';
                     var formData = new FormData();
                     formData.append('photo', file);
-                    fetch('/my/employee/upload-photo', { method: 'POST', body: formData })
+                    fetch('/my/employee/upload-photo', {
+                    method: 'POST',
+                    body: formData
+                    })
                     .then(function(res) { return res.json(); })
                     .then(function(data) {
                     if (data.success) {
                     imgEl.src = data.image_url + '?t=' + Date.now();
                     imgEl.classList.remove('opacity-50');
-                    statusEl.innerHTML = '<span style="color:#2C5832;">Photo updated!</span>';
+                    statusEl.innerHTML = '<span class="text-success">Photo updated!</span>';
                     setTimeout(function() { statusEl.innerHTML = ''; }, 3000);
                     } else {
                     statusEl.innerHTML = '<span class="text-danger">' + (data.error || 'Upload failed') + '</span>';
@@ -352,12 +376,12 @@
             <t t-set="section_content">
                 <div class="card mb-4 shadow-sm">
                     <div class="card-header bg-light">
-                        <h5 class="mb-0" style="color:#2B2B6B;">
-                            <i class="fa fa-sitemap me-2" style="color:#E74C2D;"></i>
+                        <h5 class="mb-0">
+                            <i class="fa fa-sitemap text-primary me-2"></i>
                             Organization Chart
                         </h5>
                     </div>
-                    <div class="card-body p-4" style="background:#ffffff;">
+                    <div class="card-body p-4">
                         <div style="overflow-x:auto;">
                             <div class="d-flex flex-column align-items-center" style="min-width:300px;">
 
@@ -373,12 +397,12 @@
                                                      alt="Manager"/>
                                                 <div t-else=""
                                                      class="rounded-circle d-inline-flex align-items-center justify-content-center"
-                                                     style="width:48px;height:48px;background:#E74C2D;color:#fff;font-size:18px;font-weight:700;">
+                                                     style="width:48px;height:48px;background:#6f42c1;color:#fff;font-size:18px;font-weight:700;">
                                                     <t t-esc="(employee.parent_id.name or 'M')[0]"/>
                                                 </div>
                                             </div>
                                             <div class="org-details">
-                                                <div class="org-name" style="color:#E74C2D;">
+                                                <div class="org-name">
                                                     <t t-esc="employee.parent_id.name"/>
                                                 </div>
                                                 <div class="org-role">
@@ -401,18 +425,18 @@
                                                  alt="You"/>
                                             <div t-else=""
                                                  class="rounded-circle d-inline-flex align-items-center justify-content-center"
-                                                 style="width:48px;height:48px;background:#2B2B6B;color:#fff;font-size:18px;font-weight:700;">
+                                                 style="width:48px;height:48px;background:#0d6efd;color:#fff;font-size:18px;font-weight:700;">
                                                 <t t-esc="(employee.name or 'E')[0]"/>
                                             </div>
                                         </div>
                                         <div class="org-details">
-                                            <div class="org-name" style="color:#2B2B6B;">
+                                            <div class="org-name" style="color:#0d6efd;">
                                                 <t t-esc="employee.name"/>
                                             </div>
                                             <div class="org-role">
                                                 <t t-esc="employee.job_title or employee.job_id.name or ''"/>
                                             </div>
-                                            <span style="display:inline-block;background:#2B2B6B;color:#fff;
+                                            <span style="display:inline-block;background:#0d6efd;color:#fff;
                                                          border-radius:4px;font-size:10px;padding:1px 6px;margin-top:2px;">
                                                 You
                                             </span>
@@ -436,12 +460,12 @@
                                                              alt="Report"/>
                                                         <div t-else=""
                                                              class="rounded-circle d-inline-flex align-items-center justify-content-center"
-                                                             style="width:42px;height:42px;background:#2C5832;color:#fff;font-size:16px;font-weight:700;">
+                                                             style="width:42px;height:42px;background:#198754;color:#fff;font-size:16px;font-weight:700;">
                                                             <t t-esc="(child.name or 'S')[0]"/>
                                                         </div>
                                                     </div>
                                                     <div class="org-details">
-                                                        <div class="org-name" style="color:#2C5832;">
+                                                        <div class="org-name">
                                                             <t t-esc="child.name"/>
                                                         </div>
                                                         <div class="org-role">
