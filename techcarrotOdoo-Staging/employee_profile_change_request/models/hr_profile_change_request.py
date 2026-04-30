@@ -124,13 +124,6 @@ class HrProfileChangeRequest(models.Model):
         readonly=True,
     )
 
-    work_location_id = fields.Many2one(
-        related='employee_id.work_location_id',
-        string='Work Location',
-        store=True,
-        readonly=True
-    )
-
     # ── State ─────────────────────────────────────────────────────
     state = fields.Selection(
         selection=[
@@ -195,9 +188,9 @@ class HrProfileChangeRequest(models.Model):
         for vals in vals_list:
             if vals.get('name', _('New')) == _('New'):
                 vals['name'] = (
-                        self.env['ir.sequence'].next_by_code(
-                            'hr.profile.change.request'
-                        ) or _('New')
+                    self.env['ir.sequence'].next_by_code(
+                        'hr.profile.change.request'
+                    ) or _('New')
                 )
         return super().create(vals_list)
 
