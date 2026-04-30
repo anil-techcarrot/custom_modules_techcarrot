@@ -1210,7 +1210,7 @@
                                     <label class="form-label fw-bold">Exit Type</label>
                                     <input type="text" class="form-control"
                                            t-att-value="employee.exit_type_id.name if employee.exit_type_id else ''"
-                                           readonly="readonly"/>
+                                           data-always-readonly="1" readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Exit Reason</label>

@@ -69,7 +69,7 @@
                                                 <i class="fa fa-briefcase"></i>
                                             </div>
                                             <div>
-                                                <small class="text-muted d-block">Position</small>
+                                                <small class="text-muted d-block">Designation</small>
                                                 <strong>
                                                     <t t-esc="employee.job_id.name or employee.job_title or 'Not Set'"/>
                                                 </strong>
