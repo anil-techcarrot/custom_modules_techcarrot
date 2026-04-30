@@ -31,7 +31,9 @@
                                             </div>
                                             <div>
                                                 <small class="text-muted d-block">Full Name</small>
-                                                <strong><t t-esc="employee.name"/></strong>
+                                                <strong>
+                                                    <t t-esc="employee.name"/>
+                                                </strong>
                                             </div>
                                         </div>
                                     </div>
@@ -42,7 +44,9 @@
                                             </div>
                                             <div>
                                                 <small class="text-muted d-block">Employee ID</small>
-                                                <strong><t t-esc="employee.emp_code or 'Not Set'"/></strong>
+                                                <strong>
+                                                    <t t-esc="employee.emp_code or 'Not Set'"/>
+                                                </strong>
                                             </div>
                                         </div>
                                     </div>
@@ -53,7 +57,9 @@
                                             </div>
                                             <div>
                                                 <small class="text-muted d-block">Department</small>
-                                                <strong><t t-esc="employee.department_id.name or 'Not Assigned'"/></strong>
+                                                <strong>
+                                                    <t t-esc="employee.department_id.name or 'Not Assigned'"/>
+                                                </strong>
                                             </div>
                                         </div>
                                     </div>
@@ -64,7 +70,9 @@
                                             </div>
                                             <div>
                                                 <small class="text-muted d-block">Position</small>
-                                                <strong><t t-esc="employee.job_id.name or employee.job_title or 'Not Set'"/></strong>
+                                                <strong>
+                                                    <t t-esc="employee.job_id.name or employee.job_title or 'Not Set'"/>
+                                                </strong>
                                             </div>
                                         </div>
                                     </div>
@@ -100,11 +108,14 @@
                                     <input type="file"
                                            id="photoUploadInput"
                                            accept="image/jpeg,image/png,image/gif"
-                                           style="display:none;"/>
+                                           style="display:none;"
+                                           onchange="validateAndUploadPhoto(this)"/>
                                 </div>
                                 <div id="photoUploadStatus" class="small mt-1" style="min-height:18px;"></div>
                                 <div class="text-center">
-                                    <h6 class="mb-1"><t t-esc="employee.name"/></h6>
+                                    <h6 class="mb-1">
+                                        <t t-esc="employee.name"/>
+                                    </h6>
                                     <small class="text-muted">
                                         <i class="fa fa-circle text-success me-1" style="font-size:8px;"></i>
                                         Active Employee
@@ -127,13 +138,13 @@
                                 <span class="d-md-none">Personal</span>
                             </a>
                         </li>
-<!--                        <li class="nav-item">-->
-<!--                            <a t-attf-class="nav-link rounded {{'active fw-bold' if section == 'payroll' else 'text-muted'}}"-->
-<!--                               href="/my/employee/payroll">-->
-<!--                                <i class="fa fa-money me-2"></i>-->
-<!--                                Payroll-->
-<!--                            </a>-->
-<!--                        </li>-->
+                        <!--                        <li class="nav-item">-->
+                        <!--                            <a t-attf-class="nav-link rounded {{'active fw-bold' if section == 'payroll' else 'text-muted'}}"-->
+                        <!--                               href="/my/employee/payroll">-->
+                        <!--                                <i class="fa fa-money me-2"></i>-->
+                        <!--                                Payroll-->
+                        <!--                            </a>-->
+                        <!--                        </li>-->
                         <li class="nav-item">
                             <a t-attf-class="nav-link rounded {{'active fw-bold' if section == 'experience' else 'text-muted'}}"
                                href="/my/employee/experience">
@@ -175,105 +186,177 @@
                     <t t-raw="section_content"/>
                 </div>
 
+                <script>
+                    function validateAndUploadPhoto(input) {
+                    const statusDiv = document.getElementById('photoUploadStatus');
+                    const file = input.files[0];
+
+                    if (!file) return;
+
+                    // Check file size - 5MB max
+                    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+                    if (file.size > maxSize) {
+                    statusDiv.innerHTML = '
+                    <span style="color:red;"><i class="fa fa-times-circle me-1"></i>File too large. Maximum size is 5MB.
+                    </span>
+                    ';
+                    input.value = '';
+                    return;
+                    }
+
+                    // Check file type
+                    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                    if (!allowedTypes.includes(file.type)) {
+                    statusDiv.innerHTML = '
+                    <span style="color:red;"><i class="fa fa-times-circle me-1"></i>Only JPG, PNG, GIF allowed.
+                    </span>
+                    ';
+                    input.value = '';
+                    return;
+                    }
+
+                    // Show uploading status
+                    statusDiv.innerHTML = '
+                    <span style="color:#6f42c1;"><i class="fa fa-spinner fa-spin me-1"></i>Uploading...
+                    </span>
+                    ';
+
+                    // Upload via fetch
+                    const formData = new FormData();
+                    formData.append('photo', file);
+                    formData.append('csrf_token', document.querySelector('input[name="csrf_token"]').value);
+
+                    fetch('/my/employee/upload-photo', {
+                    method: 'POST',
+                    body: formData,
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                    if (data.success) {
+                    statusDiv.innerHTML = '
+                    <span style="color:green;"><i class="fa fa-check-circle me-1"></i>Photo updated!
+                    </span>
+                    ';
+                    // Refresh photo
+                    const img = document.getElementById('employeePhotoImg');
+                    img.src = img.src.split('?')[0] + '?t=' + new Date().getTime();
+                    setTimeout(() => { statusDiv.innerHTML = ''; }, 3000);
+                    } else {
+                    statusDiv.innerHTML = '
+                    <span style="color:red;"><i class="fa fa-times-circle me-1"></i>' + (data.error || 'Upload failed')
+                        + '
+                    </span>
+                    ';
+                    }
+                    })
+                    .catch(() => {
+                    statusDiv.innerHTML = '
+                    <span style="color:red;"><i class="fa fa-times-circle me-1"></i>Upload failed. Try again.
+                    </span>
+                    ';
+                    });
+                    }
+                </script>
+
                 <!-- CSS -->
                 <style>
                     .icon-box {
-                        width: 40px;
-                        height: 40px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        font-size: 16px;
+                    width: 40px;
+                    height: 40px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 16px;
                     }
                     .nav-pills .nav-link {
-                        transition: all 0.3s ease;
-                        border: 1px solid transparent;
+                    transition: all 0.3s ease;
+                    border: 1px solid transparent;
                     }
                     .nav-pills .nav-link:hover {
-                        background-color: rgba(13, 110, 253, 0.1);
-                        border-color: rgba(13, 110, 253, 0.2);
+                    background-color: rgba(13, 110, 253, 0.1);
+                    border-color: rgba(13, 110, 253, 0.2);
                     }
                     .nav-pills .nav-link.active {
-                        background: linear-gradient(135deg, #0d6efd, #0056b3);
-                        border-color: #0056b3;
-                        box-shadow: 0 2px 4px rgba(13, 110, 253, 0.3);
+                    background: linear-gradient(135deg, #0d6efd, #0056b3);
+                    border-color: #0056b3;
+                    box-shadow: 0 2px 4px rgba(13, 110, 253, 0.3);
                     }
                     .card { transition: box-shadow 0.3s ease; }
                     .card:hover { box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important; }
                     /* Org Chart Styles */
                     .org-node {
-                        display: flex;
-                        align-items: center;
-                        gap: 10px;
-                        background: #fff;
-                        border: 1px solid #dee2e6;
-                        border-radius: 10px;
-                        padding: 10px 16px;
-                        min-width: 180px;
-                        box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    background: #fff;
+                    border: 1px solid #dee2e6;
+                    border-radius: 10px;
+                    padding: 10px 16px;
+                    min-width: 180px;
+                    box-shadow: 0 2px 6px rgba(0,0,0,0.07);
                     }
                     .org-node.org-self {
-                        border-color: #0d6efd;
-                        background: #f0f6ff;
+                    border-color: #0d6efd;
+                    background: #f0f6ff;
                     }
                     .org-node.org-manager {
-                        border-color: #6f42c1;
-                        background: #f8f4ff;
+                    border-color: #6f42c1;
+                    background: #f8f4ff;
                     }
                     .org-node.org-child {
-                        border-color: #198754;
-                        background: #f0fff4;
+                    border-color: #198754;
+                    background: #f0fff4;
                     }
                     .org-name {
-                        font-weight: 600;
-                        font-size: 14px;
+                    font-weight: 600;
+                    font-size: 14px;
                     }
                     .org-role {
-                        font-size: 12px;
-                        color: #6c757d;
+                    font-size: 12px;
+                    color: #6c757d;
                     }
                     @media (max-width: 768px) {
-                        .icon-box { width: 35px; height: 35px; font-size: 14px; }
-                        .org-node { min-width: 140px; padding: 8px 10px; }
+                    .icon-box { width: 35px; height: 35px; font-size: 14px; }
+                    .org-node { min-width: 140px; padding: 8px 10px; }
                     }
                 </style>
 
                 <!-- Photo Upload JS -->
                 <script type="text/javascript">
                     document.addEventListener('DOMContentLoaded', function () {
-                        var input = document.getElementById('photoUploadInput');
-                        if (!input) return;
-                        input.addEventListener('change', function () {
-                            if (!this.files || !this.files[0]) return;
-                            var file = this.files[0];
-                            var statusEl = document.getElementById('photoUploadStatus');
-                            var imgEl = document.getElementById('employeePhotoImg');
-                            if (file.size > 5 * 1024 * 1024) {
-                                statusEl.innerHTML = '<span class="text-danger">File too large. Max 5MB.</span>';
-                                return;
-                            }
-                            statusEl.innerHTML = '<span class="text-muted">Uploading...</span>';
-                            var formData = new FormData();
-                            formData.append('photo', file);
-                            fetch('/my/employee/upload-photo', {
-                                method: 'POST',
-                                body: formData
-                            })
-                            .then(function(res) { return res.json(); })
-                            .then(function(data) {
-                                if (data.success) {
-                                    imgEl.src = data.image_url + '?t=' + Date.now();
-                                    imgEl.classList.remove('opacity-50');
-                                    statusEl.innerHTML = '<span class="text-success">Photo updated!</span>';
-                                    setTimeout(function() { statusEl.innerHTML = ''; }, 3000);
-                                } else {
-                                    statusEl.innerHTML = '<span class="text-danger">' + (data.error || 'Upload failed') + '</span>';
-                                }
-                            })
-                            .catch(function() {
-                                statusEl.innerHTML = '<span class="text-danger">Upload failed. Try again.</span>';
-                            });
-                        });
+                    var input = document.getElementById('photoUploadInput');
+                    if (!input) return;
+                    input.addEventListener('change', function () {
+                    if (!this.files || !this.files[0]) return;
+                    var file = this.files[0];
+                    var statusEl = document.getElementById('photoUploadStatus');
+                    var imgEl = document.getElementById('employeePhotoImg');
+                    if (file.size > 5 * 1024 * 1024) {
+                    statusEl.innerHTML = '<span class="text-danger">File too large. Max 5MB.</span>';
+                    return;
+                    }
+                    statusEl.innerHTML = '<span class="text-muted">Uploading...</span>';
+                    var formData = new FormData();
+                    formData.append('photo', file);
+                    fetch('/my/employee/upload-photo', {
+                    method: 'POST',
+                    body: formData
+                    })
+                    .then(function(res) { return res.json(); })
+                    .then(function(data) {
+                    if (data.success) {
+                    imgEl.src = data.image_url + '?t=' + Date.now();
+                    imgEl.classList.remove('opacity-50');
+                    statusEl.innerHTML = '<span class="text-success">Photo updated!</span>';
+                    setTimeout(function() { statusEl.innerHTML = ''; }, 3000);
+                    } else {
+                    statusEl.innerHTML = '<span class="text-danger">' + (data.error || 'Upload failed') + '</span>';
+                    }
+                    })
+                    .catch(function() {
+                    statusEl.innerHTML = '<span class="text-danger">Upload failed. Try again.</span>';
+                    });
+                    });
                     });
                 </script>
 
