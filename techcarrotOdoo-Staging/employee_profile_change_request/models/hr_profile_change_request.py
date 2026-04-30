@@ -195,7 +195,7 @@ class HrProfileChangeRequest(models.Model):
         for vals in vals_list:
             if vals.get('name', _('New')) == _('New'):
                 vals['name'] = (
-                        self.env['ir.sequence'].next_by_code(
+                        self.env['ir.sequence'].sudo().next_by_code(
                             'hr.profile.change.request'
                         ) or _('New')
                 )
