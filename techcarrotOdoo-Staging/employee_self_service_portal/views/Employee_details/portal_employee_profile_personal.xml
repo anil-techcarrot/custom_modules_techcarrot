@@ -1949,45 +1949,46 @@
                     </div>
 
                     <!-- ===== FORM ACTIONS ===== -->
-                    <!-- ===== FORM ACTIONS ===== -->
                     <div class="card shadow-sm">
-                    <div class="card-body text-center">
-                        <div id="formActions" style="display: none;">
-                            <!-- Disclaimer -->
-                            <div class="alert alert-warning text-start mb-3"
-                                 style="border-left: 4px solid #ffc107; border-radius: 6px;">
-                                <div class="form-check d-flex align-items-start gap-2">
-                                    <input type="checkbox"
-                                           id="personalDisclaimer"
-                                           class="form-check-input mt-1"
-                                           onchange="toggleSaveBtn('personalDisclaimer','personalSaveBtn')"/>
-                                    <label class="form-check-label" for="personalDisclaimer"
-                                           style="font-size:0.875rem;">
-                                        <strong>Employee Disclaimer</strong>
-                                        – I, hereby confirm that the information updated by me is accurate and complete
-                                        to the best of my knowledge. I agree to keep my data updated at all times and
-                                        consent to the collection and use of such information, for employment
-                                        administration and legal compliances. I acknowledge that any false or incomplete
-                                        information may lead to actions in accordance with company policies and
-                                        applicable laws.
-                                    </label>
+                        <div class="card-body text-center">
+                            <div id="formActions" style="display: none;">
+                                <!-- Disclaimer -->
+                                <div class="alert alert-warning text-start mb-3"
+                                     style="border-left: 4px solid #ffc107; border-radius: 6px;">
+                                    <div class="form-check d-flex align-items-start gap-2">
+                                        <input type="checkbox"
+                                               id="personalDisclaimer"
+                                               class="form-check-input mt-1"
+                                               onchange="toggleSaveBtn('personalDisclaimer','personalSaveBtn')"/>
+                                        <label class="form-check-label" for="personalDisclaimer"
+                                               style="font-size:0.875rem;">
+                                            <strong>Employee Disclaimer</strong>
+                                            – I, hereby confirm that the information updated by me is accurate and
+                                            complete
+                                            to the best of my knowledge. I agree to keep my data updated at all times
+                                            and
+                                            consent to the collection and use of such information, for employment
+                                            administration and legal compliances. I acknowledge that any false or
+                                            incomplete
+                                            information may lead to actions in accordance with company policies and
+                                            applicable laws.
+                                        </label>
+                                    </div>
                                 </div>
+                                <button type="button" class="btn btn-secondary me-2" onclick="cancelEdit()">
+                                    <i class="fa fa-times me-1"></i>Cancel
+                                </button>
+                                <button type="button" class="btn btn-info me-2" onclick="saveAsDraft()">
+                                    <i class="fa fa-save me-1"></i>Save as Draft
+                                </button>
+                                <button type="submit"
+                                        id="personalSaveBtn"
+                                        class="btn btn-primary"
+                                        disabled="disabled"
+                                        style="opacity:0.6;">
+                                    <i class="fa fa-check me-1"></i>Save Changes
+                                </button>
                             </div>
-                            <button type="button" class="btn btn-secondary me-2" onclick="cancelEdit()">
-                                <i class="fa fa-times me-1"></i>Cancel
-                            </button>
-                            <button type="button" class="btn btn-info me-2" onclick="saveAsDraft()">
-                                <i class="fa fa-save me-1"></i>Save as Draft
-                            </button>
-                            <button type="submit"
-                                    id="personalSaveBtn"
-                                    class="btn btn-primary"
-                                    disabled="disabled"
-                                    style="opacity:0.6;">
-                                <i class="fa fa-check me-1"></i>Save Changes
-                            </button>
-                        </div>
-                        <div id="viewActions">
                             <div id="viewActions">
                                 <p class="text-muted mb-3">
                                     <i class="fa fa-info-circle me-1"></i>
