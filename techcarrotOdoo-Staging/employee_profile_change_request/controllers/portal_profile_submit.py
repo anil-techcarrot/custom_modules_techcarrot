@@ -55,6 +55,24 @@ EMAIL_PATTERN = re.compile(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
 
 class EmployeePortalProfileSubmit(http.Controller):
 
+    # ── NEW: Catch /my/employee and redirect to /my/employee/personal ──
+    @http.route(
+        '/my/employee',
+        type='http',
+        auth='user',
+        website=True,
+        methods=['GET'],
+    )
+    def portal_employee_home(self, **kwargs):
+        """
+        The base module renders portal_employee_profile_personal at /my/employee
+        WITHOUT passing portal_overlay, causing a KeyError crash.
+        This route intercepts that URL and redirects to our fixed controller.
+        """
+        return request.redirect('/my/employee/personal')
+
+    # ─────────────────────────────────────────────────────────────────
+
     @http.route(
         '/my/employee/personal',
         type='http',
@@ -117,7 +135,7 @@ class EmployeePortalProfileSubmit(http.Controller):
                 'employee': employee,
                 'countries': countries,
                 'notification': notification,
-                'portal_overlay': portal_overlay,
+                'portal_overlay': portal_overlay,  # always present — fixes KeyError
             },
         )
 
