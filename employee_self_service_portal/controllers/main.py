@@ -6,8 +6,6 @@ import html
 import json
 import logging
 import base64
-import io
-import pikepdf
 
 # Set up logger
 _logger = logging.getLogger(__name__)
@@ -21,23 +19,25 @@ CRM_LEAD_MODEL = 'crm.lead'
 CRM_STAGE_MODEL = 'crm.stage'
 MY_EMPLOYEE_URL = '/my/employee'
 
+
 def get_user_timezone():
     """Get the user's timezone (or fallback to company or UTC)."""
     import pytz
     user_tz = request.env.user.tz or request.env.company.timezone or 'UTC'
     return user_tz
 
+
 def get_local_datetime(dt=None):
     """Convert UTC datetime to user's local timezone."""
     import pytz
     from datetime import datetime
-    
+
     if dt is None:
         dt = datetime.now()
-    
+
     user_tz = get_user_timezone()
     user_pytz = pytz.timezone(user_tz)
-    
+
     if hasattr(dt, 'tzinfo') and dt.tzinfo:
         # If datetime already has tzinfo, convert to user timezone
         return dt.astimezone(user_pytz)
@@ -45,6 +45,7 @@ def get_local_datetime(dt=None):
         # Assume the datetime is UTC if no tzinfo
         utc_dt = dt.replace(tzinfo=pytz.UTC)
         return utc_dt.astimezone(user_pytz)
+
 
 def _process_tag_ids(post):
     """Refactored to reduce cognitive complexity."""
@@ -75,11 +76,12 @@ def _process_tag_ids(post):
     _logger.info('ESS Portal: tag_id_list to write: %s', tag_id_list)
     return tag_id_list
 
+
 def _process_partner_field(field_value, field_name='partner_id'):
     """Process partner field - handle existing IDs or create new partners."""
     if not field_value:
         return False
-    
+
     # Try to convert to int (existing partner ID)
     try:
         partner_id = int(field_value)
@@ -89,40 +91,41 @@ def _process_partner_field(field_value, field_name='partner_id'):
             return partner_id
     except (ValueError, TypeError):
         pass
-    
+
     # Field value is a string - create new partner
     if isinstance(field_value, str) and field_value.strip():
         partner_name = field_value.strip()
-        
+
         # Check if partner already exists by name
         existing_partner = request.env['res.partner'].sudo().search([
             ('name', '=ilike', partner_name),
-               ('is_company', '=', True),
-                ('company_id', '=', company_id)
+            ('is_company', '=', True),
+            ('company_id', '=', company_id)
         ], limit=1)
-        
+
         if existing_partner:
             return existing_partner.id
-        
+
         # Create new partner
         # partner_vals = {'name': partner_name}
-        
+
         # For point of contact, set as individual (not company)
         # if field_name == 'point_of_contact_id':
         #   partner_vals['is_company'] = False
         # else:
-            # For main customer, default to company
+        # For main customer, default to company
         #    partner_vals['is_company'] = True
-            
+
         # new_partner = request.env['res.partner'].sudo().create(partner_vals)
-        
-      #  import logging
-       # _logger = logging.getLogger(__name__)
-        # _logger.info('ESS Portal: Created new partner: %s (ID: %s)', partner_name, new_partner.id)
-        
-        # return new_partner.id
-    
+
+    #  import logging
+    # _logger = logging.getLogger(__name__)
+    # _logger.info('ESS Portal: Created new partner: %s (ID: %s)', partner_name, new_partner.id)
+
+    # return new_partner.id
+
     return False
+
 
 class PortalEmployee(http.Controller):
 
@@ -138,16 +141,22 @@ class PortalEmployee(http.Controller):
             ], limit=1)
             return record.id if record else False
 
-
     def _get_employee(self):
         return request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
 
     @http.route(MY_EMPLOYEE_URL, type='http', auth='user', website=True)
     def portal_employee_profile(self, **kw):
         employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
+        countries = request.env['res.country'].sudo().search([], order='name')
+        latest_request = request.env['hr.profile.change.request'].sudo().search(
+            [('employee_id', '=', employee.id)], order='id desc', limit=1
+        )
+        notification = self._get_notification(latest_request)
         return request.render('employee_self_service_portal.portal_employee_profile_personal', {
             'employee': employee,
             'section': 'personal',
+            'countries': countries,
+            'notification': notification,
         })
 
     @http.route(MY_EMPLOYEE_URL + '/attendance/checkin', type='http', auth='user', methods=['POST'], website=True)
@@ -155,7 +164,7 @@ class PortalEmployee(http.Controller):
         employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
         if not employee:
             return request.redirect(MY_EMPLOYEE_URL + '?error=employee_not_found')
-        
+
         # Enhanced validation and duplicate prevention
         try:
             # Check for existing open attendance
@@ -163,60 +172,61 @@ class PortalEmployee(http.Controller):
                 ('employee_id', '=', employee.id),
                 ('check_out', '=', False)
             ], limit=1)
-            
+
             if existing_attendance:
                 return request.redirect(MY_EMPLOYEE_URL + '/attendance?error=already_checked_in')
-            
+
             # Validate check-in time (business hours)
             from datetime import datetime
             import pytz
-            
+
             # Get user's timezone (or use company timezone as fallback)
             user_tz = request.env.user.tz or request.env.company.timezone or 'UTC'
             user_pytz = pytz.timezone(user_tz)
-            
+
             # Get current time in user's timezone
             utc_now = datetime.now(pytz.UTC)
             local_now = utc_now.astimezone(user_pytz)
             current_time = local_now.time()
-            
+
             # Basic business hours validation (6 AM to 11 PM)
             from datetime import time
             min_time = time(6, 0)  # 6:00 AM
             max_time = time(23, 0)  # 11:00 PM
-            
+
             if not (min_time <= current_time <= max_time):
                 return request.redirect(MY_EMPLOYEE_URL + '/attendance?error=invalid_time')
-            
+
             # Location and other data
             in_latitude = post.get('in_latitude')
             in_longitude = post.get('in_longitude')
             check_in_location = post.get('check_in_location')
-            
+
             # Log location data for debugging
             import logging
             _logger = logging.getLogger(__name__)
-            _logger.info(f"Check-in location data - lat: {in_latitude}, long: {in_longitude}, location: {check_in_location}")
+            _logger.info(
+                f"Check-in location data - lat: {in_latitude}, long: {in_longitude}, location: {check_in_location}")
             _logger.info(f"User timezone: {user_tz}, Local time: {local_now}")
-            
+
             # Check if it's a late arrival (after 9:30 AM)
             late_threshold = time(9, 30)
             is_late = current_time > late_threshold
-            
+
             # If no location is provided, try to get a default one
             if not check_in_location:
                 check_in_location = post.get('location') or 'Check-in from Portal'
-            
+
             # Use user's timezone to properly record time
             # Use format_datetime to create a datetime string with timezone info
             local_check_in = fields.Datetime.context_timestamp(request.env.user, fields.Datetime.now())
-            
+
             vals = {
                 'employee_id': employee.id,
                 'check_in': fields.Datetime.now(),  # Server will convert this appropriately
                 'check_in_location': check_in_location,
             }
-            
+
             # Make sure we convert latitude/longitude to float if provided
             try:
                 if in_latitude:
@@ -225,61 +235,62 @@ class PortalEmployee(http.Controller):
                     vals['in_longitude'] = float(in_longitude)
             except (ValueError, TypeError):
                 _logger.warning(f"Invalid latitude/longitude values: {in_latitude}, {in_longitude}")
-                
+
             # Create attendance record
             attendance = request.env[HR_ATTENDANCE_MODEL].sudo().create(vals)
-            
+
             # Log successful check-in
             _logger.info(f"Check-in successful for employee {employee.name} at {local_now}")
-            
+
             return request.redirect(MY_EMPLOYEE_URL + '/attendance?success=checked_in')
-            
+
         except Exception as e:
             import logging
             _logger = logging.getLogger(__name__)
             _logger.error("Check-in failed: %s", e)
             return request.redirect(MY_EMPLOYEE_URL + '/attendance?error=checkin_failed')
-        
-    @http.route(MY_EMPLOYEE_URL + '/attendance/quick-checkin', type='http', auth='user', methods=['POST'], website=True, csrf=False)
+
+    @http.route(MY_EMPLOYEE_URL + '/attendance/quick-checkin', type='http', auth='user', methods=['POST'], website=True,
+                csrf=False)
     def quick_check_in(self, **post):
         """Quick check-in from dashboard"""
         employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
         if not employee:
-            return request.make_response(json.dumps({'status': 'error', 'message': 'Employee not found'}), 
-                                       headers={'Content-Type': 'application/json'})
-        
+            return request.make_response(json.dumps({'status': 'error', 'message': 'Employee not found'}),
+                                         headers={'Content-Type': 'application/json'})
+
         try:
             # REMOVED: Check for existing open attendance
             # We now allow multiple check-ins per day, so we don't need to validate
             # if there's an existing open attendance
-            
+
             # Validate check-in time (business hours) - consistent with attendance page logic
             from datetime import datetime, time
             now = datetime.now()
             current_time = now.time()
-            
+
             # Basic business hours validation (6 AM to 11 PM)
             min_time = time(6, 0)  # 6:00 AM
             max_time = time(23, 0)  # 11:00 PM
-            
+
             if not (min_time <= current_time <= max_time):
                 return request.make_response(json.dumps({
-                    'status': 'error', 
+                    'status': 'error',
                     'message': 'Check-in not allowed at this time (6 AM - 11 PM only)'
                 }), headers={'Content-Type': 'application/json'})
-            
+
             # Get location data from POST request
             in_latitude = post.get('in_latitude')
             in_longitude = post.get('in_longitude')
             check_in_location = post.get('check_in_location') or post.get('location') or 'Quick Check-in from Dashboard'
-            
+
             # Create attendance record
             vals = {
                 'employee_id': employee.id,
                 'check_in': fields.Datetime.now(),
                 'check_in_location': check_in_location,
             }
-            
+
             # Make sure we convert latitude/longitude to float if provided
             try:
                 if in_latitude:
@@ -290,90 +301,91 @@ class PortalEmployee(http.Controller):
                 import logging
                 _logger = logging.getLogger(__name__)
                 _logger.warning(f"Invalid quick check-in latitude/longitude values: {in_latitude}, {in_longitude}")
-            
+
             attendance = request.env[HR_ATTENDANCE_MODEL].sudo().create(vals)
-            
+
             # Log successful check-in
             _logger.info(f"Quick check-in successful for employee {employee.name} at {now}")
-            
-            return request.make_response(json.dumps({'status': 'success', 'message': 'Checked in successfully'}), 
-                                       headers={'Content-Type': 'application/json'})
-            
+
+            return request.make_response(json.dumps({'status': 'success', 'message': 'Checked in successfully'}),
+                                         headers={'Content-Type': 'application/json'})
+
         except Exception as e:
             import logging
             _logger = logging.getLogger(__name__)
             _logger.error("Quick check-in failed: %s", e)
-            return request.make_response(json.dumps({'status': 'error', 'message': 'Check-in failed'}), 
-                                       headers={'Content-Type': 'application/json'})
+            return request.make_response(json.dumps({'status': 'error', 'message': 'Check-in failed'}),
+                                         headers={'Content-Type': 'application/json'})
 
     @http.route(MY_EMPLOYEE_URL + '/attendance/checkout', type='http', auth='user', methods=['POST'], website=True)
     def check_out(self, **post):
         employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
         if not employee:
             return request.redirect(MY_EMPLOYEE_URL + '?error=employee_not_found')
-            
+
         try:
             # Find the last open attendance record
             last_attendance = request.env[HR_ATTENDANCE_MODEL].sudo().search([
                 ('employee_id', '=', employee.id),
                 ('check_out', '=', False)
             ], order='check_in desc', limit=1)
-            
+
             if not last_attendance:
                 return request.redirect(MY_EMPLOYEE_URL + '/attendance?error=no_checkin_found')
-            
+
             # Validate minimum work duration (at least 30 minutes)
             from datetime import datetime, timedelta
             import pytz
-            
+
             # Get user's timezone (or use company timezone as fallback)
             user_tz = request.env.user.tz or request.env.company.timezone or 'UTC'
             user_pytz = pytz.timezone(user_tz)
-            
+
             # Get current time in user's timezone
             utc_now = datetime.now(pytz.UTC)
             local_now = utc_now.astimezone(user_pytz)
-            
+
             check_in_time = fields.Datetime.from_string(last_attendance.check_in)
-            
+
             # Convert check_in_time to user timezone for proper comparison
             check_in_time_local = check_in_time.replace(tzinfo=pytz.UTC).astimezone(user_pytz)
-            
+
             # Re-enabled 30-minute validation
             min_duration = timedelta(minutes=30)
             if (local_now - check_in_time_local) < min_duration:
                 return request.redirect(MY_EMPLOYEE_URL + '/attendance?error=minimum_duration_not_met')
-            
+
             # Location and other data
             out_latitude = post.get('out_latitude')
             out_longitude = post.get('out_longitude')
             check_out_location = post.get('check_out_location')
-            
+
             # Log location data for debugging
             import logging
             _logger = logging.getLogger(__name__)
-            _logger.info(f"Check-out location data - lat: {out_latitude}, long: {out_longitude}, location: {check_out_location}")
+            _logger.info(
+                f"Check-out location data - lat: {out_latitude}, long: {out_longitude}, location: {check_out_location}")
             _logger.info(f"User timezone: {user_tz}, Local time: {local_now}")
-            
+
             # Check if it's an early departure (before 5:30 PM)
             from datetime import time
             early_threshold = time(17, 30)
             current_time = local_now.time()
             is_early_departure = current_time < early_threshold
-            
+
             # If no location is provided, try to get a default one
             if not check_out_location:
                 check_out_location = post.get('location') or 'Check-out from Portal'
-            
+
             # Use format_datetime to create a datetime string with timezone info
             local_check_out = fields.Datetime.context_timestamp(request.env.user, fields.Datetime.now())
-            
+
             vals = {
                 'check_out': fields.Datetime.now(),  # Server will convert this appropriately
                 'check_out_location': check_out_location,
                 'is_auto_checkout': False,  # Explicit manual checkout
             }
-            
+
             # Make sure we convert latitude/longitude to float if provided
             try:
                 if out_latitude:
@@ -382,80 +394,83 @@ class PortalEmployee(http.Controller):
                     vals['out_longitude'] = float(out_longitude)
             except (ValueError, TypeError):
                 _logger.warning(f"Invalid latitude/longitude values: {out_latitude}, {out_longitude}")
-                
+
             # Update attendance record
             last_attendance.sudo().write(vals)
-            
+
             # Re-browse to get updated computed fields
             updated_attendance = request.env[HR_ATTENDANCE_MODEL].sudo().browse(last_attendance.id)
-            
+
             # Log successful check-out with worked hours
-            _logger.info(f"Check-out successful for employee {employee.name}. Worked hours: {updated_attendance.worked_hours}")
-            
+            _logger.info(
+                f"Check-out successful for employee {employee.name}. Worked hours: {updated_attendance.worked_hours}")
+
             return request.redirect(MY_EMPLOYEE_URL + '/attendance?success=checked_out')
-            
+
         except Exception as e:
             import logging
             _logger = logging.getLogger(__name__)
             _logger.error("Check-out failed: %s", e)
             return request.redirect(MY_EMPLOYEE_URL + '/attendance?error=checkout_failed')
 
-    @http.route(MY_EMPLOYEE_URL + '/attendance/quick-checkout', type='http', auth='user', methods=['POST'], website=True, csrf=False)
+    @http.route(MY_EMPLOYEE_URL + '/attendance/quick-checkout', type='http', auth='user', methods=['POST'],
+                website=True, csrf=False)
     def quick_check_out(self, **post):
         """Quick check-out from dashboard"""
         employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
         if not employee:
-            return request.make_response(json.dumps({'status': 'error', 'message': 'Employee not found'}), 
-                                       headers={'Content-Type': 'application/json'})
-        
+            return request.make_response(json.dumps({'status': 'error', 'message': 'Employee not found'}),
+                                         headers={'Content-Type': 'application/json'})
+
         try:
             # Find the last open attendance record
             last_attendance = request.env[HR_ATTENDANCE_MODEL].sudo().search([
                 ('employee_id', '=', employee.id),
                 ('check_out', '=', False)
             ], order='check_in desc', limit=1)
-            
+
             if not last_attendance:
-                return request.make_response(json.dumps({'status': 'error', 'message': 'No active check-in found'}), 
-                                           headers={'Content-Type': 'application/json'})
-            
+                return request.make_response(json.dumps({'status': 'error', 'message': 'No active check-in found'}),
+                                             headers={'Content-Type': 'application/json'})
+
             # Validate minimum work duration (at least 30 minutes)
             from datetime import datetime, timedelta
             import pytz
-            
+
             # Get user's timezone (or use company timezone as fallback)
             user_tz = request.env.user.tz or request.env.company.timezone or 'UTC'
             user_pytz = pytz.timezone(user_tz)
-            
+
             # Get current time in user's timezone
             utc_now = datetime.now(pytz.UTC)
             local_now = utc_now.astimezone(user_pytz)
-            
+
             check_in_time = fields.Datetime.from_string(last_attendance.check_in)
-            
+
             # Convert check_in_time to user timezone for proper comparison
             check_in_time_local = check_in_time.replace(tzinfo=pytz.UTC).astimezone(user_pytz)
-            
+
             # Re-enabled 30-minute validation
             min_duration = timedelta(minutes=30)
             if (local_now - check_in_time_local) < min_duration:
                 return request.make_response(json.dumps({
-                    'status': 'error', 
+                    'status': 'error',
                     'message': 'Minimum work duration not met (30 minutes required)'
                 }), headers={'Content-Type': 'application/json'})
-            
+
             # Get location data from POST request
             out_latitude = post.get('out_latitude')
             out_longitude = post.get('out_longitude')
-            check_out_location = post.get('check_out_location') or post.get('location') or 'Quick Check-out from Dashboard'
-            
+            check_out_location = post.get('check_out_location') or post.get(
+                'location') or 'Quick Check-out from Dashboard'
+
             # Update attendance record
             vals = {
                 'check_out': fields.Datetime.now(),
                 'check_out_location': check_out_location,
                 'is_auto_checkout': False,  # Explicit manual checkout
             }
-            
+
             # Make sure we convert latitude/longitude to float if provided
             try:
                 if out_latitude:
@@ -466,45 +481,45 @@ class PortalEmployee(http.Controller):
                 import logging
                 _logger = logging.getLogger(__name__)
                 _logger.warning(f"Invalid quick check-out latitude/longitude values: {out_latitude}, {out_longitude}")
-            
+
             last_attendance.sudo().write(vals)
-            
+
             # Get worked hours
             updated_attendance = request.env[HR_ATTENDANCE_MODEL].sudo().browse(last_attendance.id)
             worked_hours = round(updated_attendance.worked_hours, 2)
-            
+
             return request.make_response(json.dumps({
-                'status': 'success', 
+                'status': 'success',
                 'message': f'Checked out successfully. Worked {worked_hours} hours'
             }), headers={'Content-Type': 'application/json'})
-            
+
         except Exception as e:
             import logging
             _logger = logging.getLogger(__name__)
             _logger.error("Quick check-out failed: %s", e)
-            return request.make_response(json.dumps({'status': 'error', 'message': 'Check-out failed'}), 
-                                       headers={'Content-Type': 'application/json'})
-    
+            return request.make_response(json.dumps({'status': 'error', 'message': 'Check-out failed'}),
+                                         headers={'Content-Type': 'application/json'})
+
     @http.route(MY_EMPLOYEE_URL + '/attendance', type='http', auth='user', website=True)
     @check_portal_access('attendance')
     def portal_attendance_history(self, **kwargs):
         from datetime import datetime
         import pytz
-        
+
         # Get user's timezone
         user_timezone = get_user_timezone()
         user_pytz = pytz.timezone(user_timezone)
-        
+
         employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
-        
+
         # Get current time in user's timezone
         utc_now = datetime.now(pytz.UTC)
         local_now = utc_now.astimezone(user_pytz)
-        
+
         # Use current month/year as default if not provided
         month = int(kwargs.get('month', local_now.month))
         year = int(kwargs.get('year', local_now.year))
-        
+
         domain = [('employee_id', '=', employee.id)]
         if month and year:
             from calendar import monthrange
@@ -512,13 +527,13 @@ class PortalEmployee(http.Controller):
             end_date = datetime(year, month, monthrange(year, month)[1], 23, 59, 59)
             domain += [('check_in', '>=', start_date.strftime('%Y-%m-%d 00:00:00')),
                        ('check_in', '<=', end_date.strftime('%Y-%m-%d 23:59:59'))]
-        
+
         attendances = request.env[HR_ATTENDANCE_MODEL].sudo().search(
             domain, order='check_in desc', limit=50)  # Increased limit for better analytics
-        
+
         today_att = None
         today_str = local_now.strftime('%Y-%m-%d')
-        
+
         # Find today's attendance based on user's timezone
         for att in attendances:
             if att.check_in:
@@ -526,21 +541,21 @@ class PortalEmployee(http.Controller):
                 if check_in_local.strftime('%Y-%m-%d') == today_str:
                     today_att = att
                     break
-        
+
         # Enhanced analytics
         analytics_data = self._get_attendance_analytics(employee, month, year)
-        
+
         # For dropdowns
         current_year = local_now.year
         years = list(range(current_year - 5, current_year + 2))
         months = [
             {'value': i, 'name': datetime(2000, i, 1).strftime('%B')} for i in range(1, 13)
         ]
-        
+
         # Status messages
         success_message = None
         error_message = None
-        
+
         if kwargs.get('success') == 'checked_in':
             success_message = "Successfully checked in!"
         elif kwargs.get('success') == 'checked_out':
@@ -555,7 +570,7 @@ class PortalEmployee(http.Controller):
             error_message = "Minimum work duration not met (30 minutes required)."
         elif kwargs.get('error'):
             error_message = "An error occurred. Please try again."
-        
+
         return request.render('employee_self_service_portal.portal_attendance', {
             'attendances': attendances,
             'employee': employee,
@@ -568,9 +583,12 @@ class PortalEmployee(http.Controller):
             'success_message': success_message,
             'error_message': error_message,
             'user_timezone': user_timezone,
-            'format_datetime': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime('%I:%M %p') if dt else '',
-            'format_date': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime('%d/%m/%Y') if dt else '',
-            'format_day': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime('%A') if dt else '',
+            'format_datetime': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime(
+                '%I:%M %p') if dt else '',
+            'format_date': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime(
+                '%d/%m/%Y') if dt else '',
+            'format_day': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime(
+                '%A') if dt else '',
         })
 
     def _get_attendance_analytics(self, employee, month, year):
@@ -579,27 +597,27 @@ class PortalEmployee(http.Controller):
         from calendar import monthrange
         from collections import defaultdict
         import pytz
-        
+
         # Get user's timezone
         user_timezone = get_user_timezone()
         user_pytz = pytz.timezone(user_timezone)
-        
+
         # Date range for the selected month in user's timezone
         start_date = datetime(year, month, 1, tzinfo=user_pytz)
         last_day = monthrange(year, month)[1]
         end_date = datetime(year, month, last_day, 23, 59, 59, tzinfo=user_pytz)
-        
+
         # Convert to UTC for database query
         start_date_utc = start_date.astimezone(pytz.UTC)
         end_date_utc = end_date.astimezone(pytz.UTC)
-        
+
         # Get all attendance records for the month
         attendances = request.env[HR_ATTENDANCE_MODEL].sudo().search([
             ('employee_id', '=', employee.id),
             ('check_in', '>=', start_date_utc),
             ('check_in', '<=', end_date_utc)
         ])
-        
+
         # Group attendances by day for accurate day counting (using local timezone)
         attendance_by_day = defaultdict(list)
         for att in attendances:
@@ -607,23 +625,23 @@ class PortalEmployee(http.Controller):
             check_in_local = fields.Datetime.context_timestamp(request.env.user, att.check_in)
             day_key = check_in_local.strftime('%Y-%m-%d')
             attendance_by_day[day_key].append(att)
-        
+
         # Calculate metrics
         total_days = len(attendance_by_day)  # Unique days with attendance
-        
+
         # Calculate total hours per day and then sum them up
         total_hours = 0
         for day, day_attendances in attendance_by_day.items():
             day_hours = sum(att.worked_hours for att in day_attendances if att.worked_hours)
             total_hours += day_hours
-            
+
         avg_hours = total_hours / total_days if total_days > 0 else 0
-        
+
         # Calculate late arrivals by day - only count one late arrival per day
         # Define late threshold (9:30 AM)
         late_threshold = time(9, 30)
         late_arrivals = 0
-        
+
         for day, day_attendances in attendance_by_day.items():
             # Sort by check-in time to get the first check-in of the day
             day_attendances.sort(key=lambda x: x.check_in)
@@ -632,7 +650,7 @@ class PortalEmployee(http.Controller):
             # Check if first check-in of the day was late
             if first_check_in.time() > late_threshold:
                 late_arrivals += 1
-        
+
         # Working days in month (excluding weekends)
         working_days = 0
         current_date = start_date.date()
@@ -640,14 +658,14 @@ class PortalEmployee(http.Controller):
             if current_date.weekday() < 5:  # Monday=0, Sunday=6
                 working_days += 1
             current_date += timedelta(days=1)
-        
+
         # Attendance percentage
         attendance_percentage = (total_days / working_days * 100) if working_days > 0 else 0
-        
+
         # Early departures (before 5:30 PM) - count only days with early departure
         early_threshold = time(17, 30)
         early_departures = 0
-        
+
         for day, day_attendances in attendance_by_day.items():
             # Check if any attendance records for the day had an early departure
             early_departure = False
@@ -660,29 +678,29 @@ class PortalEmployee(http.Controller):
                         break
             if early_departure:
                 early_departures += 1
-        
+
         # Overtime (more than 8.5 hours per day)
         overtime_days = 0
         for day, day_attendances in attendance_by_day.items():
             day_hours = sum(att.worked_hours for att in day_attendances if att.worked_hours)
             if day_hours > 8.5:
                 overtime_days += 1
-        
+
         # This week's data
         # Get current time in user's timezone
         utc_now = datetime.now(pytz.UTC)
         local_now = utc_now.astimezone(user_pytz)
-        
+
         # Calculate week start in user's timezone
         week_start = local_now.replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=local_now.weekday())
         week_start_utc = week_start.astimezone(pytz.UTC)
-        
+
         week_attendances = request.env[HR_ATTENDANCE_MODEL].sudo().search([
             ('employee_id', '=', employee.id),
             ('check_in', '>=', week_start_utc),
             ('check_in', '<=', utc_now)
         ])
-        
+
         # Group week attendances by day for consistent calculation
         week_attendance_by_day = defaultdict(list)
         for att in week_attendances:
@@ -690,13 +708,13 @@ class PortalEmployee(http.Controller):
             check_in_local = fields.Datetime.context_timestamp(request.env.user, att.check_in)
             day_key = check_in_local.strftime('%Y-%m-%d')
             week_attendance_by_day[day_key].append(att)
-        
+
         # Calculate total hours per day and then sum them up
         this_week_hours = 0
         for day, day_attendances in week_attendance_by_day.items():
             day_hours = sum(att.worked_hours for att in day_attendances if att.worked_hours)
             this_week_hours += day_hours
-        
+
         return {
             'total_days': total_days,
             'total_hours': round(total_hours, 2),
@@ -716,34 +734,37 @@ class PortalEmployee(http.Controller):
         employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
         if not employee:
             return request.redirect(MY_EMPLOYEE_URL)
-        
+
         from datetime import datetime
         import pytz
-        
+
         # Get user's timezone
         user_timezone = get_user_timezone()
         user_pytz = pytz.timezone(user_timezone)
-        
+
         # Get current time in user's timezone
         utc_now = datetime.now(pytz.UTC)
         local_now = utc_now.astimezone(user_pytz)
-        
+
         # Get analytics for current month and last 3 months
         analytics_months = []
         for i in range(4):
             from datetime import timedelta
-            month_date = local_now.replace(day=1) - timedelta(days=i*30)
+            month_date = local_now.replace(day=1) - timedelta(days=i * 30)
             month_analytics = self._get_attendance_analytics(employee, month_date.month, month_date.year)
             analytics_months.append(month_analytics)
-        
+
         return request.render('employee_self_service_portal.portal_attendance_analytics', {
             'employee': employee,
             'analytics_months': analytics_months,
             'current_month': analytics_months[0] if analytics_months else {},
             'user_timezone': user_timezone,
-            'format_datetime': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime('%I:%M %p') if dt else '',
-            'format_date': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime('%d/%m/%Y') if dt else '',
-            'format_day': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime('%A') if dt else '',
+            'format_datetime': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime(
+                '%I:%M %p') if dt else '',
+            'format_date': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime(
+                '%d/%m/%Y') if dt else '',
+            'format_day': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime(
+                '%A') if dt else '',
         })
 
     @http.route(MY_EMPLOYEE_URL + '/attendance/export', type='http', auth='user', website=True)
@@ -752,36 +773,36 @@ class PortalEmployee(http.Controller):
         employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
         if not employee:
             return request.redirect(MY_EMPLOYEE_URL)
-        
+
         try:
             import io
             import xlsxwriter
             from datetime import datetime, timedelta, time
-            
+
             # Get date range (default: current month)
             now = datetime.now()
             start_date = kwargs.get('start_date')
             end_date = kwargs.get('end_date')
-            
+
             if not start_date:
                 start_date = now.replace(day=1).strftime('%Y-%m-%d')
             if not end_date:
                 from calendar import monthrange
                 last_day = monthrange(now.year, now.month)[1]
                 end_date = now.replace(day=last_day).strftime('%Y-%m-%d')
-            
+
             # Get attendance data
             attendances = request.env[HR_ATTENDANCE_MODEL].sudo().search([
                 ('employee_id', '=', employee.id),
                 ('check_in', '>=', start_date + ' 00:00:00'),
                 ('check_in', '<=', end_date + ' 23:59:59')
             ], order='check_in desc')
-            
+
             # Create Excel file
             output = io.BytesIO()
             workbook = xlsxwriter.Workbook(output, {'in_memory': True})
             worksheet = workbook.add_worksheet('Attendance Report')
-            
+
             # Define formats
             header_format = workbook.add_format({
                 'bold': True,
@@ -789,34 +810,34 @@ class PortalEmployee(http.Controller):
                 'font_color': 'white',
                 'border': 1
             })
-            
+
             date_format = workbook.add_format({'num_format': 'dd/mm/yyyy'})
             time_format = workbook.add_format({'num_format': 'hh:mm AM/PM'})
             hours_format = workbook.add_format({'num_format': '0.00'})
-            
+
             # Headers
             headers = [
-                'Date', 'Day', 'Check-In Time', 'Check-In Location', 
+                'Date', 'Day', 'Check-In Time', 'Check-In Location',
                 'Check-Out Time', 'Check-Out Location', 'Worked Hours', 'Status'
             ]
-            
+
             for col, header in enumerate(headers):
                 worksheet.write(0, col, header, header_format)
-            
+
             # Data rows
             for row, att in enumerate(attendances, 1):
                 check_in_date = att.check_in.date() if att.check_in else None
                 day_name = att.check_in.strftime('%A') if att.check_in else ''
                 check_in_time = att.check_in.time() if att.check_in else None
                 check_out_time = att.check_out.time() if att.check_out else None
-                
+
                 # Determine status
                 status = 'Complete' if att.check_out else 'Active'
                 if att.check_in and att.check_in.time() > time(9, 30):
                     status += ' (Late)'
                 if att.check_out and att.check_out.time() < time(17, 30):
                     status += ' (Early)'
-                
+
                 worksheet.write(row, 0, check_in_date, date_format)
                 worksheet.write(row, 1, day_name)
                 worksheet.write(row, 2, check_in_time, time_format)
@@ -825,18 +846,20 @@ class PortalEmployee(http.Controller):
                 worksheet.write(row, 5, att.check_out_location or '')
                 worksheet.write(row, 6, att.worked_hours or 0, hours_format)
                 worksheet.write(row, 7, status)
-            
+
             # Summary section
             summary_row = len(attendances) + 3
             worksheet.write(summary_row, 0, 'SUMMARY', header_format)
             worksheet.write(summary_row + 1, 0, 'Total Days:')
             worksheet.write(summary_row + 1, 1, len(attendances))
             worksheet.write(summary_row + 2, 0, 'Total Hours:')
-            worksheet.write(summary_row + 2, 1, sum(att.worked_hours for att in attendances if att.worked_hours), hours_format)
+            worksheet.write(summary_row + 2, 1, sum(att.worked_hours for att in attendances if att.worked_hours),
+                            hours_format)
             worksheet.write(summary_row + 3, 0, 'Average Hours/Day:')
-            avg_hours = sum(att.worked_hours for att in attendances if att.worked_hours) / len(attendances) if attendances else 0
+            avg_hours = sum(att.worked_hours for att in attendances if att.worked_hours) / len(
+                attendances) if attendances else 0
             worksheet.write(summary_row + 3, 1, avg_hours, hours_format)
-            
+
             # Auto-adjust column widths
             worksheet.set_column('A:A', 12)  # Date
             worksheet.set_column('B:B', 10)  # Day
@@ -846,14 +869,14 @@ class PortalEmployee(http.Controller):
             worksheet.set_column('F:F', 30)  # Check-out location
             worksheet.set_column('G:G', 12)  # Worked hours
             worksheet.set_column('H:H', 15)  # Status
-            
+
             workbook.close()
             output.seek(0)
-            
+
             # Generate filename
             filename = f"attendance_report_{employee.name}_{start_date}_to_{end_date}.xlsx"
             filename = filename.replace(' ', '_').replace('/', '-')
-            
+
             # Return file
             return request.make_response(
                 output.getvalue(),
@@ -862,7 +885,7 @@ class PortalEmployee(http.Controller):
                     ('Content-Disposition', f'attachment; filename="{filename}"')
                 ]
             )
-            
+
         except Exception as e:
             import logging
             _logger = logging.getLogger(__name__)
@@ -951,13 +974,13 @@ class PortalEmployee(http.Controller):
             # if post.get('private_phone'):
             #     vals['private_phone'] = post.get('private_phone')
 
-                # Personal Information (from inherited template)
+            # Personal Information (from inherited template)
             # if post.get('legal_name'):
             #     vals['legal_name'] = post.get('legal_name')
             # if post.get('place_of_birth'):
             #     vals['place_of_birth'] = post.get('place_of_birth')
 
-                # Visa & Work Permit (from inherited template)
+            # Visa & Work Permit (from inherited template)
             if post.get('visa_no'):
                 vals['visa_no'] = post.get('visa_no')
             if post.get('permit_no'):
@@ -1006,11 +1029,10 @@ class PortalEmployee(http.Controller):
         # Set enhanced dashboard as default
         return self._render_ess_dashboard('employee_self_service_portal.portal_ess_dashboard_enhanced', **kwargs)
 
-    @http.route('/my/ess/classic', type='http', auth='user', website=True)  
+    @http.route('/my/ess/classic', type='http', auth='user', website=True)
     def portal_ess_dashboard_classic(self, **kwargs):
         # Keep the classic view accessible via /my/ess/classic
         return self._render_ess_dashboard('employee_self_service_portal.portal_ess_dashboard', **kwargs)
-
 
     # ---------------------------------------------------------------------------
     # IT Ticket routes (added from updated version)
@@ -1190,8 +1212,7 @@ class PortalEmployee(http.Controller):
     # End IT Ticket routes
     # ---------------------------------------------------------------------------
 
-        
-    @http.route('/my/ess/enhanced', type='http', auth='user', website=True)  
+    @http.route('/my/ess/enhanced', type='http', auth='user', website=True)
     def portal_ess_dashboard_enhanced(self, **kwargs):
         # Maintain this route for backward compatibility
         return self._render_ess_dashboard('employee_self_service_portal.portal_ess_dashboard_enhanced', **kwargs)
@@ -1199,16 +1220,16 @@ class PortalEmployee(http.Controller):
     def _render_ess_dashboard(self, template_name, **kwargs):
         """Common method to render dashboard with enhanced data"""
         import pytz
-        
+
         employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
-        
+
         # Get dashboard statistics
         dashboard_data = {}
-        
+
         if employee:
             # Enhanced dashboard data with more detailed analytics
             dashboard_data = self._get_enhanced_dashboard_data(employee)
-            
+
             # Add feature access permissions
             dashboard_data.update({
                 'has_attendance_access': has_feature_access('attendance'),
@@ -1216,117 +1237,120 @@ class PortalEmployee(http.Controller):
                 'has_expenses_access': has_feature_access('expenses'),
                 'has_payslip_access': has_feature_access('payslip')
             })
-        
+
         # Add view type for enhanced template
         dashboard_data['view_type'] = 'enhanced' if 'enhanced' in template_name else 'standard'
-        
+
         # Add timezone-aware formatting functions
         user_timezone = get_user_timezone()
         dashboard_data.update({
             'user_timezone': user_timezone,
-            'format_datetime': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime('%I:%M %p') if dt else '',
-            'format_date': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime('%d/%m/%Y') if dt else '',
-            'format_day': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime('%A') if dt else '',
+            'format_datetime': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime(
+                '%I:%M %p') if dt else '',
+            'format_date': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime(
+                '%d/%m/%Y') if dt else '',
+            'format_day': lambda dt: fields.Datetime.context_timestamp(request.env.user, dt).strftime(
+                '%A') if dt else '',
         })
-        
+
         return request.render(template_name, dashboard_data)
 
     def _get_enhanced_dashboard_data(self, employee):
         """Get comprehensive dashboard data for enhanced view"""
         from datetime import date, datetime, timedelta
-        
+
         # Basic employee data
         dashboard_data = {'employee': employee}
-        
+
         # Payslips data with enhanced analytics
         payslips = request.env['hr.payslip'].sudo().search([
-            ('employee_id', '=', employee.id),('state', 'in', ['paid'])
+            ('employee_id', '=', employee.id)
         ])
         payslips_count = len(payslips)
-        
+
         # Latest payslip
         latest_payslip = request.env['hr.payslip'].sudo().search([
             ('employee_id', '=', employee.id),
             ('state', 'in', ['done', 'paid'])
         ], order='date_from desc', limit=1)
-        
+
         # Enhanced attendance data - get ALL attendance records for today using user's timezone
         import pytz
-        
+
         # Get user's timezone
         user_timezone = get_user_timezone()
         user_pytz = pytz.timezone(user_timezone)
-        
+
         # Get current time in user's timezone
         utc_now = datetime.now(pytz.UTC)
         local_now = utc_now.astimezone(user_pytz)
         today_local = local_now.date()
-        
+
         # Calculate today start and end in user's local timezone, then convert to UTC for database query
         local_day_start = datetime.combine(today_local, datetime.min.time()).replace(tzinfo=user_pytz)
         local_day_end = datetime.combine(today_local, datetime.max.time()).replace(tzinfo=user_pytz)
-        
+
         # Convert to UTC for database query
         utc_day_start = local_day_start.astimezone(pytz.UTC)
         utc_day_end = local_day_end.astimezone(pytz.UTC)
-        
+
         today_attendances = request.env[HR_ATTENDANCE_MODEL].sudo().search([
             ('employee_id', '=', employee.id),
             ('check_in', '>=', utc_day_start),
             ('check_in', '<=', utc_day_end)
         ])
-        
+
         # Weekly attendance summary in user's timezone
         week_start_local = today_local - timedelta(days=today_local.weekday())
         week_end_local = week_start_local + timedelta(days=6)
-        
+
         # Convert to datetime with timezone
         week_start_dt = datetime.combine(week_start_local, datetime.min.time()).replace(tzinfo=user_pytz)
         week_end_dt = datetime.combine(week_end_local, datetime.max.time()).replace(tzinfo=user_pytz)
-        
+
         # Convert to UTC for database query
         utc_week_start = week_start_dt.astimezone(pytz.UTC)
         utc_week_end = week_end_dt.astimezone(pytz.UTC)
-        
+
         week_attendance = request.env[HR_ATTENDANCE_MODEL].sudo().search([
             ('employee_id', '=', employee.id),
             ('check_in', '>=', utc_week_start),
             ('check_in', '<=', utc_week_end)
         ])
-        
+
         # Calculate weekly hours using the day grouping approach for consistency
         from collections import defaultdict
         week_attendance_by_day = defaultdict(list)
         for att in week_attendance:
             day_key = att.check_in.strftime('%Y-%m-%d')
             week_attendance_by_day[day_key].append(att)
-        
+
         # Calculate total hours per day and then sum them up
         weekly_hours = 0
         for day, day_attendances in week_attendance_by_day.items():
             day_hours = sum(att.worked_hours for att in day_attendances if att.worked_hours)
             weekly_hours += day_hours
-        
+
         # Enhanced CRM data
         user = request.env.user
         crm_leads = request.env[CRM_LEAD_MODEL].sudo().search([('user_id', '=', user.id)])
         crm_leads_count = len(crm_leads)
-        
+
         # CRM analytics
         new_leads = crm_leads.filtered(lambda l: l.stage_id.name in ['New', 'Qualification'] if l.stage_id else False)
         won_leads = crm_leads.filtered(lambda l: l.stage_id.name == 'Won' if l.stage_id else False)
         total_revenue = sum(crm_leads.mapped('expected_revenue'))
-        
+
         # Enhanced Expense statistics
         today_dt = datetime.now().date()
         first_day_month = today_dt.replace(day=1)
-        
+
         current_month_expenses = request.env['hr.expense'].sudo().search([
             ('employee_id', '=', employee.id),
             ('date', '>=', first_day_month),
             ('date', '<=', today_dt)
         ])
-        
+
         # Year-to-date expenses
         year_start = today_dt.replace(month=1, day=1)
         ytd_expenses = request.env['hr.expense'].sudo().search([
@@ -1334,16 +1358,16 @@ class PortalEmployee(http.Controller):
             ('date', '>=', year_start),
             ('date', '<=', today_dt)
         ])
-        
+
         expenses_count = len(current_month_expenses)
         current_month_total = sum(current_month_expenses.mapped('total_amount'))
         ytd_total = sum(ytd_expenses.mapped('total_amount'))
-        
+
         # Expense breakdown by status
         submitted_expenses = current_month_expenses.filtered(lambda x: x.sheet_id and x.sheet_id.state == 'submit')
         approved_expenses = current_month_expenses.filtered(lambda x: x.sheet_id and x.sheet_id.state == 'approve')
         draft_expenses = current_month_expenses.filtered(lambda x: not x.sheet_id or x.sheet_id.state == 'draft')
-        
+
         expense_stats = {
             'total_count': expenses_count,
             'total_amount': current_month_total,
@@ -1356,15 +1380,15 @@ class PortalEmployee(http.Controller):
             'draft_amount': sum(draft_expenses.mapped('total_amount')),
             'pending_count': len(submitted_expenses),
         }
-        
+
         # Recent activities (for enhanced dashboard)
         recent_activities = []
-        
+
         # Add recent attendance - show the most recent attendance for the activity feed
         if today_attendances:
             # Get most recent attendance record
             most_recent = today_attendances[0] if len(today_attendances) > 0 else None
-            
+
             if most_recent:
                 recent_activities.append({
                     'type': 'attendance',
@@ -1374,7 +1398,7 @@ class PortalEmployee(http.Controller):
                     'icon': 'clock-o',
                     'color': 'primary'
                 })
-        
+
         # Add recent CRM activities
         if crm_leads_count > 0:
             recent_activities.append({
@@ -1385,7 +1409,7 @@ class PortalEmployee(http.Controller):
                 'icon': 'briefcase',
                 'color': 'info'
             })
-        
+
         # Add recent expenses
         if current_month_expenses:
             recent_activities.append({
@@ -1396,10 +1420,10 @@ class PortalEmployee(http.Controller):
                 'icon': 'money',
                 'color': 'warning'
             })
-        
+
         # Sort activities by time
         recent_activities.sort(key=lambda x: x['time'], reverse=True)
-        
+
         # Performance metrics (for enhanced dashboard)
         performance_metrics = {
             'attendance_rate': self._calculate_attendance_rate(employee, today_local),
@@ -1427,7 +1451,6 @@ class PortalEmployee(http.Controller):
         except Exception:
             pass
 
-        
         dashboard_data.update({
             'payslips_count': payslips_count,
             'latest_payslip': latest_payslip,
@@ -1449,21 +1472,21 @@ class PortalEmployee(http.Controller):
             'it_tickets_pending': it_tickets_pending,
             'it_tickets_recent': it_tickets_recent,
         })
-        
+
         return dashboard_data
 
     def _calculate_attendance_rate(self, employee, today_local):
         """Calculate monthly attendance rate using timezone-aware dates"""
         from datetime import datetime, timedelta
         import pytz
-        
+
         # Get user's timezone
         user_timezone = get_user_timezone()
         user_pytz = pytz.timezone(user_timezone)
-        
+
         # Get first day of current month in user's timezone
         first_day_local = today_local.replace(day=1)
-        
+
         # Count working days (excluding weekends)
         working_days = 0
         current_date = first_day_local
@@ -1471,236 +1494,286 @@ class PortalEmployee(http.Controller):
             if current_date.weekday() < 5:  # Monday = 0, Friday = 4
                 working_days += 1
             current_date += timedelta(days=1)
-        
+
         # Convert dates to datetime with timezone
         first_day_dt = datetime.combine(first_day_local, datetime.min.time()).replace(tzinfo=user_pytz)
         today_dt = datetime.combine(today_local, datetime.max.time()).replace(tzinfo=user_pytz)
-        
+
         # Convert to UTC for database query
         utc_first_day = first_day_dt.astimezone(pytz.UTC)
         utc_today = today_dt.astimezone(pytz.UTC)
-        
+
         # Count actual attendance days
         attendance_records = request.env[HR_ATTENDANCE_MODEL].sudo().search([
             ('employee_id', '=', employee.id),
             ('check_in', '>=', utc_first_day),
             ('check_in', '<=', utc_today)
         ])
-        
+
         # Get unique days using user's timezone for accurate day counting
         attended_days = set()
         for att in attendance_records:
             # Convert each check-in time to user's timezone to get the local date
             local_date = fields.Datetime.context_timestamp(request.env.user, att.check_in).date()
             attended_days.add(local_date)
-        
+
         return (len(attended_days) / working_days * 100) if working_days > 0 else 0
 
     def _get_monthly_targets(self, employee):
         """Get monthly targets for the employee (placeholder)"""
         return {
             'attendance_target': 95,  # 95% attendance rate
-            'crm_leads_target': 10,   # 10 leads per month
-            'expense_budget': 2000,   # $2000 monthly expense budget
+            'crm_leads_target': 10,  # 10 leads per month
+            'expense_budget': 2000,  # $2000 monthly expense budget
         }
+
+    def _get_notification(self, latest_request):
+        """Return notification dict based on latest HR change request state."""
+        if not latest_request:
+            return None
+
+        if latest_request.state == 'approved':
+            reviewed_by = latest_request.reviewed_by.name or 'HR'
+            review_date = (
+                latest_request.review_date.strftime('%d %b %Y')
+                if latest_request.review_date else ''
+            )
+            return {
+                'type': 'success',
+                'title': 'Profile Update Approved',
+                'message': (
+                    f'Your profile change request {latest_request.name} '
+                    f'was approved by {reviewed_by}'
+                    f'{" on " + review_date if review_date else ""}. '
+                    f'Your records have been updated.'
+                ),
+                'reason': None,
+                'request_name': latest_request.name,
+                'reviewed_by': reviewed_by,
+            }
+
+        elif latest_request.state == 'rejected':
+            reviewed_by = latest_request.reviewed_by.name or 'HR'
+            return {
+                'type': 'danger',
+                'title': 'Profile Update Rejected',
+                'message': (
+                    f'Your profile change request {latest_request.name} '
+                    f'was rejected by {reviewed_by}. '
+                    f'Please correct and resubmit.'
+                ),
+                'reason': latest_request.rejection_reason or 'No reason provided.',
+                'request_name': latest_request.name,
+                'reviewed_by': reviewed_by,
+            }
+
+        elif latest_request.state == 'pending':
+            return {
+                'type': 'warning',
+                'title': 'Profile Update Pending',
+                'message': (
+                    f'Your profile change request {latest_request.name} '
+                    f'is awaiting HR review.'
+                ),
+                'reason': None,
+                'request_name': latest_request.name,
+                'reviewed_by': '',
+            }
+
+        return None
 
     @http.route(MY_EMPLOYEE_URL + '/personal', type='http', auth='user', website=True, methods=['GET', 'POST'],
                 csrf=False)
     def portal_employee_personal(self, **post):
-        employee = self._get_employee()
+        try:
+            employee = self._get_employee()
 
-        #  Only active/installed languages
+            countries = request.env['res.country'].sudo().search([], order='name')
 
-        countries = request.env['res.country'].sudo().search([], order='name')
+            _logger.info("portal_employee_profile - Countries count: %s", len(countries))
 
-        _logger.info("portal_employee_profile - Countries count: %s", len(countries))
+            if request.httprequest.method == 'POST':
+                try:
+                    vals = {}
 
+                    # Basic information
+                    if post.get('work_email'):
+                        import re
+                        email_pattern = r'^[^\s@]+@[^\s@]+\.[^\s@]+$'
+                        if re.match(email_pattern, post.get('work_email')):
+                            vals['work_email'] = post.get('work_email')
+                        else:
+                            return request.make_json_response({
+                                'success': False,
+                                'error': 'Invalid email format'
+                            })
 
-        if request.httprequest.method == 'POST':
-            try:
-                vals = {}
+                    if post.get('work_phone'):
+                        vals['work_phone'] = post.get('work_phone')
+                    if post.get('birthday'):
+                        vals['birthday'] = post.get('birthday')
+                    if post.get('sex'):
+                        vals['sex'] = post.get('sex')
+                    if post.get('marital'):
+                        vals['marital'] = post.get('marital')
+                    if post.get('children'):
+                        try:
+                            vals['children'] = int(post.get('children'))
+                        except (ValueError, TypeError):
+                            pass
+                    if post.get('study_field'):
+                        vals['study_field'] = post.get('study_field')
+                    if post.get('l10n_in_relationship'):
+                        vals['l10n_in_relationship'] = post.get('l10n_in_relationship')
 
-                # Basic information
-                if post.get('work_email'):
-                    import re
-                    email_pattern = r'^[^\s@]+@[^\s@]+\.[^\s@]+$'
-                    if re.match(email_pattern, post.get('work_email')):
-                        vals['work_email'] = post.get('work_email')
-                    else:
-                        return request.make_json_response({
-                            'success': False,
-                            'error': 'Invalid email format'
-                        })
+                    # Identity documents
+                    if post.get('emirates_id_number'):
+                        vals['emirates_id_number'] = post.get('emirates_id_number')
+                    if post.get('emirates_issue_date'):
+                        vals['emirates_issue_date'] = post.get('emirates_issue_date')
+                    if post.get('emirates_expiry_date'):
+                        vals['emirates_expiry_date'] = post.get('emirates_expiry_date')
+                    if post.get('ssnid'):
+                        vals['ssnid'] = post.get('ssnid')
+                    if post.get('issue_date'):
+                        vals['issue_date'] = post.get('issue_date')
+                    if post.get('expiry_date'):
+                        vals['expiry_date'] = post.get('expiry_date')
 
-                if post.get('work_phone'):
-                    vals['work_phone'] = post.get('work_phone')
-                if post.get('birthday'):
-                    vals['birthday'] = post.get('birthday')
-                if post.get('sex'):
-                    vals['sex'] = post.get('sex')
-                if post.get('marital'):
-                    vals['marital'] = post.get('marital')
-                if post.get('children'):
-                    try:
-                        vals['children'] = int(post.get('children'))
-                    except (ValueError, TypeError):
-                        pass
-                if post.get('study_field'):
-                    vals['study_field'] = post.get('study_field')
-                if post.get('l10n_in_relationship'):
-                    vals['l10n_in_relationship'] = post.get('l10n_in_relationship')
+                    if post.get('issue_countries_id'):
+                        try:
+                            vals['issue_countries_id'] = int(post.get('issue_countries_id'))
+                        except (ValueError, TypeError):
+                            country = request.env['res.country'].sudo().search([
+                                ('name', '=', post.get('issue_countries_id'))
+                            ], limit=1)
+                            if country:
+                                vals['issue_countries_id'] = country.id
 
-                # Identity documents
-                if post.get('emirates_id_number'):
-                    vals['emirates_id_number'] = post.get('emirates_id_number')
-                if post.get('emirates_issue_date'):
-                    vals['emirates_issue_date'] = post.get('emirates_issue_date')
-                if post.get('emirates_expiry_date'):
-                    vals['emirates_expiry_date'] = post.get('emirates_expiry_date')
-                if post.get('ssnid'):
-                    vals['ssnid'] = post.get('ssnid')
-                if post.get('issue_date'):
-                    vals['issue_date'] = post.get('issue_date')
-                if post.get('expiry_date'):
-                    vals['expiry_date'] = post.get('expiry_date')
+                    # Nationality
+                    if post.get('country_id'):
+                        try:
+                            vals['country_id'] = int(post.get('country_id'))
+                        except (ValueError, TypeError):
+                            country = request.env['res.country'].sudo().search([
+                                ('name', '=', post.get('country_id'))
+                            ], limit=1)
+                            if country:
+                                vals['country_id'] = country.id
 
-                if post.get('issue_countries_id'):
-                    try:
-                        vals['issue_countries_id'] = int(post.get('issue_countries_id'))
-                    except (ValueError, TypeError):
-                        country = request.env['res.country'].sudo().search([
-                            ('name', '=', post.get('issue_countries_id'))
-                        ], limit=1)
-                        if country:
-                            vals['issue_countries_id'] = country.id
+                    # Contact information
+                    if post.get('private_email'):
+                        vals['private_email'] = post.get('private_email')
+                    if post.get('private_phone'):
+                        vals['private_phone'] = post.get('private_phone')
+                    if post.get('private_street'):
+                        vals['private_street'] = post.get('private_street')
+                    if post.get('private_street2'):
+                        vals['private_street2'] = post.get('private_street2')
+                    if post.get('private_city'):
+                        vals['private_city'] = post.get('private_city')
+                    if post.get('private_zip'):
+                        vals['private_zip'] = post.get('private_zip')
+                    if post.get('e_private_city'):
+                        vals['e_private_city'] = post.get('e_private_city')
 
-                # Nationality
-                if post.get('country_id'):
-                    try:
-                        vals['country_id'] = int(post.get('country_id'))
-                    except (ValueError, TypeError):
-                        country = request.env['res.country'].sudo().search([
-                            ('name', '=', post.get('country_id'))
-                        ], limit=1)
-                        if country:
-                            vals['country_id'] = country.id
+                    # Emergency contact
+                    if post.get('emergency_contact'):
+                        vals['emergency_contact'] = post.get('emergency_contact')
+                    if post.get('emergency_phone'):
+                        vals['emergency_phone'] = post.get('emergency_phone')
 
-                # Contact information
-                if post.get('private_email'):
-                    vals['private_email'] = post.get('private_email')
-                if post.get('private_phone'):
-                    vals['private_phone'] = post.get('private_phone')
-                if post.get('private_street'):
-                    vals['private_street'] = post.get('private_street')
-                if post.get('private_street2'):
-                    vals['private_street2'] = post.get('private_street2')
-                if post.get('private_city'):
-                    vals['private_city'] = post.get('private_city')
-                if post.get('private_zip'):
-                    vals['private_zip'] = post.get('private_zip')
-                if post.get('e_private_city'):
-                    vals['e_private_city'] = post.get('e_private_city')
+                    # Dependent Details - Child 1
+                    if post.get('dependent_child_name_1') is not None:
+                        vals['dependent_child_name_1'] = post.get('dependent_child_name_1', '').strip()
+                    if post.get('dependent_child_dob_1'):
+                        vals['dependent_child_dob_1'] = post.get('dependent_child_dob_1')
+                    if post.get('dependent_child_gender_1'):
+                        vals['dependent_child_gender_1'] = post.get('dependent_child_gender_1')
+                    if post.get('dependent_child_passport_no') is not None:
+                        vals['dependent_child_passport_no'] = post.get('dependent_child_passport_no', '').strip()
+                    if post.get('dependent_child_passport_issue_date_1'):
+                        vals['dependent_child_passport_issue_date_1'] = post.get(
+                            'dependent_child_passport_issue_date_1')
+                    if post.get('dependent_child_passport_expiry_date_1'):
+                        vals['dependent_child_passport_expiry_date_1'] = post.get(
+                            'dependent_child_passport_expiry_date_1')
 
-                # Emergency contact
-                if post.get('emergency_contact'):
-                    vals['emergency_contact'] = post.get('emergency_contact')
-                if post.get('emergency_phone'):
-                    vals['emergency_phone'] = post.get('emergency_phone')
+                    # General Information
+                    if post.get('u_private_city'):
+                        vals['u_private_city'] = post.get('u_private_city')
+                    if post.get('industry_start_date'):
+                        vals['industry_start_date'] = post.get('industry_start_date')
+                    if post.get('experience'):
+                        vals['experience'] = post.get('experience')
+                    if post.get('current_role'):
+                        vals['current_role'] = post.get('current_role')
+                    if post.get('current_address'):
+                        vals['current_address'] = post.get('current_address')
+                    if post.get('phone_code_1'):
+                        vals['phone_code_1'] = post.get('phone_code_1')
 
-                # Dependent Details - Child 1
-                if post.get('dependent_child_name_1') is not None:
-                    vals['dependent_child_name_1'] = post.get('dependent_child_name_1', '').strip()
+                    # Emergency Contact UAE
+                    if post.get('emergency_contact_person_name'):
+                        vals['emergency_contact_person_name'] = post.get('emergency_contact_person_name')
+                    if post.get('emergency_contact_person_phone'):
+                        vals['emergency_contact_person_phone'] = post.get('emergency_contact_person_phone')
+                    if post.get('alternate_mobile_number'):
+                        vals['alternate_mobile_number'] = post.get('alternate_mobile_number')
+                    if post.get('emergency_contact_person_name_1'):
+                        vals['emergency_contact_person_name_1'] = post.get('emergency_contact_person_name_1')
+                    if post.get('emergency_contact_person_phone_1'):
+                        vals['emergency_contact_person_phone_1'] = post.get('emergency_contact_person_phone_1')
+                    if post.get('second_alternative_number'):
+                        vals['second_alternative_number'] = post.get('second_alternative_number')
+                    if post.get('home_land_line_no'):
+                        vals['home_land_line_no'] = post.get('home_land_line_no')
 
-                if post.get('dependent_child_dob_1'):
-                    vals['dependent_child_dob_1'] = post.get('dependent_child_dob_1')
+                    # Spouse Info
+                    if post.get('spouse_passport_no'):
+                        vals['spouse_passport_no'] = post.get('spouse_passport_no')
+                    if post.get('spouse_passport_issue_date'):
+                        vals['spouse_passport_issue_date'] = post.get('spouse_passport_issue_date')
+                    if post.get('spouse_passport_expiry_date'):
+                        vals['spouse_passport_expiry_date'] = post.get('spouse_passport_expiry_date')
+                    if post.get('spouse_visa_no'):
+                        vals['spouse_visa_no'] = post.get('spouse_visa_no')
+                    if post.get('spouse_visa_expire_date'):
+                        vals['spouse_visa_expire_date'] = post.get('spouse_visa_expire_date')
+                    if post.get('spouse_emirates_id_no'):
+                        vals['spouse_emirates_id_no'] = post.get('spouse_emirates_id_no')
+                    if post.get('spouse_emirates_issue_date'):
+                        vals['spouse_emirates_issue_date'] = post.get('spouse_emirates_issue_date')
+                    if post.get('spouse_emirates_id_expiry_date'):
+                        vals['spouse_emirates_id_expiry_date'] = post.get('spouse_emirates_id_expiry_date')
+                    if post.get('spouse_aadhar_no'):
+                        vals['spouse_aadhar_no'] = post.get('spouse_aadhar_no')
 
-                if post.get('dependent_child_gender_1'):
-                    vals['dependent_child_gender_1'] = post.get('dependent_child_gender_1')
+                    # Father Mother Info
+                    if post.get('father_name'):
+                        vals['father_name'] = post.get('father_name')
+                    if post.get('father_dob'):
+                        vals['father_dob'] = post.get('father_dob')
+                    if post.get('mother_name'):
+                        vals['mother_name'] = post.get('mother_name')
+                    if post.get('mother_dob'):
+                        vals['mother_dob'] = post.get('mother_dob')
 
-                if post.get('dependent_child_passport_no') is not None:
-                    vals['dependent_child_passport_no'] = post.get('dependent_child_passport_no', '').strip()
+                    # Employee Details
+                    if post.get('employee_nominee_name'):
+                        vals['employee_nominee_name'] = post.get('employee_nominee_name')
+                    if post.get('employee_nominee_contact_no'):
+                        vals['employee_nominee_contact_no'] = post.get('employee_nominee_contact_no')
+                    if post.get('domain_worked'):
+                        vals['domain_worked'] = post.get('domain_worked')
+                    if post.get('primary_skill'):
+                        vals['primary_skill'] = post.get('primary_skill')
+                    if post.get('secondary_skill'):
+                        vals['secondary_skill'] = post.get('secondary_skill')
+                    if post.get('tool_used'):
+                        vals['tool_used'] = post.get('tool_used')
 
-                if post.get('dependent_child_passport_issue_date_1'):
-                    vals['dependent_child_passport_issue_date_1'] = post.get('dependent_child_passport_issue_date_1')
-
-                if post.get('dependent_child_passport_expiry_date_1'):
-                    vals['dependent_child_passport_expiry_date_1'] = post.get('dependent_child_passport_expiry_date_1')
-
-                # General Information
-                if post.get('u_private_city'):
-                    vals['u_private_city'] = post.get('u_private_city')
-                if post.get('industry_start_date'):
-                    vals['industry_start_date'] = post.get('industry_start_date')
-                if post.get('experience'):
-                    vals['experience'] = post.get('experience')
-                if post.get('current_role'):
-                    vals['current_role'] = post.get('current_role')
-                if post.get('current_address'):
-                    vals['current_address'] = post.get('current_address')
-                if post.get('phone_code_1'):
-                    vals['phone_code_1'] = post.get('phone_code_1')
-
-                # Emergency Contact UAE
-                if post.get('emergency_contact_person_name'):
-                    vals['emergency_contact_person_name'] = post.get('emergency_contact_person_name')
-                if post.get('emergency_contact_person_phone'):
-                    vals['emergency_contact_person_phone'] = post.get('emergency_contact_person_phone')
-                if post.get('alternate_mobile_number'):
-                    vals['alternate_mobile_number'] = post.get('alternate_mobile_number')
-                if post.get('emergency_contact_person_name_1'):
-                    vals['emergency_contact_person_name_1'] = post.get('emergency_contact_person_name_1')
-                if post.get('emergency_contact_person_phone_1'):
-                    vals['emergency_contact_person_phone_1'] = post.get('emergency_contact_person_phone_1')
-                if post.get('second_alternative_number'):
-                    vals['second_alternative_number'] = post.get('second_alternative_number')
-                if post.get('home_land_line_no'):
-                    vals['home_land_line_no'] = post.get('home_land_line_no')
-
-                # Spouse Info
-                if post.get('spouse_passport_no'):
-                    vals['spouse_passport_no'] = post.get('spouse_passport_no')
-                if post.get('spouse_passport_issue_date'):
-                    vals['spouse_passport_issue_date'] = post.get('spouse_passport_issue_date')
-                if post.get('spouse_passport_expiry_date'):
-                    vals['spouse_passport_expiry_date'] = post.get('spouse_passport_expiry_date')
-                if post.get('spouse_visa_no'):
-                    vals['spouse_visa_no'] = post.get('spouse_visa_no')
-                if post.get('spouse_visa_expire_date'):
-                    vals['spouse_visa_expire_date'] = post.get('spouse_visa_expire_date')
-                if post.get('spouse_emirates_id_no'):
-                    vals['spouse_emirates_id_no'] = post.get('spouse_emirates_id_no')
-                if post.get('spouse_emirates_issue_date'):
-                    vals['spouse_emirates_issue_date'] = post.get('spouse_emirates_issue_date')
-                if post.get('spouse_emirates_id_expiry_date'):
-                    vals['spouse_emirates_id_expiry_date'] = post.get('spouse_emirates_id_expiry_date')
-                if post.get('spouse_aadhar_no'):
-                    vals['spouse_aadhar_no'] = post.get('spouse_aadhar_no')
-
-                # Father Mother Info
-                if post.get('father_name'):
-                    vals['father_name'] = post.get('father_name')
-                if post.get('father_dob'):
-                    vals['father_dob'] = post.get('father_dob')
-                if post.get('mother_name'):
-                    vals['mother_name'] = post.get('mother_name')
-                if post.get('mother_dob'):
-                    vals['mother_dob'] = post.get('mother_dob')
-
-                # Employee Details
-                if post.get('employee_nominee_name'):
-                    vals['employee_nominee_name'] = post.get('employee_nominee_name')
-                if post.get('employee_nominee_contact_no'):
-                    vals['employee_nominee_contact_no'] = post.get('employee_nominee_contact_no')
-                if post.get('domain_worked'):
-                    vals['domain_worked'] = post.get('domain_worked')
-                if post.get('primary_skill'):
-                    vals['primary_skill'] = post.get('primary_skill')
-                if post.get('secondary_skill'):
-                    vals['secondary_skill'] = post.get('secondary_skill')
-                if post.get('tool_used'):
-                    vals['tool_used'] = post.get('tool_used')
-
-                    # Last Organisation Info
+                    # Last Organisation Info  ← FIXED: was wrongly indented inside tool_used block
                     if post.get('last_organisation_name'):
                         vals['last_organisation_name'] = post.get('last_organisation_name')
                     if post.get('last_location'):
@@ -1731,159 +1804,155 @@ class PortalEmployee(http.Controller):
                                 'error': 'Invalid Reporting Manager email format'
                             })
 
-                # Many2one - Passport Issuing Country
-                # Child 1 Passport Issuing Country - Many2one res.country
-                if post.get('dependent_child_passport_issuing_countries_1_id'):
-                    try:
-                        vals['dependent_child_passport_issuing_countries_1_id'] = int(
-                            post.get('dependent_child_passport_issuing_countries_1_id')
-                        )
-                    except (ValueError, TypeError):
-                        country = request.env['res.country'].sudo().search([
-                            ('name', '=', post.get('dependent_child_passport_issuing_countries_1_id'))
-                        ], limit=1)
-                        if country:
-                            vals['dependent_child_passport_issuing_countries_1_id'] = country.id
+                    # Many2one - Child 1 Passport Issuing Country
+                    if post.get('dependent_child_passport_issuing_countries_1_id'):
+                        try:
+                            vals['dependent_child_passport_issuing_countries_1_id'] = int(
+                                post.get('dependent_child_passport_issuing_countries_1_id')
+                            )
+                        except (ValueError, TypeError):
+                            country = request.env['res.country'].sudo().search([
+                                ('name', '=', post.get('dependent_child_passport_issuing_countries_1_id'))
+                            ], limit=1)
+                            if country:
+                                vals['dependent_child_passport_issuing_countries_1_id'] = country.id
 
-                if post.get('dependent_child_visa_no_1') is not None:
-                    vals['dependent_child_visa_no_1'] = post.get('dependent_child_visa_no_1', '').strip()
+                    if post.get('dependent_child_visa_no_1') is not None:
+                        vals['dependent_child_visa_no_1'] = post.get('dependent_child_visa_no_1', '').strip()
+                    if post.get('dependent_child_visa_expiration_date_1'):
+                        vals['dependent_child_visa_expiration_date_1'] = post.get(
+                            'dependent_child_visa_expiration_date_1')
+                    if post.get('dependent_child_emirates_id_no_1') is not None:
+                        vals['dependent_child_emirates_id_no_1'] = post.get('dependent_child_emirates_id_no_1',
+                                                                            '').strip()
+                    if post.get('dependent_child_emirates_id_issue_date_1'):
+                        vals['dependent_child_emirates_id_issue_date_1'] = post.get(
+                            'dependent_child_emirates_id_issue_date_1')
+                    if post.get('dependent_child_emirates_id_expiry_date_1'):
+                        vals['dependent_child_emirates_id_expiry_date_1'] = post.get(
+                            'dependent_child_emirates_id_expiry_date_1')
+                    if post.get('dependent_child_aadhar_no_1') is not None:
+                        vals['dependent_child_aadhar_no_1'] = post.get('dependent_child_aadhar_no_1', '').strip()
 
-                if post.get('dependent_child_visa_expiration_date_1'):
-                    vals['dependent_child_visa_expiration_date_1'] = post.get('dependent_child_visa_expiration_date_1')
+                    # Personal information
+                    if post.get('legal_name'):
+                        vals['legal_name'] = post.get('legal_name')
+                    if post.get('place_of_birth'):
+                        vals['place_of_birth'] = post.get('place_of_birth')
 
-                if post.get('dependent_child_emirates_id_no_1') is not None:
-                    vals['dependent_child_emirates_id_no_1'] = post.get('dependent_child_emirates_id_no_1', '').strip()
+                    # Document and personal details
+                    if post.get('whatsapp'):
+                        vals['whatsapp'] = post.get('whatsapp')
+                    if post.get('house_no'):
+                        vals['house_no'] = post.get('house_no')
+                    if post.get('area_name'):
+                        vals['area_name'] = post.get('area_name')
+                    if post.get('city'):
+                        vals['city'] = post.get('city')
+                    if post.get('zip_code'):
+                        vals['zip_code'] = post.get('zip_code')
+                    if post.get('linkedin'):
+                        vals['linkedin'] = post.get('linkedin')
 
-                if post.get('dependent_child_emirates_id_issue_date_1'):
-                    vals['dependent_child_emirates_id_issue_date_1'] = post.get(
-                        'dependent_child_emirates_id_issue_date_1')
+                    # Visa and work permit
+                    if post.get('visa_no'):
+                        vals['visa_no'] = post.get('visa_no')
+                    if post.get('permit_no'):
+                        vals['permit_no'] = post.get('permit_no')
 
-                if post.get('dependent_child_emirates_id_expiry_date_1'):
-                    vals['dependent_child_emirates_id_expiry_date_1'] = post.get(
-                        'dependent_child_emirates_id_expiry_date_1')
+                    # Social Media Details
+                    if post.get('facebook_profile') is not None:
+                        vals['facebook_profile'] = post.get('facebook_profile', '').strip()
+                    if post.get('insta_profile') is not None:
+                        vals['insta_profile'] = post.get('insta_profile', '').strip()
+                    if post.get('twitter_profile') is not None:
+                        vals['twitter_profile'] = post.get('twitter_profile', '').strip()
 
-                if post.get('dependent_child_aadhar_no_1') is not None:
-                    vals['dependent_child_aadhar_no_1'] = post.get('dependent_child_aadhar_no_1', '').strip()
+                    # Career Details
+                    if post.get('career_break_detail') is not None:
+                        vals['career_break_detail'] = post.get('career_break_detail', '').strip()
 
-                # Personal information
-                if post.get('legal_name'):
-                    vals['legal_name'] = post.get('legal_name')
-                if post.get('place_of_birth'):
-                    vals['place_of_birth'] = post.get('place_of_birth')
+                    # Industry Details
+                    if post.get('industry_ref_name') is not None:
+                        vals['industry_ref_name'] = post.get('industry_ref_name', '').strip()
+                    if post.get('industry_ref_email') is not None:
+                        vals['industry_ref_email'] = post.get('industry_ref_email', '').strip()
+                    if post.get('industry_ref_mob_no') is not None:
+                        vals['industry_ref_mob_no'] = post.get('industry_ref_mob_no', '').strip()
+                    if post.get('home_country_id_name') is not None:
+                        vals['home_country_id_name'] = post.get('home_country_id_name', '').strip()
+                    if post.get('home_country_id_number') is not None:
+                        vals['home_country_id_number'] = post.get('home_country_id_number', '').strip()
 
-                # Document and personal details
-                if post.get('whatsapp'):
-                    vals['whatsapp'] = post.get('whatsapp')
-                if post.get('house_no'):
-                    vals['house_no'] = post.get('house_no')
-                if post.get('area_name'):
-                    vals['area_name'] = post.get('area_name')
-                if post.get('city'):
-                    vals['city'] = post.get('city')
-                if post.get('zip_code'):
-                    vals['zip_code'] = post.get('zip_code')
-                if post.get('linkedin'):
-                    vals['linkedin'] = post.get('linkedin')
+                    # Citizenship
+                    if post.get('identification_id'):
+                        vals['identification_id'] = post.get('identification_id')
+                    if post.get('passport_id'):
+                        vals['passport_id'] = post.get('passport_id')
+                    if post.get('mother_tongue_name'):
+                        vals['mother_tongue_name'] = post.get('mother_tongue_name')
+                    if post.get('language_known_name') is not None:
+                        vals['language_known_name'] = post.get('language_known_name', '').strip()
 
-                # Visa and work permit
-                if post.get('visa_no'):
-                    vals['visa_no'] = post.get('visa_no')
-                if post.get('permit_no'):
-                    vals['permit_no'] = post.get('permit_no')
+                    # Selection field with validation
+                    allowed_blood_groups = ['a_pos', 'a_neg', 'b_pos', 'b_neg', 'ab_pos', 'ab_neg', 'o_pos', 'o_neg',
+                                            'unknown']
+                    if post.get('blood_group') and post.get('blood_group') in allowed_blood_groups:
+                        vals['blood_group'] = post.get('blood_group')
 
-                # Social Media Details
-                if post.get('facebook_profile') is not None:
-                    vals['facebook_profile'] = post.get('facebook_profile', '').strip()
-                if post.get('insta_profile') is not None:
-                    vals['insta_profile'] = post.get('insta_profile', '').strip()
-                if post.get('twitter_profile') is not None:
-                    vals['twitter_profile'] = post.get('twitter_profile', '').strip()
+                    # Certificate - selection field with validation
+                    allowed_certificates = ['graduate', 'bachelor', 'master', 'doctor', 'other']
+                    if post.get('certificate') and post.get('certificate') in allowed_certificates:
+                        vals['certificate'] = post.get('certificate')
 
-                # Career Details
-                if post.get('career_break_detail') is not None:
-                    vals['career_break_detail'] = post.get('career_break_detail', '').strip()
+                    # Checkbox field - always set True or False
+                    vals['is_non_resident'] = True if post.get('is_non_resident') == 'on' else False
 
-                # Industry Details
-                if post.get('industry_ref_name') is not None:
-                    vals['industry_ref_name'] = post.get('industry_ref_name', '').strip()
-                if post.get('industry_ref_email') is not None:
-                    vals['industry_ref_email'] = post.get('industry_ref_email', '').strip()
-                if post.get('industry_ref_mob_no') is not None:
-                    vals['industry_ref_mob_no'] = post.get('industry_ref_mob_no', '').strip()
-                if post.get('home_country_id_name') is not None:
-                    vals['home_country_id_name'] = post.get('home_country_id_name', '').strip()
-                if post.get('home_country_id_number') is not None:
-                    vals['home_country_id_number'] = post.get('home_country_id_number', '').strip()
+                    # Single write call - all fields together
+                    _logger.info("Writing vals to employee %s: %s", employee.id, list(vals.keys()))
+                    employee.sudo().write(vals)
+                    _logger.info("Successfully wrote vals for employee %s", employee.id)
 
-                # Citizenship
-                if post.get('identification_id'):
-                    vals['identification_id'] = post.get('identification_id')
-                if post.get('passport_id'):
-                    vals['passport_id'] = post.get('passport_id')
-                if post.get('mother_tongue_name'):
-                    vals['mother_tongue_name'] = post.get('mother_tongue_name')
-                if post.get('language_known_name') is not None:
-                    vals['language_known_name'] = post.get('language_known_name', '').strip()
-                # Distance - only save if BOTH fields have valid values
-                # distance_raw = post.get('distance_home_work', '').strip()
-                # if distance_raw and distance_raw not in ['km', 'mi', '']:
-                #     try:
-                #         vals['distance_home_work'] = int(distance_raw)
-                #     except (ValueError, TypeError):
-                #         pass  # skip silently if not a valid integer
-                #
-                # # Unit - only km or mi allowed
-                # km_val = post.get('km_home_work', '').strip()
-                # if km_val in ['km', 'mi']:
-                #     vals['km_home_work'] = km_val
+                    # Handle document uploads
+                    self._handle_document_uploads(employee, request.httprequest.files)
 
+                    return request.make_json_response({
+                        'success': True,
+                        'message': 'Personal details updated successfully'
+                    })
 
+                except Exception as e:
+                    _logger.error("Error in portal_employee_personal POST: %s", str(e))
+                    import traceback
+                    _logger.error("Traceback: %s", traceback.format_exc())
+                    return request.make_json_response({
+                        'success': False,
+                        'error': str(e)
+                    })
 
-                # Selection field with validation
-                allowed_blood_groups = ['a_pos', 'a_neg', 'b_pos', 'b_neg', 'ab_pos', 'ab_neg', 'o_pos', 'o_neg',
-                                        'unknown']
-                if post.get('blood_group') and post.get('blood_group') in allowed_blood_groups:
-                    vals['blood_group'] = post.get('blood_group')
-
-                #  Certificate - selection field with validation
-                allowed_certificates = ['graduate', 'bachelor', 'master', 'doctor', 'other']
-                if post.get('certificate') and post.get('certificate') in allowed_certificates:
-                    vals['certificate'] = post.get('certificate')
-
-
-                #  Checkbox field - always set True or False
-                vals['is_non_resident'] = True if post.get('is_non_resident') == 'on' else False
-
-                #  Single write call - all fields together
-                _logger.info("Writing vals to employee %s: %s", employee.id, list(vals.keys()))
-                employee.sudo().write(vals)
-                _logger.info("Successfully wrote vals for employee %s", employee.id)
-
-                # Handle document uploads
-                self._handle_document_uploads(employee, request.httprequest.files)
-
-                return request.make_json_response({
-                    'success': True,
-                    'message': 'Personal details updated successfully'
-                })
-
+            # GET - pass all required variables to template
+            notification = None
+            try:
+                latest_request = request.env['hr.profile.change.request'].sudo().search(
+                    [('employee_id', '=', employee.id)], order='id desc', limit=1
+                )
+                notification = self._get_notification(latest_request)
             except Exception as e:
-                _logger.error("Error in portal_employee_personal POST: %s", str(e))
-                import traceback
-                _logger.error("Traceback: %s", traceback.format_exc())
-                return request.make_json_response({
-                    'success': False,
-                    'error': str(e)
-                })
+                _logger.warning("Could not load notification for employee %s: %s", employee.id, str(e))
 
+            return request.render('employee_self_service_portal.portal_employee_profile_personal', {
+                'employee': employee,
+                'section': 'personal',
+                'countries': countries,
+                'notification': notification,
+            })
 
-        #  GET - pass all required variables to template
-        return request.render('employee_self_service_portal.portal_employee_profile_personal', {
-            'employee': employee,
-            'section': 'personal',
-            'countries': countries,
-        })
-        
+        except Exception as e:
+            _logger.error("Fatal error in portal_employee_personal: %s", str(e))
+            import traceback
+            _logger.error("Traceback: %s", traceback.format_exc())
+            return request.redirect('/my/employee')
+
         return request.render('employee_self_service_portal.portal_employee_profile_personal', {
             'employee': employee,
             'section': 'personal',
@@ -1949,16 +2018,16 @@ class PortalEmployee(http.Controller):
         """Export employee profile as PDF"""
         try:
             employee = self._get_employee()
-            
+
             # Create PDF using reportlab or return HTML for now
             html_content = request.env['ir.qweb']._render('employee_self_service_portal.profile_pdf_template', {
                 'employee': employee,
                 'company': request.env.company,
             })
-            
+
             # Convert HTML to PDF (simplified version)
             pdf_data = html_content.encode('utf-8')
-            
+
             return request.make_response(
                 pdf_data,
                 headers=[
@@ -1966,7 +2035,7 @@ class PortalEmployee(http.Controller):
                     ('Content-Disposition', f'attachment; filename="profile_{employee.name.replace(" ", "_")}.pdf"')
                 ]
             )
-            
+
         except Exception as e:
             return request.redirect('/my/employee/personal?error=export_failed')
 
@@ -2009,19 +2078,19 @@ class PortalEmployee(http.Controller):
         """Save individual document file"""
         try:
             import base64
-            
+
             # Validate file size (10MB max)
             max_size = 10 * 1024 * 1024
             file.seek(0, 2)
             file_size = file.tell()
             file.seek(0)
-            
+
             if file_size > max_size:
                 return
-            
+
             # Read file data
             file_data = base64.b64encode(file.read())
-            
+
             # Create attachment
             attachment = request.env['ir.attachment'].sudo().create({
                 'name': f"{doc_type} - {file.filename}",
@@ -2031,9 +2100,9 @@ class PortalEmployee(http.Controller):
                 'public': False,
                 'type': 'binary',
             })
-            
+
             return attachment
-            
+
         except Exception as e:
             _logger.error(f"Error saving document {file.filename}: {str(e)}")
             return None
@@ -2213,57 +2282,57 @@ class PortalEmployee(http.Controller):
     def portal_employee_crm(self, **kwargs):
         employee = self._get_employee()
         user = request.env.user
-        
+
         # Build base domain
         domain = [('user_id', '=', user.id)]
-        
+
         # Apply filters based on parameters
         stage_filter = kwargs.get('stage')
         if stage_filter:
             domain.append(('stage_id', '=', int(stage_filter)))
-            
+
         practice_filter = kwargs.get('practice')
         if practice_filter:
             # Only apply practice filter if the field exists on the model
             lead_model = request.env['crm.lead']
             if 'practice_id' in lead_model._fields:
                 domain.append(('practice_id', '=', int(practice_filter)))
-            
+
         industry_filter = kwargs.get('industry')
         if industry_filter:
             # Only apply industry filter if the field exists on the model
             lead_model = request.env['crm.lead']
             if 'industry_id' in lead_model._fields:
                 domain.append(('industry_id', '=', int(industry_filter)))
-            
+
         priority_filter = kwargs.get('priority')
         if priority_filter:
             domain.append(('priority', '=', priority_filter))
-            
+
         # Date range filters
         date_from = kwargs.get('date_from')
         if date_from:
             domain.append(('create_date', '>=', date_from + ' 00:00:00'))
-            
+
         date_to = kwargs.get('date_to')
         if date_to:
             domain.append(('create_date', '<=', date_to + ' 23:59:59'))
-            
+
         # Activity due date filters - filter through activity_ids
         activity_due_from = kwargs.get('activity_due_from')
         if activity_due_from:
             domain.append(('activity_ids.date_deadline', '>=', activity_due_from))
-            
+
         activity_due_to = kwargs.get('activity_due_to')
         if activity_due_to:
             domain.append(('activity_ids.date_deadline', '<=', activity_due_to))
-            
+
         # Quick activity filters
         quick_activity = kwargs.get('quick_activity')
         if quick_activity:
             from datetime import date, timedelta
             today = date.today()
-            
+
             if quick_activity == 'today':
                 domain.append(('activity_ids.date_deadline', '=', today))
             elif quick_activity == 'yesterday':
@@ -2286,7 +2355,7 @@ class PortalEmployee(http.Controller):
                 domain.append(('activity_ids.date_deadline', '<', today))
             elif quick_activity == 'no_activities':
                 domain.append(('activity_ids', '=', False))
-        
+
         # Tags filter
         tags_filter = kwargs.get('tags')
         if tags_filter:
@@ -2296,7 +2365,7 @@ class PortalEmployee(http.Controller):
                     tag_ids = [int(tags_filter)]
                 else:
                     tag_ids = [int(tag) for tag in tags_filter if tag]
-                
+
                 if tag_ids:
                     # Check if tag_ids field exists
                     lead_model = request.env['crm.lead']
@@ -2304,15 +2373,15 @@ class PortalEmployee(http.Controller):
                         domain.append(('tag_ids', 'in', tag_ids))
             except (ValueError, TypeError):
                 pass  # Skip invalid tag values
-        
+
         leads = request.env['crm.lead'].sudo().search(domain, order='priority desc, create_date desc')
-        
+
         # Custom sorting by nearest activity date
         def get_next_activity_date(lead):
             """Get the nearest activity date for sorting"""
             if not lead.activity_ids:
                 return date.max  # Leads without activities go to the end
-            
+
             next_activity = lead.activity_ids.sorted('date_deadline')
             if next_activity and next_activity[0].date_deadline:
                 activity_date = next_activity[0].date_deadline
@@ -2321,21 +2390,21 @@ class PortalEmployee(http.Controller):
                     return activity_date.date()
                 return activity_date
             return date.max
-        
+
         # Sort leads by nearest activity date, then by priority, then by create date
         from datetime import date
         leads = leads.sorted(key=lambda lead: (
             get_next_activity_date(lead),  # Nearest activity first
-            -int(lead.priority or '0'),    # Higher priority first (reversed)
-            -lead.id                       # Newer leads first (reversed by ID)
+            -int(lead.priority or '0'),  # Higher priority first (reversed)
+            -lead.id  # Newer leads first (reversed by ID)
         ))
-        
+
         # Get filter options for dropdowns - show ALL available options, not just used ones
         all_user_leads = request.env['crm.lead'].sudo().search([('user_id', '=', user.id)])
-        
+
         # Get ALL stages available in the system
         stages = request.env['crm.stage'].sudo().search([], order='sequence, name')
-        
+
         # Handle practices safely - check if model and field exist
         practices = []
         try:
@@ -2348,12 +2417,12 @@ class PortalEmployee(http.Controller):
                         break
                     except KeyError:
                         continue
-                
+
                 if practice_model:
                     practices = practice_model.sudo().search([], order='name')
         except Exception:
             practices = []
-            
+
         industries = []
         try:
             if 'industry_id' in all_user_leads._fields:
@@ -2361,7 +2430,7 @@ class PortalEmployee(http.Controller):
                 industries = request.env['res.partner.industry'].sudo().search([], order='name')
         except Exception:
             industries = []
-            
+
         # Get tags for filter options - show ALL available tags
         tags = []
         try:
@@ -2370,15 +2439,15 @@ class PortalEmployee(http.Controller):
                 tags = request.env['crm.tag'].sudo().search([], order='name')
         except Exception:
             tags = []
-        
+
         # Process leads to add computed fields for template
         import datetime
         import re
         from odoo import fields
-        
+
         today = datetime.date.today()
         processed_leads = []
-        
+
         for lead in leads:
             lead_data = {
                 'record': lead,
@@ -2387,17 +2456,17 @@ class PortalEmployee(http.Controller):
                 'recent_note_info': self._get_recent_note_info(lead),
             }
             processed_leads.append(lead_data)
-        
+
         # Check if enhanced view is requested
         view_type = kwargs.get('view', 'list')  # Default to list view instead of enhanced view
         template_name = 'employee_self_service_portal.portal_employee_crm_enhanced' if view_type == 'enhanced' else 'employee_self_service_portal.portal_employee_crm'
-        
+
         # Calculate dashboard KPIs for enhanced view
         dashboard_kpis = {}
         if view_type == 'enhanced':
             all_user_leads_current = request.env['crm.lead'].sudo().search([('user_id', '=', user.id)])
             dashboard_kpis = self._calculate_dashboard_kpis(all_user_leads_current, today)
-        
+
         return request.render(template_name, {
             'employee': employee,
             'leads': leads,  # Keep original for compatibility
@@ -2424,7 +2493,7 @@ class PortalEmployee(http.Controller):
                 'view': view_type,
             }
         })
-    
+
     def _get_activity_summary(self, lead):
         """Get activity summary for a lead"""
         activity_count = len(lead.activity_ids)
@@ -2432,15 +2501,15 @@ class PortalEmployee(http.Controller):
             'count': activity_count,
             'has_activities': activity_count > 0
         }
-    
+
     def _get_next_activity_info(self, lead, today):
         """Get next activity information with relative date"""
         if not lead.activity_ids:
             return {'has_activity': False}
-        
+
         next_activity = lead.activity_ids.sorted('date_deadline')[0]
         activity_date = next_activity.date_deadline
-        
+
         if not activity_date:
             return {
                 'has_activity': True,
@@ -2449,13 +2518,13 @@ class PortalEmployee(http.Controller):
                 'relative_date': 'No date',
                 'badge_class': 'badge-secondary'
             }
-        
+
         # Convert to date if it's datetime
         if hasattr(activity_date, 'date'):
             activity_date = activity_date.date()
-        
+
         date_diff = (activity_date - today).days
-        
+
         # Determine relative date text and badge class
         if date_diff == 0:
             relative_date = 'Today'
@@ -2472,7 +2541,7 @@ class PortalEmployee(http.Controller):
         else:
             relative_date = f'Due in {date_diff} days'
             badge_class = 'badge-info'
-        
+
         return {
             'has_activity': True,
             'activity_type': next_activity.activity_type_id.name,
@@ -2480,32 +2549,32 @@ class PortalEmployee(http.Controller):
             'relative_date': relative_date,
             'badge_class': badge_class
         }
-    
+
     def _get_recent_note_info(self, lead):
         """Get recent note information"""
         import re
-        
+
         recent_notes = lead.message_ids.filtered(
             lambda m: m.message_type == 'comment' and m.body and m.body.strip()
         )
-        
+
         if not recent_notes:
             return {'has_note': False}
-        
+
         recent_note = recent_notes[0]
-        
+
         # Clean HTML tags from body
         clean_body = re.sub(r'<[^>]+>', '', recent_note.body or '').strip()
-        
+
         # Truncate if too long
         if len(clean_body) > 47:
             clean_body = clean_body[:47] + '...'
-        
+
         # Format date
         date_str = ''
         if recent_note.date:
             date_str = recent_note.date.strftime('%m/%d %H:%M')
-        
+
         return {
             'has_note': True,
             'author_name': recent_note.author_id.name or 'System',
@@ -2517,37 +2586,38 @@ class PortalEmployee(http.Controller):
     def _calculate_dashboard_kpis(self, leads, today):
         """Calculate KPIs for the enhanced CRM dashboard"""
         from datetime import timedelta
-        
+
         total_leads = len(leads)
-        
+
         # Count leads by stage
         new_leads = leads.filtered(lambda l: l.stage_id.name in ['New', 'Qualification'] if l.stage_id else False)
-        in_progress_leads = leads.filtered(lambda l: l.stage_id.name in ['Qualified', 'Proposition'] if l.stage_id else False)
+        in_progress_leads = leads.filtered(
+            lambda l: l.stage_id.name in ['Qualified', 'Proposition'] if l.stage_id else False)
         won_leads = leads.filtered(lambda l: l.stage_id.name == 'Won' if l.stage_id else False)
-        
+
         # Calculate revenue
         total_revenue = sum(leads.mapped('expected_revenue'))
         won_revenue = sum(won_leads.mapped('expected_revenue'))
-        
+
         # Activity metrics
         overdue_activities = 0
         today_activities = 0
-        
+
         for lead in leads:
             for activity in lead.activity_ids:
                 if activity.date_deadline:
                     activity_date = activity.date_deadline
                     if hasattr(activity_date, 'date'):
                         activity_date = activity_date.date()
-                    
+
                     if activity_date < today:
                         overdue_activities += 1
                     elif activity_date == today:
                         today_activities += 1
-        
+
         # Conversion rate (won leads / total leads)
         conversion_rate = (len(won_leads) / total_leads * 100) if total_leads > 0 else 0
-        
+
         return {
             'total_leads': total_leads,
             'new_leads': len(new_leads),
@@ -2566,10 +2636,10 @@ class PortalEmployee(http.Controller):
         if request.httprequest.method == 'POST':
             # Process partner_id (customer) - handle creation of new customers
             partner_id = _process_partner_field(post.get('partner_id'), 'partner_id')
-            
+
             # Process point_of_contact_id - handle creation of new contacts
             point_of_contact_id = _process_partner_field(post.get('point_of_contact_id'), 'point_of_contact_id')
-            
+
             vals = {
                 'name': post.get('name'),
                 'partner_id': partner_id,
@@ -2596,7 +2666,7 @@ class PortalEmployee(http.Controller):
             # Always update tag_ids, even if empty (to allow clearing all tags)
             lead.sudo().write({'tag_ids': [(6, 0, tag_id_list)]})
             return request.redirect(CRM_REDIRECT_URL)
-        partners = request.env['res.partner'].sudo().search([('active', '=', True),('is_company', '=', True)])
+        partners = request.env['res.partner'].sudo().search([('active', '=', True), ('is_company', '=', True)])
         # Get contacts for point of contact field
         contacts = request.env['res.partner'].sudo().search([('is_company', '=', False)])
         stages = request.env['crm.stage'].sudo().search([])
@@ -2631,7 +2701,7 @@ class PortalEmployee(http.Controller):
         if request.httprequest.method == 'POST':
             # Process point_of_contact_id - handle creation of new contacts
             point_of_contact_id = _process_partner_field(post.get('point_of_contact_id'), 'point_of_contact_id')
-            
+
             vals = {
                 'name': post.get('name'),
                 'email_from': post.get('email_from'),
@@ -2687,7 +2757,9 @@ class PortalEmployee(http.Controller):
         lead_types = request.env['crm.lead.type'].sudo().search([('active', '=', True)])
         employees = request.env['hr.employee'].sudo().search([('active', '=', True)])
         activity_types = request.env['mail.activity.type'].sudo().search([])
-        default_activity_type_id = request.env.ref('mail.mail_activity_data_todo').id if request.env.ref('mail.mail_activity_data_todo', raise_if_not_found=False) else (activity_types and activity_types[0].id or False)
+        default_activity_type_id = request.env.ref('mail.mail_activity_data_todo').id if request.env.ref(
+            'mail.mail_activity_data_todo', raise_if_not_found=False) else (
+                    activity_types and activity_types[0].id or False)
         return request.render('employee_self_service_portal.portal_employee_crm_edit', {
             'lead': lead,
             'stages': stages,
@@ -2729,7 +2801,8 @@ class PortalEmployee(http.Controller):
                 files = [file]
         _logger.info('ESS Portal: Number of files in attachments: %s', len(files))
         for f in files:
-            _logger.info('ESS Portal: File received: filename=%s content_type=%s', getattr(f, 'filename', None), getattr(f, 'content_type', None))
+            _logger.info('ESS Portal: File received: filename=%s content_type=%s', getattr(f, 'filename', None),
+                         getattr(f, 'content_type', None))
         # Allow log note with or without text, as long as there are files or a note
         if lead and (note or files) and lead.user_id.id == user.id:
             msg = lead.message_post(body=note or '', message_type='comment', author_id=user.partner_id.id)
@@ -2755,7 +2828,8 @@ class PortalEmployee(http.Controller):
                         'public': True,
                     })
                     attachment_ids.append(attachment.id)
-                    _logger.info('ESS Portal: Created attachment id=%s name=%s res_model=%s res_id=%s', attachment.id, attachment.name, attachment.res_model, attachment.res_id)
+                    _logger.info('ESS Portal: Created attachment id=%s name=%s res_model=%s res_id=%s', attachment.id,
+                                 attachment.name, attachment.res_model, attachment.res_id)
             if attachment_ids:
                 msg.sudo().write({'attachment_ids': [(4, att_id) for att_id in attachment_ids]})
         return request.redirect(f'/my/employee/crm/edit/{lead_id}')
@@ -2794,7 +2868,7 @@ class PortalEmployee(http.Controller):
             if note:
                 msg += f"<br/>Note: {html.escape(note)}"
             lead.message_post(body=msg)
-        
+
         # Check if request came from modal (via referer or special parameter)
         referer = request.httprequest.environ.get('HTTP_REFERER', '')
         if 'activity_modal' in referer or post.get('from_modal'):
@@ -2802,7 +2876,8 @@ class PortalEmployee(http.Controller):
         else:
             return request.redirect(f'/my/employee/crm/edit/{lead_id}')
 
-    @http.route('/my/employee/crm/activity_done/<int:activity_id>', type='http', auth='user', website=True, methods=['POST'])
+    @http.route('/my/employee/crm/activity_done/<int:activity_id>', type='http', auth='user', website=True,
+                methods=['POST'])
     def portal_employee_crm_activity_done(self, activity_id, **post):
         activity = request.env['mail.activity'].sudo().browse(activity_id)
         lead_id = int(request.params.get('lead_id', 0))
@@ -2814,7 +2889,7 @@ class PortalEmployee(http.Controller):
                 activity.action_done()
             except Exception:
                 pass
-        
+
         # Check if request came from modal
         referer = request.httprequest.environ.get('HTTP_REFERER', '')
         if 'activity_modal' in referer or post.get('from_modal'):
@@ -2822,13 +2897,15 @@ class PortalEmployee(http.Controller):
         else:
             return request.redirect(f'/my/employee/crm/edit/{lead_id}')
 
-    @http.route('/my/employee/crm/activity_edit/<int:activity_id>', type='http', auth='user', website=True, methods=['GET', 'POST'])
+    @http.route('/my/employee/crm/activity_edit/<int:activity_id>', type='http', auth='user', website=True,
+                methods=['GET', 'POST'])
     def portal_employee_crm_activity_edit(self, activity_id, **post):
         activity = request.env['mail.activity'].sudo().browse(activity_id)
         lead_id = int(request.params.get('lead_id', 0))
         lead = request.env['crm.lead'].sudo().browse(lead_id)
         user = request.env.user
-        if not (activity and lead and lead.user_id.id == user.id and activity.res_model == 'crm.lead' and activity.res_id == lead.id):
+        if not (
+                activity and lead and lead.user_id.id == user.id and activity.res_model == 'crm.lead' and activity.res_id == lead.id):
             return request.redirect(f'/my/employee/crm/edit/{lead_id}')
         if request.httprequest.method == 'POST':
             vals = {}
@@ -2862,7 +2939,8 @@ class PortalEmployee(http.Controller):
             'salespersons': salespersons,
         })
 
-    @http.route('/my/employee/crm/activity_delete/<int:activity_id>', type='http', auth='user', website=True, methods=['POST'])
+    @http.route('/my/employee/crm/activity_delete/<int:activity_id>', type='http', auth='user', website=True,
+                methods=['POST'])
     def portal_employee_crm_activity_delete(self, activity_id, **post):
         activity = request.env['mail.activity'].sudo().browse(activity_id)
         lead_id = int(request.params.get('lead_id', 0))
@@ -2882,7 +2960,7 @@ class PortalEmployee(http.Controller):
                 lead.message_post(body=msg)
             except Exception:
                 pass
-        
+
         # Check if request came from modal
         referer = request.httprequest.environ.get('HTTP_REFERER', '')
         if 'activity_modal' in referer or post.get('from_modal'):
@@ -2895,20 +2973,22 @@ class PortalEmployee(http.Controller):
         """Route to handle activity modal content loading"""
         lead = request.env['crm.lead'].sudo().browse(lead_id)
         user = request.env.user
-        
+
         # Security check - only allow access to own leads
         if not lead or lead.user_id.id != user.id:
             return '<div class="alert alert-danger">Access denied</div>'
-        
+
         # Common data for both views
         activity_types = request.env['mail.activity.type'].sudo().search([])
-        default_activity_type_id = request.env.ref('mail.mail_activity_data_todo').id if request.env.ref('mail.mail_activity_data_todo', raise_if_not_found=False) else (activity_types and activity_types[0].id or False)
+        default_activity_type_id = request.env.ref('mail.mail_activity_data_todo').id if request.env.ref(
+            'mail.mail_activity_data_todo', raise_if_not_found=False) else (
+                    activity_types and activity_types[0].id or False)
         salespersons = request.env['res.users'].sudo().search([('active', '=', True)])
-        
+
         # Get today's date for comparison
         from datetime import date
         today = date.today()
-        
+
         context = {
             'lead': lead,
             'activity_types': activity_types,
@@ -2916,7 +2996,7 @@ class PortalEmployee(http.Controller):
             'salespersons': salespersons,
             'today': today,
         }
-        
+
         if action == 'view':
             return request.render('employee_self_service_portal.portal_employee_crm_activity_modal_view', context)
         elif action == 'add':
@@ -3051,23 +3131,23 @@ class PortalEmployee(http.Controller):
         import logging
         _logger = logging.getLogger(__name__)
         errors = []
-        
+
         # Get employee for company-specific validations
         employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
         currency_symbol = employee.company_id.currency_id.symbol or '$'
-        
+
         # Required field validation
         required_fields = {
             'name': 'Description',
-            'date': 'Date', 
+            'date': 'Date',
             'total_amount': 'Amount',
             'category_id': 'Category'
         }
-        
+
         for field, label in required_fields.items():
             if not post.get(field):
                 errors.append(f'{label} is required.')
-        
+
         # Amount validation
         try:
             amount = float(post.get('total_amount', 0))
@@ -3077,7 +3157,7 @@ class PortalEmployee(http.Controller):
                 errors.append(f'Amount cannot exceed {currency_symbol}50,000.')
         except (ValueError, TypeError):
             errors.append('Amount must be a valid number.')
-        
+
         # Date validation
         if post.get('date'):
             try:
@@ -3088,7 +3168,7 @@ class PortalEmployee(http.Controller):
                     errors.append('Expense date cannot be in the future.')
             except ValueError:
                 errors.append('Invalid date format.')
-        
+
         # Duplicate expense detection
         if post.get('date') and post.get('total_amount') and post.get('category_id'):
             try:
@@ -3100,14 +3180,15 @@ class PortalEmployee(http.Controller):
                     ('product_id', '=', int(post.get('category_id'))),
                     ('sheet_id.state', '!=', 'cancel')  # Exclude withdrawn expenses
                 ], limit=1)
-                
+
                 if existing_expense:
-                    errors.append('A similar expense already exists for the same date, amount, and category. Please verify this is not a duplicate.')
+                    errors.append(
+                        'A similar expense already exists for the same date, amount, and category. Please verify this is not a duplicate.')
                     _logger.warning("Potential duplicate expense detected for employee %s", employee.name)
-                    
+
             except Exception as duplicate_check_error:
                 _logger.warning("Error checking for duplicate expenses: %s", str(duplicate_check_error))
-        
+
         # File validation
         attachment = request.httprequest.files.get('attachment')
         if attachment and attachment.filename:
@@ -3116,28 +3197,28 @@ class PortalEmployee(http.Controller):
             if len(file_content) > 10 * 1024 * 1024:
                 errors.append('File size cannot exceed 10MB.')
             attachment.seek(0)  # Reset file pointer
-            
+
             # Check file type
             allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf']
             if attachment.content_type not in allowed_types:
                 errors.append('Only JPG, PNG, and PDF files are allowed.')
-        
+
         return errors
-    
+
     def _get_or_create_expense_sheet(self, employee, expense):
         """Get existing draft sheet or create new one"""
         import logging
         _logger = logging.getLogger(__name__)
-        
+
         company_id = employee.company_id.id
-        
+
         # Find existing draft sheet in the same company
         sheet = request.env['hr.expense.sheet'].sudo().search([
             ('employee_id', '=', employee.id),
             ('company_id', '=', company_id),
             ('state', '=', 'draft')
         ], limit=1)
-        
+
         if not sheet:
             # Create new sheet with company and currency info
             sheet_vals = {
@@ -3153,7 +3234,7 @@ class PortalEmployee(http.Controller):
             # Add expense to existing sheet
             sheet.write({'expense_line_ids': [(4, expense.id)]})
             _logger.info("Added expense to existing sheet ID: %d", sheet.id)
-        
+
         # Submit the sheet if it has expenses
         if sheet.state == 'draft' and sheet.expense_line_ids:
             try:
@@ -3161,7 +3242,7 @@ class PortalEmployee(http.Controller):
                 _logger.info("Successfully submitted expense sheet ID: %d", sheet.id)
             except Exception as submit_error:
                 _logger.warning("Failed to auto-submit sheet: %s", str(submit_error))
-        
+
         return sheet
 
     # @http.route(MY_EMPLOYEE_URL + '/expenses/withdraw/<int:expense_id>', type='http', auth='user', website=True, methods=['POST'])
@@ -3221,24 +3302,24 @@ class PortalEmployee(http.Controller):
         """Portal route for viewing payslip history - Only confirmed payslips"""
         import logging
         _logger = logging.getLogger(__name__)
-        
+
         employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
         if not employee:
             return request.redirect(MY_EMPLOYEE_URL)
-            
+
         # Only show confirmed payslips - no status filter needed
         domain = [
             ('employee_id', '=', employee.id),
-            ('state', 'in', ['validated','done', 'paid'])
+            ('state', 'in', ['validated', 'done', 'paid'])
         ]
-        
+
         # Only month/year filtering allowed
         month = kwargs.get('month')
         year = kwargs.get('year')
-        
+
         # Log filter parameters for debugging
         _logger.info("Payslip filters - month: %s, year: %s", month, year)
-        
+
         if month and year:
             try:
                 # Filter by date range for selected month/year
@@ -3247,15 +3328,16 @@ class PortalEmployee(http.Controller):
                 start_date = datetime(int(year), int(month), 1)
                 end_date = datetime(int(year), int(month), monthrange(int(year), int(month))[1], 23, 59, 59)
                 domain += [('date_from', '>=', start_date.strftime('%Y-%m-%d')),
-                          ('date_to', '<=', end_date.strftime('%Y-%m-%d'))]
-                _logger.info("Date filter applied: %s to %s", start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
+                           ('date_to', '<=', end_date.strftime('%Y-%m-%d'))]
+                _logger.info("Date filter applied: %s to %s", start_date.strftime('%Y-%m-%d'),
+                             end_date.strftime('%Y-%m-%d'))
             except (ValueError, TypeError) as e:
                 _logger.warning("Invalid date filter values - month: %s, year: %s, error: %s", month, year, e)
-        
+
         _logger.info("Final domain: %s", domain)
         payslips = request.env['hr.payslip'].sudo().search(domain, order='date_from desc, date_to desc')
         _logger.info("Found %d confirmed payslips", len(payslips))
-        
+
         # For dropdowns - get available years and months from payslips
         from datetime import datetime
         current_year = datetime.now().year
@@ -3263,7 +3345,7 @@ class PortalEmployee(http.Controller):
         months = [
             {'value': i, 'name': datetime(2000, i, 1).strftime('%B')} for i in range(1, 13)
         ]
-        
+
         return request.render('employee_self_service_portal.portal_payslip', {
             'payslips': payslips,
             'employee': employee,
@@ -3279,148 +3361,349 @@ class PortalEmployee(http.Controller):
         import logging
         import base64
         _logger = logging.getLogger(__name__)
-    
+
         try:
             payslip = request.env['hr.payslip'].sudo().browse(payslip_id)
-            employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.uid)], limit=1)
-    
-            # Security check
+            employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
+
+            # Security check - only allow access to own payslips
             if not payslip.exists() or not employee or payslip.employee_id.id != employee.id:
-                _logger.warning("Unauthorized payslip access attempt by user %s for payslip %s", request.uid,
+                _logger.warning("Unauthorized payslip access attempt by user %s for payslip %s", request.env.uid,
                                 payslip_id)
                 return request.redirect(MY_EMPLOYEE_URL + '/payslips?error=access_denied')
-    
+
+            # Only allow download of confirmed payslips
             if payslip.state not in ['validated', 'done', 'paid']:
+                _logger.warning("Download attempt for unconfirmed payslip %s by user %s", payslip_id, request.env.uid)
                 return request.redirect(MY_EMPLOYEE_URL + '/payslips?error=not_confirmed')
-    
+
+            _logger.info("Attempting to download payslip %s for user %s", payslip_id, request.env.uid)
+
+            # Try to find the payslip report - multiple approaches with detailed logging
             report_ref = None
-    
+
+            # Method 1: Try standard hr_payroll reports with sudo()
             report_names = [
                 'hr_payroll.action_report_payslip',
                 'hr_payroll.payslip_report',
                 'hr_payroll.report_payslip',
                 'hr_payroll.report_payslip_details'
             ]
-    
+
             for report_name in report_names:
-                report_ref = request.env.ref(report_name, raise_if_not_found=False)
-                if report_ref:
-                    break
-    
+                try:
+                    report_ref = request.env.ref(report_name, raise_if_not_found=False)
+                    if report_ref:
+                        _logger.info("Found report reference: %s", report_name)
+                        # Test if we can access this report
+                        try:
+                            report_sudo = report_ref.sudo()
+                            # Try a quick test to see if this report can be used
+                            if hasattr(report_sudo, 'report_name') or hasattr(report_sudo, '_render_qweb_pdf'):
+                                _logger.info("Report %s is accessible and usable", report_name)
+                                break
+                            else:
+                                _logger.warning("Report %s found but may not be usable", report_name)
+                                report_ref = None
+                        except Exception as access_test:
+                            _logger.warning("Report %s access test failed: %s", report_name, str(access_test))
+                            report_ref = None
+                            continue
+                    else:
+                        _logger.debug("Report %s not found", report_name)
+                except Exception as ref_error:
+                    _logger.debug("Error checking report %s: %s", report_name, str(ref_error))
+                    continue
+
+            # Method 2: Search for payslip reports if standard ones not found
             if not report_ref:
-                reports = request.env['ir.actions.report'].sudo().search([
-                    ('model', '=', 'hr.payslip'),
-                    ('report_type', '=', 'qweb-pdf')
-                ])
-                report_ref = reports[:1]
-    
+                _logger.info("Standard reports not found, searching for any payslip reports...")
+                try:
+                    reports = request.env['ir.actions.report'].sudo().search([
+                        ('model', '=', 'hr.payslip'),
+                        ('report_type', '=', 'qweb-pdf')
+                    ])
+                    _logger.info("Found %d payslip reports in system", len(reports))
+
+                    for report in reports:
+                        try:
+                            # Test each report
+                            _logger.info("Testing report: %s (ID: %d)", report.sudo().name, report.id)
+                            report_ref = report
+                            break
+                        except Exception as test_error:
+                            _logger.warning("Report test failed: %s", str(test_error))
+                            continue
+
+                except Exception as search_error:
+                    _logger.error("Error searching for reports: %s", str(search_error))
+
             if not report_ref:
+                _logger.error("No payslip report found for model hr.payslip")
                 return request.redirect(MY_EMPLOYEE_URL + '/payslips?error=report_not_found')
-    
+
+            # Generate PDF using the found report - use sudo() for report access
+            _logger.info("Attempting to generate PDF with found report (ID: %d)", report_ref.id)
+
+            # Use the correct method based on Odoo version with sudo()
             pdf_content = None
-    
             try:
                 report_sudo = report_ref.sudo()
-                pdf_content, _ = report_sudo._render_qweb_pdf(report_sudo.report_name, payslip.ids)
-            except Exception:
+
+                # Use the standard Odoo report rendering approach
+                _logger.info("Using standard report rendering with payslip ID: %d", payslip.id)
+
+                # Method 1: Try _render_qweb_pdf with proper context and parameters
                 try:
-                    pdf_content, _ = report_sudo.render_qweb_pdf(payslip.ids)
-                except Exception:
+                    # Use the correct Odoo 18 API for report rendering
+                    # _render_qweb_pdf expects (report_ref, res_ids, data=None)
+                    pdf_content, _ = report_sudo._render_qweb_pdf(report_sudo.report_name, payslip.ids)
+                    _logger.info("Successfully used _render_qweb_pdf method")
+                except Exception as method_error:
+                    _logger.warning("_render_qweb_pdf failed: %s", str(method_error))
+
+                    # Method 2: Try with render_qweb_pdf (if available)
+                    try:
+                        # Try render_qweb_pdf method
+                        pdf_content, _ = report_sudo.render_qweb_pdf(payslip.ids)
+                        _logger.info("Successfully used render_qweb_pdf method")
+                    except Exception as method_error2:
+                        _logger.warning("render_qweb_pdf method failed: %s", str(method_error2))
+
+                        # Method 3: Try with _render method (with proper parameters)
+                        try:
+                            # Use _render with proper report_name and res_ids parameters
+                            pdf_content, _ = report_sudo._render(report_sudo.report_name, payslip.ids)
+                            _logger.info("Successfully used _render method")
+                        except Exception as method_error3:
+                            _logger.error("All render methods failed: %s", str(method_error3))
+                            raise Exception("All report render methods failed")
+
+                if pdf_content and len(pdf_content) > 1000:
+                    _logger.info("Successfully generated PDF using Odoo report, size: %d bytes", len(pdf_content))
+                else:
+                    _logger.warning("PDF content is empty or too small: %s bytes",
+                                    len(pdf_content) if pdf_content else 0)
                     pdf_content = None
-    
+
+            except Exception as render_error:
+                _logger.error("PDF rendering failed with Odoo report: %s", str(render_error))
+                pdf_content = None
+
+            # Only use fallback if we couldn't get a valid PDF from Odoo reports
+            if not pdf_content or len(pdf_content) < 100:
+                _logger.warning("Odoo report failed or returned invalid PDF, using fallback method")
+
+                # Fallback: Create a simple HTML-to-PDF conversion
+                _logger.info("Attempting simple PDF generation as fallback")
+                _logger.info("Attempting simple PDF generation as fallback")
+                try:
+                    # Create simple HTML content
+                    html_content = f"""
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="utf-8">
+                        <title>Payslip {payslip.number or payslip.id}</title>
+                        <style>
+                            body {{ font-family: Arial, sans-serif; margin: 20px; }}
+                            .header {{ text-align: center; margin-bottom: 30px; }}
+                            .info {{ margin-bottom: 20px; }}
+                            .line {{ margin: 5px 0; }}
+                            table {{ width: 100%; border-collapse: collapse; margin-top: 20px; }}
+                            th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
+                            th {{ background-color: #f2f2f2; }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class="header">
+                            <h1>PAYSLIP</h1>
+                            <h2>{payslip.number or payslip.id}</h2>
+                        </div>
+
+                        <div class="info">
+                            <div class="line"><strong>Employee:</strong> {payslip.employee_id.name}</div>
+                            <div class="line"><strong>Period:</strong> {payslip.date_from} to {payslip.date_to}</div>
+                            <div class="line"><strong>Status:</strong> {dict(payslip._fields['state'].selection).get(payslip.state, payslip.state)}</div>
+                        </div>
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    """
+
+                    # Add payslip lines
+                    if payslip.line_ids:
+                        for line in payslip.line_ids:
+                            html_content += f"""
+                                <tr>
+                                    <td>{line.name}</td>
+                                    <td>{line.total:.2f}</td>
+                                </tr>
+                            """
+                    else:
+                        html_content += "<tr><td colspan='2'>No payslip details available</td></tr>"
+
+                    html_content += """
+                            </tbody>
+                        </table>
+                    </body>
+                    </html>
+                    """
+
+                    # Use wkhtmltopdf if available, otherwise create simple text-based PDF
+                    try:
+                        import subprocess
+                        import tempfile
+                        import os
+
+                        # Create temporary HTML file
+                        with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False) as html_file:
+                            html_file.write(html_content)
+                            html_file_path = html_file.name
+
+                        # Create temporary PDF file
+                        pdf_file_path = html_file_path.replace('.html', '.pdf')
+
+                        # Try wkhtmltopdf
+                        result = subprocess.run([
+                            'wkhtmltopdf', '--page-size', 'A4', '--orientation', 'Portrait',
+                            html_file_path, pdf_file_path
+                        ], capture_output=True, timeout=30)
+
+                        if result.returncode == 0 and os.path.exists(pdf_file_path):
+                            with open(pdf_file_path, 'rb') as pdf_file:
+                                pdf_content = pdf_file.read()
+                            _logger.info("Successfully created PDF using wkhtmltopdf")
+                        else:
+                            raise Exception("wkhtmltopdf failed")
+
+                        # Cleanup
+                        os.unlink(html_file_path)
+                        os.unlink(pdf_file_path)
+
+                    except Exception:
+                        # Final fallback: Create a very simple text-based response
+                        _logger.warning("wkhtmltopdf not available, creating simple text response")
+                        simple_content = f"""
+PAYSLIP: {payslip.number or payslip.id}
+Employee: {payslip.employee_id.name}
+Period: {payslip.date_from} to {payslip.date_to}
+Status: {dict(payslip._fields['state'].selection).get(payslip.state, payslip.state)}
+
+Payslip Details:
+"""
+                        if payslip.line_ids:
+                            for line in payslip.line_ids:
+                                simple_content += f"{line.name}: {line.total:.2f}\n"
+                        else:
+                            simple_content += "No payslip details available\n"
+
+                        # Return as text file instead of PDF
+                        safe_number = (payslip.number or str(payslip.id)).replace('/', '_').replace('\\', '_')
+                        safe_date = payslip.date_from.strftime('%Y-%m') if payslip.date_from else 'unknown'
+                        filename = f"Payslip_{safe_number}_{safe_date}.txt"
+
+                        headers = [
+                            ('Content-Type', 'text/plain'),
+                            ('Content-Length', len(simple_content.encode('utf-8'))),
+                            ('Content-Disposition', f'attachment; filename="{filename}"'),
+                            ('Cache-Control', 'no-cache'),
+                            ('Pragma', 'no-cache')
+                        ]
+
+                        _logger.info("Payslip %s downloaded as text file by user %s", payslip_id, request.env.uid)
+                        return request.make_response(simple_content.encode('utf-8'), headers=headers)
+
+                except Exception as fallback_error:
+                    _logger.error("Fallback PDF generation also failed: %s", str(fallback_error))
+                    return request.redirect(MY_EMPLOYEE_URL + '/payslips?error=render_failed')
+
             if not pdf_content:
-                return request.redirect(MY_EMPLOYEE_URL + '/payslips?error=render_failed')
-    
-            # ================= PASSWORD PROTECTION ADDED HERE =================
-            try:
-    
-    
-                password = None
-                if payslip.employee_id.birthday:
-                    password = payslip.employee_id.birthday.strftime("%d%m%Y")
-    
-                if password:
-                    pdf_stream = io.BytesIO(pdf_content)
-                    output_stream = io.BytesIO()
-    
-                    with pikepdf.open(pdf_stream) as pdf:
-                        pdf.save(
-                            output_stream,
-                            encryption=pikepdf.Encryption(
-                                user=password,
-                                owner=password,
-                                R=4
-                            )
-                        )
-    
-                    pdf_content = output_stream.getvalue()
-    
-            except Exception as enc_error:
-                _logger.error("PDF encryption failed: %s", str(enc_error))
-            # =================================================================
-    
+                _logger.error("All PDF generation methods failed - no content generated")
+                return request.redirect(MY_EMPLOYEE_URL + '/payslips?error=empty_pdf')
+
+            # Log which method was used
+            if len(pdf_content) > 1000:
+                _logger.info("Successfully generated PDF - likely from Odoo report system (%d bytes)", len(pdf_content))
+            else:
+                _logger.info("Generated small PDF - likely from fallback method (%d bytes)", len(pdf_content))
+
+            # Create safe filename
             safe_number = (payslip.name or str(payslip.id)).replace('/', '_').replace('\\', '_')
             safe_date = payslip.date_from.strftime('%Y-%m') if payslip.date_from else 'unknown'
-            filename = f"{payslip.employee_id.name} - {payslip.date_from.strftime('%B %Y')}.pdf"
-    
+            filename = f"Payslip_{safe_number}_{safe_date}.pdf"
+
+            # Create response with PDF
             pdfhttpheaders = [
                 ('Content-Type', 'application/pdf'),
                 ('Content-Length', len(pdf_content)),
                 ('Content-Disposition', f'attachment; filename="{filename}"'),
+                ('Cache-Control', 'no-cache'),
+                ('Pragma', 'no-cache')
             ]
-    
+
+            _logger.info("Payslip %s downloaded successfully by user %s, file size: %d bytes",
+                         payslip_id, request.env.uid, len(pdf_content))
+
             return request.make_response(pdf_content, headers=pdfhttpheaders)
-    
+
         except Exception as e:
+            _logger.error("Unexpected error in payslip download for payslip %s: %s", payslip_id, str(e))
             import traceback
-            _logger.error("Error: %s", traceback.format_exc())
+            _logger.error("Full traceback: %s", traceback.format_exc())
             return request.redirect(MY_EMPLOYEE_URL + '/payslips?error=download_failed')
 
-     
     @http.route(MY_EMPLOYEE_URL + '/payslips/view/<int:payslip_id>', type='http', auth='user', website=True)
     def portal_payslip_view(self, payslip_id, **kwargs):
         """View payslip details"""
         payslip = request.env['hr.payslip'].sudo().browse(payslip_id)
         employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
-        
+
         # Security check - only allow access to own payslips
         if not payslip or not employee or payslip.employee_id.id != employee.id:
             return request.redirect(MY_EMPLOYEE_URL + '/payslips')
-            
+
         return request.render('employee_self_service_portal.portal_payslip_view', {
             'payslip': payslip,
             'employee': employee,
         })
 
-    @http.route('/my/employee/crm/update_stage/<int:lead_id>', type='http', auth='user', website=True, methods=['POST'], csrf=True)
+    @http.route('/my/employee/crm/update_stage/<int:lead_id>', type='http', auth='user', website=True, methods=['POST'],
+                csrf=True)
     def portal_employee_crm_update_stage(self, lead_id, **post):
         """Route to handle stage updates via AJAX"""
         import json
-        
+
         lead = request.env['crm.lead'].sudo().browse(lead_id)
         user = request.env.user
-        
+
         # Security check - only allow access to own leads
         if not lead or lead.user_id.id != user.id:
             response = json.dumps({'success': False, 'error': 'Access denied'})
             return request.make_response(response, headers={'Content-Type': 'application/json'})
-        
+
         stage_id = post.get('stage_id')
         if not stage_id:
             response = json.dumps({'success': False, 'error': 'Stage ID is required'})
             return request.make_response(response, headers={'Content-Type': 'application/json'})
-        
+
         try:
             stage_id = int(stage_id)
             stage = request.env['crm.stage'].sudo().browse(stage_id)
             if not stage.exists():
                 response = json.dumps({'success': False, 'error': 'Invalid stage'})
                 return request.make_response(response, headers={'Content-Type': 'application/json'})
-            
+
             lead.write({'stage_id': stage_id})
             response = json.dumps({'success': True, 'stage_name': stage.name})
             return request.make_response(response, headers={'Content-Type': 'application/json'})
-            
+
         except Exception as e:
             _logger.error("Error updating lead stage: %s", str(e))
             response = json.dumps({'success': False, 'error': 'Update failed'})
@@ -3431,43 +3714,44 @@ class PortalEmployee(http.Controller):
         """API endpoint to get dashboard KPIs"""
         import json
         from datetime import date
-        
+
         user = request.env.user
-        
+
         try:
             # Get all user leads
             all_user_leads = request.env['crm.lead'].sudo().search([('user_id', '=', user.id)])
             today = date.today()
-            
+
             # Calculate KPIs
             kpis = self._calculate_dashboard_kpis(all_user_leads, today)
-            
+
             response = json.dumps({'success': True, 'kpis': kpis})
             return request.make_response(response, headers={'Content-Type': 'application/json'})
-            
+
         except Exception as e:
             _logger.error("Error fetching KPIs: %s", str(e))
             response = json.dumps({'success': False, 'error': 'Failed to fetch KPIs'})
             return request.make_response(response, headers={'Content-Type': 'application/json'})
 
-    @http.route('/my/employee/crm/api/quick_action', type='http', auth='user', website=True, methods=['POST'], csrf=True)
+    @http.route('/my/employee/crm/api/quick_action', type='http', auth='user', website=True, methods=['POST'],
+                csrf=True)
     def portal_employee_crm_quick_action(self, **post):
         """API endpoint for quick actions on leads"""
         import json
-        
+
         user = request.env.user
         action = post.get('action')
         lead_id = post.get('lead_id')
-        
+
         try:
             lead_id = int(lead_id)
             lead = request.env['crm.lead'].sudo().browse(lead_id)
-            
+
             # Security check
             if not lead or lead.user_id.id != user.id:
                 response = json.dumps({'success': False, 'error': 'Access denied'})
                 return request.make_response(response, headers={'Content-Type': 'application/json'})
-            
+
             if action == 'mark_won':
                 # Find "Won" stage
                 won_stage = request.env['crm.stage'].sudo().search([('name', '=ilike', 'won')], limit=1)
@@ -3476,7 +3760,7 @@ class PortalEmployee(http.Controller):
                     response = json.dumps({'success': True, 'message': 'Lead marked as won'})
                 else:
                     response = json.dumps({'success': False, 'error': 'Won stage not found'})
-                    
+
             elif action == 'mark_lost':
                 # Find "Lost" stage or set as lost
                 lost_stage = request.env['crm.stage'].sudo().search([('name', '=ilike', 'lost')], limit=1)
@@ -3486,13 +3770,13 @@ class PortalEmployee(http.Controller):
                     # Use Odoo's built-in lost functionality
                     lead.write({'active': False})
                 response = json.dumps({'success': True, 'message': 'Lead marked as lost'})
-                
+
             elif action == 'schedule_call':
                 # Create a call activity
                 activity_type = request.env['mail.activity.type'].sudo().search([('name', '=ilike', 'call')], limit=1)
                 if not activity_type:
                     activity_type = request.env['mail.activity.type'].sudo().search([], limit=1)
-                    
+
                 if activity_type:
                     from datetime import date, timedelta
                     request.env['mail.activity'].sudo().create({
@@ -3506,7 +3790,7 @@ class PortalEmployee(http.Controller):
                     response = json.dumps({'success': True, 'message': 'Call scheduled for tomorrow'})
                 else:
                     response = json.dumps({'success': False, 'error': 'Could not create activity'})
-                    
+
             elif action == 'add_note':
                 note_content = post.get('note_content', '')
                 if note_content:
@@ -3514,12 +3798,12 @@ class PortalEmployee(http.Controller):
                     response = json.dumps({'success': True, 'message': 'Note added'})
                 else:
                     response = json.dumps({'success': False, 'error': 'Note content required'})
-                    
+
             else:
                 response = json.dumps({'success': False, 'error': 'Unknown action'})
-                
+
             return request.make_response(response, headers={'Content-Type': 'application/json'})
-            
+
         except Exception as e:
             _logger.error("Error in quick action: %s", str(e))
             response = json.dumps({'success': False, 'error': 'Action failed'})
@@ -3530,11 +3814,11 @@ class PortalEmployee(http.Controller):
         """Route to handle notes modal content loading"""
         lead = request.env['crm.lead'].sudo().browse(lead_id)
         user = request.env.user
-        
+
         # Security check - only allow access to own leads
         if not lead or lead.user_id.id != user.id:
             return '<div class="alert alert-danger">Access denied</div>'
-        
+
         # Get all log notes for this lead
         notes = request.env['mail.message'].sudo().search([
             ('model', '=', 'crm.lead'),
@@ -3542,10 +3826,10 @@ class PortalEmployee(http.Controller):
             ('message_type', '=', 'comment'),
             ('subtype_id', '=', request.env.ref('mail.mt_note').id)
         ], order='date desc')
-        
+
         context = {
             'lead': lead,
             'notes': notes,
         }
-        
+
         return request.render('employee_self_service_portal.portal_employee_crm_notes_modal', context)

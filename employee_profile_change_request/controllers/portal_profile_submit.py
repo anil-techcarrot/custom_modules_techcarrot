@@ -76,6 +76,8 @@ class EmployeePortalProfileSubmit(http.Controller):
         countries = request.env['res.country'].sudo().search(
             [], order='name'
         )
+
+
         return request.render(
             'employee_self_service_portal'
             '.portal_employee_profile_personal',

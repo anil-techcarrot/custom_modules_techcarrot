@@ -53,7 +53,8 @@
                                     <t t-esc="employee.x_experience"/>
                                 </textarea>
                                 <small class="text-muted">
-                                    <span id="experienceWordCount">0</span> words
+                                    <span id="experienceWordCount">0</span>
+                                    words
                                 </small>
                             </div>
                         </div>
@@ -136,10 +137,38 @@
                     <div class="card shadow-sm">
                         <div class="card-body text-center">
                             <div id="formActions" style="display: none;">
+
+                                <!-- ✅ DISCLAIMER — only addition -->
+                                <div class="alert alert-warning text-start mb-3"
+                                     style="border-left: 4px solid #ffc107; border-radius: 6px;">
+                                    <div class="form-check d-flex align-items-start gap-2">
+                                        <input type="checkbox"
+                                               id="expDisclaimer"
+                                               class="form-check-input mt-1"
+                                               onchange="toggleExpSaveBtn()"/>
+                                        <label class="form-check-label" for="expDisclaimer"
+                                               style="font-size:0.875rem;">
+                                            <strong>Employee Disclaimer</strong>
+                                            – I, hereby confirm that the
+                                            information updated by me is accurate and complete to the best of my
+                                            knowledge. I agree to keep my data updated at all times and consent
+                                            to the collection and use of such information, for employment
+                                            administration and legal compliances. I acknowledge that any false or
+                                            incomplete information may lead to actions in accordance with company
+                                            policies and applicable laws.
+                                        </label>
+                                    </div>
+                                </div>
+
                                 <button type="button" class="btn btn-secondary me-2" onclick="cancelEdit()">
                                     <i class="fa fa-times me-1"></i>Cancel
                                 </button>
-                                <button type="submit" class="btn btn-primary">
+                                <!-- Save button starts disabled -->
+                                <button type="submit"
+                                        id="expSaveBtn"
+                                        class="btn btn-primary"
+                                        disabled="disabled"
+                                        style="opacity:0.6;">
                                     <i class="fa fa-check me-1"></i>Save Changes
                                 </button>
                             </div>
@@ -232,6 +261,11 @@ function showFormActions() {
     storeOriginalFormData();
     document.getElementById('formActions').style.display = 'block';
     document.getElementById('viewActions').style.display = 'none';
+    /* ── Reset disclaimer & save button ── */
+    const disc = document.getElementById('expDisclaimer');
+    if (disc) disc.checked = false;
+    const btn = document.getElementById('expSaveBtn');
+    if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
 }
 
 function enableFullEdit() {
@@ -246,11 +280,24 @@ function enableFullEdit() {
     });
     document.getElementById('formActions').style.display = 'block';
     document.getElementById('viewActions').style.display = 'none';
+    /* ── Reset disclaimer & save button ── */
+    const disc = document.getElementById('expDisclaimer');
+    if (disc) disc.checked = false;
+    const btn = document.getElementById('expSaveBtn');
+    if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
     document.getElementById('experienceText').addEventListener('input', function () {
         updateWordCount();
         calculateExperience();
     });
     document.getElementById('skillsInput').addEventListener('input', updateSkillsDisplay);
+}
+
+/* ── ONLY NEW FUNCTION ── */
+function toggleExpSaveBtn() {
+    const checked = document.getElementById('expDisclaimer').checked;
+    const btn = document.getElementById('expSaveBtn');
+    btn.disabled = !checked;
+    btn.style.opacity = checked ? '1' : '0.6';
 }
 
 function storeOriginalFormData() {
@@ -286,11 +333,21 @@ function disableEditMode() {
     });
     document.getElementById('formActions').style.display = 'none';
     document.getElementById('viewActions').style.display = 'block';
+    /* ── Reset disclaimer & save button ── */
+    const disc = document.getElementById('expDisclaimer');
+    if (disc) disc.checked = false;
+    const btn = document.getElementById('expSaveBtn');
+    if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
 }
 
-// ✅ Form submit - no required validation, just save
 document.getElementById('experienceForm').addEventListener('submit', function (e) {
     e.preventDefault();
+    /* ── Guard: disclaimer must be checked ── */
+    const disc = document.getElementById('expDisclaimer');
+    if (disc && !disc.checked) {
+        showMessage('Please read and accept the Employee Disclaimer before saving.', 'error');
+        return;
+    }
     const formData = new FormData(this);
     fetch('/my/employee/experience', {
         method: 'POST',

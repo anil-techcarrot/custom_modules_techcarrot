@@ -64,3 +64,4 @@ class HrProfileChangeRequestTrail(models.Model):
         store=True,
         readonly=True,
     )
+
