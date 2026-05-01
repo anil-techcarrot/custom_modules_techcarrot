@@ -37,7 +37,6 @@ class HrProfileChangeRequestRejectWizard(models.TransientModel):
 
         req = self.request_id
 
-        # Update request
         req.write({
             'state': 'rejected',
             'rejection_reason': self.rejection_reason.strip(),
@@ -45,7 +44,12 @@ class HrProfileChangeRequestRejectWizard(models.TransientModel):
             'review_date': fields.Datetime.now(),
         })
 
-        #  Safe call for trail (only if method exists)
+        # ── Mark overlay as rejected (keep submitted data, just change state) ──
+        req.employee_id.sudo().write({
+            'last_submission_state': 'rejected',
+            # last_portal_submission stays — portal will still show submitted values
+        })
+
         if hasattr(req, '_add_trail'):
             req._add_trail(
                 action='rejected',
@@ -53,7 +57,6 @@ class HrProfileChangeRequestRejectWizard(models.TransientModel):
                 reason=self.rejection_reason.strip(),
             )
 
-        #  Safe call for email (only if method exists)
         if hasattr(req, '_send_mail_to_employee'):
             req._send_mail_to_employee('rejected')
 
