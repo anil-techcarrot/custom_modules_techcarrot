@@ -45,9 +45,10 @@ class HrProfileChangeRequestRejectWizard(models.TransientModel):
         })
 
         # ── Mark overlay as rejected (keep submitted data, just change state) ──
+
         req.employee_id.sudo().write({
             'last_submission_state': 'rejected',
-            # last_portal_submission stays — portal will still show submitted values
+            'last_portal_submission': req.submitted_data,  # ← ADD THIS LINE
         })
 
         if hasattr(req, '_add_trail'):
