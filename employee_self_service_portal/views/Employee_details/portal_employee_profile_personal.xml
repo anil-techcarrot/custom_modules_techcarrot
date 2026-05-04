@@ -75,13 +75,33 @@
                             </div>
                         </t>
 
-                        <button type="button"
-                                class="btn-close"
-                                data-bs-dismiss="alert"
-                                aria-label="Close"/>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"/>
                     </div>
                 </t>
                 <!-- ══ End Notification Banner ══ -->
+
+                <!-- ══ Overlay Banner — shows when pending or rejected ══ -->
+                <t t-if="portal_overlay and notification">
+                    <div class="alert alert-info alert-dismissible fade show mb-3"
+                         style="border-left:4px solid #2B2B6B;border-radius:6px;">
+                        <i class="fa fa-info-circle me-2"></i>
+                        <t t-if="notification.get('type') == 'danger'">
+                            <strong>Note:</strong>
+                            The values shown below are from your
+                            <span style="color:#E74C2D;font-weight:bold;">rejected submission</span>.
+                            Your actual employee record has <strong>not been changed</strong>.
+                            Please correct and resubmit.
+                        </t>
+                        <t t-if="notification.get('type') == 'warning'">
+                            <strong>Note:</strong>
+                            The values shown below are from your
+                            <span style="color:#2B2B6B;font-weight:bold;">pending submission</span>
+                            currently awaiting HR review.
+                        </t>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                    </div>
+                </t>
+                <!-- ══ End Overlay Banner ══ -->
 
                 <t t-set="all_countries" t-value="request.env['res.country'].sudo().search([], order='name')"/>
 
@@ -158,7 +178,6 @@
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
-                                <!-- NAME FIELDS: text only, always-readonly -->
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">Employee First Name</label>
                                     <input type="text" name="employee_first_name" class="form-control"
@@ -219,7 +238,6 @@
                                            t-att-value="employee.nationality_at_birth_id.name or ''"
                                            data-always-readonly="1" readonly="readonly"/>
                                 </div>
-                                <!-- WORK EMAIL: email validation -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-envelope text-muted me-1"></i>Work Email
@@ -231,13 +249,13 @@
                                            data-validation="email"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
-                                <!-- WORK PHONE: digits + optional + only -->
+                                <!-- WORK PHONE — editable, use overlay -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-phone text-muted me-1"></i>Work Phone
                                     </label>
                                     <input type="tel" name="work_phone" class="form-control"
-                                           t-att-value="employee.work_phone"
+                                           t-att-value="portal_overlay.get('work_phone') or employee.work_phone or ''"
                                            readonly="readonly"
                                            data-validation="phone"/>
                                     <div class="invalid-feedback"></div>
@@ -268,7 +286,6 @@
                                     </select>
                                     <div class="invalid-feedback"></div>
                                 </div>
-                                <!-- DATE OF BIRTH: past date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-calendar text-muted me-1"></i>Date of Birth
@@ -292,10 +309,11 @@
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
+                                <!-- legal_name — editable, use overlay -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Legal Name</label>
                                     <input name="legal_name" class="form-control"
-                                           t-att-value="employee.legal_name or ''"
+                                           t-att-value="portal_overlay.get('legal_name') or employee.legal_name or ''"
                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
@@ -371,7 +389,6 @@
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
-                                <!-- EMIRATES ID: digits-and-dashes format only -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-id-badge text-muted me-1"></i>Emirates ID
@@ -383,7 +400,6 @@
                                     <div class="invalid-feedback"></div>
                                     <small class="text-muted">Format: 784-1234-1234567-1</small>
                                 </div>
-                                <!-- EMIRATES EXPIRY: must be future date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-calendar-times text-muted me-1"></i>Emirates ID Expiry
@@ -394,7 +410,6 @@
                                            data-validation="future-date"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
-                                <!-- PASSPORT NUMBER: alphanumeric, no spaces -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-passport text-muted me-1"></i>Passport Number
@@ -415,7 +430,6 @@
                                            data-always-readonly="1" readonly="readonly"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
-                                <!-- PASSPORT ISSUE DATE: must be past -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-calendar text-muted me-1"></i>Passport Issue Date
@@ -426,7 +440,6 @@
                                            data-validation="past-date"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
-                                <!-- PASSPORT EXPIRY: must be future -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-calendar-times text-muted me-1"></i>Passport Expiry Date
@@ -437,7 +450,6 @@
                                            data-validation="future-date"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
-                                <!-- IDENTIFICATION NO: alphanumeric -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Identification No</label>
                                     <input name="identification_id" class="form-control"
@@ -447,7 +459,6 @@
                                     <div class="invalid-feedback"></div>
                                     <small class="text-muted">Letters and digits only</small>
                                 </div>
-                                <!-- SSN: digits only -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">SSN No</label>
                                     <input name="ssnid" class="form-control"
@@ -483,7 +494,6 @@
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
-                                <!-- VISA NO: alphanumeric -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Visa No</label>
                                     <input name="visa_no" class="form-control"
@@ -493,7 +503,6 @@
                                     <div class="invalid-feedback"></div>
                                     <small class="text-muted">Letters and digits only</small>
                                 </div>
-                                <!-- PERMIT NO: alphanumeric -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Work Permit No</label>
                                     <input name="permit_no" class="form-control"
@@ -528,34 +537,32 @@
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
-                                <!-- PERSONAL EMAIL -->
+                                <!-- All contact fields use overlay -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-envelope text-muted me-1"></i>Personal Email
                                     </label>
                                     <input type="email" name="private_email" class="form-control"
-                                           t-att-value="employee.private_email"
+                                           t-att-value="portal_overlay.get('private_email') or employee.private_email or ''"
                                            readonly="readonly"
                                            data-validation="email"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
-                                <!-- PERSONAL PHONE: digits only + optional + -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-phone text-muted me-1"></i>Personal Phone
                                     </label>
                                     <input type="tel" name="private_phone" class="form-control"
-                                           t-att-value="employee.private_phone"
+                                           t-att-value="portal_overlay.get('private_phone') or employee.private_phone or ''"
                                            readonly="readonly"
                                            data-validation="phone"/>
                                     <div class="invalid-feedback"></div>
                                     <small class="text-muted">Digits only, optional leading + for country code</small>
                                 </div>
-                                <!-- WHATSAPP: digits only + optional + -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">WhatsApp</label>
                                     <input type="text" name="whatsapp" class="form-control"
-                                           t-att-value="employee.whatsapp or ''"
+                                           t-att-value="portal_overlay.get('whatsapp') or employee.whatsapp or ''"
                                            readonly="readonly"
                                            data-validation="phone"/>
                                     <div class="invalid-feedback"></div>
@@ -566,7 +573,7 @@
                                         <i class="fa fa-map-marker text-muted me-1"></i>Address Line 1
                                     </label>
                                     <input type="text" name="private_street" class="form-control"
-                                           t-att-value="employee.private_street"
+                                           t-att-value="portal_overlay.get('private_street') or employee.private_street or ''"
                                            readonly="readonly"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
@@ -575,29 +582,28 @@
                                         <i class="fa fa-map-marker text-muted me-1"></i>Address Line 2
                                     </label>
                                     <input type="text" name="private_street2" class="form-control"
-                                           t-att-value="employee.private_street2"
+                                           t-att-value="portal_overlay.get('private_street2') or employee.private_street2 or ''"
                                            readonly="readonly"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">City</label>
                                     <input type="text" name="private_city" class="form-control"
-                                           t-att-value="employee.private_city"
+                                           t-att-value="portal_overlay.get('private_city') or employee.private_city or ''"
                                            readonly="readonly"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">State/Province</label>
                                     <input type="text" name="private_state_id" class="form-control"
-                                           t-att-value="employee.private_state_id.name"
+                                           t-att-value="portal_overlay.get('private_state_id') or employee.private_state_id.name or ''"
                                            readonly="readonly"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
-                                <!-- ZIP: digits only -->
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">ZIP/Postal Code</label>
                                     <input type="text" name="private_zip" class="form-control"
-                                           t-att-value="employee.private_zip"
+                                           t-att-value="portal_overlay.get('private_zip') or employee.private_zip or ''"
                                            readonly="readonly"
                                            data-validation="digits-only"/>
                                     <div class="invalid-feedback"></div>
@@ -622,29 +628,28 @@
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
-                                <!-- Social media: text/URL fields, no integer validation needed -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">LinkedIn</label>
                                     <input type="text" name="linkedin" class="form-control"
-                                           t-att-value="employee.linkedin or ''"
+                                           t-att-value="portal_overlay.get('linkedin') or employee.linkedin or ''"
                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Facebook Profile</label>
                                     <input type="text" name="facebook_profile" class="form-control"
-                                           t-att-value="employee.facebook_profile or ''"
+                                           t-att-value="portal_overlay.get('facebook_profile') or employee.facebook_profile or ''"
                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Instagram Profile</label>
                                     <input type="text" name="insta_profile" class="form-control"
-                                           t-att-value="employee.insta_profile or ''"
+                                           t-att-value="portal_overlay.get('insta_profile') or employee.insta_profile or ''"
                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Twitter Profile</label>
                                     <input type="text" name="twitter_profile" class="form-control"
-                                           t-att-value="employee.twitter_profile or ''"
+                                           t-att-value="portal_overlay.get('twitter_profile') or employee.twitter_profile or ''"
                                            readonly="readonly"/>
                                 </div>
                             </div>
@@ -711,7 +716,6 @@
                                            t-att-value="employee.employment_status_id.name if employee.employment_status_id else ''"
                                            data-always-readonly="1" readonly="readonly"/>
                                 </div>
-                                <!-- NOTICE PERIOD: digits only (number of days) -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Notice Period (in days)</label>
                                     <input type="text" name="notice_period" class="form-control"
@@ -776,23 +780,23 @@
                                            t-att-value="employee.work_location_id.name or ''"
                                            data-always-readonly="1" readonly="readonly"/>
                                 </div>
+                                <!-- Work location editable fields — use overlay -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Full Address Inside UAE</label>
                                     <input type="text" name="u_private_city" class="form-control"
-                                           t-att-value="employee.u_private_city or ''"
+                                           t-att-value="portal_overlay.get('u_private_city') or employee.u_private_city or ''"
                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Current Work Address</label>
                                     <input type="text" name="current_address" class="form-control"
-                                           t-att-value="employee.current_address or ''"
+                                           t-att-value="portal_overlay.get('current_address') or employee.current_address or ''"
                                            readonly="readonly"/>
                                 </div>
-                                <!-- ISD CODE: digits + optional + -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">ISD Code</label>
                                     <input type="text" name="phone_code_1" class="form-control"
-                                           t-att-value="employee.phone_code_1 or ''"
+                                           t-att-value="portal_overlay.get('phone_code_1') or employee.phone_code_1 or ''"
                                            readonly="readonly"
                                            data-validation="phone"/>
                                     <div class="invalid-feedback"></div>
@@ -801,19 +805,19 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">House Number and Building Name</label>
                                     <input type="text" name="house_no" class="form-control"
-                                           t-att-value="employee.house_no or ''"
+                                           t-att-value="portal_overlay.get('house_no') or employee.house_no or ''"
                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Area / Town Name</label>
                                     <input type="text" name="area_name" class="form-control"
-                                           t-att-value="employee.area_name or ''"
+                                           t-att-value="portal_overlay.get('area_name') or employee.area_name or ''"
                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">City</label>
                                     <input type="text" name="city" class="form-control"
-                                           t-att-value="employee.city or ''"
+                                           t-att-value="portal_overlay.get('city') or employee.city or ''"
                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
@@ -834,11 +838,10 @@
                                            t-att-value="employee.states_id.name or ''"
                                            readonly="readonly"/>
                                 </div>
-                                <!-- ZIP CODE: digits only -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Zip Code</label>
                                     <input type="text" name="zip_code" class="form-control"
-                                           t-att-value="employee.zip_code or ''"
+                                           t-att-value="portal_overlay.get('zip_code') or employee.zip_code or ''"
                                            readonly="readonly"
                                            data-validation="digits-only"/>
                                     <div class="invalid-feedback"></div>
@@ -881,10 +884,11 @@
                                            t-att-value="'Yes' if employee.emp_inside_uae else 'No'"
                                            data-always-readonly="1" readonly="readonly"/>
                                 </div>
+                                <!-- editable — use overlay -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Industry Start Date</label>
                                     <input type="date" name="industry_start_date" class="form-control"
-                                           t-att-value="employee.industry_start_date.strftime('%Y-%m-%d') if employee.industry_start_date else ''"
+                                           t-att-value="portal_overlay.get('industry_start_date') or (employee.industry_start_date.strftime('%Y-%m-%d') if employee.industry_start_date else '')"
                                            readonly="readonly"
                                            data-validation="past-date"/>
                                     <div class="invalid-feedback"></div>
@@ -892,16 +896,15 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Experience</label>
                                     <input type="text" name="experience" class="form-control"
-                                           t-att-value="employee.experience or ''"
+                                           t-att-value="portal_overlay.get('experience') or employee.experience or ''"
                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Current / Additional Role</label>
                                     <input type="text" name="current_role" class="form-control"
-                                           t-att-value="employee.current_role or ''"
+                                           t-att-value="portal_overlay.get('current_role') or employee.current_role or ''"
                                            readonly="readonly"/>
                                 </div>
-                                <!-- AADHAR: 12 digits only -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Aadhar Number</label>
                                     <input type="text" class="form-control"
@@ -911,7 +914,6 @@
                                     <div class="invalid-feedback"></div>
                                     <small class="text-muted">12 digits only</small>
                                 </div>
-                                <!-- PAN: alphanumeric, 10 chars -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">PAN</label>
                                     <input type="text" class="form-control"
@@ -921,7 +923,6 @@
                                     <div class="invalid-feedback"></div>
                                     <small class="text-muted">Format: ABCDE1234F (10 characters)</small>
                                 </div>
-                                <!-- UAN: 12 digits -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">UAN</label>
                                     <input type="text" class="form-control"
@@ -931,7 +932,6 @@
                                     <div class="invalid-feedback"></div>
                                     <small class="text-muted">Digits only</small>
                                 </div>
-                                <!-- PF NUMBER: alphanumeric -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">PF Number</label>
                                     <input type="text" class="form-control"
@@ -969,28 +969,28 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Organisation Name</label>
                                     <input type="text" name="last_organisation_name" class="form-control"
-                                           t-att-value="employee.last_organisation_name or ''"
+                                           t-att-value="portal_overlay.get('last_organisation_name') or employee.last_organisation_name or ''"
                                            readonly="readonly"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Location</label>
                                     <input type="text" name="last_location" class="form-control"
-                                           t-att-value="employee.last_location or ''"
+                                           t-att-value="portal_overlay.get('last_location') or employee.last_location or ''"
                                            readonly="readonly"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Salary Per Annum Currency</label>
                                     <input type="text" name="last_salary_per_annum_currency" class="form-control"
-                                           t-att-value="employee.last_salary_per_annum_currency or ''"
+                                           t-att-value="portal_overlay.get('last_salary_per_annum_currency') or employee.last_salary_per_annum_currency or ''"
                                            readonly="readonly"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Salary Per Annum Amount</label>
                                     <input type="number" name="last_salary_per_annum_amt" class="form-control"
-                                           t-att-value="employee.last_salary_per_annum_amt or ''"
+                                           t-att-value="portal_overlay.get('last_salary_per_annum_amt') or employee.last_salary_per_annum_amt or ''"
                                            readonly="readonly"
                                            min="0" step="0.01"
                                            data-validation="positive-number"/>
@@ -999,28 +999,28 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Reason for Leaving</label>
                                     <input type="text" name="reason_for_leaving" class="form-control"
-                                           t-att-value="employee.reason_for_leaving or ''"
+                                           t-att-value="portal_overlay.get('reason_for_leaving') or employee.reason_for_leaving or ''"
                                            readonly="readonly"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Reporting Manager Name</label>
                                     <input type="text" name="last_report_manager_name" class="form-control"
-                                           t-att-value="employee.last_report_manager_name or ''"
+                                           t-att-value="portal_overlay.get('last_report_manager_name') or employee.last_report_manager_name or ''"
                                            readonly="readonly"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Reporting Manager Designation</label>
                                     <input type="text" name="last_report_manager_designation" class="form-control"
-                                           t-att-value="employee.last_report_manager_designation or ''"
+                                           t-att-value="portal_overlay.get('last_report_manager_designation') or employee.last_report_manager_designation or ''"
                                            readonly="readonly"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Last Reporting Manager Mobile Number</label>
                                     <input type="tel" name="last_report_manager_mob_no" class="form-control"
-                                           t-att-value="employee.last_report_manager_mob_no or ''"
+                                           t-att-value="portal_overlay.get('last_report_manager_mob_no') or employee.last_report_manager_mob_no or ''"
                                            readonly="readonly"
                                            pattern="[+]?[0-9\s\-\(\)]*"
                                            data-validation="phone"/>
@@ -1029,7 +1029,7 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Reporting Manager Email-ID</label>
                                     <input type="email" name="last_report_manager_mail" class="form-control"
-                                           t-att-value="employee.last_report_manager_mail or ''"
+                                           t-att-value="portal_overlay.get('last_report_manager_mail') or employee.last_report_manager_mail or ''"
                                            readonly="readonly"
                                            data-validation="email"/>
                                     <div class="invalid-feedback"></div>
@@ -1050,14 +1050,13 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Nominee Name</label>
                                     <input type="text" name="employee_nominee_name" class="form-control"
-                                           t-att-value="employee.employee_nominee_name or ''"
+                                           t-att-value="portal_overlay.get('employee_nominee_name') or employee.employee_nominee_name or ''"
                                            readonly="readonly"/>
                                 </div>
-                                <!-- NOMINEE CONTACT: phone digits only -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Nominee Contact Number</label>
                                     <input type="tel" name="employee_nominee_contact_no" class="form-control"
-                                           t-att-value="employee.employee_nominee_contact_no or ''"
+                                           t-att-value="portal_overlay.get('employee_nominee_contact_no') or employee.employee_nominee_contact_no or ''"
                                            readonly="readonly"
                                            data-validation="phone"/>
                                     <div class="invalid-feedback"></div>
@@ -1072,25 +1071,25 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Domains Worked</label>
                                     <input type="text" name="domain_worked" class="form-control"
-                                           t-att-value="employee.domain_worked or ''"
+                                           t-att-value="portal_overlay.get('domain_worked') or employee.domain_worked or ''"
                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Primary Skills</label>
                                     <input type="text" name="primary_skill" class="form-control"
-                                           t-att-value="employee.primary_skill or ''"
+                                           t-att-value="portal_overlay.get('primary_skill') or employee.primary_skill or ''"
                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Secondary Skills</label>
                                     <input type="text" name="secondary_skill" class="form-control"
-                                           t-att-value="employee.secondary_skill or ''"
+                                           t-att-value="portal_overlay.get('secondary_skill') or employee.secondary_skill or ''"
                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Tools Used</label>
                                     <input type="text" name="tool_used" class="form-control"
-                                           t-att-value="employee.tool_used or ''"
+                                           t-att-value="portal_overlay.get('tool_used') or employee.tool_used or ''"
                                            readonly="readonly"/>
                                 </div>
                             </div>
@@ -1106,7 +1105,6 @@
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
-                                <!-- NO. OF CAREER BREAK: digits only -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">No. of Career Break</label>
                                     <input type="text" name="no_of_career_break" class="form-control"
@@ -1125,7 +1123,7 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Career Break Detail</label>
                                     <input type="text" name="career_break_detail" class="form-control"
-                                           t-att-value="employee.career_break_detail or ''"
+                                           t-att-value="portal_overlay.get('career_break_detail') or employee.career_break_detail or ''"
                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
@@ -1160,23 +1158,21 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Reference Name</label>
                                     <input type="text" name="industry_ref_name" class="form-control"
-                                           t-att-value="employee.industry_ref_name or ''"
+                                           t-att-value="portal_overlay.get('industry_ref_name') or employee.industry_ref_name or ''"
                                            readonly="readonly"/>
                                 </div>
-                                <!-- REFERENCE EMAIL -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Reference Email</label>
                                     <input type="email" name="industry_ref_email" class="form-control"
-                                           t-att-value="employee.industry_ref_email or ''"
+                                           t-att-value="portal_overlay.get('industry_ref_email') or employee.industry_ref_email or ''"
                                            readonly="readonly"
                                            data-validation="email"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
-                                <!-- REFERENCE MOBILE: phone digits only -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Reference Mobile Number</label>
                                     <input type="tel" name="industry_ref_mob_no" class="form-control"
-                                           t-att-value="employee.industry_ref_mob_no or ''"
+                                           t-att-value="portal_overlay.get('industry_ref_mob_no') or employee.industry_ref_mob_no or ''"
                                            readonly="readonly"
                                            data-validation="phone"/>
                                     <div class="invalid-feedback"></div>
@@ -1185,50 +1181,37 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Previous Company Name</label>
                                     <input type="text" name="previous_company_name" class="form-control"
-                                           t-att-value="employee.previous_company_name or ''"
+                                           t-att-value="portal_overlay.get('previous_company_name') or employee.previous_company_name or ''"
                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Designation</label>
                                     <input type="text" name="designation" class="form-control"
-                                           t-att-value="employee.designation or ''"
+                                           t-att-value="portal_overlay.get('designation') or employee.designation or ''"
                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Period in Company</label>
                                     <input type="text" name="period_in_company" class="form-control"
-                                           t-att-value="employee.period_in_company or ''"
+                                           t-att-value="portal_overlay.get('period_in_company') or employee.period_in_company or ''"
                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Reason of Leaving</label>
                                     <input type="text" name="reason_of_leaving" class="form-control"
-                                           t-att-value="employee.reason_of_leaving or ''"
+                                           t-att-value="portal_overlay.get('reason_of_leaving') or employee.reason_of_leaving or ''"
                                            readonly="readonly"/>
                                 </div>
-<!--                                <div class="col-md-6">-->
-<!--                                    <label class="form-label fw-bold">Exit Type</label>-->
-<!--                                    <input type="text" class="form-control"-->
-<!--                                           t-att-value="employee.exit_type_id.name if employee.exit_type_id else ''"-->
-<!--                                           data-always-readonly="1" readonly="readonly"/>-->
-<!--                                </div>-->
-<!--                                <div class="col-md-6">-->
-<!--                                    <label class="form-label fw-bold">Exit Reason</label>-->
-<!--                                    <input type="text" class="form-control"-->
-<!--                                           t-att-value="employee.exit_reason_id.name if employee.exit_reason_id else ''"-->
-<!--                                           readonly="readonly"/>-->
-<!--                                </div>-->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Home Country ID Name</label>
                                     <input type="text" name="home_country_id_name" class="form-control"
-                                           t-att-value="employee.home_country_id_name or ''"
+                                           t-att-value="portal_overlay.get('home_country_id_name') or employee.home_country_id_name or ''"
                                            readonly="readonly"/>
                                 </div>
-                                <!-- HOME COUNTRY ID NUMBER: alphanumeric -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Home Country ID Number</label>
                                     <input type="text" name="home_country_id_number" class="form-control"
-                                           t-att-value="employee.home_country_id_number or ''"
+                                           t-att-value="portal_overlay.get('home_country_id_number') or employee.home_country_id_number or ''"
                                            readonly="readonly"
                                            data-validation="alphanumeric"/>
                                     <div class="invalid-feedback"></div>
@@ -1268,14 +1251,13 @@
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
-                                <!-- EMERGENCY PHONE: digits only -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-phone text-muted me-1"></i>Emergency Contact Phone
                                         <span class="text-danger">*</span>
                                     </label>
                                     <input type="tel" name="emergency_phone" class="form-control"
-                                           t-att-value="employee.emergency_phone"
+                                           t-att-value="portal_overlay.get('emergency_phone') or employee.emergency_phone or ''"
                                            readonly="readonly" required="required"
                                            data-validation="phone"/>
                                     <div class="invalid-feedback"></div>
@@ -1284,14 +1266,13 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Emergency Address</label>
                                     <input type="text" name="e_private_city" class="form-control"
-                                           t-att-value="employee.e_private_city or ''"
+                                           t-att-value="portal_overlay.get('e_private_city') or employee.e_private_city or ''"
                                            readonly="readonly"/>
                                 </div>
-                                <!-- COUNTRY CODE: phone format -->
                                 <div class="col-md-3">
                                     <label class="form-label fw-bold">Country Code</label>
                                     <input type="text" name="phone_code_1" class="form-control"
-                                           t-att-value="employee.phone_code_1 or ''"
+                                           t-att-value="portal_overlay.get('phone_code_1') or employee.phone_code_1 or ''"
                                            readonly="readonly"
                                            placeholder="+971"
                                            data-validation="phone"/>
@@ -1315,7 +1296,7 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Contact Person Name</label>
                                     <input type="text" name="emergency_contact_person_name" class="form-control"
-                                           t-att-value="employee.emergency_contact_person_name or ''"
+                                           t-att-value="portal_overlay.get('emergency_contact_person_name') or employee.emergency_contact_person_name or ''"
                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
@@ -1324,11 +1305,10 @@
                                            t-att-value="employee.relationship_with_emp_id.name if employee.relationship_with_emp_id else ''"
                                            readonly="readonly"/>
                                 </div>
-                                <!-- ALL PHONE FIELDS: digits only -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Contact Person Phone Number</label>
                                     <input type="tel" name="emergency_contact_person_phone" class="form-control"
-                                           t-att-value="employee.emergency_contact_person_phone or ''"
+                                           t-att-value="portal_overlay.get('emergency_contact_person_phone') or employee.emergency_contact_person_phone or ''"
                                            readonly="readonly"
                                            data-validation="phone"/>
                                     <div class="invalid-feedback"></div>
@@ -1337,7 +1317,7 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Alternate Mobile Number</label>
                                     <input type="tel" name="alternate_mobile_number" class="form-control"
-                                           t-att-value="employee.alternate_mobile_number or ''"
+                                           t-att-value="portal_overlay.get('alternate_mobile_number') or employee.alternate_mobile_number or ''"
                                            readonly="readonly"
                                            data-validation="phone"/>
                                     <div class="invalid-feedback"></div>
@@ -1346,7 +1326,7 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Contact Person Name (1)</label>
                                     <input type="text" name="emergency_contact_person_name_1" class="form-control"
-                                           t-att-value="employee.emergency_contact_person_name_1 or ''"
+                                           t-att-value="portal_overlay.get('emergency_contact_person_name_1') or employee.emergency_contact_person_name_1 or ''"
                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
@@ -1358,7 +1338,7 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Contact Person Phone Number (1)</label>
                                     <input type="tel" name="emergency_contact_person_phone_1" class="form-control"
-                                           t-att-value="employee.emergency_contact_person_phone_1 or ''"
+                                           t-att-value="portal_overlay.get('emergency_contact_person_phone_1') or employee.emergency_contact_person_phone_1 or ''"
                                            readonly="readonly"
                                            data-validation="phone"/>
                                     <div class="invalid-feedback"></div>
@@ -1367,7 +1347,7 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Second Alternative Number</label>
                                     <input type="tel" name="second_alternative_number" class="form-control"
-                                           t-att-value="employee.second_alternative_number or ''"
+                                           t-att-value="portal_overlay.get('second_alternative_number') or employee.second_alternative_number or ''"
                                            readonly="readonly"
                                            data-validation="phone"/>
                                     <div class="invalid-feedback"></div>
@@ -1376,7 +1356,7 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Home Land Line Number</label>
                                     <input type="tel" name="home_land_line_no" class="form-control"
-                                           t-att-value="employee.home_land_line_no or ''"
+                                           t-att-value="portal_overlay.get('home_land_line_no') or employee.home_land_line_no or ''"
                                            readonly="readonly"
                                            data-validation="phone"/>
                                     <div class="invalid-feedback"></div>
@@ -1395,30 +1375,27 @@
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
-                                <!-- PASSPORT NO: alphanumeric -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Spouse Passport No</label>
                                     <input type="text" name="spouse_passport_no" class="form-control"
-                                           t-att-value="employee.spouse_passport_no or ''"
+                                           t-att-value="portal_overlay.get('spouse_passport_no') or employee.spouse_passport_no or ''"
                                            readonly="readonly"
                                            data-validation="alphanumeric"/>
                                     <div class="invalid-feedback"></div>
                                     <small class="text-muted">Letters and digits only</small>
                                 </div>
-                                <!-- PASSPORT ISSUE: past date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Passport Issue Date</label>
                                     <input type="date" name="spouse_passport_issue_date" class="form-control"
-                                           t-att-value="employee.spouse_passport_issue_date.strftime('%Y-%m-%d') if employee.spouse_passport_issue_date else ''"
+                                           t-att-value="portal_overlay.get('spouse_passport_issue_date') or (employee.spouse_passport_issue_date.strftime('%Y-%m-%d') if employee.spouse_passport_issue_date else '')"
                                            readonly="readonly"
                                            data-validation="past-date"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
-                                <!-- PASSPORT EXPIRY: future date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Passport Expiry Date</label>
                                     <input type="date" name="spouse_passport_expiry_date" class="form-control"
-                                           t-att-value="employee.spouse_passport_expiry_date.strftime('%Y-%m-%d') if employee.spouse_passport_expiry_date else ''"
+                                           t-att-value="portal_overlay.get('spouse_passport_expiry_date') or (employee.spouse_passport_expiry_date.strftime('%Y-%m-%d') if employee.spouse_passport_expiry_date else '')"
                                            readonly="readonly"
                                            data-validation="future-date"/>
                                     <div class="invalid-feedback"></div>
@@ -1429,58 +1406,52 @@
                                            t-att-value="employee.spouse_passport_issuing_countries_id.name if employee.spouse_passport_issuing_countries_id else ''"
                                            readonly="readonly"/>
                                 </div>
-                                <!-- VISA NO: alphanumeric -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Visa No</label>
                                     <input type="text" name="spouse_visa_no" class="form-control"
-                                           t-att-value="employee.spouse_visa_no or ''"
+                                           t-att-value="portal_overlay.get('spouse_visa_no') or employee.spouse_visa_no or ''"
                                            readonly="readonly"
                                            data-validation="alphanumeric"/>
                                     <div class="invalid-feedback"></div>
                                     <small class="text-muted">Letters and digits only</small>
                                 </div>
-                                <!-- VISA EXPIRY: future date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Visa Expiration Date</label>
                                     <input type="date" name="spouse_visa_expire_date" class="form-control"
-                                           t-att-value="employee.spouse_visa_expire_date.strftime('%Y-%m-%d') if employee.spouse_visa_expire_date else ''"
+                                           t-att-value="portal_overlay.get('spouse_visa_expire_date') or (employee.spouse_visa_expire_date.strftime('%Y-%m-%d') if employee.spouse_visa_expire_date else '')"
                                            readonly="readonly"
                                            data-validation="future-date"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
-                                <!-- EMIRATES ID: format validation -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Emirates ID Number</label>
                                     <input type="text" name="spouse_emirates_id_no" class="form-control"
-                                           t-att-value="employee.spouse_emirates_id_no or ''"
+                                           t-att-value="portal_overlay.get('spouse_emirates_id_no') or employee.spouse_emirates_id_no or ''"
                                            readonly="readonly"
                                            data-validation="emirates-id"/>
                                     <div class="invalid-feedback"></div>
                                     <small class="text-muted">Format: 784-1234-1234567-1</small>
                                 </div>
-                                <!-- EMIRATES ISSUE: past date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Emirates Issue Date</label>
                                     <input type="date" name="spouse_emirates_issue_date" class="form-control"
-                                           t-att-value="employee.spouse_emirates_issue_date.strftime('%Y-%m-%d') if employee.spouse_emirates_issue_date else ''"
+                                           t-att-value="portal_overlay.get('spouse_emirates_issue_date') or (employee.spouse_emirates_issue_date.strftime('%Y-%m-%d') if employee.spouse_emirates_issue_date else '')"
                                            readonly="readonly"
                                            data-validation="past-date"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
-                                <!-- EMIRATES EXPIRY: future date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Emirates ID Expiry Date</label>
                                     <input type="date" name="spouse_emirates_id_expiry_date" class="form-control"
-                                           t-att-value="employee.spouse_emirates_id_expiry_date.strftime('%Y-%m-%d') if employee.spouse_emirates_id_expiry_date else ''"
+                                           t-att-value="portal_overlay.get('spouse_emirates_id_expiry_date') or (employee.spouse_emirates_id_expiry_date.strftime('%Y-%m-%d') if employee.spouse_emirates_id_expiry_date else '')"
                                            readonly="readonly"
                                            data-validation="future-date"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
-                                <!-- AADHAR: 12 digits -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Aadhar Number</label>
                                     <input type="text" name="spouse_aadhar_no" class="form-control"
-                                           t-att-value="employee.spouse_aadhar_no or ''"
+                                           t-att-value="portal_overlay.get('spouse_aadhar_no') or employee.spouse_aadhar_no or ''"
                                            readonly="readonly"
                                            data-validation="aadhar"/>
                                     <div class="invalid-feedback"></div>
@@ -1502,14 +1473,13 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Child 1 Name</label>
                                     <input type="text" name="dependent_child_name_1" class="form-control"
-                                           t-att-value="employee.dependent_child_name_1 or ''"
+                                           t-att-value="portal_overlay.get('dependent_child_name_1') or employee.dependent_child_name_1 or ''"
                                            readonly="readonly"/>
                                 </div>
-                                <!-- CHILD DOB: past date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Child 1 DOB</label>
                                     <input type="date" name="dependent_child_dob_1" class="form-control"
-                                           t-att-value="employee.dependent_child_dob_1 or ''"
+                                           t-att-value="portal_overlay.get('dependent_child_dob_1') or employee.dependent_child_dob_1 or ''"
                                            readonly="readonly"
                                            data-validation="past-date"/>
                                     <div class="invalid-feedback"></div>
@@ -1532,31 +1502,28 @@
                                         </option>
                                     </select>
                                 </div>
-                                <!-- PASSPORT NO: alphanumeric -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Child 1 Passport No</label>
                                     <input type="text" name="dependent_child_passport_no" class="form-control"
-                                           t-att-value="employee.dependent_child_passport_no or ''"
+                                           t-att-value="portal_overlay.get('dependent_child_passport_no') or employee.dependent_child_passport_no or ''"
                                            readonly="readonly"
                                            data-validation="alphanumeric"/>
                                     <div class="invalid-feedback"></div>
                                     <small class="text-muted">Letters and digits only</small>
                                 </div>
-                                <!-- PASSPORT ISSUE: past date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Child 1 Passport Issue Date</label>
                                     <input type="date" name="dependent_child_passport_issue_date_1" class="form-control"
-                                           t-att-value="employee.dependent_child_passport_issue_date_1 or ''"
+                                           t-att-value="portal_overlay.get('dependent_child_passport_issue_date_1') or employee.dependent_child_passport_issue_date_1 or ''"
                                            readonly="readonly"
                                            data-validation="past-date"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
-                                <!-- PASSPORT EXPIRY: future date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Child 1 Passport Expiry Date</label>
                                     <input type="date" name="dependent_child_passport_expiry_date_1"
                                            class="form-control"
-                                           t-att-value="employee.dependent_child_passport_expiry_date_1 or ''"
+                                           t-att-value="portal_overlay.get('dependent_child_passport_expiry_date_1') or employee.dependent_child_passport_expiry_date_1 or ''"
                                            readonly="readonly"
                                            data-validation="future-date"/>
                                     <div class="invalid-feedback"></div>
@@ -1574,61 +1541,55 @@
                                         </t>
                                     </select>
                                 </div>
-                                <!-- VISA NO: alphanumeric -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Child 1 Visa No</label>
                                     <input type="text" name="dependent_child_visa_no_1" class="form-control"
-                                           t-att-value="employee.dependent_child_visa_no_1 or ''"
+                                           t-att-value="portal_overlay.get('dependent_child_visa_no_1') or employee.dependent_child_visa_no_1 or ''"
                                            readonly="readonly"
                                            data-validation="alphanumeric"/>
                                     <div class="invalid-feedback"></div>
                                     <small class="text-muted">Letters and digits only</small>
                                 </div>
-                                <!-- VISA EXPIRY: future date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Child 1 Visa Expiration Date</label>
                                     <input type="date" name="dependent_child_visa_expiration_date_1"
                                            class="form-control"
-                                           t-att-value="employee.dependent_child_visa_expiration_date_1 or ''"
+                                           t-att-value="portal_overlay.get('dependent_child_visa_expiration_date_1') or employee.dependent_child_visa_expiration_date_1 or ''"
                                            readonly="readonly"
                                            data-validation="future-date"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
-                                <!-- EMIRATES ID: format -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Child 1 Emirates ID Number</label>
                                     <input type="text" name="dependent_child_emirates_id_no_1" class="form-control"
-                                           t-att-value="employee.dependent_child_emirates_id_no_1 or ''"
+                                           t-att-value="portal_overlay.get('dependent_child_emirates_id_no_1') or employee.dependent_child_emirates_id_no_1 or ''"
                                            readonly="readonly"
                                            data-validation="emirates-id"/>
                                     <div class="invalid-feedback"></div>
                                     <small class="text-muted">Format: 784-1234-1234567-1</small>
                                 </div>
-                                <!-- EMIRATES ISSUE: past date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Child 1 Emirates ID Issue Date</label>
                                     <input type="date" name="dependent_child_emirates_id_issue_date_1"
                                            class="form-control"
-                                           t-att-value="employee.dependent_child_emirates_id_issue_date_1 or ''"
+                                           t-att-value="portal_overlay.get('dependent_child_emirates_id_issue_date_1') or employee.dependent_child_emirates_id_issue_date_1 or ''"
                                            readonly="readonly"
                                            data-validation="past-date"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
-                                <!-- EMIRATES EXPIRY: future date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Child 1 Emirates ID Expiry Date</label>
                                     <input type="date" name="dependent_child_emirates_id_expiry_date_1"
                                            class="form-control"
-                                           t-att-value="employee.dependent_child_emirates_id_expiry_date_1 or ''"
+                                           t-att-value="portal_overlay.get('dependent_child_emirates_id_expiry_date_1') or employee.dependent_child_emirates_id_expiry_date_1 or ''"
                                            readonly="readonly"
                                            data-validation="future-date"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
-                                <!-- AADHAR: 12 digits -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Child 1 Aadhar Number</label>
                                     <input type="text" name="dependent_child_aadhar_no_1" class="form-control"
-                                           t-att-value="employee.dependent_child_aadhar_no_1 or ''"
+                                           t-att-value="portal_overlay.get('dependent_child_aadhar_no_1') or employee.dependent_child_aadhar_no_1 or ''"
                                            readonly="readonly"
                                            data-validation="aadhar"/>
                                     <div class="invalid-feedback"></div>
@@ -1653,11 +1614,10 @@
                                            t-att-value="'Yes' if employee.disabled else 'No'"
                                            data-always-readonly="1" readonly="readonly"/>
                                 </div>
-                                <!-- DEPENDENT CHILDREN: digits only (integer count) -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Dependent Children</label>
                                     <input name="children" class="form-control"
-                                           t-att-value="employee.children or ''"
+                                           t-att-value="portal_overlay.get('children') or employee.children or ''"
                                            readonly="readonly"
                                            data-validation="digits-only"/>
                                     <div class="invalid-feedback"></div>
@@ -1694,7 +1654,7 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Father Name</label>
                                     <input type="text" name="father_name" class="form-control"
-                                           t-att-value="employee.father_name or ''"
+                                           t-att-value="portal_overlay.get('father_name') or employee.father_name or ''"
                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
@@ -1703,11 +1663,10 @@
                                            t-att-value="employee.father_nationalities_id.name if employee.father_nationalities_id else ''"
                                            data-always-readonly="1" readonly="readonly"/>
                                 </div>
-                                <!-- FATHER DOB: past date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Father DOB</label>
                                     <input type="date" name="father_dob" class="form-control"
-                                           t-att-value="employee.father_dob.strftime('%Y-%m-%d') if employee.father_dob else ''"
+                                           t-att-value="portal_overlay.get('father_dob') or (employee.father_dob.strftime('%Y-%m-%d') if employee.father_dob else '')"
                                            readonly="readonly"
                                            data-validation="past-date"/>
                                     <div class="invalid-feedback"></div>
@@ -1721,7 +1680,7 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Mother Name</label>
                                     <input type="text" name="mother_name" class="form-control"
-                                           t-att-value="employee.mother_name or ''"
+                                           t-att-value="portal_overlay.get('mother_name') or employee.mother_name or ''"
                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
@@ -1730,11 +1689,10 @@
                                            t-att-value="employee.mother_nationalities_id.name if employee.mother_nationalities_id else ''"
                                            data-always-readonly="1" readonly="readonly"/>
                                 </div>
-                                <!-- MOTHER DOB: past date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Mother DOB</label>
                                     <input type="date" name="mother_dob" class="form-control"
-                                           t-att-value="employee.mother_dob.strftime('%Y-%m-%d') if employee.mother_dob else ''"
+                                           t-att-value="portal_overlay.get('mother_dob') or (employee.mother_dob.strftime('%Y-%m-%d') if employee.mother_dob else '')"
                                            readonly="readonly"
                                            data-validation="past-date"/>
                                     <div class="invalid-feedback"></div>
@@ -1761,13 +1719,13 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Mother Tongue</label>
                                     <input type="text" name="mother_tongue_name" class="form-control"
-                                           t-att-value="employee.mother_tongue_name or ''"
+                                           t-att-value="portal_overlay.get('mother_tongue_name') or employee.mother_tongue_name or ''"
                                            readonly="readonly"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Languages Known</label>
                                     <input type="text" name="language_known_name" class="form-control"
-                                           t-att-value="employee.language_known_name or ''"
+                                           t-att-value="portal_overlay.get('language_known_name') or employee.language_known_name or ''"
                                            readonly="readonly"/>
                                 </div>
                             </div>
@@ -1778,7 +1736,7 @@
                     <!--  TAB: EDUCATION                                               -->
                     <!-- ============================================================ -->
 
-                    <!-- Employee Education Details -->
+                    <!-- Employee Education Details — all data-always-readonly, no overlay needed -->
                     <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="education">
                         <div class="card-header bg-light d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">
@@ -1816,7 +1774,6 @@
                                            t-att-value="employee.study_field or ''"
                                            data-always-readonly="1" readonly="readonly"/>
                                 </div>
-                                <!-- DEGREE START: past date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Start Date of Degree</label>
                                     <input type="date" name="start_date_of_degree" class="form-control"
@@ -1825,7 +1782,6 @@
                                            data-validation="past-date"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
-                                <!-- DEGREE COMPLETION: past date -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Completion Date of Degree</label>
                                     <input type="date" name="completion_date_of_degree" class="form-control"
@@ -1834,7 +1790,6 @@
                                            data-validation="past-date"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
-                                <!-- YEAR OF PASSING: 4-digit year -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Year of Passing</label>
                                     <input type="text" name="year_of_passing" class="form-control"
@@ -1870,7 +1825,6 @@
                     <!--  TAB: DOCUMENTS                                               -->
                     <!-- ============================================================ -->
 
-                    <!-- Document Management -->
                     <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="documents">
                         <div class="card-header bg-light d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">
@@ -1952,7 +1906,6 @@
                     <div class="card shadow-sm">
                         <div class="card-body text-center">
                             <div id="formActions" style="display: none;">
-                                <!-- Disclaimer -->
                                 <div class="alert alert-warning text-start mb-3"
                                      style="border-left: 4px solid #ffc107; border-radius: 6px;">
                                     <div class="form-check d-flex align-items-start gap-2">
@@ -1964,14 +1917,12 @@
                                                style="font-size:0.875rem;">
                                             <strong>Employee Disclaimer</strong>
                                             – I, hereby confirm that the information updated by me is accurate and
-                                            complete
-                                            to the best of my knowledge. I agree to keep my data updated at all times
-                                            and
-                                            consent to the collection and use of such information, for employment
-                                            administration and legal compliances. I acknowledge that any false or
-                                            incomplete
-                                            information may lead to actions in accordance with company policies and
-                                            applicable laws.
+                                            complete to the best of my knowledge. I agree to keep my data updated at all
+                                            times and consent to the collection and use of such information, for
+                                            employment administration and legal compliances. I acknowledge that any
+                                            false
+                                            or incomplete information may lead to actions in accordance with company
+                                            policies and applicable laws.
                                         </label>
                                     </div>
                                 </div>
@@ -2030,7 +1981,6 @@ function switchProfileTab(tabKey) {
     });
 }
 
-/* ─── Sync all toggles ──────────────────────────────────────── */
 function syncAndToggleEditMode(sourceCheckbox) {
     document.querySelectorAll('.edit-mode-toggle').forEach(t => {
         t.checked = sourceCheckbox.checked;
@@ -2038,7 +1988,6 @@ function syncAndToggleEditMode(sourceCheckbox) {
     sourceCheckbox.checked ? enableEditMode() : disableEditMode();
 }
 
-/* ─── Enable edit mode ──────────────────────────────────────── */
 function enableEditMode() {
     isEditMode = true;
     document.querySelectorAll('.edit-mode-toggle').forEach(t => t.checked = true);
@@ -2060,7 +2009,6 @@ function enableEditMode() {
     });
     document.getElementById('formActions').style.display = 'block';
     document.getElementById('viewActions').style.display = 'none';
-    /* ── Reset disclaimer & save button whenever edit mode opens ── */
     const disc = document.getElementById('personalDisclaimer');
     if (disc) disc.checked = false;
     const btn = document.getElementById('personalSaveBtn');
@@ -2073,7 +2021,6 @@ function enableEditMode() {
     });
 }
 
-/* ─── Disable edit mode ─────────────────────────────────────── */
 function disableEditMode() {
     isEditMode = false;
     document.querySelectorAll('.edit-mode-toggle').forEach(t => t.checked = false);
@@ -2095,14 +2042,12 @@ function disableEditMode() {
     document.getElementById('formActions').style.display = 'none';
     document.getElementById('viewActions').style.display = 'block';
     clearValidationStates(activeProfileTab);
-    /* ── Reset disclaimer & save button ── */
     const disc = document.getElementById('personalDisclaimer');
     if (disc) disc.checked = false;
     const btn = document.getElementById('personalSaveBtn');
     if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
 }
 
-/* ─── Disclaimer toggle ─────────────────────────────────────── */
 function toggleSaveBtn(checkboxId, btnId) {
     const checked = document.getElementById(checkboxId).checked;
     const btn = document.getElementById(btnId);
@@ -2110,14 +2055,12 @@ function toggleSaveBtn(checkboxId, btnId) {
     btn.style.opacity = checked ? '1' : '0.6';
 }
 
-/* ─── Store original data ───────────────────────────────────── */
 function storeOriginalFormData() {
     const formData = new FormData(document.getElementById('personalDetailsForm'));
     originalFormData = {};
     for (let [key, value] of formData.entries()) originalFormData[key] = value;
 }
 
-/* ─── Cancel ────────────────────────────────────────────────── */
 function cancelEdit() {
     for (let [key, value] of Object.entries(originalFormData)) {
         const input = document.querySelector(`[name="${key}"]`);
@@ -2128,7 +2071,6 @@ function cancelEdit() {
     showTabMessage(activeProfileTab, 'Changes cancelled.', 'info');
 }
 
-/* ─── Save as draft ─────────────────────────────────────────── */
 function saveAsDraft() {
     const formData = new FormData(document.getElementById('personalDetailsForm'));
     const draftData = {};
@@ -2137,175 +2079,84 @@ function saveAsDraft() {
     showTabMessage(activeProfileTab, 'Profile saved as draft.', 'info');
 }
 
-/* ─── Validate single field ─────────────────────────────────── */
 function validateField(event) {
     const field = event.target;
-
     const parentSection = field.closest('.profile-tab-section');
     if (parentSection && parentSection.getAttribute('data-tab-group') !== activeProfileTab) {
         return true;
     }
-
     const validationType = field.getAttribute('data-validation');
     let isValid = true;
     let errorMessage = '';
-
     field.classList.remove('is-valid', 'is-invalid');
-
     const existingDynamic = field.parentNode.querySelector('.invalid-feedback.dynamic-error');
     if (existingDynamic) existingDynamic.remove();
-
     const feedback = field.parentNode.querySelector('.invalid-feedback:not(.dynamic-error)');
-    if (feedback) {
-        feedback.textContent = '';
-        feedback.style.display = 'none';
-    }
-
+    if (feedback) { feedback.textContent = ''; feedback.style.display = 'none'; }
     if (validationType && field.value) {
         const val = field.value.trim();
-
         switch (validationType) {
-
             case 'email':
-                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
-                    isValid = false;
-                    errorMessage = 'Please enter a valid email address (e.g. name@example.com).';
-                }
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) { isValid = false; errorMessage = 'Please enter a valid email address (e.g. name@example.com).'; }
                 break;
-
             case 'phone':
                 const phoneCleaned = val.replace(/\s/g, '');
-                if (!/^\+?[0-9]+$/.test(phoneCleaned)) {
-                    isValid = false;
-                    errorMessage = 'Phone number must contain digits only. A leading + is allowed for country code (e.g. +971501234567).';
-                } else {
-                    const digitsOnly = phoneCleaned.replace('+', '');
-                    if (digitsOnly.length < 7 || digitsOnly.length > 15) {
-                        isValid = false;
-                        errorMessage = 'Phone number must be between 7 and 15 digits.';
-                    }
-                }
+                if (!/^\+?[0-9]+$/.test(phoneCleaned)) { isValid = false; errorMessage = 'Phone number must contain digits only. A leading + is allowed for country code (e.g. +971501234567).'; }
+                else { const digitsOnly = phoneCleaned.replace('+', ''); if (digitsOnly.length < 7 || digitsOnly.length > 15) { isValid = false; errorMessage = 'Phone number must be between 7 and 15 digits.'; } }
                 break;
-
             case 'digits-only':
-                if (!/^[0-9]+$/.test(val)) {
-                    isValid = false;
-                    errorMessage = 'This field must contain digits only (no letters or special characters).';
-                }
+                if (!/^[0-9]+$/.test(val)) { isValid = false; errorMessage = 'This field must contain digits only (no letters or special characters).'; }
                 break;
-
             case 'alphanumeric':
-                if (!/^[A-Za-z0-9]+$/.test(val)) {
-                    isValid = false;
-                    errorMessage = 'This field must contain letters and digits only (no spaces or special characters).';
-                }
+                if (!/^[A-Za-z0-9]+$/.test(val)) { isValid = false; errorMessage = 'This field must contain letters and digits only (no spaces or special characters).'; }
                 break;
-
             case 'emirates-id':
-                if (!/^[0-9]{3}-[0-9]{4}-[0-9]{7}-[0-9]{1}$/.test(val)) {
-                    isValid = false;
-                    errorMessage = 'Emirates ID must be in format: 784-1234-1234567-1';
-                }
+                if (!/^[0-9]{3}-[0-9]{4}-[0-9]{7}-[0-9]{1}$/.test(val)) { isValid = false; errorMessage = 'Emirates ID must be in format: 784-1234-1234567-1'; }
                 break;
-
             case 'aadhar':
-                if (!/^[0-9]{12}$/.test(val)) {
-                    isValid = false;
-                    errorMessage = 'Aadhar number must be exactly 12 digits.';
-                }
+                if (!/^[0-9]{12}$/.test(val)) { isValid = false; errorMessage = 'Aadhar number must be exactly 12 digits.'; }
                 break;
-
             case 'pan':
-                if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(val.toUpperCase())) {
-                    isValid = false;
-                    errorMessage = 'PAN must be in format: ABCDE1234F (5 letters, 4 digits, 1 letter).';
-                }
+                if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(val.toUpperCase())) { isValid = false; errorMessage = 'PAN must be in format: ABCDE1234F (5 letters, 4 digits, 1 letter).'; }
                 break;
-
             case 'year':
-                if (!/^[0-9]{4}$/.test(val)) {
-                    isValid = false;
-                    errorMessage = 'Please enter a valid 4-digit year (e.g. 2020).';
-                } else {
-                    const yr = parseInt(val, 10);
-                    const currentYear = new Date().getFullYear();
-                    if (yr < 1900 || yr > currentYear) {
-                        isValid = false;
-                        errorMessage = `Year must be between 1900 and ${currentYear}.`;
-                    }
-                }
+                if (!/^[0-9]{4}$/.test(val)) { isValid = false; errorMessage = 'Please enter a valid 4-digit year (e.g. 2020).'; }
+                else { const yr = parseInt(val, 10); const currentYear = new Date().getFullYear(); if (yr < 1900 || yr > currentYear) { isValid = false; errorMessage = `Year must be between 1900 and ${currentYear}.`; } }
                 break;
-
             case 'past-date':
-                const pastInput = new Date(val);
-                const todayForPast = new Date();
-                todayForPast.setHours(0, 0, 0, 0);
-                if (isNaN(pastInput.getTime())) {
-                    isValid = false;
-                    errorMessage = 'Please enter a valid date.';
-                } else if (pastInput > todayForPast) {
-                    isValid = false;
-                    errorMessage = 'This date cannot be in the future.';
-                }
+                const pastInput = new Date(val); const todayForPast = new Date(); todayForPast.setHours(0, 0, 0, 0);
+                if (isNaN(pastInput.getTime())) { isValid = false; errorMessage = 'Please enter a valid date.'; }
+                else if (pastInput > todayForPast) { isValid = false; errorMessage = 'This date cannot be in the future.'; }
                 break;
-
             case 'future-date':
-                const futureInput = new Date(val);
-                const todayForFuture = new Date();
-                todayForFuture.setHours(0, 0, 0, 0);
-                if (isNaN(futureInput.getTime())) {
-                    isValid = false;
-                    errorMessage = 'Please enter a valid date.';
-                } else if (futureInput <= todayForFuture) {
-                    isValid = false;
-                    errorMessage = 'Expiry date must be a future date. Entered: ' + futureInput.toDateString() + ' | Today: ' + todayForFuture.toDateString();
-                }
+                const futureInput = new Date(val); const todayForFuture = new Date(); todayForFuture.setHours(0, 0, 0, 0);
+                if (isNaN(futureInput.getTime())) { isValid = false; errorMessage = 'Please enter a valid date.'; }
+                else if (futureInput <= todayForFuture) { isValid = false; errorMessage = 'Expiry date must be a future date. Entered: ' + futureInput.toDateString() + ' | Today: ' + todayForFuture.toDateString(); }
                 break;
-
             case 'required':
-                if (!val) {
-                    isValid = false;
-                    errorMessage = 'This field is required.';
-                }
+                if (!val) { isValid = false; errorMessage = 'This field is required.'; }
                 break;
         }
     }
-
     if (field.value.trim()) {
-        if (isValid) {
-            field.classList.add('is-valid');
-        } else {
+        if (isValid) { field.classList.add('is-valid'); }
+        else {
             field.classList.add('is-invalid');
-            if (feedback) {
-                feedback.textContent = errorMessage;
-                feedback.style.display = 'block';
-            } else {
-                const errDiv = document.createElement('div');
-                errDiv.className = 'invalid-feedback dynamic-error';
-                errDiv.style.display = 'block';
-                errDiv.style.color = '#dc3545';
-                errDiv.style.fontSize = '0.8rem';
-                errDiv.style.marginTop = '3px';
-                errDiv.textContent = errorMessage;
-                field.insertAdjacentElement('afterend', errDiv);
-            }
+            if (feedback) { feedback.textContent = errorMessage; feedback.style.display = 'block'; }
+            else { const errDiv = document.createElement('div'); errDiv.className = 'invalid-feedback dynamic-error'; errDiv.style.display = 'block'; errDiv.style.color = '#dc3545'; errDiv.style.fontSize = '0.8rem'; errDiv.style.marginTop = '3px'; errDiv.textContent = errorMessage; field.insertAdjacentElement('afterend', errDiv); }
         }
     }
-
     updateTabErrorBadges();
     return isValid;
 }
 
-/* ─── Tab error badges ──────────────────────────────────────── */
 function updateTabErrorBadges() {
     ['basic', 'professional', 'family', 'education', 'documents'].forEach(tabKey => {
         const tabBtn = document.querySelector(`.profile-tab-button[data-tab-target="${tabKey}"]`);
         if (!tabBtn) return;
         const existing = tabBtn.querySelector('.tab-error-badge');
         if (existing) existing.remove();
-        const count = document.querySelectorAll(
-            `.profile-tab-section[data-tab-group="${tabKey}"] .is-invalid`
-        ).length;
+        const count = document.querySelectorAll(`.profile-tab-section[data-tab-group="${tabKey}"] .is-invalid`).length;
         if (count > 0) {
             const badge = document.createElement('span');
             badge.className = 'tab-error-badge badge bg-danger ms-1';
@@ -2315,7 +2166,6 @@ function updateTabErrorBadges() {
     });
 }
 
-/* ─── Clear validation states — scoped to a tab ────────────── */
 function clearValidationStates(tabKey) {
     let inputs = [], feedbacks = [], messages = [];
     if (tabKey) {
@@ -2338,7 +2188,6 @@ function clearValidationStates(tabKey) {
     updateTabErrorBadges();
 }
 
-/* ─── Show message inside active tab ───────────────────────── */
 function showTabMessage(tabKey, text, type) {
     document.querySelectorAll('.tab-message-box').forEach(el => el.remove());
     const firstCard = document.querySelector(`.profile-tab-section[data-tab-group="${tabKey}"]`);
@@ -2347,21 +2196,14 @@ function showTabMessage(tabKey, text, type) {
     const icon = type === 'success' ? 'fa-check-circle' : type === 'info' ? 'fa-info-circle' : 'fa-exclamation-triangle';
     const msgDiv = document.createElement('div');
     msgDiv.className = `tab-message-box alert ${alertClass} alert-dismissible fade show mb-3`;
-    msgDiv.innerHTML = `
-        <i class="fa ${icon} me-2"></i>
-        <span>${text}</span>
-        <button type="button" class="btn-close" onclick="this.parentNode.remove()"></button>
-    `;
+    msgDiv.innerHTML = `<i class="fa ${icon} me-2"></i><span>${text}</span><button type="button" class="btn-close" onclick="this.parentNode.remove()"></button>`;
     firstCard.parentNode.insertBefore(msgDiv, firstCard);
     msgDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
     setTimeout(() => { if (msgDiv.parentNode) msgDiv.remove(); }, 5000);
 }
 
-/* ─── Form submit ───────────────────────────────────────────── */
 document.getElementById('personalDetailsForm').addEventListener('submit', function(e) {
     e.preventDefault();
-
-    /* ── Guard: disclaimer must be checked ── */
     const disc = document.getElementById('personalDisclaimer');
     if (disc && !disc.checked) {
         showTabMessage(activeProfileTab, 'Please read and accept the Employee Disclaimer before saving.', 'error');
@@ -2369,44 +2211,26 @@ document.getElementById('personalDetailsForm').addEventListener('submit', functi
         setTimeout(() => disc.closest('.alert').style.animation = '', 400);
         return;
     }
-
     clearValidationStates(activeProfileTab);
-
     let isFormValid = true;
     document.querySelectorAll(
         `.profile-tab-section[data-tab-group="${activeProfileTab}"] input[data-validation],
          .profile-tab-section[data-tab-group="${activeProfileTab}"] select[data-validation]`
-    ).forEach(input => {
-        if (!validateField({ target: input })) isFormValid = false;
-    });
-
+    ).forEach(input => { if (!validateField({ target: input })) isFormValid = false; });
     updateTabErrorBadges();
-
     if (!isFormValid) {
-        const firstError = document.querySelector(
-            `.profile-tab-section[data-tab-group="${activeProfileTab}"] .is-invalid`
-        );
-        if (firstError) {
-            setTimeout(() => { firstError.scrollIntoView({ behavior: 'smooth', block: 'center' }); firstError.focus(); }, 100);
-        }
+        const firstError = document.querySelector(`.profile-tab-section[data-tab-group="${activeProfileTab}"] .is-invalid`);
+        if (firstError) { setTimeout(() => { firstError.scrollIntoView({ behavior: 'smooth', block: 'center' }); firstError.focus(); }, 100); }
         showTabMessage(activeProfileTab, 'Please correct the highlighted errors in this tab.', 'error');
         return;
     }
-
     const toReenable = [];
-    document.querySelectorAll(
-        '#personalDetailsForm select[disabled], #personalDetailsForm input[type="checkbox"][disabled]'
-    ).forEach(el => {
-        if (!el.hasAttribute('data-always-readonly')) {
-            el.removeAttribute('disabled');
-            toReenable.push(el);
-        }
+    document.querySelectorAll('#personalDetailsForm select[disabled], #personalDetailsForm input[type="checkbox"][disabled]').forEach(el => {
+        if (!el.hasAttribute('data-always-readonly')) { el.removeAttribute('disabled'); toReenable.push(el); }
     });
-
     const formData = new FormData(this);
     const csrfToken = document.querySelector('input[name="csrf_token"]').value;
     toReenable.forEach(el => el.setAttribute('disabled', 'disabled'));
-
     fetch('/my/employee/personal', {
         method: 'POST',
         body: formData,
@@ -2418,13 +2242,11 @@ document.getElementById('personalDetailsForm').addEventListener('submit', functi
             disableEditMode();
             localStorage.removeItem('profileDraft');
             const ref = data.reference || '';
-            showTabMessage(
-                activeProfileTab,
+            showTabMessage(activeProfileTab,
                 ' Your changes have been submitted to HR for review and approval.' +
                 (ref ? ' Reference: <strong>' + ref + '</strong>' : '') +
                 ' You will receive an email once HR approves or rejects your request.',
-                'success'
-            );
+                'success');
         } else {
             showTabMessage(activeProfileTab, 'Error: ' + (data.error || 'Unknown error'), 'error');
         }
@@ -2435,15 +2257,11 @@ document.getElementById('personalDetailsForm').addEventListener('submit', functi
     });
 });
 
-/* ─── DOMContentLoaded ──────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('#personalDetailsForm .profile-tab-button').forEach(button => {
-        button.addEventListener('click', function() {
-            switchProfileTab(this.getAttribute('data-tab-target'));
-        });
+        button.addEventListener('click', function() { switchProfileTab(this.getAttribute('data-tab-target')); });
     });
     switchProfileTab(activeProfileTab);
-
     const draftData = localStorage.getItem('profileDraft');
     if (draftData) {
         try {
@@ -2453,9 +2271,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (input && input.type !== 'hidden') input.value = value;
             });
             showTabMessage(activeProfileTab, 'Draft data loaded.', 'info');
-        } catch (e) {
-            console.error('Error loading draft:', e);
-        }
+        } catch (e) { console.error('Error loading draft:', e); }
     }
 });
                     ]]>
@@ -2465,70 +2281,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 <style>
                     <![CDATA[
 .form-label { font-weight: 600; color: #495057; margin-bottom: 0.5rem; }
-
-.profile-tab-navigation .nav-link {
-    border-radius: 0.5rem 0.5rem 0 0;
-    font-weight: 600;
-    color: #495057;
-    transition: color 0.2s;
-}
+.profile-tab-navigation .nav-link { border-radius: 0.5rem 0.5rem 0 0; font-weight: 600; color: #495057; transition: color 0.2s; }
 .profile-tab-navigation .nav-link.active { color: #0d6efd; }
-
-.tab-error-badge {
-    font-size: 0.65rem;
-    border-radius: 50%;
-    padding: 2px 6px;
-    vertical-align: middle;
-    animation: badgePop 0.2s ease;
-}
-@keyframes badgePop {
-    0%   { transform: scale(0); }
-    80%  { transform: scale(1.2); }
-    100% { transform: scale(1); }
-}
-
-.form-control.is-invalid,
-.form-select.is-invalid {
-    border-color: #dc3545 !important;
-    box-shadow: 0 0 0 0.2rem rgba(220,53,69,0.2) !important;
-    animation: shake 0.35s ease;
-}
-@keyframes shake {
-    0%,100% { transform: translateX(0); }
-    20%      { transform: translateX(-5px); }
-    40%      { transform: translateX(5px); }
-    60%      { transform: translateX(-3px); }
-    80%      { transform: translateX(3px); }
-}
+.tab-error-badge { font-size: 0.65rem; border-radius: 50%; padding: 2px 6px; vertical-align: middle; animation: badgePop 0.2s ease; }
+@keyframes badgePop { 0% { transform: scale(0); } 80% { transform: scale(1.2); } 100% { transform: scale(1); } }
+.form-control.is-invalid, .form-select.is-invalid { border-color: #dc3545 !important; box-shadow: 0 0 0 0.2rem rgba(220,53,69,0.2) !important; animation: shake 0.35s ease; }
+@keyframes shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-5px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
 .form-control.is-valid { border-color: #198754; }
-
-.is-invalid ~ .invalid-feedback,
-.form-select.is-invalid ~ .invalid-feedback {
-    display: block !important;
-    color: #dc3545;
-    font-size: 0.8rem;
-    margin-top: 3px;
-}
-
-.form-control:focus,
-.form-select:focus {
-    border-color: #80bdff;
-    box-shadow: 0 0 0 0.2rem rgba(13,110,253,0.25);
-}
-
+.is-invalid ~ .invalid-feedback, .form-select.is-invalid ~ .invalid-feedback { display: block !important; color: #dc3545; font-size: 0.8rem; margin-top: 3px; }
+.form-control:focus, .form-select:focus { border-color: #80bdff; box-shadow: 0 0 0 0.2rem rgba(13,110,253,0.25); }
 .card { transition: box-shadow 0.3s ease; }
 .card:hover { box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important; }
-
 .form-switch .form-check-input { background-color: #6c757d; }
 .form-switch .form-check-input:checked { background-color: #0d6efd; border-color: #0d6efd; }
-
 .tab-message-box { border-radius: 0.5rem; font-weight: 500; }
-
-@media (max-width: 768px) {
-    .card-body { padding: 1rem; }
-    .row.g-3 > * { margin-bottom: 1rem; }
-    .profile-tab-navigation .nav-link { font-size: 0.85rem; padding: 0.4rem 0.6rem; }
-}
+@media (max-width: 768px) { .card-body { padding: 1rem; } .row.g-3 > * { margin-bottom: 1rem; } .profile-tab-navigation .nav-link { font-size: 0.85rem; padding: 0.4rem 0.6rem; } }
                     ]]>
                 </style>
             </t>

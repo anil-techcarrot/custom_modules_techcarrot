@@ -1940,12 +1940,24 @@ class PortalEmployee(http.Controller):
             except Exception as e:
                 _logger.warning("Could not load notification for employee %s: %s", employee.id, str(e))
 
-            return request.render('employee_self_service_portal.portal_employee_profile_personal', {
-                'employee': employee,
-                'section': 'personal',
-                'countries': countries,
-                'notification': notification,
-            })
+                # Build portal_overlay from last pending/rejected submission
+                portal_overlay = {}
+                if (hasattr(employee, 'last_portal_submission')
+                        and employee.last_portal_submission
+                        and getattr(employee, 'last_submission_state', '') in ('pending', 'rejected')):
+                    try:
+                        import json
+                        portal_overlay = json.loads(employee.last_portal_submission)
+                    except Exception:
+                        portal_overlay = {}
+
+                return request.render('employee_self_service_portal.portal_employee_profile_personal', {
+                    'employee': employee,
+                    'section': 'personal',
+                    'countries': countries,
+                    'notification': notification,
+                    'portal_overlay': portal_overlay,  # ← FIX
+                })
 
         except Exception as e:
             _logger.error("Fatal error in portal_employee_personal: %s", str(e))
@@ -3310,7 +3322,7 @@ class PortalEmployee(http.Controller):
         # Only show confirmed payslips - no status filter needed
         domain = [
             ('employee_id', '=', employee.id),
-            ('state', 'in', ['paid'])
+            ('state', 'in', ['validated', 'done', 'paid'])
         ]
 
         # Only month/year filtering allowed

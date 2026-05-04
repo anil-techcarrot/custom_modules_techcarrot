@@ -55,6 +55,24 @@ EMAIL_PATTERN = re.compile(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
 
 class EmployeePortalProfileSubmit(http.Controller):
 
+    # ── NEW: Catch /my/employee and redirect to /my/employee/personal ──
+    @http.route(
+        '/my/employee',
+        type='http',
+        auth='user',
+        website=True,
+        methods=['GET'],
+    )
+    def portal_employee_home(self, **kwargs):
+        """
+        The base module renders portal_employee_profile_personal at /my/employee
+        WITHOUT passing portal_overlay, causing a KeyError crash.
+        This route intercepts that URL and redirects to our fixed controller.
+        """
+        return request.redirect('/my/employee/personal')
+
+    # ─────────────────────────────────────────────────────────────────
+
     @http.route(
         '/my/employee/personal',
         type='http',
@@ -73,15 +91,52 @@ class EmployeePortalProfileSubmit(http.Controller):
         if request.httprequest.method == 'POST':
             return self._handle_post(employee, post)
 
-        countries = request.env['res.country'].sudo().search(
-            [], order='name'
-        )
+        # ── Build portal_overlay from last submission ──────────────
+        portal_overlay = {}
+        if (employee.last_portal_submission
+                and employee.last_submission_state in ('pending', 'rejected')):
+            try:
+                portal_overlay = json.loads(employee.last_portal_submission)
+            except Exception:
+                portal_overlay = {}
 
+        # ── Build notification banner ──────────────────────────────
+        notification = None
+        if employee.last_submission_state == 'rejected':
+            rejected_req = request.env['hr.profile.change.request'].sudo().search([
+                ('employee_id', '=', employee.id),
+                ('state', '=', 'rejected'),
+            ], order='create_date desc', limit=1)
+            if rejected_req:
+                notification = {
+                    'type': 'danger',
+                    'message': 'Your profile update request was rejected by HR.',
+                    'reason': rejected_req.rejection_reason or 'No reason provided.',
+                    'request_name': rejected_req.name,
+                }
+        elif employee.last_submission_state == 'pending':
+            pending_req = request.env['hr.profile.change.request'].sudo().search([
+                ('employee_id', '=', employee.id),
+                ('state', '=', 'pending'),
+            ], order='create_date desc', limit=1)
+            if pending_req:
+                notification = {
+                    'type': 'warning',
+                    'message': 'Your profile change request is awaiting HR review.',
+                    'request_name': pending_req.name,
+                }
+
+        countries = request.env['res.country'].sudo().search([], order='name')
 
         return request.render(
             'employee_self_service_portal'
             '.portal_employee_profile_personal',
-            {'employee': employee, 'countries': countries},
+            {
+                'employee': employee,
+                'countries': countries,
+                'notification': notification,
+                'portal_overlay': portal_overlay,  # always present — fixes KeyError
+            },
         )
 
     def _handle_post(self, employee, post):

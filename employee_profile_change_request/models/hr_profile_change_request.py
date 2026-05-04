@@ -293,6 +293,11 @@ class HrProfileChangeRequest(models.Model):
     def action_submit(self):
         self.ensure_one()
         self.write({'state': 'pending'})
+        # ── Save submitted data to employee so portal can show overlay ──
+        self.employee_id.sudo().write({
+            'last_portal_submission': self.submitted_data,
+            'last_submission_state': 'pending',
+        })
         self._add_trail(
             action='submitted',
             note=f'Request submitted by {self.employee_id.name}',
@@ -359,6 +364,11 @@ class HrProfileChangeRequest(models.Model):
                  f'{len(write_vals)} field(s) written to employee record.',
         )
         self._send_mail_to_employee('approved')
+        # ── Clear overlay after approval ──
+        self.employee_id.sudo().write({
+            'last_portal_submission': False,
+            'last_submission_state': False,
+        })
         return True
 
     # ── Reject (opens wizard) ─────────────────────────────────────
