@@ -331,7 +331,14 @@ class PortalEmployeeSyncController(http.Controller):
             # Other fields
             second_relation_value = self._val(data.get('second_relation_with_employee'))
             if second_relation_value:
+                _logger.info("second_relation_value: %s", second_relation_value)
                 vals['second_relation_with_employee'] = second_relation_value
+                if second_relation_value =='Father':
+                    _logger.info("Father1")
+                    vals['father_name'] =  self._val(data.get('emergency_contact_person_1'))
+                elif second_relation_value =='Mother':
+                    _logger.info("Mother1")
+                    vals['mother_name'] = self._val(data.get('emergency_contact_person_1'))
 
             if self._val(data.get('private_street')):
                 vals['private_street'] = self._val(data.get('private_street'))
@@ -344,7 +351,11 @@ class PortalEmployeeSyncController(http.Controller):
 
             relationship_id = self._get_or_create_relationship(data.get('relationship_with_emp_id'))
             if relationship_id:
+                _logger.info("relationship_id: %s", relationship_id)
                 vals['relationship_with_emp_id'] = relationship_id
+                if relationship_id == '1':
+                    _logger.info("Father")
+                    vals['father_name'] = self._val(data.get('emergency_contact_person'))
 
             if self._val(data.get('sex')):
                 sex_value = self._val(data.get('sex')).lower()
@@ -363,7 +374,7 @@ class PortalEmployeeSyncController(http.Controller):
                 'leave_date_from': self._parse_date(data.get('leave_date_from')),
                 'start_date_of_degree': self._parse_date(data.get('start_date_of_degree')),
                 'completion_date_of_degree': self._parse_date(data.get('completion_date_of_degree')),
-                'expiry_date': self._parse_date(data.get('expiry_date')),
+                'expiry_date': self._parse_date(data.get('passport_expiration_date')),
             })
 
             try:

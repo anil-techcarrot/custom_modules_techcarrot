@@ -10,6 +10,48 @@ import phonenumbers
 class HrEmployeeInherit(models.Model):
     _inherit = 'hr.employee'
 
+    hr_manager_id = fields.Many2one(
+        comodel_name='hr.employee',
+        string='Assigned HR Manager',
+        help='The HR person responsible for reviewing this employee profile change requests.',
+        tracking=True,
+    )
+
+    mother_tongue_name = fields.Char(string='Mother Tongue')
+    language_known_name = fields.Char(string='language known')
+    spouse_passport_expiry_date = fields.Datetime(string='Spouse Passport Expiry Date')
+
+    bank_account_no = fields.Char(string='Bank Account Number')
+
+    # Professional Development & Supporting Documents
+    resume_file = fields.Binary(string='Resume/CV', attachment=True)
+    resume_file_filename = fields.Char(string='Resume/CV Filename')
+
+    training_certificates = fields.Binary(string='Training Certificates', attachment=True)
+    training_certificates_filename = fields.Char(string='Training Certificates Filename')
+
+    awards_files = fields.Binary(string='Awards & Recognition', attachment=True)
+    awards_files_filename = fields.Char(string='Awards & Recognition Filename')
+
+    x_experience = fields.Text(
+        string='Professional Experience Summary',
+        help='Describe professional experience, roles, responsibilities and achievements'
+    )
+    x_skills = fields.Char(
+        string='Technical & Professional Skills',
+        help='Separate skills with commas. e.g., Python, Project Management'
+    )
+
+    # Document Management
+    emirates_id_file = fields.Binary(string='Emirates ID Copy', attachment=True)
+    emirates_id_filename = fields.Char(string='Emirates ID Filename')
+
+    passport_file = fields.Binary(string='Passport Copy', attachment=True)
+    passport_filename = fields.Char(string='Passport Filename')
+
+    other_documents = fields.Binary(string='Other Documents', attachment=True)
+    other_documents_filename = fields.Char(string='Other Documents Filename')
+
     resource_id = fields.Many2one('resource.resource', required=False)
     employee_first_name = fields.Char('Employee First Name', copy=False)
     employee_middle_name = fields.Char('Employee Middle Name', copy=False)
@@ -28,6 +70,8 @@ class HrEmployeeInherit(models.Model):
 
     #Notebook Pages Field
     home_land_line_no = fields.Char('Home Land Line Number', copy=False)
+    home_land_line_no_1 = fields.Char('Home Land Line Number', copy=False)
+    # phone_code_of_second_person = fields.Selection(string="Countrycode", selection=_country_code_get, copy=False)
     relationship_with_emp_id = fields.Many2one('employee.relationship', string= "Relationship with Employee", copy=False)
     emergency_contact_person_name = fields.Char('Emergency Contact Person Name', copy=False)
     emergency_contact_person_name_1 = fields.Char('Emergency Contact Person Name(1)', copy=False)
@@ -181,6 +225,17 @@ class HrEmployeeInherit(models.Model):
     exit_reason_id = fields.Many2one('exit.reason', string='Exit Reason', copy=False)
     home_country_id_name = fields.Char('Home Country ID Name', copy=False)
     home_country_id_number = fields.Char('Home Country ID Number', copy=False)
+    industry_ref_name_1 = fields.Char('Industry Reference Name', copy=False)
+    industry_ref_email_1 = fields.Char('Industry Reference Email', copy=False)
+    industry_ref_mob_no_1 = fields.Char('Industry Reference Mobile Number', copy=False)
+    previous_company_name_1 = fields.Char('Previous Company Name', copy=False)
+    designation_1 = fields.Char('Designation', copy=False)
+    period_in_company_1 = fields.Char('Period in Company', copy=False)
+    reason_of_leaving_1 = fields.Char('Reason of Leaving', copy=False)
+    exit_type_id_1 = fields.Many2one('exit.type', string='Exit Type', copy=False)
+    exit_reason_id_1 = fields.Many2one('exit.reason', string='Exit Reason', copy=False)
+    home_country_id_name_1 = fields.Char('Home Country ID Name', copy=False)
+    home_country_id_number_1 = fields.Char('Home Country ID Number', copy=False)
     is_expiry_today = fields.Boolean(compute='_compute_is_expiry_today', string="Expiry Today")
     # country_code_for_emergency_contact_person_phone_no = fields.Integer(string='Country Code', related='private_country_id.phone_code', copy=False)
     # country_code_for_work_mobile = fields.Selection(selection=_country_code_get, string='Country ISD Code', copy=False)
