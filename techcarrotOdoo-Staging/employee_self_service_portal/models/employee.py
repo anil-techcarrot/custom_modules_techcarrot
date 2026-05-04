@@ -37,6 +37,7 @@ class HREmployee(models.Model):
     last_submission_state = fields.Selection([
         ('pending', 'Pending HR Review'),
         ('rejected', 'Rejected'),
+        ('approved', 'Approved'),  # ← ADD THIS LINE
     ], string='Last Submission Display State')
 
     user_id = fields.Many2one('res.users', string="Portal User", help="Portal user linked to this employee")
