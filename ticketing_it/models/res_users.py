@@ -33,10 +33,20 @@ class ResUsers(models.Model):
         # Handle Azure SSO login by validating user existence and linking OAuth credentials
         email = validation.get('email')
         oauth_uid = validation.get('user_id')
+ 
         if not email:
             raise Exception("Email not provided by Azure AD")
-        # Check if user exists in Odoo
-        user = self.sudo().search([('login', '=', email)], limit=1)
+ 
+        original_login = email.strip()
+ 
+        # 🔹 Variant 1: First letter CAPITAL
+        cap_login = original_login[:1].upper() + original_login[1:]
+        # 🔹 Variant 2: First letter lowercase
+        low_login = original_login[:1].lower() + original_login[1:]
+        # 🔍 Try both variants
+        user = self.sudo().search([('login', '=', cap_login)], limit=1)
+        if not user:
+            user = self.sudo().search([('login', '=', low_login)], limit=1)
         if not user:
             # Block login if user is not pre-created in Odoo
             _logger.warning("Azure SSO: Login blocked for %s — user not found in Odoo", email)
