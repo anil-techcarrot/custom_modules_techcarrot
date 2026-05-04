@@ -3,33 +3,6 @@ from odoo import models, fields, api
 class HREmployee(models.Model):
     _inherit = 'hr.employee'
 
-    last_portal_submission = fields.Text(
-        string='Last Portal Submission (JSON)',
-        help='Stores last submitted data from portal for display purposes.'
-    )
-    last_submission_state = fields.Selection([
-        ('pending', 'Pending HR Review'),
-        ('rejected', 'Rejected'),
-    ], string='Last Submission Display State')
-
-    # ── Persistent notification fields (never auto-cleared) ────────
-    # These survive approve/reject and show the banner on next portal visit.
-    last_notification_type = fields.Selection([
-        ('pending', 'Pending'),
-        ('approved', 'Approved'),
-        ('rejected', 'Rejected'),
-    ], string='Last Portal Notification Type')
-
-    last_notification_message = fields.Text(
-        string='Last Portal Notification Message',
-    )
-    last_notification_reason = fields.Text(
-        string='Last Portal Notification Reason',
-    )
-    last_notification_ref = fields.Char(
-        string='Last Portal Notification Reference',
-    )
-
     # last_portal_submission = fields.Text(
     #     string='Last Portal Submission (JSON)',
     #     help='Stores last submitted data from portal for display purposes.'
@@ -38,6 +11,33 @@ class HREmployee(models.Model):
     #     ('pending', 'Pending HR Review'),
     #     ('rejected', 'Rejected'),
     # ], string='Last Submission Display State')
+    #
+    # # ── Persistent notification fields (never auto-cleared) ────────
+    # # These survive approve/reject and show the banner on next portal visit.
+    # last_notification_type = fields.Selection([
+    #     ('pending', 'Pending'),
+    #     ('approved', 'Approved'),
+    #     ('rejected', 'Rejected'),
+    # ], string='Last Portal Notification Type')
+    #
+    # last_notification_message = fields.Text(
+    #     string='Last Portal Notification Message',
+    # )
+    # last_notification_reason = fields.Text(
+    #     string='Last Portal Notification Reason',
+    # )
+    # last_notification_ref = fields.Char(
+    #     string='Last Portal Notification Reference',
+    # )
+
+    last_portal_submission = fields.Text(
+        string='Last Portal Submission (JSON)',
+        help='Stores last submitted data from portal for display purposes.'
+    )
+    last_submission_state = fields.Selection([
+        ('pending', 'Pending HR Review'),
+        ('rejected', 'Rejected'),
+    ], string='Last Submission Display State')
 
     user_id = fields.Many2one('res.users', string="Portal User", help="Portal user linked to this employee")
     portal_access_crm = fields.Boolean("Portal Access CRM", default=False, help="Allow access to CRM functionality in portal")

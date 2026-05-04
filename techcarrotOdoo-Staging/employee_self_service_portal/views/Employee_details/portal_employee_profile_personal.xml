@@ -2237,20 +2237,37 @@ document.getElementById('personalDetailsForm').addEventListener('submit', functi
         headers: { 'X-CSRFToken': csrfToken }
     })
     .then(response => response.json())
+
+
     .then(data => {
-        if (data.success) {
-            disableEditMode();
-            localStorage.removeItem('profileDraft');
+    if (data.success) {
+        disableEditMode();
+        localStorage.removeItem('profileDraft');
+        if (data.no_change) {
+            // Nothing changed — show info message, no reference
+            showTabMessage(
+                activeProfileTab,
+                'No changes were detected. Your profile data is already up to date.',
+                'info'
+            );
+        } else {
             const ref = data.reference || '';
-            showTabMessage(activeProfileTab,
+            showTabMessage(
+                activeProfileTab,
                 ' Your changes have been submitted to HR for review and approval.' +
                 (ref ? ' Reference: <strong>' + ref + '</strong>' : '') +
                 ' You will receive an email once HR approves or rejects your request.',
-                'success');
-        } else {
-            showTabMessage(activeProfileTab, 'Error: ' + (data.error || 'Unknown error'), 'error');
+                'success'
+            );
         }
-    })
+    } else {
+        showTabMessage(activeProfileTab, 'Error: ' + (data.error || 'Unknown error'), 'error');
+    }
+})
+
+
+
+
     .catch(error => {
         console.error('Error:', error);
         showTabMessage(activeProfileTab, 'Network error. Please try again.', 'error');

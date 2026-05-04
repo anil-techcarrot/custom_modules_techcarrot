@@ -168,25 +168,55 @@ class EmployeePortalProfileSubmit(http.Controller):
                     'error': 'No data was submitted.',
                 })
 
-            # ── Create change request ────────────────────────────
+            # ── Compare submitted values against current employee values ──
+            # Only keep fields where the submitted value actually differs
+            changed = {}
+            for field, new_val in submitted.items():
+                try:
+                    current = getattr(employee, field, None)
+                    # Handle relational fields (Many2one)
+                    if hasattr(current, 'name'):
+                        current_str = str(current.name) if current else ''
+                    elif current is False or current is None:
+                        current_str = ''
+                    else:
+                        current_str = str(current)
+
+                    # Normalise both sides for comparison
+                    if new_val.strip() != current_str.strip():
+                        changed[field] = new_val
+                except Exception:
+                    # If we can't compare, include it to be safe
+                    changed[field] = new_val
+
+            # ── If nothing actually changed, return success without creating a request ──
+            if not changed:
+                return request.make_json_response({
+                    'success': True,
+                    'reference': '',
+                    'message': 'No changes detected. Nothing was saved.',
+                    'no_change': True,
+                })
+
+            # ── Create change request only when something changed ────────────────────
             req = request.env[
                 'hr.profile.change.request'
             ].sudo().create({
-                'employee_id':    employee.id,
-                'submitted_data': json.dumps(submitted),
-                'state':          'draft',
+                'employee_id': employee.id,
+                'submitted_data': json.dumps(changed),
+                'state': 'draft',
             })
 
             # ── Submit → state=pending + email to HR ─────────────
             req.action_submit()
 
             _logger.info(
-                'Profile change request %s created for employee %s',
-                req.name, employee.name,
+                'Profile change request %s created for employee %s — %d field(s) changed',
+                req.name, employee.name, len(changed),
             )
 
             return request.make_json_response({
-                'success':   True,
+                'success': True,
                 'reference': req.name,
                 'message': (
                     'Your profile update request has been submitted. '
@@ -201,5 +231,5 @@ class EmployeePortalProfileSubmit(http.Controller):
             )
             return request.make_json_response({
                 'success': False,
-                'error':   str(e),
+                'error': str(e),
             })
