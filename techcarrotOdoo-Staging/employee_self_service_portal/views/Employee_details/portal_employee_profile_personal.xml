@@ -1968,7 +1968,8 @@ let activeProfileTab = 'basic';
 function switchProfileTab(tabKey) {
     const previousTab = activeProfileTab;
     activeProfileTab = tabKey;
-    if (previousTab && previousTab !== tabKey) {
+    /* ── Only clear validation when NOT in edit mode ── */
+    if (!isEditMode && previousTab && previousTab !== tabKey) {
         clearValidationStates(previousTab);
     }
     document.querySelectorAll('#personalDetailsForm .profile-tab-section').forEach(card => {
@@ -2041,7 +2042,8 @@ function disableEditMode() {
     });
     document.getElementById('formActions').style.display = 'none';
     document.getElementById('viewActions').style.display = 'block';
-    clearValidationStates(activeProfileTab);
+    /* ── Clear ALL tabs when exiting edit mode ── */
+    ['basic', 'professional', 'family', 'education', 'documents'].forEach(t => clearValidationStates(t));
     const disc = document.getElementById('personalDisclaimer');
     if (disc) disc.checked = false;
     const btn = document.getElementById('personalSaveBtn');
@@ -2066,7 +2068,6 @@ function cancelEdit() {
         const input = document.querySelector(`[name="${key}"]`);
         if (input) input.value = value;
     }
-    clearValidationStates(activeProfileTab);
     disableEditMode();
     showTabMessage(activeProfileTab, 'Changes cancelled.', 'info');
 }
@@ -2083,8 +2084,7 @@ function validateField(event) {
     const field = event.target;
     const parentSection = field.closest('.profile-tab-section');
 
-    // ── ONLY skip validation on live user events for fields in OTHER tabs ──
-    // When called from the submit handler (type='submit'), always validate.
+    /* ── Only skip on live user events for other tabs ── */
     const isUserEvent = event.type === 'input' || event.type === 'blur' || event.type === 'change';
     if (isUserEvent && parentSection && parentSection.getAttribute('data-tab-group') !== activeProfileTab) {
         return true;
@@ -2102,19 +2102,16 @@ function validateField(event) {
     if (validationType) {
         const val = field.value ? field.value.trim() : '';
 
-        // ── Check empty required fields ───────────────────────────
         if (!val) {
             if (field.hasAttribute('required') || validationType === 'required') {
                 isValid = false;
                 errorMessage = 'This field is required.';
             } else {
-                // Empty + not required = skip further checks, clear state
                 updateTabErrorBadges();
                 return true;
             }
         }
 
-        // ── Only run format checks if field has a value ───────────
         if (val) {
             switch (validationType) {
                 case 'email':
@@ -2161,7 +2158,6 @@ function validateField(event) {
         }
     }
 
-    // ── Show validation state for filled fields OR invalid empty required fields ──
     if (field.value.trim() || !isValid) {
         if (isValid) {
             field.classList.add('is-valid');
@@ -2239,7 +2235,7 @@ function showTabMessage(tabKey, text, type) {
 document.getElementById('personalDetailsForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
-    // ── Step 1: Check disclaimer ──────────────────────────────────
+    /* ── Step 1: Disclaimer check ── */
     const disc = document.getElementById('personalDisclaimer');
     if (disc && !disc.checked) {
         showTabMessage(activeProfileTab, 'Please read and accept the Employee Disclaimer before saving.', 'error');
@@ -2248,18 +2244,20 @@ document.getElementById('personalDetailsForm').addEventListener('submit', functi
         return;
     }
 
-    // ── Step 2: Clear ALL tabs first, then validate all ───────────
+    /* ── Step 2: Clear ALL tabs first ── */
     const allTabs = ['basic', 'professional', 'family', 'education', 'documents'];
     const tabNames = {
-        'basic': 'Basic Info', 'professional': 'Professional',
-        'family': 'Family', 'education': 'Education', 'documents': 'Documents',
+        'basic': 'Basic Info',
+        'professional': 'Professional',
+        'family': 'Family',
+        'education': 'Education',
+        'documents': 'Documents',
     };
     const tabsWithErrors = [];
 
-    // Clear all states first
     allTabs.forEach(tabKey => clearValidationStates(tabKey));
 
-    // Validate every field in every tab using synthetic submit event
+    /* ── Step 3: Validate ALL tabs with synthetic submit event ── */
     allTabs.forEach(tabKey => {
         document.querySelectorAll(
             `.profile-tab-section[data-tab-group="${tabKey}"] input[data-validation],
@@ -2276,37 +2274,37 @@ document.getElementById('personalDetailsForm').addEventListener('submit', functi
 
     updateTabErrorBadges();
 
-    // ── Step 3: Show floating error popup if any tab has errors ───
+    /* ── Step 4: Show floating popup if errors found ── */
     if (tabsWithErrors.length > 0) {
         const tabBadges = tabsWithErrors.map(t =>
-            `<span style="background:#dc3545;color:white;padding:2px 10px;
-             border-radius:12px;font-size:12px;font-weight:bold;margin:0 3px;">
-             ${tabNames[t] || t}</span>`
+            `<span style="background:#dc3545;color:white;padding:3px 12px;
+             border-radius:12px;font-size:12px;font-weight:bold;margin:2px 4px;display:inline-block;">
+             ⚠ ${tabNames[t] || t}</span>`
         ).join('');
 
-        // Remove existing alert
         const existingAlert = document.getElementById('globalValidationAlert');
         if (existingAlert) existingAlert.remove();
 
         const globalAlert = document.createElement('div');
         globalAlert.id = 'globalValidationAlert';
         globalAlert.innerHTML = `
-            <div style="display:flex;align-items:flex-start;gap:10px;">
-                <span style="font-size:22px;">⚠️</span>
+            <div style="display:flex;align-items:flex-start;gap:12px;">
+                <span style="font-size:26px;line-height:1;">⚠️</span>
                 <div style="flex:1;">
-                    <strong style="display:block;margin-bottom:4px;font-size:14px;">
+                    <strong style="display:block;margin-bottom:6px;font-size:15px;color:#b71c1c;">
                         Please fix errors before saving
                     </strong>
-                    <div style="font-size:13px;margin-bottom:4px;">
-                        Required fields missing in: ${tabBadges}
+                    <div style="font-size:13px;margin-bottom:6px;color:#333;">
+                        Required fields are missing in:
                     </div>
-                    <div style="font-size:12px;color:#555;">
-                        Click the highlighted tab to see the missing fields.
+                    <div style="margin-bottom:6px;">${tabBadges}</div>
+                    <div style="font-size:12px;color:#666;">
+                        👆 Click the highlighted tab above to see and fill the missing fields.
                     </div>
                 </div>
                 <button onclick="document.getElementById('globalValidationAlert').remove()"
-                    style="background:none;border:none;font-size:22px;cursor:pointer;
-                           color:#666;line-height:1;padding:0;">×</button>
+                    style="background:none;border:none;font-size:24px;cursor:pointer;
+                           color:#999;line-height:1;padding:0;margin-top:-4px;">×</button>
             </div>
         `;
         Object.assign(globalAlert.style, {
@@ -2315,25 +2313,24 @@ document.getElementById('personalDetailsForm').addEventListener('submit', functi
             left:         '50%',
             transform:    'translateX(-50%)',
             zIndex:       '99999',
-            minWidth:     '360px',
-            maxWidth:     '650px',
-            background:   '#fff8e1',
+            minWidth:     '380px',
+            maxWidth:     '680px',
+            background:   '#fff3f3',
             border:       '2px solid #dc3545',
-            borderRadius: '10px',
-            padding:      '14px 18px',
-            boxShadow:    '0 6px 24px rgba(0,0,0,0.18)',
+            borderRadius: '12px',
+            padding:      '16px 20px',
+            boxShadow:    '0 8px 32px rgba(220,53,69,0.25)',
             fontFamily:   'Arial, sans-serif',
-            animation:    'slideDown 0.3s ease',
         });
         document.body.appendChild(globalAlert);
 
-        // Auto-remove after 8 seconds
+        /* Auto-remove after 10 seconds */
         setTimeout(() => {
             const a = document.getElementById('globalValidationAlert');
             if (a) a.remove();
-        }, 8000);
+        }, 10000);
 
-        // Switch to first tab with errors and scroll to first invalid field
+        /* Switch to first tab with errors */
         switchProfileTab(tabsWithErrors[0]);
         setTimeout(() => {
             const firstError = document.querySelector(
@@ -2347,13 +2344,15 @@ document.getElementById('personalDetailsForm').addEventListener('submit', functi
         return;
     }
 
-    // ── Step 4: Hide global alert if showing ─────────────────────
+    /* ── Step 5: Remove alert if all good ── */
     const existingAlert = document.getElementById('globalValidationAlert');
     if (existingAlert) existingAlert.remove();
 
-    // ── Step 5: Submit the form ───────────────────────────────────
+    /* ── Step 6: Submit ── */
     const toReenable = [];
-    document.querySelectorAll('#personalDetailsForm select[disabled], #personalDetailsForm input[type="checkbox"][disabled]').forEach(el => {
+    document.querySelectorAll(
+        '#personalDetailsForm select[disabled], #personalDetailsForm input[type="checkbox"][disabled]'
+    ).forEach(el => {
         if (!el.hasAttribute('data-always-readonly')) { el.removeAttribute('disabled'); toReenable.push(el); }
     });
     const formData = new FormData(this);
