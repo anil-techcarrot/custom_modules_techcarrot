@@ -2233,39 +2233,86 @@ document.getElementById('personalDetailsForm').addEventListener('submit', functi
     updateTabErrorBadges();
 
     if (tabsWithErrors.length > 0) {
-        // ── Build human-readable tab names ──────────────────────
-        const tabNames = {
-            'basic':        'Basic Info',
-            'professional': 'Professional',
-            'family':       'Family',
-            'education':    'Education',
-            'documents':    'Documents',
-        };
+    const tabNames = {
+        'basic':        'Basic Info',
+        'professional': 'Professional',
+        'family':       'Family',
+        'education':    'Education',
+        'documents':    'Documents',
+    };
 
-        const errorTabNames = tabsWithErrors.map(t => `<strong>${tabNames[t] || t}</strong>`).join(', ');
+    // ── Build badge list of tabs with errors ─────────────────
+    const tabBadges = tabsWithErrors.map(t =>
+        `<span style="background:#dc3545;color:white;padding:2px 10px;
+         border-radius:12px;font-size:12px;font-weight:bold;margin:0 3px;">
+         ${tabNames[t] || t}</span>`
+    ).join('');
 
-        // ── Switch to the first tab that has errors ──────────────
-        switchProfileTab(tabsWithErrors[0]);
+    const msg = tabsWithErrors.length === 1
+        ? `Required fields missing in: ${tabBadges}`
+        : `Required fields missing in: ${tabBadges}`;
 
-        // ── Show error message listing all tabs with issues ──────
-        const msg = tabsWithErrors.length === 1
-            ? `Please fill in the required fields in the ${errorTabNames} tab.`
-            : `Please fill in the required fields in the following tabs: ${errorTabNames}.`;
+    // ── Show FIXED floating alert at top of screen ───────────
+    // Remove existing alert if any
+    const existingAlert = document.getElementById('globalValidationAlert');
+    if (existingAlert) existingAlert.remove();
 
-        showTabMessage(tabsWithErrors[0], msg, 'error');
+    const globalAlert = document.createElement('div');
+    globalAlert.id = 'globalValidationAlert';
+    globalAlert.innerHTML = `
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+            <span style="font-size:22px;">⚠️</span>
+            <div style="flex:1;">
+                <strong style="display:block;margin-bottom:4px;font-size:14px;">
+                    Please fix errors before saving
+                </strong>
+                <div style="font-size:13px;margin-bottom:4px;">${msg}</div>
+                <div style="font-size:12px;color:#555;">
+                    Click the highlighted tab to see the missing fields.
+                </div>
+            </div>
+            <button onclick="this.closest('#globalValidationAlert').remove()"
+                style="background:none;border:none;font-size:22px;cursor:pointer;
+                       color:#666;line-height:1;padding:0;">×</button>
+        </div>
+    `;
+    Object.assign(globalAlert.style, {
+        position:        'fixed',
+        top:             '80px',
+        left:            '50%',
+        transform:       'translateX(-50%)',
+        zIndex:          '99999',
+        minWidth:        '360px',
+        maxWidth:        '650px',
+        background:      '#fff8e1',
+        border:          '2px solid #dc3545',
+        borderRadius:    '10px',
+        padding:         '14px 18px',
+        boxShadow:       '0 6px 24px rgba(0,0,0,0.18)',
+        fontFamily:      'Arial, sans-serif',
+        animation:       'slideDown 0.3s ease',
+    });
+    document.body.appendChild(globalAlert);
 
-        // ── Scroll to the first invalid field in that tab ────────
-        setTimeout(() => {
-            const firstError = document.querySelector(
-                `.profile-tab-section[data-tab-group="${tabsWithErrors[0]}"] .is-invalid`
-            );
-            if (firstError) {
-                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                firstError.focus();
-            }
-        }, 150);
-        return;
-    }
+    // Auto-remove after 8 seconds
+    setTimeout(() => {
+        const a = document.getElementById('globalValidationAlert');
+        if (a) a.remove();
+    }, 8000);
+
+    // ── Switch to first tab with errors THEN scroll ──────────
+    switchProfileTab(tabsWithErrors[0]);
+    setTimeout(() => {
+        const firstError = document.querySelector(
+            `.profile-tab-section[data-tab-group="${tabsWithErrors[0]}"] .is-invalid`
+        );
+        if (firstError) {
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            firstError.focus();
+        }
+    }, 200);
+    return;
+}
 
 
 
@@ -2321,6 +2368,8 @@ document.getElementById('personalDetailsForm').addEventListener('submit', functi
     });
 });
 
+
+
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('#personalDetailsForm .profile-tab-button').forEach(button => {
         button.addEventListener('click', function() { switchProfileTab(this.getAttribute('data-tab-target')); });
@@ -2360,6 +2409,10 @@ document.addEventListener('DOMContentLoaded', function() {
 .form-switch .form-check-input:checked { background-color: #0d6efd; border-color: #0d6efd; }
 .tab-message-box { border-radius: 0.5rem; font-weight: 500; }
 @media (max-width: 768px) { .card-body { padding: 1rem; } .row.g-3 > * { margin-bottom: 1rem; } .profile-tab-navigation .nav-link { font-size: 0.85rem; padding: 0.4rem 0.6rem; } }
+@keyframes slideDown {
+    from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
                     ]]>
                 </style>
             </t>
