@@ -2211,19 +2211,66 @@ document.getElementById('personalDetailsForm').addEventListener('submit', functi
         setTimeout(() => disc.closest('.alert').style.animation = '', 400);
         return;
     }
-    clearValidationStates(activeProfileTab);
-    let isFormValid = true;
-    document.querySelectorAll(
-        `.profile-tab-section[data-tab-group="${activeProfileTab}"] input[data-validation],
-         .profile-tab-section[data-tab-group="${activeProfileTab}"] select[data-validation]`
-    ).forEach(input => { if (!validateField({ target: input })) isFormValid = false; });
+
+    // ── Validate ALL tabs, not just the active one ──────────────
+    const allTabs = ['basic', 'professional', 'family', 'education', 'documents'];
+    const tabsWithErrors = [];
+
+    allTabs.forEach(tabKey => {
+        clearValidationStates(tabKey);
+        document.querySelectorAll(
+            `.profile-tab-section[data-tab-group="${tabKey}"] input[data-validation],
+             .profile-tab-section[data-tab-group="${tabKey}"] select[data-validation]`
+        ).forEach(input => {
+            if (!validateField({ target: input })) {
+                if (!tabsWithErrors.includes(tabKey)) {
+                    tabsWithErrors.push(tabKey);
+                }
+            }
+        });
+    });
+
     updateTabErrorBadges();
-    if (!isFormValid) {
-        const firstError = document.querySelector(`.profile-tab-section[data-tab-group="${activeProfileTab}"] .is-invalid`);
-        if (firstError) { setTimeout(() => { firstError.scrollIntoView({ behavior: 'smooth', block: 'center' }); firstError.focus(); }, 100); }
-        showTabMessage(activeProfileTab, 'Please correct the highlighted errors in this tab.', 'error');
+
+    if (tabsWithErrors.length > 0) {
+        // ── Build human-readable tab names ──────────────────────
+        const tabNames = {
+            'basic':        'Basic Info',
+            'professional': 'Professional',
+            'family':       'Family',
+            'education':    'Education',
+            'documents':    'Documents',
+        };
+
+        const errorTabNames = tabsWithErrors.map(t => `<strong>${tabNames[t] || t}</strong>`).join(', ');
+
+        // ── Switch to the first tab that has errors ──────────────
+        switchProfileTab(tabsWithErrors[0]);
+
+        // ── Show error message listing all tabs with issues ──────
+        const msg = tabsWithErrors.length === 1
+            ? `Please fill in the required fields in the ${errorTabNames} tab.`
+            : `Please fill in the required fields in the following tabs: ${errorTabNames}.`;
+
+        showTabMessage(tabsWithErrors[0], msg, 'error');
+
+        // ── Scroll to the first invalid field in that tab ────────
+        setTimeout(() => {
+            const firstError = document.querySelector(
+                `.profile-tab-section[data-tab-group="${tabsWithErrors[0]}"] .is-invalid`
+            );
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstError.focus();
+            }
+        }, 150);
         return;
     }
+
+
+
+
+
     const toReenable = [];
     document.querySelectorAll('#personalDetailsForm select[disabled], #personalDetailsForm input[type="checkbox"][disabled]').forEach(el => {
         if (!el.hasAttribute('data-always-readonly')) { el.removeAttribute('disabled'); toReenable.push(el); }
