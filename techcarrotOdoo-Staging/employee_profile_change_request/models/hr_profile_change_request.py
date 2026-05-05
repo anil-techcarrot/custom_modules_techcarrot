@@ -224,36 +224,113 @@ class HrProfileChangeRequest(models.Model):
 
     def _send_mail_to_hr(self):
         try:
-            hr_person = self.employee_id.hr_manager_id
-            hr_email = hr_person.work_email if hr_person else None
-            if not hr_email:
-                _logger.warning('No HR manager assigned for employee %s.', self.employee_id.name)
+            # ── Get ALL users in HR Reviewer group ──────────────────
+            # No need to fill hr_manager_id on every employee.
+            # Any HR Reviewer in the same company will receive the email.
+            hr_group = self.env.ref(
+                'employee_profile_change_request.group_profile_change_hr_reviewer',
+                raise_if_not_found=False,
+            )
+            if not hr_group:
+                _logger.warning('HR Reviewer group not found.')
                 return
+
+            # Filter HR users belonging to the same company as the employee
+            hr_users = hr_group.users.filtered(
+                lambda u: not self.company_id
+                          or self.company_id in u.company_ids
+            )
+
+            if not hr_users:
+                _logger.warning(
+                    'No HR Reviewers found for company %s. '
+                    'Please assign the HR Reviewer group to at least one user.',
+                    self.company_id.name if self.company_id else '—',
+                )
+                return
+
+            # Collect all HR email addresses
+            hr_emails = [u.work_email or u.email for u in hr_users if (u.work_email or u.email)]
+            if not hr_emails:
+                _logger.warning('HR Reviewers found but none have an email address.')
+                return
+
+            email_to = ', '.join(hr_emails)
+            hr_names = ', '.join(hr_users.mapped('name'))
+
             mail = self.env['mail.mail'].sudo().create({
-                'subject': f'New Profile Change Request: {self.name} — {self.employee_id.name}',
-                'email_to': hr_email,
-                'email_from': self.employee_id.company_id.email or 'notifications@techcarrot-fz-llc1.odoo.com',
+                'subject': (
+                    f'New Profile Change Request: '
+                    f'{self.name} — {self.employee_id.name}'
+                ),
+                'email_to': email_to,
+                'email_from': (
+                        self.employee_id.company_id.email
+                        or 'notifications@techcarrot-fz-llc1.odoo.com'
+                ),
                 'auto_delete': False,
                 'body_html': f'''
                     <div style="font-family:Arial,sans-serif;max-width:600px;">
                         <div style="background:#4e73df;padding:20px;">
-                            <h2 style="color:white;margin:0;">📋 New Profile Change Request</h2>
+                            <h2 style="color:white;margin:0;">
+                                📋 New Profile Change Request
+                            </h2>
                         </div>
                         <div style="padding:20px;background:#f9f9f9;">
-                            <p>Dear {hr_person.name},</p>
-                            <p><b>{self.employee_id.name}</b> has submitted a profile update request that requires your review.</p>
+                            <p>Dear HR Team,</p>
+                            <p>
+                                <b>{self.employee_id.name}</b> has submitted
+                                a profile update request that requires your review.
+                            </p>
                             <table style="width:100%;border-collapse:collapse;">
-                                <tr style="background:#eef2ff;"><td style="padding:8px;border:1px solid #ddd;font-weight:bold;width:35%;">Reference</td><td style="padding:8px;border:1px solid #ddd;">{self.name}</td></tr>
-                                <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Employee</td><td style="padding:8px;border:1px solid #ddd;">{self.employee_id.name}</td></tr>
-                                <tr style="background:#eef2ff;"><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Department</td><td style="padding:8px;border:1px solid #ddd;">{self.department_id.name or '—'}</td></tr>
-                                <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Submitted On</td><td style="padding:8px;border:1px solid #ddd;">{self.submission_date}</td></tr>
+                                <tr style="background:#eef2ff;">
+                                    <td style="padding:8px;border:1px solid #ddd;
+                                               font-weight:bold;width:35%;">Reference</td>
+                                    <td style="padding:8px;border:1px solid #ddd;">{self.name}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:8px;border:1px solid #ddd;
+                                               font-weight:bold;">Employee</td>
+                                    <td style="padding:8px;border:1px solid #ddd;">{self.employee_id.name}</td>
+                                </tr>
+                                <tr style="background:#eef2ff;">
+                                    <td style="padding:8px;border:1px solid #ddd;
+                                               font-weight:bold;">Company</td>
+                                    <td style="padding:8px;border:1px solid #ddd;">{self.company_id.name if self.company_id else '—'}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:8px;border:1px solid #ddd;
+                                               font-weight:bold;">Department</td>
+                                    <td style="padding:8px;border:1px solid #ddd;">{self.department_id.name or '—'}</td>
+                                </tr>
+                                <tr style="background:#eef2ff;">
+                                    <td style="padding:8px;border:1px solid #ddd;
+                                               font-weight:bold;">Work Location</td>
+                                    <td style="padding:8px;border:1px solid #ddd;">{self.work_location_id.name if self.work_location_id else '—'}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:8px;border:1px solid #ddd;
+                                               font-weight:bold;">Submitted On</td>
+                                    <td style="padding:8px;border:1px solid #ddd;">{self.submission_date}</td>
+                                </tr>
                             </table>
-                            <p>Please login to Odoo → Profile Change Requests to review and approve or reject.</p>
+                            <p style="margin-top:16px;">
+                                Please login to Odoo →
+                                <b>Profile Change Requests → Pending Review</b>
+                                to approve or reject.
+                            </p>
+                            <p style="color:#888;font-size:12px;">
+                                This email was sent to: {hr_names}
+                            </p>
                         </div>
-                    </div>''',
+                    </div>
+                ''',
             })
             mail.sudo().send()
-            _logger.info('HR notification sent to %s for request %s', hr_email, self.name)
+            _logger.info(
+                'HR notification sent to %s for request %s',
+                email_to, self.name,
+            )
         except Exception as e:
             _logger.warning('Failed to send HR notification: %s', e)
 
