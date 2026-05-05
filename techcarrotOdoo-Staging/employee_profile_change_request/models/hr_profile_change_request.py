@@ -94,6 +94,15 @@ class HrProfileChangeRequest(models.Model):
     rejection_reason = fields.Text(string='Rejection Reason', tracking=True)
     trail_ids = fields.One2many(comodel_name='hr.profile.change.request.trail', inverse_name='request_id', string='Audit Trail', readonly=True)
 
+    company_id = fields.Many2one(
+        comodel_name='res.company',
+        related='employee_id.company_id',
+        string='Company',
+        store=True,
+        readonly=True,
+        index=True,
+    )
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
