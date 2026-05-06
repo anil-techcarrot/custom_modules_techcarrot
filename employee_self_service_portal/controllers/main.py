@@ -6,6 +6,8 @@ import html
 import json
 import logging
 import base64
+import io
+import pikepdf
 
 # Set up logger
 _logger = logging.getLogger(__name__)
@@ -1264,14 +1266,14 @@ class PortalEmployee(http.Controller):
 
         # Payslips data with enhanced analytics
         payslips = request.env['hr.payslip'].sudo().search([
-            ('employee_id', '=', employee.id)
+            ('employee_id', '=', employee.id),('state', 'in', ['paid'])
         ])
         payslips_count = len(payslips)
 
         # Latest payslip
         latest_payslip = request.env['hr.payslip'].sudo().search([
             ('employee_id', '=', employee.id),
-            ('state', 'in', ['done', 'paid'])
+            ('state', 'in', ['paid'])
         ], order='date_from desc', limit=1)
 
         # Enhanced attendance data - get ALL attendance records for today using user's timezone
@@ -3322,7 +3324,7 @@ class PortalEmployee(http.Controller):
         # Only show confirmed payslips - no status filter needed
         domain = [
             ('employee_id', '=', employee.id),
-            ('state', 'in', ['validated', 'done', 'paid'])
+            ('state', 'in', ['paid'])
         ]
 
         # Only month/year filtering allowed
@@ -3367,309 +3369,415 @@ class PortalEmployee(http.Controller):
             'selected_year': year or '',
         })
 
+#     @http.route(MY_EMPLOYEE_URL + '/payslips/download/<int:payslip_id>', type='http', auth='user', website=True)
+#     def portal_payslip_download(self, payslip_id, **kwargs):
+#         """Download payslip as PDF"""
+#         import logging
+#         import base64
+#         _logger = logging.getLogger(__name__)
+
+#         try:
+#             payslip = request.env['hr.payslip'].sudo().browse(payslip_id)
+#             employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
+
+#             # Security check - only allow access to own payslips
+#             if not payslip.exists() or not employee or payslip.employee_id.id != employee.id:
+#                 _logger.warning("Unauthorized payslip access attempt by user %s for payslip %s", request.env.uid,
+#                                 payslip_id)
+#                 return request.redirect(MY_EMPLOYEE_URL + '/payslips?error=access_denied')
+
+#             # Only allow download of confirmed payslips
+#             if payslip.state not in ['validated', 'done', 'paid']:
+#                 _logger.warning("Download attempt for unconfirmed payslip %s by user %s", payslip_id, request.env.uid)
+#                 return request.redirect(MY_EMPLOYEE_URL + '/payslips?error=not_confirmed')
+
+#             _logger.info("Attempting to download payslip %s for user %s", payslip_id, request.env.uid)
+
+#             # Try to find the payslip report - multiple approaches with detailed logging
+#             report_ref = None
+
+#             # Method 1: Try standard hr_payroll reports with sudo()
+#             report_names = [
+#                 'hr_payroll.action_report_payslip',
+#                 'hr_payroll.payslip_report',
+#                 'hr_payroll.report_payslip',
+#                 'hr_payroll.report_payslip_details'
+#             ]
+
+#             for report_name in report_names:
+#                 try:
+#                     report_ref = request.env.ref(report_name, raise_if_not_found=False)
+#                     if report_ref:
+#                         _logger.info("Found report reference: %s", report_name)
+#                         # Test if we can access this report
+#                         try:
+#                             report_sudo = report_ref.sudo()
+#                             # Try a quick test to see if this report can be used
+#                             if hasattr(report_sudo, 'report_name') or hasattr(report_sudo, '_render_qweb_pdf'):
+#                                 _logger.info("Report %s is accessible and usable", report_name)
+#                                 break
+#                             else:
+#                                 _logger.warning("Report %s found but may not be usable", report_name)
+#                                 report_ref = None
+#                         except Exception as access_test:
+#                             _logger.warning("Report %s access test failed: %s", report_name, str(access_test))
+#                             report_ref = None
+#                             continue
+#                     else:
+#                         _logger.debug("Report %s not found", report_name)
+#                 except Exception as ref_error:
+#                     _logger.debug("Error checking report %s: %s", report_name, str(ref_error))
+#                     continue
+
+#             # Method 2: Search for payslip reports if standard ones not found
+#             if not report_ref:
+#                 _logger.info("Standard reports not found, searching for any payslip reports...")
+#                 try:
+#                     reports = request.env['ir.actions.report'].sudo().search([
+#                         ('model', '=', 'hr.payslip'),
+#                         ('report_type', '=', 'qweb-pdf')
+#                     ])
+#                     _logger.info("Found %d payslip reports in system", len(reports))
+
+#                     for report in reports:
+#                         try:
+#                             # Test each report
+#                             _logger.info("Testing report: %s (ID: %d)", report.sudo().name, report.id)
+#                             report_ref = report
+#                             break
+#                         except Exception as test_error:
+#                             _logger.warning("Report test failed: %s", str(test_error))
+#                             continue
+
+#                 except Exception as search_error:
+#                     _logger.error("Error searching for reports: %s", str(search_error))
+
+#             if not report_ref:
+#                 _logger.error("No payslip report found for model hr.payslip")
+#                 return request.redirect(MY_EMPLOYEE_URL + '/payslips?error=report_not_found')
+
+#             # Generate PDF using the found report - use sudo() for report access
+#             _logger.info("Attempting to generate PDF with found report (ID: %d)", report_ref.id)
+
+#             # Use the correct method based on Odoo version with sudo()
+#             pdf_content = None
+#             try:
+#                 report_sudo = report_ref.sudo()
+
+#                 # Use the standard Odoo report rendering approach
+#                 _logger.info("Using standard report rendering with payslip ID: %d", payslip.id)
+
+#                 # Method 1: Try _render_qweb_pdf with proper context and parameters
+#                 try:
+#                     # Use the correct Odoo 18 API for report rendering
+#                     # _render_qweb_pdf expects (report_ref, res_ids, data=None)
+#                     pdf_content, _ = report_sudo._render_qweb_pdf(report_sudo.report_name, payslip.ids)
+#                     _logger.info("Successfully used _render_qweb_pdf method")
+#                 except Exception as method_error:
+#                     _logger.warning("_render_qweb_pdf failed: %s", str(method_error))
+
+#                     # Method 2: Try with render_qweb_pdf (if available)
+#                     try:
+#                         # Try render_qweb_pdf method
+#                         pdf_content, _ = report_sudo.render_qweb_pdf(payslip.ids)
+#                         _logger.info("Successfully used render_qweb_pdf method")
+#                     except Exception as method_error2:
+#                         _logger.warning("render_qweb_pdf method failed: %s", str(method_error2))
+
+#                         # Method 3: Try with _render method (with proper parameters)
+#                         try:
+#                             # Use _render with proper report_name and res_ids parameters
+#                             pdf_content, _ = report_sudo._render(report_sudo.report_name, payslip.ids)
+#                             _logger.info("Successfully used _render method")
+#                         except Exception as method_error3:
+#                             _logger.error("All render methods failed: %s", str(method_error3))
+#                             raise Exception("All report render methods failed")
+
+#                 if pdf_content and len(pdf_content) > 1000:
+#                     _logger.info("Successfully generated PDF using Odoo report, size: %d bytes", len(pdf_content))
+#                 else:
+#                     _logger.warning("PDF content is empty or too small: %s bytes",
+#                                     len(pdf_content) if pdf_content else 0)
+#                     pdf_content = None
+
+#             except Exception as render_error:
+#                 _logger.error("PDF rendering failed with Odoo report: %s", str(render_error))
+#                 pdf_content = None
+
+#             # Only use fallback if we couldn't get a valid PDF from Odoo reports
+#             if not pdf_content or len(pdf_content) < 100:
+#                 _logger.warning("Odoo report failed or returned invalid PDF, using fallback method")
+
+#                 # Fallback: Create a simple HTML-to-PDF conversion
+#                 _logger.info("Attempting simple PDF generation as fallback")
+#                 _logger.info("Attempting simple PDF generation as fallback")
+#                 try:
+#                     # Create simple HTML content
+#                     html_content = f"""
+#                     <!DOCTYPE html>
+#                     <html>
+#                     <head>
+#                         <meta charset="utf-8">
+#                         <title>Payslip {payslip.number or payslip.id}</title>
+#                         <style>
+#                             body {{ font-family: Arial, sans-serif; margin: 20px; }}
+#                             .header {{ text-align: center; margin-bottom: 30px; }}
+#                             .info {{ margin-bottom: 20px; }}
+#                             .line {{ margin: 5px 0; }}
+#                             table {{ width: 100%; border-collapse: collapse; margin-top: 20px; }}
+#                             th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
+#                             th {{ background-color: #f2f2f2; }}
+#                         </style>
+#                     </head>
+#                     <body>
+#                         <div class="header">
+#                             <h1>PAYSLIP</h1>
+#                             <h2>{payslip.number or payslip.id}</h2>
+#                         </div>
+
+#                         <div class="info">
+#                             <div class="line"><strong>Employee:</strong> {payslip.employee_id.name}</div>
+#                             <div class="line"><strong>Period:</strong> {payslip.date_from} to {payslip.date_to}</div>
+#                             <div class="line"><strong>Status:</strong> {dict(payslip._fields['state'].selection).get(payslip.state, payslip.state)}</div>
+#                         </div>
+
+#                         <table>
+#                             <thead>
+#                                 <tr>
+#                                     <th>Description</th>
+#                                     <th>Amount</th>
+#                                 </tr>
+#                             </thead>
+#                             <tbody>
+#                     """
+
+#                     # Add payslip lines
+#                     if payslip.line_ids:
+#                         for line in payslip.line_ids:
+#                             html_content += f"""
+#                                 <tr>
+#                                     <td>{line.name}</td>
+#                                     <td>{line.total:.2f}</td>
+#                                 </tr>
+#                             """
+#                     else:
+#                         html_content += "<tr><td colspan='2'>No payslip details available</td></tr>"
+
+#                     html_content += """
+#                             </tbody>
+#                         </table>
+#                     </body>
+#                     </html>
+#                     """
+
+#                     # Use wkhtmltopdf if available, otherwise create simple text-based PDF
+#                     try:
+#                         import subprocess
+#                         import tempfile
+#                         import os
+
+#                         # Create temporary HTML file
+#                         with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False) as html_file:
+#                             html_file.write(html_content)
+#                             html_file_path = html_file.name
+
+#                         # Create temporary PDF file
+#                         pdf_file_path = html_file_path.replace('.html', '.pdf')
+
+#                         # Try wkhtmltopdf
+#                         result = subprocess.run([
+#                             'wkhtmltopdf', '--page-size', 'A4', '--orientation', 'Portrait',
+#                             html_file_path, pdf_file_path
+#                         ], capture_output=True, timeout=30)
+
+#                         if result.returncode == 0 and os.path.exists(pdf_file_path):
+#                             with open(pdf_file_path, 'rb') as pdf_file:
+#                                 pdf_content = pdf_file.read()
+#                             _logger.info("Successfully created PDF using wkhtmltopdf")
+#                         else:
+#                             raise Exception("wkhtmltopdf failed")
+
+#                         # Cleanup
+#                         os.unlink(html_file_path)
+#                         os.unlink(pdf_file_path)
+
+#                     except Exception:
+#                         # Final fallback: Create a very simple text-based response
+#                         _logger.warning("wkhtmltopdf not available, creating simple text response")
+#                         simple_content = f"""
+# PAYSLIP: {payslip.number or payslip.id}
+# Employee: {payslip.employee_id.name}
+# Period: {payslip.date_from} to {payslip.date_to}
+# Status: {dict(payslip._fields['state'].selection).get(payslip.state, payslip.state)}
+
+# Payslip Details:
+# """
+#                         if payslip.line_ids:
+#                             for line in payslip.line_ids:
+#                                 simple_content += f"{line.name}: {line.total:.2f}\n"
+#                         else:
+#                             simple_content += "No payslip details available\n"
+
+#                         # Return as text file instead of PDF
+#                         safe_number = (payslip.number or str(payslip.id)).replace('/', '_').replace('\\', '_')
+#                         safe_date = payslip.date_from.strftime('%Y-%m') if payslip.date_from else 'unknown'
+#                         filename = f"Payslip_{safe_number}_{safe_date}.txt"
+
+#                         headers = [
+#                             ('Content-Type', 'text/plain'),
+#                             ('Content-Length', len(simple_content.encode('utf-8'))),
+#                             ('Content-Disposition', f'attachment; filename="{filename}"'),
+#                             ('Cache-Control', 'no-cache'),
+#                             ('Pragma', 'no-cache')
+#                         ]
+
+#                         _logger.info("Payslip %s downloaded as text file by user %s", payslip_id, request.env.uid)
+#                         return request.make_response(simple_content.encode('utf-8'), headers=headers)
+
+#                 except Exception as fallback_error:
+#                     _logger.error("Fallback PDF generation also failed: %s", str(fallback_error))
+#                     return request.redirect(MY_EMPLOYEE_URL + '/payslips?error=render_failed')
+
+#             if not pdf_content:
+#                 _logger.error("All PDF generation methods failed - no content generated")
+#                 return request.redirect(MY_EMPLOYEE_URL + '/payslips?error=empty_pdf')
+
+#             # Log which method was used
+#             if len(pdf_content) > 1000:
+#                 _logger.info("Successfully generated PDF - likely from Odoo report system (%d bytes)", len(pdf_content))
+#             else:
+#                 _logger.info("Generated small PDF - likely from fallback method (%d bytes)", len(pdf_content))
+
+#             # Create safe filename
+#             safe_number = (payslip.name or str(payslip.id)).replace('/', '_').replace('\\', '_')
+#             safe_date = payslip.date_from.strftime('%Y-%m') if payslip.date_from else 'unknown'
+#             filename = f"Payslip_{safe_number}_{safe_date}.pdf"
+
+#             # Create response with PDF
+#             pdfhttpheaders = [
+#                 ('Content-Type', 'application/pdf'),
+#                 ('Content-Length', len(pdf_content)),
+#                 ('Content-Disposition', f'attachment; filename="{filename}"'),
+#                 ('Cache-Control', 'no-cache'),
+#                 ('Pragma', 'no-cache')
+#             ]
+
+#             _logger.info("Payslip %s downloaded successfully by user %s, file size: %d bytes",
+#                          payslip_id, request.env.uid, len(pdf_content))
+
+#             return request.make_response(pdf_content, headers=pdfhttpheaders)
+
+#         except Exception as e:
+#             _logger.error("Unexpected error in payslip download for payslip %s: %s", payslip_id, str(e))
+#             import traceback
+#             _logger.error("Full traceback: %s", traceback.format_exc())
+#             return request.redirect(MY_EMPLOYEE_URL + '/payslips?error=download_failed')
+
     @http.route(MY_EMPLOYEE_URL + '/payslips/download/<int:payslip_id>', type='http', auth='user', website=True)
     def portal_payslip_download(self, payslip_id, **kwargs):
         """Download payslip as PDF"""
         import logging
         import base64
         _logger = logging.getLogger(__name__)
-
+    
         try:
             payslip = request.env['hr.payslip'].sudo().browse(payslip_id)
-            employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.env.uid)], limit=1)
-
-            # Security check - only allow access to own payslips
+            employee = request.env[HR_EMPLOYEE_MODEL].sudo().search([('user_id', '=', request.uid)], limit=1)
+    
+            # Security check
             if not payslip.exists() or not employee or payslip.employee_id.id != employee.id:
-                _logger.warning("Unauthorized payslip access attempt by user %s for payslip %s", request.env.uid,
+                _logger.warning("Unauthorized payslip access attempt by user %s for payslip %s", request.uid,
                                 payslip_id)
                 return request.redirect(MY_EMPLOYEE_URL + '/payslips?error=access_denied')
-
-            # Only allow download of confirmed payslips
+    
             if payslip.state not in ['validated', 'done', 'paid']:
-                _logger.warning("Download attempt for unconfirmed payslip %s by user %s", payslip_id, request.env.uid)
                 return request.redirect(MY_EMPLOYEE_URL + '/payslips?error=not_confirmed')
-
-            _logger.info("Attempting to download payslip %s for user %s", payslip_id, request.env.uid)
-
-            # Try to find the payslip report - multiple approaches with detailed logging
+    
             report_ref = None
-
-            # Method 1: Try standard hr_payroll reports with sudo()
+    
             report_names = [
                 'hr_payroll.action_report_payslip',
                 'hr_payroll.payslip_report',
                 'hr_payroll.report_payslip',
                 'hr_payroll.report_payslip_details'
             ]
-
+    
             for report_name in report_names:
-                try:
-                    report_ref = request.env.ref(report_name, raise_if_not_found=False)
-                    if report_ref:
-                        _logger.info("Found report reference: %s", report_name)
-                        # Test if we can access this report
-                        try:
-                            report_sudo = report_ref.sudo()
-                            # Try a quick test to see if this report can be used
-                            if hasattr(report_sudo, 'report_name') or hasattr(report_sudo, '_render_qweb_pdf'):
-                                _logger.info("Report %s is accessible and usable", report_name)
-                                break
-                            else:
-                                _logger.warning("Report %s found but may not be usable", report_name)
-                                report_ref = None
-                        except Exception as access_test:
-                            _logger.warning("Report %s access test failed: %s", report_name, str(access_test))
-                            report_ref = None
-                            continue
-                    else:
-                        _logger.debug("Report %s not found", report_name)
-                except Exception as ref_error:
-                    _logger.debug("Error checking report %s: %s", report_name, str(ref_error))
-                    continue
-
-            # Method 2: Search for payslip reports if standard ones not found
+                report_ref = request.env.ref(report_name, raise_if_not_found=False)
+                if report_ref:
+                    break
+    
             if not report_ref:
-                _logger.info("Standard reports not found, searching for any payslip reports...")
-                try:
-                    reports = request.env['ir.actions.report'].sudo().search([
-                        ('model', '=', 'hr.payslip'),
-                        ('report_type', '=', 'qweb-pdf')
-                    ])
-                    _logger.info("Found %d payslip reports in system", len(reports))
-
-                    for report in reports:
-                        try:
-                            # Test each report
-                            _logger.info("Testing report: %s (ID: %d)", report.sudo().name, report.id)
-                            report_ref = report
-                            break
-                        except Exception as test_error:
-                            _logger.warning("Report test failed: %s", str(test_error))
-                            continue
-
-                except Exception as search_error:
-                    _logger.error("Error searching for reports: %s", str(search_error))
-
+                reports = request.env['ir.actions.report'].sudo().search([
+                    ('model', '=', 'hr.payslip'),
+                    ('report_type', '=', 'qweb-pdf')
+                ])
+                report_ref = reports[:1]
+    
             if not report_ref:
-                _logger.error("No payslip report found for model hr.payslip")
                 return request.redirect(MY_EMPLOYEE_URL + '/payslips?error=report_not_found')
-
-            # Generate PDF using the found report - use sudo() for report access
-            _logger.info("Attempting to generate PDF with found report (ID: %d)", report_ref.id)
-
-            # Use the correct method based on Odoo version with sudo()
+    
             pdf_content = None
+    
             try:
                 report_sudo = report_ref.sudo()
-
-                # Use the standard Odoo report rendering approach
-                _logger.info("Using standard report rendering with payslip ID: %d", payslip.id)
-
-                # Method 1: Try _render_qweb_pdf with proper context and parameters
+                pdf_content, _ = report_sudo._render_qweb_pdf(report_sudo.report_name, payslip.ids)
+            except Exception:
                 try:
-                    # Use the correct Odoo 18 API for report rendering
-                    # _render_qweb_pdf expects (report_ref, res_ids, data=None)
-                    pdf_content, _ = report_sudo._render_qweb_pdf(report_sudo.report_name, payslip.ids)
-                    _logger.info("Successfully used _render_qweb_pdf method")
-                except Exception as method_error:
-                    _logger.warning("_render_qweb_pdf failed: %s", str(method_error))
-
-                    # Method 2: Try with render_qweb_pdf (if available)
-                    try:
-                        # Try render_qweb_pdf method
-                        pdf_content, _ = report_sudo.render_qweb_pdf(payslip.ids)
-                        _logger.info("Successfully used render_qweb_pdf method")
-                    except Exception as method_error2:
-                        _logger.warning("render_qweb_pdf method failed: %s", str(method_error2))
-
-                        # Method 3: Try with _render method (with proper parameters)
-                        try:
-                            # Use _render with proper report_name and res_ids parameters
-                            pdf_content, _ = report_sudo._render(report_sudo.report_name, payslip.ids)
-                            _logger.info("Successfully used _render method")
-                        except Exception as method_error3:
-                            _logger.error("All render methods failed: %s", str(method_error3))
-                            raise Exception("All report render methods failed")
-
-                if pdf_content and len(pdf_content) > 1000:
-                    _logger.info("Successfully generated PDF using Odoo report, size: %d bytes", len(pdf_content))
-                else:
-                    _logger.warning("PDF content is empty or too small: %s bytes",
-                                    len(pdf_content) if pdf_content else 0)
+                    pdf_content, _ = report_sudo.render_qweb_pdf(payslip.ids)
+                except Exception:
                     pdf_content = None
-
-            except Exception as render_error:
-                _logger.error("PDF rendering failed with Odoo report: %s", str(render_error))
-                pdf_content = None
-
-            # Only use fallback if we couldn't get a valid PDF from Odoo reports
-            if not pdf_content or len(pdf_content) < 100:
-                _logger.warning("Odoo report failed or returned invalid PDF, using fallback method")
-
-                # Fallback: Create a simple HTML-to-PDF conversion
-                _logger.info("Attempting simple PDF generation as fallback")
-                _logger.info("Attempting simple PDF generation as fallback")
-                try:
-                    # Create simple HTML content
-                    html_content = f"""
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <meta charset="utf-8">
-                        <title>Payslip {payslip.number or payslip.id}</title>
-                        <style>
-                            body {{ font-family: Arial, sans-serif; margin: 20px; }}
-                            .header {{ text-align: center; margin-bottom: 30px; }}
-                            .info {{ margin-bottom: 20px; }}
-                            .line {{ margin: 5px 0; }}
-                            table {{ width: 100%; border-collapse: collapse; margin-top: 20px; }}
-                            th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
-                            th {{ background-color: #f2f2f2; }}
-                        </style>
-                    </head>
-                    <body>
-                        <div class="header">
-                            <h1>PAYSLIP</h1>
-                            <h2>{payslip.number or payslip.id}</h2>
-                        </div>
-
-                        <div class="info">
-                            <div class="line"><strong>Employee:</strong> {payslip.employee_id.name}</div>
-                            <div class="line"><strong>Period:</strong> {payslip.date_from} to {payslip.date_to}</div>
-                            <div class="line"><strong>Status:</strong> {dict(payslip._fields['state'].selection).get(payslip.state, payslip.state)}</div>
-                        </div>
-
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Description</th>
-                                    <th>Amount</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                    """
-
-                    # Add payslip lines
-                    if payslip.line_ids:
-                        for line in payslip.line_ids:
-                            html_content += f"""
-                                <tr>
-                                    <td>{line.name}</td>
-                                    <td>{line.total:.2f}</td>
-                                </tr>
-                            """
-                    else:
-                        html_content += "<tr><td colspan='2'>No payslip details available</td></tr>"
-
-                    html_content += """
-                            </tbody>
-                        </table>
-                    </body>
-                    </html>
-                    """
-
-                    # Use wkhtmltopdf if available, otherwise create simple text-based PDF
-                    try:
-                        import subprocess
-                        import tempfile
-                        import os
-
-                        # Create temporary HTML file
-                        with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False) as html_file:
-                            html_file.write(html_content)
-                            html_file_path = html_file.name
-
-                        # Create temporary PDF file
-                        pdf_file_path = html_file_path.replace('.html', '.pdf')
-
-                        # Try wkhtmltopdf
-                        result = subprocess.run([
-                            'wkhtmltopdf', '--page-size', 'A4', '--orientation', 'Portrait',
-                            html_file_path, pdf_file_path
-                        ], capture_output=True, timeout=30)
-
-                        if result.returncode == 0 and os.path.exists(pdf_file_path):
-                            with open(pdf_file_path, 'rb') as pdf_file:
-                                pdf_content = pdf_file.read()
-                            _logger.info("Successfully created PDF using wkhtmltopdf")
-                        else:
-                            raise Exception("wkhtmltopdf failed")
-
-                        # Cleanup
-                        os.unlink(html_file_path)
-                        os.unlink(pdf_file_path)
-
-                    except Exception:
-                        # Final fallback: Create a very simple text-based response
-                        _logger.warning("wkhtmltopdf not available, creating simple text response")
-                        simple_content = f"""
-PAYSLIP: {payslip.number or payslip.id}
-Employee: {payslip.employee_id.name}
-Period: {payslip.date_from} to {payslip.date_to}
-Status: {dict(payslip._fields['state'].selection).get(payslip.state, payslip.state)}
-
-Payslip Details:
-"""
-                        if payslip.line_ids:
-                            for line in payslip.line_ids:
-                                simple_content += f"{line.name}: {line.total:.2f}\n"
-                        else:
-                            simple_content += "No payslip details available\n"
-
-                        # Return as text file instead of PDF
-                        safe_number = (payslip.number or str(payslip.id)).replace('/', '_').replace('\\', '_')
-                        safe_date = payslip.date_from.strftime('%Y-%m') if payslip.date_from else 'unknown'
-                        filename = f"Payslip_{safe_number}_{safe_date}.txt"
-
-                        headers = [
-                            ('Content-Type', 'text/plain'),
-                            ('Content-Length', len(simple_content.encode('utf-8'))),
-                            ('Content-Disposition', f'attachment; filename="{filename}"'),
-                            ('Cache-Control', 'no-cache'),
-                            ('Pragma', 'no-cache')
-                        ]
-
-                        _logger.info("Payslip %s downloaded as text file by user %s", payslip_id, request.env.uid)
-                        return request.make_response(simple_content.encode('utf-8'), headers=headers)
-
-                except Exception as fallback_error:
-                    _logger.error("Fallback PDF generation also failed: %s", str(fallback_error))
-                    return request.redirect(MY_EMPLOYEE_URL + '/payslips?error=render_failed')
-
+    
             if not pdf_content:
-                _logger.error("All PDF generation methods failed - no content generated")
-                return request.redirect(MY_EMPLOYEE_URL + '/payslips?error=empty_pdf')
-
-            # Log which method was used
-            if len(pdf_content) > 1000:
-                _logger.info("Successfully generated PDF - likely from Odoo report system (%d bytes)", len(pdf_content))
-            else:
-                _logger.info("Generated small PDF - likely from fallback method (%d bytes)", len(pdf_content))
-
-            # Create safe filename
+                return request.redirect(MY_EMPLOYEE_URL + '/payslips?error=render_failed')
+    
+            # ================= PASSWORD PROTECTION ADDED HERE =================
+            try:
+    
+    
+                password = None
+                if payslip.employee_id.birthday:
+                    password = payslip.employee_id.birthday.strftime("%d%m%Y")
+    
+                if password:
+                    pdf_stream = io.BytesIO(pdf_content)
+                    output_stream = io.BytesIO()
+    
+                    with pikepdf.open(pdf_stream) as pdf:
+                        pdf.save(
+                            output_stream,
+                            encryption=pikepdf.Encryption(
+                                user=password,
+                                owner=password,
+                                R=4
+                            )
+                        )
+    
+                    pdf_content = output_stream.getvalue()
+    
+            except Exception as enc_error:
+                _logger.error("PDF encryption failed: %s", str(enc_error))
+            # =================================================================
+    
             safe_number = (payslip.name or str(payslip.id)).replace('/', '_').replace('\\', '_')
             safe_date = payslip.date_from.strftime('%Y-%m') if payslip.date_from else 'unknown'
-            filename = f"Payslip_{safe_number}_{safe_date}.pdf"
-
-            # Create response with PDF
+            filename = f"{payslip.employee_id.name} - {payslip.date_from.strftime('%B %Y')}.pdf"
+    
             pdfhttpheaders = [
                 ('Content-Type', 'application/pdf'),
                 ('Content-Length', len(pdf_content)),
                 ('Content-Disposition', f'attachment; filename="{filename}"'),
-                ('Cache-Control', 'no-cache'),
-                ('Pragma', 'no-cache')
             ]
-
-            _logger.info("Payslip %s downloaded successfully by user %s, file size: %d bytes",
-                         payslip_id, request.env.uid, len(pdf_content))
-
+    
             return request.make_response(pdf_content, headers=pdfhttpheaders)
-
+    
         except Exception as e:
-            _logger.error("Unexpected error in payslip download for payslip %s: %s", payslip_id, str(e))
             import traceback
-            _logger.error("Full traceback: %s", traceback.format_exc())
+            _logger.error("Error: %s", traceback.format_exc())
             return request.redirect(MY_EMPLOYEE_URL + '/payslips?error=download_failed')
+
+     
+
 
     @http.route(MY_EMPLOYEE_URL + '/payslips/view/<int:payslip_id>', type='http', auth='user', website=True)
     def portal_payslip_view(self, payslip_id, **kwargs):

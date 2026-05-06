@@ -1254,11 +1254,10 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-phone text-muted me-1"></i>Emergency Contact Phone
-                                        <span class="text-danger">*</span>
                                     </label>
                                     <input type="tel" name="emergency_phone" class="form-control"
                                            t-att-value="portal_overlay.get('emergency_phone') or employee.emergency_phone or ''"
-                                           readonly="readonly" required="required"
+                                           readonly="readonly"
                                            data-validation="phone"/>
                                     <div class="invalid-feedback"></div>
                                     <small class="text-muted">Digits only, optional leading + for country code</small>
@@ -1964,11 +1963,27 @@ let isEditMode = false;
 let originalFormData = {};
 let activeProfileTab = 'basic';
 
-/* ─── Tab switching ─────────────────────────────────────────── */
+/* ── Helper: snapshot all editable field values into localStorage immediately ── */
+function autosaveDraftNow() {
+    if (!isEditMode) return;
+    try {
+        const draftData = {};
+        document.querySelectorAll('#personalDetailsForm input, #personalDetailsForm select').forEach(function(input) {
+            if (input.type === 'hidden' || input.type === 'file') return;
+            if (!input.name) return;
+            draftData[input.name] = input.value;
+        });
+        localStorage.setItem('profileDraft', JSON.stringify(draftData));
+        /* NOTE: we do NOT set profileEditActive here anymore.
+           It is only set once — right when the user explicitly
+           navigates away while in edit mode (beforeunload).        */
+    } catch(e) { console.error('autosave error', e); }
+}
+
 function switchProfileTab(tabKey) {
     const previousTab = activeProfileTab;
     activeProfileTab = tabKey;
-    if (previousTab && previousTab !== tabKey) {
+    if (!isEditMode && previousTab && previousTab !== tabKey) {
         clearValidationStates(previousTab);
     }
     document.querySelectorAll('#personalDetailsForm .profile-tab-section').forEach(card => {
@@ -1982,9 +1997,7 @@ function switchProfileTab(tabKey) {
 }
 
 function syncAndToggleEditMode(sourceCheckbox) {
-    document.querySelectorAll('.edit-mode-toggle').forEach(t => {
-        t.checked = sourceCheckbox.checked;
-    });
+    document.querySelectorAll('.edit-mode-toggle').forEach(t => { t.checked = sourceCheckbox.checked; });
     sourceCheckbox.checked ? enableEditMode() : disableEditMode();
 }
 
@@ -2007,6 +2020,9 @@ function enableEditMode() {
         input.style.removeProperty('pointer-events');
         input.style.removeProperty('background-color');
     });
+    /* NOTE: Do NOT set profileEditActive here.
+       It is only written in beforeunload so it only
+       survives a real navigation — not a page refresh. */
     document.getElementById('formActions').style.display = 'block';
     document.getElementById('viewActions').style.display = 'none';
     const disc = document.getElementById('personalDisclaimer');
@@ -2016,13 +2032,20 @@ function enableEditMode() {
     document.querySelectorAll('#personalDetailsForm input, #personalDetailsForm select').forEach(input => {
         input.removeEventListener('input', validateField);
         input.removeEventListener('blur', validateField);
+        input.removeEventListener('change', autosaveDraftNow);
+        input.removeEventListener('input', autosaveDraftNow);
         input.addEventListener('input', validateField);
         input.addEventListener('blur', validateField);
+        input.addEventListener('input', autosaveDraftNow);
+        input.addEventListener('change', autosaveDraftNow);
     });
 }
 
 function disableEditMode() {
     isEditMode = false;
+    /* Clear BOTH keys — user explicitly cancelled or saved */
+    localStorage.removeItem('profileEditActive');
+    localStorage.removeItem('profileDraft');
     document.querySelectorAll('.edit-mode-toggle').forEach(t => t.checked = false);
     document.querySelectorAll('#personalDetailsForm input, #personalDetailsForm select').forEach(input => {
         if (input.type === 'hidden') return;
@@ -2041,11 +2064,12 @@ function disableEditMode() {
     });
     document.getElementById('formActions').style.display = 'none';
     document.getElementById('viewActions').style.display = 'block';
-    clearValidationStates(activeProfileTab);
+    ['basic', 'professional', 'family', 'education', 'documents'].forEach(t => clearValidationStates(t));
     const disc = document.getElementById('personalDisclaimer');
     if (disc) disc.checked = false;
     const btn = document.getElementById('personalSaveBtn');
     if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
+    hideSaveError();
 }
 
 function toggleSaveBtn(checkboxId, btnId) {
@@ -2066,23 +2090,43 @@ function cancelEdit() {
         const input = document.querySelector(`[name="${key}"]`);
         if (input) input.value = value;
     }
-    clearValidationStates(activeProfileTab);
+    localStorage.removeItem('profileDraft');
+    localStorage.removeItem('profileEditActive');
     disableEditMode();
     showTabMessage(activeProfileTab, 'Changes cancelled.', 'info');
 }
 
 function saveAsDraft() {
-    const formData = new FormData(document.getElementById('personalDetailsForm'));
-    const draftData = {};
-    for (let [key, value] of formData.entries()) draftData[key] = value;
-    localStorage.setItem('profileDraft', JSON.stringify(draftData));
+    autosaveDraftNow();
     showTabMessage(activeProfileTab, 'Profile saved as draft.', 'info');
+}
+
+function showSaveError(html) {
+    let box = document.getElementById('saveErrorBox');
+    if (!box) {
+        box = document.createElement('div');
+        box.id = 'saveErrorBox';
+        box.className = 'alert alert-danger';
+        box.style.cssText = 'margin-bottom:12px;border-left:4px solid #dc3545;';
+        const saveBtn = document.getElementById('personalSaveBtn');
+        if (saveBtn) saveBtn.parentNode.insertBefore(box, saveBtn);
+        else document.getElementById('formActions').appendChild(box);
+    }
+    box.innerHTML = html;
+    box.style.display = 'block';
+    setTimeout(() => box.scrollIntoView({ behavior: 'smooth', block: 'center' }), 80);
+}
+
+function hideSaveError() {
+    const box = document.getElementById('saveErrorBox');
+    if (box) box.style.display = 'none';
 }
 
 function validateField(event) {
     const field = event.target;
     const parentSection = field.closest('.profile-tab-section');
-    if (parentSection && parentSection.getAttribute('data-tab-group') !== activeProfileTab) {
+    const isUserEvent = event.type === 'input' || event.type === 'blur' || event.type === 'change';
+    if (isUserEvent && parentSection && parentSection.getAttribute('data-tab-group') !== activeProfileTab) {
         return true;
     }
     const validationType = field.getAttribute('data-validation');
@@ -2093,57 +2137,76 @@ function validateField(event) {
     if (existingDynamic) existingDynamic.remove();
     const feedback = field.parentNode.querySelector('.invalid-feedback:not(.dynamic-error)');
     if (feedback) { feedback.textContent = ''; feedback.style.display = 'none'; }
-    if (validationType && field.value) {
-        const val = field.value.trim();
-        switch (validationType) {
-            case 'email':
-                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) { isValid = false; errorMessage = 'Please enter a valid email address (e.g. name@example.com).'; }
-                break;
-            case 'phone':
-                const phoneCleaned = val.replace(/\s/g, '');
-                if (!/^\+?[0-9]+$/.test(phoneCleaned)) { isValid = false; errorMessage = 'Phone number must contain digits only. A leading + is allowed for country code (e.g. +971501234567).'; }
-                else { const digitsOnly = phoneCleaned.replace('+', ''); if (digitsOnly.length < 7 || digitsOnly.length > 15) { isValid = false; errorMessage = 'Phone number must be between 7 and 15 digits.'; } }
-                break;
-            case 'digits-only':
-                if (!/^[0-9]+$/.test(val)) { isValid = false; errorMessage = 'This field must contain digits only (no letters or special characters).'; }
-                break;
-            case 'alphanumeric':
-                if (!/^[A-Za-z0-9]+$/.test(val)) { isValid = false; errorMessage = 'This field must contain letters and digits only (no spaces or special characters).'; }
-                break;
-            case 'emirates-id':
-                if (!/^[0-9]{3}-[0-9]{4}-[0-9]{7}-[0-9]{1}$/.test(val)) { isValid = false; errorMessage = 'Emirates ID must be in format: 784-1234-1234567-1'; }
-                break;
-            case 'aadhar':
-                if (!/^[0-9]{12}$/.test(val)) { isValid = false; errorMessage = 'Aadhar number must be exactly 12 digits.'; }
-                break;
-            case 'pan':
-                if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(val.toUpperCase())) { isValid = false; errorMessage = 'PAN must be in format: ABCDE1234F (5 letters, 4 digits, 1 letter).'; }
-                break;
-            case 'year':
-                if (!/^[0-9]{4}$/.test(val)) { isValid = false; errorMessage = 'Please enter a valid 4-digit year (e.g. 2020).'; }
-                else { const yr = parseInt(val, 10); const currentYear = new Date().getFullYear(); if (yr < 1900 || yr > currentYear) { isValid = false; errorMessage = `Year must be between 1900 and ${currentYear}.`; } }
-                break;
-            case 'past-date':
-                const pastInput = new Date(val); const todayForPast = new Date(); todayForPast.setHours(0, 0, 0, 0);
-                if (isNaN(pastInput.getTime())) { isValid = false; errorMessage = 'Please enter a valid date.'; }
-                else if (pastInput > todayForPast) { isValid = false; errorMessage = 'This date cannot be in the future.'; }
-                break;
-            case 'future-date':
-                const futureInput = new Date(val); const todayForFuture = new Date(); todayForFuture.setHours(0, 0, 0, 0);
-                if (isNaN(futureInput.getTime())) { isValid = false; errorMessage = 'Please enter a valid date.'; }
-                else if (futureInput <= todayForFuture) { isValid = false; errorMessage = 'Expiry date must be a future date. Entered: ' + futureInput.toDateString() + ' | Today: ' + todayForFuture.toDateString(); }
-                break;
-            case 'required':
-                if (!val) { isValid = false; errorMessage = 'This field is required.'; }
-                break;
+
+    if (validationType) {
+        const val = field.value ? field.value.trim() : '';
+        if (!val) {
+            if (field.hasAttribute('required') || validationType === 'required') {
+                isValid = false;
+                errorMessage = 'This field is required.';
+            } else {
+                updateTabErrorBadges();
+                return true;
+            }
+        }
+        if (val) {
+            switch (validationType) {
+                case 'email':
+                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) { isValid = false; errorMessage = 'Please enter a valid email address (e.g. name@example.com).'; }
+                    break;
+                case 'phone':
+                    const phoneCleaned = val.replace(/\s/g, '');
+                    if (!/^\+?[0-9]+$/.test(phoneCleaned)) { isValid = false; errorMessage = 'Phone number must contain digits only. A leading + is allowed.'; }
+                    else { const d = phoneCleaned.replace('+', ''); if (d.length < 7 || d.length > 15) { isValid = false; errorMessage = 'Phone number must be between 7 and 15 digits.'; } }
+                    break;
+                case 'digits-only':
+                    if (!/^[0-9]+$/.test(val)) { isValid = false; errorMessage = 'This field must contain digits only.'; }
+                    break;
+                case 'alphanumeric':
+                    if (!/^[A-Za-z0-9]+$/.test(val)) { isValid = false; errorMessage = 'Letters and digits only (no spaces or special characters).'; }
+                    break;
+                case 'emirates-id':
+                    if (!/^[0-9]{3}-[0-9]{4}-[0-9]{7}-[0-9]{1}$/.test(val)) { isValid = false; errorMessage = 'Emirates ID must be in format: 784-1234-1234567-1'; }
+                    break;
+                case 'aadhar':
+                    if (!/^[0-9]{12}$/.test(val)) { isValid = false; errorMessage = 'Aadhar number must be exactly 12 digits.'; }
+                    break;
+                case 'pan':
+                    if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(val.toUpperCase())) { isValid = false; errorMessage = 'PAN must be in format: ABCDE1234F'; }
+                    break;
+                case 'year':
+                    if (!/^[0-9]{4}$/.test(val)) { isValid = false; errorMessage = 'Please enter a valid 4-digit year.'; }
+                    else { const yr = parseInt(val, 10); const cy = new Date().getFullYear(); if (yr < 1900 || yr > cy) { isValid = false; errorMessage = `Year must be between 1900 and ${cy}.`; } }
+                    break;
+                case 'past-date':
+                    const pd = new Date(val); const td1 = new Date(); td1.setHours(0,0,0,0);
+                    if (isNaN(pd.getTime())) { isValid = false; errorMessage = 'Please enter a valid date.'; }
+                    else if (pd > td1) { isValid = false; errorMessage = 'This date cannot be in the future.'; }
+                    break;
+                case 'future-date':
+                    const fd = new Date(val); const td2 = new Date(); td2.setHours(0,0,0,0);
+                    if (isNaN(fd.getTime())) { isValid = false; errorMessage = 'Please enter a valid date.'; }
+                    else if (fd <= td2) { isValid = false; errorMessage = 'Expiry date must be a future date.'; }
+                    break;
+                case 'required':
+                    if (!val) { isValid = false; errorMessage = 'This field is required.'; }
+                    break;
+            }
         }
     }
-    if (field.value.trim()) {
-        if (isValid) { field.classList.add('is-valid'); }
-        else {
+    if (field.value.trim() || !isValid) {
+        if (isValid) {
+            field.classList.add('is-valid');
+        } else {
             field.classList.add('is-invalid');
             if (feedback) { feedback.textContent = errorMessage; feedback.style.display = 'block'; }
-            else { const errDiv = document.createElement('div'); errDiv.className = 'invalid-feedback dynamic-error'; errDiv.style.display = 'block'; errDiv.style.color = '#dc3545'; errDiv.style.fontSize = '0.8rem'; errDiv.style.marginTop = '3px'; errDiv.textContent = errorMessage; field.insertAdjacentElement('afterend', errDiv); }
+            else {
+                const errDiv = document.createElement('div');
+                errDiv.className = 'invalid-feedback dynamic-error';
+                errDiv.style.cssText = 'display:block;color:#dc3545;font-size:0.8rem;margin-top:3px;';
+                errDiv.textContent = errorMessage;
+                field.insertAdjacentElement('afterend', errDiv);
+            }
         }
     }
     updateTabErrorBadges();
@@ -2204,26 +2267,46 @@ function showTabMessage(tabKey, text, type) {
 
 document.getElementById('personalDetailsForm').addEventListener('submit', function(e) {
     e.preventDefault();
+
     const disc = document.getElementById('personalDisclaimer');
     if (disc && !disc.checked) {
-        showTabMessage(activeProfileTab, 'Please read and accept the Employee Disclaimer before saving.', 'error');
-        disc.closest('.alert').style.animation = 'shake 0.35s ease';
-        setTimeout(() => disc.closest('.alert').style.animation = '', 400);
+        showSaveError('<i class="fa fa-exclamation-triangle me-2"></i>Please read and accept the Employee Disclaimer before saving.');
         return;
     }
-    clearValidationStates(activeProfileTab);
-    let isFormValid = true;
-    document.querySelectorAll(
-        `.profile-tab-section[data-tab-group="${activeProfileTab}"] input[data-validation],
-         .profile-tab-section[data-tab-group="${activeProfileTab}"] select[data-validation]`
-    ).forEach(input => { if (!validateField({ target: input })) isFormValid = false; });
+
+    const allTabs = ['basic', 'professional', 'family', 'education', 'documents'];
+    const tabNames = {
+        'basic': 'Basic Info', 'professional': 'Professional',
+        'family': 'Family', 'education': 'Education', 'documents': 'Documents',
+    };
+    const tabsWithErrors = [];
+
+    allTabs.forEach(tabKey => {
+        document.querySelectorAll(
+            `.profile-tab-section[data-tab-group="${tabKey}"] input[data-validation],
+             .profile-tab-section[data-tab-group="${tabKey}"] select[data-validation]`
+        ).forEach(input => {
+            if (!validateField({ target: input, type: 'submit' })) {
+                if (!tabsWithErrors.includes(tabKey)) tabsWithErrors.push(tabKey);
+            }
+        });
+    });
+
     updateTabErrorBadges();
-    if (!isFormValid) {
-        const firstError = document.querySelector(`.profile-tab-section[data-tab-group="${activeProfileTab}"] .is-invalid`);
-        if (firstError) { setTimeout(() => { firstError.scrollIntoView({ behavior: 'smooth', block: 'center' }); firstError.focus(); }, 100); }
-        showTabMessage(activeProfileTab, 'Please correct the highlighted errors in this tab.', 'error');
+
+    if (tabsWithErrors.length > 0) {
+        const tabLabels = tabsWithErrors
+            .map(t => `<strong style="color:#721c24;">${tabNames[t] || t}</strong>`)
+            .join(', ');
+        showSaveError(
+            `<i class="fa fa-exclamation-triangle me-2"></i>` +
+            `Please fix errors in the following tab(s) before saving: ${tabLabels}`
+        );
         return;
     }
+
+    hideSaveError();
+
     const toReenable = [];
     document.querySelectorAll('#personalDetailsForm select[disabled], #personalDetailsForm input[type="checkbox"][disabled]').forEach(el => {
         if (!el.hasAttribute('data-always-readonly')) { el.removeAttribute('disabled'); toReenable.push(el); }
@@ -2231,39 +2314,30 @@ document.getElementById('personalDetailsForm').addEventListener('submit', functi
     const formData = new FormData(this);
     const csrfToken = document.querySelector('input[name="csrf_token"]').value;
     toReenable.forEach(el => el.setAttribute('disabled', 'disabled'));
-    fetch('/my/employee/personal', {
-        method: 'POST',
-        body: formData,
-        headers: { 'X-CSRFToken': csrfToken }
-    })
-    .then(response => response.json())
-     .then(data => {
+
+    fetch('/my/employee/personal', { method: 'POST', body: formData, headers: { 'X-CSRFToken': csrfToken } })
+    .then(r => r.json())
+    .then(data => {
         if (data.success) {
             disableEditMode();
             localStorage.removeItem('profileDraft');
+            localStorage.removeItem('profileEditActive');
             if (data.no_change) {
-                // Nothing changed — show info message, no reference
-                showTabMessage(
-                    activeProfileTab,
-                    'No changes were detected. Your profile data is already up to date.',
-                    'info'
-                );
+                showTabMessage(activeProfileTab, 'No changes were detected. Your profile data is already up to date.', 'info');
             } else {
                 const ref = data.reference || '';
-                showTabMessage(
-                    activeProfileTab,
-                    ' Your changes have been submitted to HR for review and approval.' +
+                showTabMessage(activeProfileTab,
+                    'Your changes have been submitted to HR for review and approval.' +
                     (ref ? ' Reference: <strong>' + ref + '</strong>' : '') +
                     ' You will receive an email once HR approves or rejects your request.',
-                    'success'
-                );
+                    'success');
             }
         } else {
             showTabMessage(activeProfileTab, 'Error: ' + (data.error || 'Unknown error'), 'error');
         }
     })
-    .catch(error => {
-        console.error('Error:', error);
+    .catch(err => {
+        console.error('Error:', err);
         showTabMessage(activeProfileTab, 'Network error. Please try again.', 'error');
     });
 });
@@ -2273,16 +2347,69 @@ document.addEventListener('DOMContentLoaded', function() {
         button.addEventListener('click', function() { switchProfileTab(this.getAttribute('data-tab-target')); });
     });
     switchProfileTab(activeProfileTab);
-    const draftData = localStorage.getItem('profileDraft');
-    if (draftData) {
-        try {
-            const draft = JSON.parse(draftData);
-            Object.entries(draft).forEach(([key, value]) => {
-                const input = document.querySelector(`[name="${key}"]`);
-                if (input && input.type !== 'hidden') input.value = value;
+
+    /* ══════════════════════════════════════════════════════════════
+       KEY DESIGN:
+       - profileEditActive is ONLY written in beforeunload
+         (real navigation away) — never inside enableEditMode()
+       - On page load we ALWAYS force toggles OFF first
+       - Then we check if user was mid-edit when they navigated away
+       ══════════════════════════════════════════════════════════════ */
+
+    /* STEP 1 — Always force edit mode OFF on every page load, no exceptions */
+    document.querySelectorAll('.edit-mode-toggle').forEach(t => t.checked = false);
+    document.getElementById('formActions').style.display = 'none';
+    document.getElementById('viewActions').style.display = 'block';
+    isEditMode = false;
+
+    /* STEP 2 — Read flags BEFORE touching localStorage */
+    const draftRaw   = localStorage.getItem('profileDraft');
+    const wasEditing = localStorage.getItem('profileEditActive') === '1';
+
+    /* STEP 3 — Immediately wipe the flag so refresh never re-triggers edit mode */
+    localStorage.removeItem('profileEditActive');
+
+    /* STEP 4 — Save on real navigation (top tab links, browser back, etc.) */
+    window.addEventListener('beforeunload', function() {
+        if (isEditMode) {
+            /* Save current field values */
+            const draftData = {};
+            document.querySelectorAll('#personalDetailsForm input, #personalDetailsForm select').forEach(function(input) {
+                if (input.type === 'hidden' || input.type === 'file') return;
+                if (!input.name) return;
+                draftData[input.name] = input.value;
             });
-            showTabMessage(activeProfileTab, 'Draft data loaded.', 'info');
-        } catch (e) { console.error('Error loading draft:', e); }
+            try {
+                localStorage.setItem('profileDraft', JSON.stringify(draftData));
+                /* Only set the flag here — this is the ONLY place */
+                localStorage.setItem('profileEditActive', '1');
+            } catch(e) {}
+        }
+    });
+
+    /* STEP 5 — Restore draft if user navigated away while editing */
+    if (draftRaw && wasEditing) {
+        try {
+            const draft = JSON.parse(draftRaw);
+
+            /* Unlock fields */
+            enableEditMode();
+
+            /* Restore saved values */
+            Object.entries(draft).forEach(function([key, value]) {
+                const input = document.querySelector('[name="' + key + '"]');
+                if (input && input.type !== 'hidden' && input.type !== 'file') {
+                    input.value = value;
+                }
+            });
+
+            showTabMessage(activeProfileTab,
+                'Your unsaved changes have been restored. Please review and click Save Changes.',
+                'info');
+        } catch (ex) {
+            console.error('Error loading draft:', ex);
+            localStorage.removeItem('profileDraft');
+        }
     }
 });
                     ]]>
@@ -2307,6 +2434,10 @@ document.addEventListener('DOMContentLoaded', function() {
 .form-switch .form-check-input:checked { background-color: #0d6efd; border-color: #0d6efd; }
 .tab-message-box { border-radius: 0.5rem; font-weight: 500; }
 @media (max-width: 768px) { .card-body { padding: 1rem; } .row.g-3 > * { margin-bottom: 1rem; } .profile-tab-navigation .nav-link { font-size: 0.85rem; padding: 0.4rem 0.6rem; } }
+@keyframes slideDown {
+    from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
                     ]]>
                 </style>
             </t>
