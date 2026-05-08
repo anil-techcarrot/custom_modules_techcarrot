@@ -457,7 +457,7 @@
                                     </label>
                                     <input type="date" name="expiry_date" class="form-control"
                                            t-att-value="employee.expiry_date.strftime('%Y-%m-%d') if employee.expiry_date else ''"
-                                           data-always-readonly="1" readonly="readonly"
+                                           readonly="readonly"
                                            data-validation="future-date"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
@@ -534,7 +534,8 @@
                                             </a>
                                         </div>
                                     </t>
-                                    <input type="file" name="has_work_permit" class="form-control file-upload-input" disabled="disabled"/>
+                                    <input type="file" name="has_work_permit" class="form-control file-upload-input"
+                                           disabled="disabled"/>
                                 </div>
                             </div>
                         </div>
@@ -2272,7 +2273,11 @@ function validateField(event) {
                     break;
                 case 'isd-code':
                     const isdCleaned = val.replace(/\s/g, '');
-                    if (!/^\+?[0-9]+$/.test(isdCleaned)) { isValid = false; errorMessage = 'Phone number must contain digits only. A leading + is allowed.'; }
+                    // NEW - only accepts +1 to +999 (real country codes)
+if (!/^\+[1-9][0-9]{0,2}$/.test(isdCleaned)) {
+    isValid = false;
+    errorMessage = 'ISD code must start with + followed by 1-3 digits (e.g. +91, +971, +1, +44).';
+}
                     break;
                 case 'digits-only':
                     if (!/^[0-9]+$/.test(val)) { isValid = false; errorMessage = 'This field must contain digits only.'; }
