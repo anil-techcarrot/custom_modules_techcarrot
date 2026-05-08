@@ -45,7 +45,7 @@
                                 </select>
                             </div>
                             <div class="col-md-4 mb-2 d-flex align-items-end">
-                                <button type="submit" class="btn btn-primary mr-2">
+                                <button type="submit" class="btn btn-primary mr-2" style="margin-right:20px;">
                                     <i class="fa fa-search mr-1"></i>Filter
                                 </button>
                                 <a href="/my/employee/payslips" class="btn btn-secondary">
