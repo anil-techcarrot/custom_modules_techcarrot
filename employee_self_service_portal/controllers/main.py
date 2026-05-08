@@ -3355,7 +3355,7 @@ class PortalEmployee(http.Controller):
         # For dropdowns - get available years and months from payslips
         from datetime import datetime
         current_year = datetime.now().year
-        years = list(range(current_year - 5, current_year + 2))
+        years = list(range(2026, current_year + 1))
         months = [
             {'value': i, 'name': datetime(2000, i, 1).strftime('%B')} for i in range(1, 13)
         ]
