@@ -8,9 +8,10 @@ class HREmployee(models.Model):
         help='Stores last submitted data from portal for display purposes.'
     )
     last_submission_state = fields.Selection([
-        ('pending', 'Pending HR Review'),
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
         ('rejected', 'Rejected'),
-    ], string='Last Submission Display State')
+    ], string='Last Submission State')
 
     user_id = fields.Many2one('res.users', string="Portal User", help="Portal user linked to this employee")
     portal_access_crm = fields.Boolean("Portal Access CRM", default=False, help="Allow access to CRM functionality in portal")
