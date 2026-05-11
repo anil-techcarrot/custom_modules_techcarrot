@@ -436,7 +436,7 @@
                                     </label>
                                     <input type="date" name="issue_date" class="form-control"
                                            t-att-value="employee.issue_date"
-                                           data-always-readonly="1" readonly="readonly"
+                                            readonly="readonly"
                                            data-validation="past-date"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
@@ -446,7 +446,7 @@
                                     </label>
                                     <input type="date" name="expiry_date" class="form-control"
                                            t-att-value="employee.expiry_date.strftime('%Y-%m-%d') if employee.expiry_date else ''"
-                                           data-always-readonly="1" readonly="readonly"
+                                           readonly="readonly"
                                            data-validation="future-date"/>
                                     <div class="invalid-feedback"></div>
                                 </div>
