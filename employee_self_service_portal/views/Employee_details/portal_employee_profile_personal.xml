@@ -798,7 +798,7 @@
                                     <input type="text" name="phone_code_1" class="form-control"
                                            t-att-value="portal_overlay.get('phone_code_1') or employee.phone_code_1 or ''"
                                            readonly="readonly"
-                                           data-validation="phone"/>
+                                           data-validation="isd-code"/>
                                     <div class="invalid-feedback"></div>
                                     <small class="text-muted">E.g. +91, +971</small>
                                 </div>
@@ -1275,7 +1275,8 @@
                                            t-att-value="portal_overlay.get('phone_code_1') or employee.phone_code_1 or ''"
                                            readonly="readonly"
                                            placeholder="+971"
-                                           data-validation="phone"/>
+
+                                    />
                                     <div class="invalid-feedback"></div>
                                     <small class="text-muted">E.g. +971</small>
                                 </div>
@@ -2130,6 +2131,13 @@ function validateField(event) {
                     if (!/^\+?[0-9]+$/.test(phoneCleaned)) { isValid = false; errorMessage = 'Phone number must contain digits only. A leading + is allowed for country code (e.g. +971501234567).'; }
                     else { const digitsOnly = phoneCleaned.replace('+', ''); if (digitsOnly.length < 7 || digitsOnly.length > 15) { isValid = false; errorMessage = 'Phone number must be between 7 and 15 digits.'; } }
                     break;
+                case 'isd-code':
+                    const isdCleaned = val.replace(/\s/g, '');
+                            // NEW - only accepts +1 to +999 (real country codes)
+                    if (!/^\+[1-9][0-9]{0,2}$/.test(isdCleaned)) {
+                    isValid = false;
+                     errorMessage = 'ISD code must start with + followed by 1-3 digits (e.g. +91, +971, +1, +44).';
+        }
                 case 'digits-only':
                     if (!/^[0-9]+$/.test(val)) { isValid = false; errorMessage = 'This field must contain digits only (no letters or special characters).'; }
                     break;
