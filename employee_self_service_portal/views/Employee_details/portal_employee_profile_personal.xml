@@ -1288,17 +1288,42 @@
                                            t-att-value="portal_overlay.get('e_private_city') or employee.e_private_city or ''"
                                            readonly="readonly"/>
                                 </div>
+
+
                                 <div class="col-md-3">
                                     <label class="form-label fw-bold">Country Code</label>
-                                    <input type="text" name="phone_code_1" class="form-control"
-                                           t-att-value="portal_overlay.get('phone_code_1') or employee.phone_code_1 or ''"
-                                           readonly="readonly"
-                                           placeholder="+91, +971"
 
-                                    />
+                                    <!-- visible readonly field -->
+                                    <input type="text"
+                                           class="form-control"
+                                           t-att-value="portal_overlay.get('phone_code_1') or employee.phone_code_1 or ''"
+                                           style="pointer-events:none;background-color:#e9ecef;"
+                                           placeholder="+91, +971"/>
+
+                                    <!-- hidden field sent to backend -->
+                                    <input type="hidden"
+                                           name="phone_code_1"
+                                           t-att-value="portal_overlay.get('phone_code_1') or employee.phone_code_1 or ''"/>
+
                                     <div class="invalid-feedback"></div>
-                                    <small class="text-muted">E.g. +91, +971</small>
+
+                                    <small class="text-muted">
+                                        E.g. +91, +971
+                                    </small>
                                 </div>
+                                <!--                                <div class="col-md-3">-->
+                                <!--                                    <label class="form-label fw-bold">Country Code</label>-->
+                                <!--                                    <input type="text" name="phone_code_1" class="form-control"-->
+                                <!--                                           t-att-value="portal_overlay.get('phone_code_1') or employee.phone_code_1 or ''"-->
+                                <!--                                           readonly="readonly"-->
+                                <!--                                           placeholder="+91, +971"-->
+
+                                <!--                                    />-->
+                                <!--                                    <div class="invalid-feedback"></div>-->
+                                <!--                                    <small class="text-muted">E.g. +91, +971</small>-->
+                                <!--                                </div>-->
+
+
                             </div>
                         </div>
                     </div>
