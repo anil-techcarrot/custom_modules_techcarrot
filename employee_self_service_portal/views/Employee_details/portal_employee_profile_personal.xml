@@ -1294,7 +1294,8 @@
                                            t-att-value="portal_overlay.get('phone_code_1') or employee.phone_code_1 or ''"
                                            readonly="readonly"
                                            placeholder="+91, +971"
-                                           data-validation="phone"/>
+
+                                    />
                                     <div class="invalid-feedback"></div>
                                     <small class="text-muted">E.g. +91, +971</small>
                                 </div>
