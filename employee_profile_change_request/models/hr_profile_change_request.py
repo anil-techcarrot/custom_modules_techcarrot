@@ -10,9 +10,12 @@ FIELD_LABELS = {
     'work_phone': 'Work Phone', 'private_email': 'Personal Email',
     'private_phone': 'Personal Phone', 'private_street': 'Address Line 1',
     'private_street2': 'Address Line 2', 'private_city': 'City (Private)',
-    'private_zip': 'ZIP Code', 'whatsapp': 'WhatsApp', 'linkedin': 'LinkedIn',
+    'private_zip': 'ZIP Code', 'private_state_id': 'State/Province',
+    'whatsapp': 'WhatsApp', 'linkedin': 'LinkedIn',
     'legal_name': 'Legal Name', 'facebook_profile': 'Facebook Profile',
     'insta_profile': 'Instagram Profile', 'twitter_profile': 'Twitter Profile',
+    'blood_group': 'Blood Group',
+    'issue_date': 'Passport Issue Date', 'expiry_date': 'Passport Expiry Date',
     'l10n_in_relationship': 'Emergency Relationship',
     'emergency_phone': 'Emergency Phone', 'e_private_city': 'Emergency Address',
     'emergency_contact_person_name': 'Emergency Contact Name',
@@ -68,6 +71,14 @@ FIELD_LABELS = {
     'last_report_manager_designation': 'Reporting Manager Designation',
     'last_report_manager_mob_no': 'Reporting Manager Mobile',
     'last_report_manager_mail': 'Reporting Manager Email',
+    'previous_company_name': 'Previous Company Name',
+    'designation': 'Designation', 'period_in_company': 'Period in Company',
+    'reason_of_leaving': 'Reason of Leaving',
+    # File fields
+    'emirates_id_file': 'Emirates ID Copy',
+    'passport_file': 'Passport Copy',
+    'other_documents': 'Other Documents',
+    'has_work_permit': 'Work Permit File',
 }
 
 
@@ -80,7 +91,6 @@ class HrProfileChangeRequest(models.Model):
 
     _check_company_auto = False
 
-    # ── Core fields ───────────────────────────────────────────────
     name = fields.Char(
         string='Reference', required=True, copy=False,
         readonly=True, default='New',
@@ -112,70 +122,54 @@ class HrProfileChangeRequest(models.Model):
         'res.company', string='Company',
         default=lambda self: self.env.company,
     )
-    submitted_data = fields.Text(string='Submitted Data (JSON)', readonly=True)
+    submitted_data    = fields.Text(string='Submitted Data (JSON)', readonly=True)
     changed_fields_display = fields.Html(
         string='Submitted Changes',
         compute='_compute_changed_fields_display',
         sanitize=False,
     )
-    submission_date = fields.Datetime(
-        string='Submitted On', default=fields.Datetime.now, readonly=True,
-    )
-    review_date      = fields.Datetime(string='Reviewed On', readonly=True)
-    reviewed_by      = fields.Many2one(comodel_name='res.users', string='Reviewed By', readonly=True)
-    rejection_reason = fields.Text(string='Rejection Reason', tracking=True)
-    trail_ids        = fields.One2many(
+    submission_date   = fields.Datetime(string='Submitted On', default=fields.Datetime.now, readonly=True)
+    review_date       = fields.Datetime(string='Reviewed On', readonly=True)
+    reviewed_by       = fields.Many2one(comodel_name='res.users', string='Reviewed By', readonly=True)
+    rejection_reason  = fields.Text(string='Rejection Reason', tracking=True)
+    trail_ids         = fields.One2many(
         comodel_name='hr.profile.change.request.trail',
         inverse_name='request_id', string='Audit Trail', readonly=True,
     )
 
-    # ── Document upload tracking fields ──────────────────────────
+    # ── Document upload tracking — Issue 20 fix ───────────────────
     has_emirates_id_doc = fields.Boolean(
         string='Emirates ID Uploaded',
-        compute='_compute_doc_flags',
-        store=True,
+        compute='_compute_doc_flags', store=True,
     )
     has_passport_doc = fields.Boolean(
         string='Passport Uploaded',
-        compute='_compute_doc_flags',
-        store=True,
+        compute='_compute_doc_flags', store=True,
     )
     has_other_doc = fields.Boolean(
         string='Other Doc Uploaded',
-        compute='_compute_doc_flags',
-        store=True,
+        compute='_compute_doc_flags', store=True,
     )
-
     has_work_permit_doc = fields.Boolean(
         string='Work Permit Uploaded',
-        compute='_compute_doc_flags',
-        store=True,
+        compute='_compute_doc_flags', store=True,
     )
     has_any_doc = fields.Boolean(
         string='Has Any Document',
-        compute='_compute_doc_flags',
-        store=True,
+        compute='_compute_doc_flags', store=True,
     )
     total_docs_uploaded = fields.Integer(
-        string='Total Documents',
-        compute='_compute_doc_flags',
-        store=True,
+        string='Total Documents Uploaded',
+        compute='_compute_doc_flags', store=True,
     )
 
     @api.depends('submitted_data')
     def _compute_doc_flags(self):
-        """
-        Parse submitted_data JSON to detect which documents
-        were uploaded via the ESS portal.
-        Portal file field names:
-          emirates_id_file, passport_file,
-          other_documents, has_work_permit
-        """
         doc_field_map = {
-            'emirates_id_file':  'has_emirates_id_doc',
-            'passport_file':     'has_passport_doc',
-            'other_documents':   'has_other_doc',
-            'has_work_permit':   'has_work_permit_doc',
+            'emirates_id_file': 'has_emirates_id_doc',
+            'passport_file':    'has_passport_doc',
+            'other_documents':  'has_other_doc',
+            'has_work_permit':  'has_work_permit_doc',
         }
         for rec in self:
             flags = {f: False for f in doc_field_map.values()}
@@ -195,14 +189,12 @@ class HrProfileChangeRequest(models.Model):
 
     # ── HR Reviewer helpers ───────────────────────────────────────
     def _get_hr_reviewer_users(self):
-        """Get all HR Reviewer users via SQL (Odoo 17/19 compatible)."""
         try:
             hr_group = self.env.ref(
                 'employee_profile_change_request.group_profile_change_hr_reviewer',
                 raise_if_not_found=False,
             )
             if not hr_group:
-                _logger.warning('HR Reviewer group not found.')
                 return self.env['res.users']
             self.env.cr.execute(
                 'SELECT uid FROM res_groups_users_rel WHERE gid = %s',
@@ -210,18 +202,13 @@ class HrProfileChangeRequest(models.Model):
             )
             user_ids = [row[0] for row in self.env.cr.fetchall()]
             if not user_ids:
-                _logger.warning('No users in HR Reviewer group (id=%s)', hr_group.id)
                 return self.env['res.users']
-            hr_users = self.env['res.users'].sudo().browse(user_ids)
-            _logger.info('HR Reviewer users found: %s',
-                         [(u.name, u.work_email or u.email) for u in hr_users])
-            return hr_users
+            return self.env['res.users'].sudo().browse(user_ids)
         except Exception as e:
             _logger.error('_get_hr_reviewer_users error: %s', e)
             return self.env['res.users']
 
     def _is_hr_reviewer(self):
-        """Return True if current user is in HR Reviewer group."""
         try:
             hr_group = self.env.ref(
                 'employee_profile_change_request.group_profile_change_hr_reviewer',
@@ -237,7 +224,7 @@ class HrProfileChangeRequest(models.Model):
         except Exception:
             return False
 
-    # ── ORM overrides — ONE definition each, infinite-loop safe ──
+    # ── ORM overrides — cross-company ─────────────────────────────
     @api.model
     def search(self, domain, offset=0, limit=None, order=None):
         if self._is_hr_reviewer() and not self.env.su:
@@ -249,33 +236,26 @@ class HrProfileChangeRequest(models.Model):
     @api.model
     def search_count(self, domain, limit=None):
         if self._is_hr_reviewer() and not self.env.su:
-            return super(HrProfileChangeRequest, self.sudo()).search_count(
-                domain, limit=limit,
-            )
+            return super(HrProfileChangeRequest, self.sudo()).search_count(domain, limit=limit)
         return super().search_count(domain, limit=limit)
 
     @api.model
     def _search(self, domain, offset=0, limit=None, order=None, **kwargs):
-        """Accept **kwargs to avoid TypeError on active_test= calls."""
         if self._is_hr_reviewer() and not self.env.su:
             return super(HrProfileChangeRequest, self.sudo())._search(
                 domain, offset=offset, limit=limit, order=order, **kwargs
             )
-        return super()._search(
-            domain, offset=offset, limit=limit, order=order, **kwargs
-        )
+        return super()._search(domain, offset=offset, limit=limit, order=order, **kwargs)
 
     def read_group(self, domain, fields, groupby, offset=0, limit=None,
                    orderby=False, lazy=True):
         if self._is_hr_reviewer() and not self.env.su:
             return super(HrProfileChangeRequest, self.sudo()).read_group(
-                domain, fields, groupby,
-                offset=offset, limit=limit,
+                domain, fields, groupby, offset=offset, limit=limit,
                 orderby=orderby, lazy=lazy,
             )
         return super().read_group(
-            domain, fields, groupby,
-            offset=offset, limit=limit,
+            domain, fields, groupby, offset=offset, limit=limit,
             orderby=orderby, lazy=lazy,
         )
 
@@ -306,16 +286,22 @@ class HrProfileChangeRequest(models.Model):
                 rows = ''
                 for key, new_val in data.items():
                     label = FIELD_LABELS.get(key, key.replace('_', ' ').title())
-                    try:
-                        current = getattr(rec.employee_id, key, '') or ''
-                        if hasattr(current, 'name'):
-                            current = current.name or ''
-                        current = str(current)
-                    except Exception:
+                    # Skip binary file data in display
+                    if new_val and str(new_val).startswith('[FILE:'):
                         current = '—'
-                    new_val_str = str(new_val) if new_val else '—'
-                    is_changed  = new_val_str != current
-                    row_style   = 'background:#fffde7;' if is_changed else ''
+                        new_val_str = str(new_val)
+                        is_changed = True
+                    else:
+                        try:
+                            current = getattr(rec.employee_id, key, '') or ''
+                            if hasattr(current, 'name'):
+                                current = current.name or ''
+                            current = str(current)
+                        except Exception:
+                            current = '—'
+                        new_val_str = str(new_val) if new_val else '—'
+                        is_changed = new_val_str != current
+                    row_style = 'background:#fffde7;' if is_changed else ''
                     badge = (
                         '<span style="background:#ff9800;color:white;padding:2px 6px;'
                         'border-radius:3px;font-size:11px;">CHANGED</span>'
@@ -356,7 +342,7 @@ class HrProfileChangeRequest(models.Model):
         self._send_mail_to_hr()
         return True
 
-    # ── Approve ───────────────────────────────────────────────────
+    # ── Approve — Issue 21 fix: write ALL fields including blood_group etc ──
     def action_approve(self):
         self.ensure_one()
         if self.state != 'pending':
@@ -367,8 +353,19 @@ class HrProfileChangeRequest(models.Model):
             raise UserError(_('Submitted data is corrupted.'))
 
         skip_fields = {'csrf_token', 'submit'}
-        write_vals  = {k: v for k, v in data.items()
-                       if k not in skip_fields and v is not None and v != ''}
+        write_vals = {}
+
+        for k, v in data.items():
+            if k in skip_fields:
+                continue
+            # Skip file marker entries — files already written at submission
+            if v and str(v).startswith('[FILE:'):
+                continue
+            if v is None or v == '':
+                continue
+            write_vals[k] = v
+
+        # Type coercions
         for f in {'children'}:
             if f in write_vals:
                 try:    write_vals[f] = int(write_vals[f])
@@ -378,9 +375,11 @@ class HrProfileChangeRequest(models.Model):
                 try:    write_vals[f] = float(write_vals[f])
                 except: write_vals.pop(f, None)
 
-        self.employee_id.sudo().write(write_vals)
+        if write_vals:
+            self.employee_id.sudo().write(write_vals)
         _logger.info('PCR %s approved — %d fields written to %s.',
                      self.name, len(write_vals), self.employee_id.name)
+
         self.write({
             'state': 'approved',
             'reviewed_by': self.env.user.id,
@@ -415,10 +414,8 @@ class HrProfileChangeRequest(models.Model):
         if self.state != 'rejected':
             raise UserError(_('Only rejected requests can be re-opened.'))
         self.write({
-            'state': 'pending',
-            'rejection_reason': False,
-            'reviewed_by': False,
-            'review_date': False,
+            'state': 'pending', 'rejection_reason': False,
+            'reviewed_by': False, 'review_date': False,
         })
         self.employee_id.sudo().write({
             'last_submission_state':  False,
@@ -429,35 +426,29 @@ class HrProfileChangeRequest(models.Model):
 
     def _add_trail(self, action, note, reason=None):
         self.env['hr.profile.change.request.trail'].sudo().create({
-            'request_id':  self.id,
-            'action':      action,
-            'note':        note,
-            'reason':      reason or '',
+            'request_id':  self.id, 'action': action,
+            'note':        note,    'reason': reason or '',
             'user_id':     self.env.user.id,
             'action_date': fields.Datetime.now(),
         })
 
-    # ── Send mail to HR ───────────────────────────────────────────
+    # ── Mail to ALL HR Reviewers ──────────────────────────────────
     def _send_mail_to_hr(self):
         try:
             hr_users = self._get_hr_reviewer_users()
             if not hr_users:
-                _logger.warning('PCR %s: No HR Reviewer users — mail not sent.', self.name)
+                _logger.warning('PCR %s: No HR Reviewer users found.', self.name)
                 return
-            hr_emails = []
-            hr_names_list = []
+            hr_emails, hr_names_list = [], []
             for u in hr_users:
-                best_email = (
-                    u.work_email
-                    or u.partner_id.email
-                    or (u.login if '@' in (u.login or '') else None)
+                email = u.work_email or u.partner_id.email or (
+                    u.login if '@' in (u.login or '') else None
                 )
-                if best_email:
-                    hr_emails.append(best_email)
+                if email:
+                    hr_emails.append(email)
                     hr_names_list.append(u.name)
-                    _logger.info('PCR %s: will notify %s at %s', self.name, u.name, best_email)
             if not hr_emails:
-                _logger.warning('PCR %s: HR Reviewers have no email addresses.', self.name)
+                _logger.warning('PCR %s: HR Reviewers have no email.', self.name)
                 return
             email_to = ', '.join(hr_emails)
             hr_names = ', '.join(hr_names_list)
@@ -470,8 +461,8 @@ class HrProfileChangeRequest(models.Model):
                 ),
                 'auto_delete': False,
                 'body_html': f'''
-                <div style="font-family:Arial,sans-serif;max-width:620px;
-                            margin:auto;border:1px solid #ddd;border-radius:8px;overflow:hidden;">
+                <div style="font-family:Arial,sans-serif;max-width:620px;margin:auto;
+                            border:1px solid #ddd;border-radius:8px;overflow:hidden;">
                     <div style="background:#4e73df;padding:24px 28px;">
                         <h2 style="color:white;margin:0;font-size:20px;">📋 New Profile Change Request</h2>
                         <p style="color:#c8d8ff;margin:6px 0 0;font-size:13px;">
@@ -485,22 +476,16 @@ class HrProfileChangeRequest(models.Model):
                                 <td style="padding:10px 14px;border:1px solid #ddd;font-weight:bold;width:38%;">Reference</td>
                                 <td style="padding:10px 14px;border:1px solid #ddd;">{self.name}</td>
                             </tr>
-                            <tr>
-                                <td style="padding:10px 14px;border:1px solid #ddd;font-weight:bold;">Employee</td>
-                                <td style="padding:10px 14px;border:1px solid #ddd;">{self.employee_id.name}</td>
-                            </tr>
+                            <tr><td style="padding:10px 14px;border:1px solid #ddd;font-weight:bold;">Employee</td>
+                                <td style="padding:10px 14px;border:1px solid #ddd;">{self.employee_id.name}</td></tr>
                             <tr style="background:#eef2ff;">
                                 <td style="padding:10px 14px;border:1px solid #ddd;font-weight:bold;">Company</td>
-                                <td style="padding:10px 14px;border:1px solid #ddd;">{self.company_id.name if self.company_id else '—'}</td>
-                            </tr>
-                            <tr>
-                                <td style="padding:10px 14px;border:1px solid #ddd;font-weight:bold;">Department</td>
-                                <td style="padding:10px 14px;border:1px solid #ddd;">{self.department_id.name or '—'}</td>
-                            </tr>
+                                <td style="padding:10px 14px;border:1px solid #ddd;">{self.company_id.name if self.company_id else '—'}</td></tr>
+                            <tr><td style="padding:10px 14px;border:1px solid #ddd;font-weight:bold;">Department</td>
+                                <td style="padding:10px 14px;border:1px solid #ddd;">{self.department_id.name or '—'}</td></tr>
                             <tr style="background:#eef2ff;">
                                 <td style="padding:10px 14px;border:1px solid #ddd;font-weight:bold;">Submitted On</td>
-                                <td style="padding:10px 14px;border:1px solid #ddd;">{self.submission_date}</td>
-                            </tr>
+                                <td style="padding:10px 14px;border:1px solid #ddd;">{self.submission_date}</td></tr>
                         </table>
                         <p>Go to: <b>Profile Change Requests → Pending Review</b></p>
                         <p style="color:#999;font-size:11px;">Sent to: {hr_names}</p>
@@ -512,46 +497,56 @@ class HrProfileChangeRequest(models.Model):
         except Exception as e:
             _logger.warning('PCR %s: Failed to send HR notification: %s', self.name, e)
 
-    # ── Send mail to Employee ─────────────────────────────────────
+    # ── Mail to Employee ──────────────────────────────────────────
     def _send_mail_to_employee(self, status):
         try:
             emp_user = self.employee_id.user_id
-            if emp_user and '@' in (emp_user.login or ''):
-                emp_email = emp_user.login
-            else:
-                emp_email = self.employee_id.work_email or self.employee_id.private_email
+            emp_email = (
+                (emp_user.login if emp_user and '@' in (emp_user.login or '') else None)
+                or self.employee_id.work_email
+                or self.employee_id.private_email
+            )
             if not emp_email:
                 _logger.warning('PCR %s: Employee has no email.', self.name)
                 return
             if status == 'approved':
                 subject = f'Profile Update Approved - {self.name}'
                 body = (
+                    f'<div style="font-family:Arial,sans-serif;max-width:600px;">'
+                    f'<div style="background:#1cc88a;padding:20px;">'
+                    f'<h2 style="color:white;margin:0;">✅ Profile Update Approved</h2></div>'
+                    f'<div style="padding:20px;background:#f9f9f9;">'
                     f'<p>Dear <b>{self.employee_id.name}</b>,</p>'
-                    f'<p>Your request <b>{self.name}</b> has been '
-                    f'<b style="color:green">APPROVED</b>. '
-                    f'Your profile has been updated successfully.</p>'
+                    f'<p>Your request <b>{self.name}</b> has been <b style="color:#1cc88a;">APPROVED</b>.</p>'
+                    f'<p>Your profile has been updated successfully.</p>'
+                    f'<p>Approved by: <b>{self.reviewed_by.name if self.reviewed_by else "HR"}</b></p>'
+                    f'<p><a href="/my/employee/personal" style="background:#1cc88a;color:white;'
+                    f'padding:10px 24px;border-radius:6px;text-decoration:none;">View My Profile</a></p>'
+                    f'</div></div>'
                 )
             else:
                 subject = f'Profile Update Rejected - {self.name}'
                 body = (
+                    f'<div style="font-family:Arial,sans-serif;max-width:600px;">'
+                    f'<div style="background:#e74a3b;padding:20px;">'
+                    f'<h2 style="color:white;margin:0;">❌ Profile Update Rejected</h2></div>'
+                    f'<div style="padding:20px;background:#f9f9f9;">'
                     f'<p>Dear <b>{self.employee_id.name}</b>,</p>'
-                    f'<p>Your request <b>{self.name}</b> has been '
-                    f'<b style="color:red">REJECTED</b>.</p>'
-                    f'<p>Reason: {self.rejection_reason or "No reason provided"}</p>'
+                    f'<p>Your request <b>{self.name}</b> has been <b style="color:#e74a3b;">REJECTED</b>.</p>'
+                    f'<p><b>Reason:</b> {self.rejection_reason or "No reason provided"}</p>'
+                    f'<p><a href="/my/employee/personal" style="background:#e74a3b;color:white;'
+                    f'padding:10px 24px;border-radius:6px;text-decoration:none;">Go to My Profile</a></p>'
+                    f'</div></div>'
                 )
             mail = self.env['mail.mail'].sudo().create({
-                'subject':     subject,
-                'email_to':    emp_email,
-                'email_from':  'notifications@techcarrot-fz-llc1.odoo.com',
-                'auto_delete': False,
-                'body_html':   body,
+                'subject': subject, 'email_to': emp_email,
+                'email_from': 'notifications@techcarrot-fz-llc1.odoo.com',
+                'auto_delete': False, 'body_html': body,
             })
             mail.sudo().send()
-            _logger.info('PCR %s: Employee notification sent to %s', self.name, emp_email)
+            _logger.info('PCR %s: Employee notification (%s) sent to %s', self.name, status, emp_email)
         except Exception as e:
             _logger.warning('PCR %s: Failed to send employee notification: %s', self.name, e)
-
-
 
 
 # # -*- coding: utf-8 -*-
