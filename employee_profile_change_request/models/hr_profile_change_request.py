@@ -138,8 +138,8 @@ class HrProfileChangeRequest(models.Model):
     )
     state = fields.Selection(
         selection=[
-            ('draft', 'Draft'),
-            ('pending', 'Pending HR Review'),
+            ('draft',    'Draft'),
+            ('pending',  'Pending HR Review'),
             ('approved', 'Approved'),
             ('rejected', 'Rejected'),
         ],
@@ -149,17 +149,17 @@ class HrProfileChangeRequest(models.Model):
         'res.company', string='Company',
         default=lambda self: self.env.company,
     )
-    submitted_data = fields.Text(string='Submitted Data (JSON)', readonly=True)
+    submitted_data    = fields.Text(string='Submitted Data (JSON)', readonly=True)
     changed_fields_display = fields.Html(
         string='Submitted Changes',
         compute='_compute_changed_fields_display',
         sanitize=False,
     )
-    submission_date = fields.Datetime(string='Submitted On', default=fields.Datetime.now, readonly=True)
-    review_date = fields.Datetime(string='Reviewed On', readonly=True)
-    reviewed_by = fields.Many2one(comodel_name='res.users', string='Reviewed By', readonly=True)
-    rejection_reason = fields.Text(string='Rejection Reason', tracking=True)
-    trail_ids = fields.One2many(
+    submission_date   = fields.Datetime(string='Submitted On', default=fields.Datetime.now, readonly=True)
+    review_date       = fields.Datetime(string='Reviewed On', readonly=True)
+    reviewed_by       = fields.Many2one(comodel_name='res.users', string='Reviewed By', readonly=True)
+    rejection_reason  = fields.Text(string='Rejection Reason', tracking=True)
+    trail_ids         = fields.One2many(
         comodel_name='hr.profile.change.request.trail',
         inverse_name='request_id', string='Audit Trail', readonly=True,
     )
@@ -194,9 +194,9 @@ class HrProfileChangeRequest(models.Model):
     def _compute_doc_flags(self):
         doc_field_map = {
             'emirates_id_file': 'has_emirates_id_doc',
-            'passport_file': 'has_passport_doc',
-            'other_documents': 'has_other_doc',
-            'has_work_permit': 'has_work_permit_doc',
+            'passport_file':    'has_passport_doc',
+            'other_documents':  'has_other_doc',
+            'has_work_permit':  'has_work_permit_doc',
         }
         for rec in self:
             flags = {f: False for f in doc_field_map.values()}
@@ -366,7 +366,7 @@ class HrProfileChangeRequest(models.Model):
         self.write({'state': 'pending'})
         self.employee_id.sudo().write({
             'last_portal_submission': self.submitted_data,
-            'last_submission_state': 'pending',
+            'last_submission_state':  'pending',
         })
         self._add_trail(action='submitted', note=f'Submitted by {self.employee_id.name}')
         self._send_mail_to_hr()
@@ -398,16 +398,12 @@ class HrProfileChangeRequest(models.Model):
         # Type coercions
         for f in {'children'}:
             if f in write_vals:
-                try:
-                    write_vals[f] = int(write_vals[f])
-                except:
-                    write_vals.pop(f, None)
+                try:    write_vals[f] = int(write_vals[f])
+                except: write_vals.pop(f, None)
         for f in {'last_salary_per_annum_amt'}:
             if f in write_vals:
-                try:
-                    write_vals[f] = float(write_vals[f])
-                except:
-                    write_vals.pop(f, None)
+                try:    write_vals[f] = float(write_vals[f])
+                except: write_vals.pop(f, None)
 
         if write_vals:
             self.employee_id.sudo().write(write_vals)
@@ -426,7 +422,7 @@ class HrProfileChangeRequest(models.Model):
         self._send_mail_to_employee('approved')
         self.employee_id.sudo().write({
             'last_portal_submission': False,
-            'last_submission_state': 'approved',
+            'last_submission_state':  'approved',
         })
         return True
 
@@ -452,7 +448,7 @@ class HrProfileChangeRequest(models.Model):
             'reviewed_by': False, 'review_date': False,
         })
         self.employee_id.sudo().write({
-            'last_submission_state': False,
+            'last_submission_state':  False,
             'last_portal_submission': False,
         })
         self._add_trail(action='reopened', note=f'Re-opened by {self.env.user.name}')
@@ -460,9 +456,9 @@ class HrProfileChangeRequest(models.Model):
 
     def _add_trail(self, action, note, reason=None):
         self.env['hr.profile.change.request.trail'].sudo().create({
-            'request_id': self.id, 'action': action,
-            'note': note, 'reason': reason or '',
-            'user_id': self.env.user.id,
+            'request_id':  self.id, 'action': action,
+            'note':        note,    'reason': reason or '',
+            'user_id':     self.env.user.id,
             'action_date': fields.Datetime.now(),
         })
 
@@ -487,11 +483,11 @@ class HrProfileChangeRequest(models.Model):
             email_to = ', '.join(hr_emails)
             hr_names = ', '.join(hr_names_list)
             mail = self.env['mail.mail'].sudo().create({
-                'subject': f'New Profile Change Request: {self.name} — {self.employee_id.name}',
-                'email_to': email_to,
+                'subject':    f'New Profile Change Request: {self.name} — {self.employee_id.name}',
+                'email_to':   email_to,
                 'email_from': (
-                        self.employee_id.company_id.email
-                        or 'notifications@techcarrot-fz-llc1.odoo.com'
+                    self.employee_id.company_id.email
+                    or 'notifications@techcarrot-fz-llc1.odoo.com'
                 ),
                 'auto_delete': False,
                 'body_html': f'''
@@ -536,9 +532,9 @@ class HrProfileChangeRequest(models.Model):
         try:
             emp_user = self.employee_id.user_id
             emp_email = (
-                    (emp_user.login if emp_user and '@' in (emp_user.login or '') else None)
-                    or self.employee_id.work_email
-                    or self.employee_id.private_email
+                (emp_user.login if emp_user and '@' in (emp_user.login or '') else None)
+                or self.employee_id.work_email
+                or self.employee_id.private_email
             )
             if not emp_email:
                 _logger.warning('PCR %s: Employee has no email.', self.name)
@@ -581,8 +577,6 @@ class HrProfileChangeRequest(models.Model):
             _logger.info('PCR %s: Employee notification (%s) sent to %s', self.name, status, emp_email)
         except Exception as e:
             _logger.warning('PCR %s: Failed to send employee notification: %s', self.name, e)
-
-
 
 
 

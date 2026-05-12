@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
 import logging
-# -*- coding: utf-8 -*-
-import json
-import logging
 import re
 import base64
 
@@ -17,6 +14,7 @@ MANY2ONE_FIELDS = {
     'nationality_at_birth_id',
     'country_id',
     'issue_countries_id',
+    'countries_id',
 }
 
 # ── ALL editable text/select fields ───────────────────────────────────────────
@@ -31,7 +29,6 @@ EDITABLE_FIELDS = [
     # Basic Info — Personal
     'blood_group',
     'gender', 'birthday',
-    'lang',
 
     # Basic Info — Identity
     'issue_date', 'expiry_date',
@@ -318,7 +315,6 @@ class EmployeePortalProfileSubmit(http.Controller):
         except Exception as e:
             _logger.error('Profile change error for %s: %s', employee.name, str(e))
             return request.make_json_response({'success': False, 'error': str(e)})
-
 
 
 

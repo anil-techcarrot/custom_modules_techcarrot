@@ -865,8 +865,15 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Country</label>
-                                    <input type="text" name="countries_id" class="form-control"
-                                           t-att-value="employee.countries_id.name or ''" readonly="readonly"/>
+                                    <select name="countries_id" class="form-select" disabled="disabled">
+                                        <option value="">-- Select Country --</option>
+                                        <t t-foreach="countries" t-as="country">
+                                            <option t-att-value="country.id"
+                                                    t-att-selected="'selected' if country.id == employee.countries_id.id else None">
+                                                <t t-esc="country.name"/>
+                                            </option>
+                                        </t>
+                                    </select>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">State</label>
