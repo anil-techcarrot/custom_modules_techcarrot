@@ -246,8 +246,16 @@ class EmployeePortalProfileSubmit(http.Controller):
                         new_id = int(new_val) if new_val else 0
                         current_rec = getattr(employee, field, False)
                         current_id = current_rec.id if current_rec else 0
+
                         if new_id and new_id != current_id:
-                            changed[field] = new_id   # store as int
+                            # Get country name
+                            country = request.env['res.country'].sudo().browse(new_id)
+
+                            changed[field] = {
+                                'id': new_id,
+                                'name': country.name or ''
+                            }
+
                     except (ValueError, TypeError):
                         pass
                     continue
