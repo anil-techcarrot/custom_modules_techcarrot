@@ -9,73 +9,51 @@ from odoo.http import request
 
 _logger = logging.getLogger(__name__)
 
-# ── MANY2ONE COUNTRY FIELDS ───────────────────────────────────────────────────
-MANY2ONE_FIELDS = [
-    'country_id',
-    'nationality_at_birth_id',
-    'issue_countries_id',
-    'private_state_id',
-]
+# ── MANY2ONE FIELDS ───────────────────────────────────────────────────────────
+# These are submitted as integer IDs from <select> dropdowns.
+# We store them as "ID::Name" so display is human-readable but
+# action_approve can write the integer ID.
+MANY2ONE_COUNTRY_FIELDS = {
+    'country_id':             'res.country',
+    'nationality_at_birth_id': 'res.country',
+    'issue_countries_id':     'res.country',
+}
 
-# ── ALL editable fields including ALL tabs ────────────────────────────────────
+# ── ALL editable text/select fields ──────────────────────────────────────────
 EDITABLE_FIELDS = [
-
     # Basic Info — Contact
-    'work_phone',
-    'private_email',
-    'private_phone',
-    'private_street',
-    'private_street2',
-    'private_city',
-    'private_zip',
-    'private_state_id',
-    'whatsapp',
-    'linkedin',
-    'legal_name',
-    'facebook_profile',
-    'insta_profile',
-    'twitter_profile',
+    'work_phone', 'private_email', 'private_phone',
+    'private_street', 'private_street2', 'private_city', 'private_zip',
+    'private_state_id', 'whatsapp', 'linkedin', 'legal_name',
+    'facebook_profile', 'insta_profile', 'twitter_profile',
 
-    # ── COUNTRY FIELDS ───────────────────────────────────────────────────────
-    'country_id',
-    'nationality_at_birth_id',
-    'issue_countries_id',
+    # Basic Info — Country dropdowns (submitted as integer IDs)
+    'country_id', 'nationality_at_birth_id', 'issue_countries_id',
 
     # Basic Info — Personal
     'blood_group',
 
     # Basic Info — Identity
-    'issue_date',
-    'expiry_date',
+    'issue_date', 'expiry_date',
 
     # Basic Info — Emergency
-    'l10n_in_relationship',
-    'emergency_phone',
-    'e_private_city',
+    'l10n_in_relationship', 'emergency_phone', 'e_private_city',
 
     # Professional — Emergency Contact
-    'emergency_contact_person_name',
-    'emergency_contact_person_phone',
-    'alternate_mobile_number',
-    'emergency_contact_person_name_1',
-    'emergency_contact_person_phone_1',
-    'second_alternative_number',
+    'emergency_contact_person_name', 'emergency_contact_person_phone',
+    'alternate_mobile_number', 'emergency_contact_person_name_1',
+    'emergency_contact_person_phone_1', 'second_alternative_number',
     'home_land_line_no',
 
     # Professional — Spouse
-    'spouse_passport_no',
-    'spouse_passport_issue_date',
-    'spouse_passport_expiry_date',
-    'spouse_visa_no',
-    'spouse_visa_expire_date',
-    'spouse_emirates_id_no',
-    'spouse_emirates_issue_date',
-    'spouse_emirates_id_expiry_date',
+    'spouse_passport_no', 'spouse_passport_issue_date',
+    'spouse_passport_expiry_date', 'spouse_visa_no',
+    'spouse_visa_expire_date', 'spouse_emirates_id_no',
+    'spouse_emirates_issue_date', 'spouse_emirates_id_expiry_date',
     'spouse_aadhar_no',
 
     # Family — Child
-    'dependent_child_name_1',
-    'dependent_child_dob_1',
+    'dependent_child_name_1', 'dependent_child_dob_1',
     'dependent_child_passport_no',
     'dependent_child_passport_issue_date_1',
     'dependent_child_passport_expiry_date_1',
@@ -87,129 +65,75 @@ EDITABLE_FIELDS = [
     'dependent_child_aadhar_no_1',
 
     # Family
-    'father_name',
-    'father_dob',
-    'mother_name',
-    'mother_dob',
-    'children',
-    'career_break_detail',
+    'father_name', 'father_dob', 'mother_name', 'mother_dob',
+    'children', 'career_break_detail',
 
     # Professional — Nominee
-    'employee_nominee_name',
-    'employee_nominee_contact_no',
-    'domain_worked',
-    'primary_skill',
-    'secondary_skill',
-    'tool_used',
+    'employee_nominee_name', 'employee_nominee_contact_no',
+    'domain_worked', 'primary_skill', 'secondary_skill', 'tool_used',
 
     # Professional — Industry
-    'industry_ref_name',
-    'industry_ref_email',
-    'industry_ref_mob_no',
-    'home_country_id_name',
-    'home_country_id_number',
+    'industry_ref_name', 'industry_ref_email', 'industry_ref_mob_no',
+    'home_country_id_name', 'home_country_id_number',
 
     # Family — Languages
-    'mother_tongue_name',
-    'language_known_name',
+    'mother_tongue_name', 'language_known_name',
 
     # Professional — Work Location
-    'u_private_city',
-    'current_address',
-    'phone_code_1',
-    'house_no',
-    'area_name',
-    'city',
-    'zip_code',
+    'u_private_city', 'current_address', 'phone_code_1',
+    'house_no', 'area_name', 'city', 'zip_code',
 
     # Professional — General
-    'experience',
-    'current_role',
-    'industry_start_date',
+    'experience', 'current_role', 'industry_start_date',
 
     # Professional — Last Organisation
-    'last_organisation_name',
-    'last_location',
-    'last_salary_per_annum_currency',
-    'last_salary_per_annum_amt',
-    'reason_for_leaving',
-    'last_report_manager_name',
-    'last_report_manager_designation',
-    'last_report_manager_mob_no',
+    'last_organisation_name', 'last_location',
+    'last_salary_per_annum_currency', 'last_salary_per_annum_amt',
+    'reason_for_leaving', 'last_report_manager_name',
+    'last_report_manager_designation', 'last_report_manager_mob_no',
     'last_report_manager_mail',
 
     # Professional — Industry Details
-    'previous_company_name',
-    'designation',
-    'period_in_company',
-    'reason_of_leaving',
+    'previous_company_name', 'designation',
+    'period_in_company', 'reason_of_leaving',
 ]
 
 # ── FILE FIELDS ───────────────────────────────────────────────────────────────
 FILE_FIELDS = [
-    'emirates_id_file',
-    'passport_file',
-    'other_documents',
-    'has_work_permit',
+    'emirates_id_file', 'passport_file',
+    'other_documents', 'has_work_permit',
 ]
 
 EMAIL_PATTERN = re.compile(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
-
-# ── ISD CODE VALIDATION ──────────────────────────────────────────────────────
-ISD_PATTERN = re.compile(r'^\+[1-9][0-9]{0,2}$')
+ISD_PATTERN   = re.compile(r'^\+[1-9][0-9]{0,2}$')
 
 
 class EmployeePortalProfileSubmit(http.Controller):
 
-    # =========================================================================
-    # HOME
-    # =========================================================================
-    @http.route(
-        '/my/employee',
-        type='http',
-        auth='user',
-        website=True,
-        methods=['GET']
-    )
+    @http.route('/my/employee', type='http', auth='user', website=True, methods=['GET'])
     def portal_employee_home(self, **kwargs):
         return request.redirect('/my/employee/personal')
 
-    # =========================================================================
-    # MAIN PAGE
-    # =========================================================================
     @http.route(
         '/my/employee/personal',
-        type='http',
-        auth='user',
-        website=True,
-        methods=['GET', 'POST'],
-        csrf=False,
+        type='http', auth='user', website=True,
+        methods=['GET', 'POST'], csrf=False,
     )
     def portal_employee_personal(self, **post):
 
         employee = request.env['hr.employee'].sudo().search(
-            [('user_id', '=', request.env.user.id)],
-            limit=1
+            [('user_id', '=', request.env.user.id)], limit=1
         )
-
         if not employee:
             return request.redirect('/my')
 
-        # ---------------------------------------------------------------------
-        # POST
-        # ---------------------------------------------------------------------
         if request.httprequest.method == 'POST':
             return self._handle_post(employee, post)
 
-        # ---------------------------------------------------------------------
-        # GET
-        # ---------------------------------------------------------------------
+        # ── GET ──────────────────────────────────────────────────
         portal_overlay = {}
-
-        if (
-            employee.last_portal_submission
-            and employee.last_submission_state in ('pending', 'rejected')
-        ):
+        if (employee.last_portal_submission
+                and employee.last_submission_state in ('pending', 'rejected')):
             try:
                 portal_overlay = json.loads(employee.last_portal_submission)
             except Exception:
@@ -218,18 +142,11 @@ class EmployeePortalProfileSubmit(http.Controller):
         notification = None
         state = employee.last_submission_state
 
-        # ---------------------------------------------------------------------
-        # APPROVED
-        # ---------------------------------------------------------------------
         if state == 'approved':
-
-            approved_req = request.env[
-                'hr.profile.change.request'
-            ].sudo().search([
+            approved_req = request.env['hr.profile.change.request'].sudo().search([
                 ('employee_id', '=', employee.id),
                 ('state', '=', 'approved'),
             ], order='review_date desc', limit=1)
-
             notification = {
                 'type': 'success',
                 'message': 'Your profile has been updated successfully.',
@@ -237,41 +154,24 @@ class EmployeePortalProfileSubmit(http.Controller):
                 'request_name': approved_req.name if approved_req else '',
             }
 
-        # ---------------------------------------------------------------------
-        # REJECTED
-        # ---------------------------------------------------------------------
         elif state == 'rejected':
-
-            rejected_req = request.env[
-                'hr.profile.change.request'
-            ].sudo().search([
+            rejected_req = request.env['hr.profile.change.request'].sudo().search([
                 ('employee_id', '=', employee.id),
                 ('state', '=', 'rejected'),
             ], order='create_date desc', limit=1)
-
             if rejected_req:
                 notification = {
                     'type': 'danger',
                     'message': 'Your profile update request was rejected.',
-                    'reason': (
-                        rejected_req.rejection_reason
-                        or 'No reason provided.'
-                    ),
+                    'reason': rejected_req.rejection_reason or 'No reason provided.',
                     'request_name': rejected_req.name,
                 }
 
-        # ---------------------------------------------------------------------
-        # PENDING
-        # ---------------------------------------------------------------------
         elif state == 'pending':
-
-            pending_req = request.env[
-                'hr.profile.change.request'
-            ].sudo().search([
+            pending_req = request.env['hr.profile.change.request'].sudo().search([
                 ('employee_id', '=', employee.id),
                 ('state', '=', 'pending'),
             ], order='create_date desc', limit=1)
-
             if pending_req:
                 notification = {
                     'type': 'warning',
@@ -280,10 +180,7 @@ class EmployeePortalProfileSubmit(http.Controller):
                     'request_name': pending_req.name,
                 }
 
-        countries = request.env['res.country'].sudo().search(
-            [],
-            order='name'
-        )
+        countries = request.env['res.country'].sudo().search([], order='name')
 
         return request.render(
             'employee_self_service_portal.portal_employee_profile_personal',
@@ -297,278 +194,138 @@ class EmployeePortalProfileSubmit(http.Controller):
         )
 
     # =========================================================================
-    # HANDLE SAVE
+    # _handle_post — THE KEY FIX IS HERE
+    # For Many2one country fields we store "ID::CountryName" in submitted_data
+    # so that:
+    #   - action_approve can extract the integer ID and write it to employee
+    #   - The display table can show the human-readable name
     # =========================================================================
     def _handle_post(self, employee, post):
-
         try:
-
-            # ================================================================
-            # CHECK PENDING REQUEST
-            # ================================================================
-            pending_request = request.env[
-                'hr.profile.change.request'
-            ].sudo().search([
+            # ── Block if pending ──────────────────────────────────
+            pending_req = request.env['hr.profile.change.request'].sudo().search([
                 ('employee_id', '=', employee.id),
                 ('state', '=', 'pending'),
             ], limit=1)
-
-            if pending_request:
+            if pending_req:
                 return request.make_json_response({
                     'success': False,
-                    'error': (
-                        'Your previous request is still pending HR approval.'
-                    )
+                    'error': 'Your previous request is still pending HR approval.',
                 })
 
-            # ================================================================
-            # EMAIL VALIDATION
-            # ================================================================
-            email_fields = [
-                'private_email',
-                'industry_ref_email',
-                'last_report_manager_mail',
-            ]
-
-            for field in email_fields:
-
+            # ── Email validation ──────────────────────────────────
+            for field in ['private_email', 'industry_ref_email', 'last_report_manager_mail']:
                 val = post.get(field, '').strip()
-
                 if val and not EMAIL_PATTERN.match(val):
                     return request.make_json_response({
                         'success': False,
-                        'error': 'Invalid email format.',
+                        'error': f'Invalid email format for field: {field}',
                     })
 
-            # ================================================================
-            # ISD VALIDATION
-            # ================================================================
-            isd_fields = [
-                'phone_code_1',
-            ]
-
-            for field in isd_fields:
-
-                val = post.get(field, '').strip()
-
-                if val and not ISD_PATTERN.match(val):
-                    return request.make_json_response({
-                        'success': False,
-                        'error': (
-                            'ISD code must start with + followed by '
-                            '1-3 digits. Example: +91, +971, +1'
-                        )
-                    })
-
-            # ================================================================
-            # COLLECT TEXT VALUES
-            # ================================================================
-            submitted = {}
-
-            for field in EDITABLE_FIELDS:
-
-                val = post.get(field)
-
-                if val is not None:
-                    submitted[field] = str(val).strip()
-
-            # ================================================================
-            # FILES
-            # ================================================================
-            files_submitted = {}
-
-            for field in FILE_FIELDS:
-
-                file_obj = request.httprequest.files.get(field)
-
-                if file_obj and file_obj.filename:
-                    files_submitted[field] = file_obj
-
-            # ================================================================
-            # NOTHING SUBMITTED
-            # ================================================================
-            if not submitted and not files_submitted:
-
+            # ── ISD code validation ───────────────────────────────
+            isd_val = post.get('phone_code_1', '').strip()
+            if isd_val and not ISD_PATTERN.match(isd_val):
                 return request.make_json_response({
                     'success': False,
-                    'error': 'No data submitted.',
+                    'error': 'ISD code must start with + followed by 1-3 digits. Example: +91, +971, +1',
                 })
 
-            # ================================================================
-            # COMPARE VALUES
-            # ================================================================
+            # ── Compare and collect changed fields ────────────────
             changed = {}
 
-            for field, new_val in submitted.items():
+            # ── Many2one country fields ───────────────────────────
+            for field, model_name in MANY2ONE_COUNTRY_FIELDS.items():
+                raw_val = post.get(field, '').strip()
+                if not raw_val:
+                    continue
+                try:
+                    new_id = int(raw_val)
+                except (ValueError, TypeError):
+                    continue
+
+                current_rec = getattr(employee, field, False)
+                current_id  = current_rec.id if current_rec else 0
+
+                if new_id != current_id:
+                    # Look up the name so we can display it in the diff table
+                    country_rec = request.env[model_name].sudo().browse(new_id)
+                    country_name = country_rec.name if country_rec else str(new_id)
+                    # Store as "ID::Name" — approve reads the ID, display reads the name
+                    changed[field] = f'M2O_ID::{new_id}::{country_name}'
+
+            # ── Regular text/select fields ────────────────────────
+            for field in EDITABLE_FIELDS:
+                if field in MANY2ONE_COUNTRY_FIELDS:
+                    continue  # already handled above
+                val = post.get(field)
+                if val is None:
+                    continue
+                new_val = str(val).strip()
 
                 try:
-
                     current = getattr(employee, field, False)
-
-                    # ========================================================
-                    # MANY2ONE FIELDS
-                    # ========================================================
-                    if field in MANY2ONE_FIELDS:
-
-                        current_id = str(current.id or '').strip()
-                        new_id = str(new_val or '').strip()
-
-                        if current_id != new_id:
-
-                            # SHOW COUNTRY NAME IN REQUEST
-                            if new_id:
-
-                                rec = request.env[
-                                    current._name
-                                ].sudo().browse(int(new_id))
-
-                                changed[field] = rec.name
-
-                            else:
-                                changed[field] = ''
-
-                    # ========================================================
-                    # NORMAL FIELDS
-                    # ========================================================
+                    if hasattr(current, 'name'):
+                        current_val = str(current.name or '').strip()
+                    elif current in [False, None]:
+                        current_val = ''
                     else:
+                        current_val = str(current).strip()
 
-                        if current in [False, None]:
-                            current_val = ''
-                        else:
-                            current_val = str(current).strip()
-
-                        new_val = str(new_val).strip()
-
-                        if current_val != new_val:
-                            changed[field] = new_val
+                    if new_val != current_val:
+                        changed[field] = new_val
 
                 except Exception:
-                    changed[field] = new_val
+                    if new_val:
+                        changed[field] = new_val
 
-            # ================================================================
-            # FILE CHANGES
-            # ================================================================
-            file_changed_fields = {}
+            # ── File fields ───────────────────────────────────────
+            file_write_vals = {}
+            for field in FILE_FIELDS:
+                file_obj = request.httprequest.files.get(field)
+                if file_obj and file_obj.filename:
+                    try:
+                        file_data = base64.b64encode(file_obj.read()).decode('utf-8')
+                        file_write_vals[field] = file_data
+                        changed[field] = f'[FILE:{file_obj.filename}]'
+                    except Exception as e:
+                        _logger.error('File upload failed for %s: %s', field, e)
 
-            for field, file_obj in files_submitted.items():
-
-                try:
-
-                    file_data = base64.b64encode(
-                        file_obj.read()
-                    ).decode('utf-8')
-
-                    file_changed_fields[field] = file_data
-
-                    changed[field] = '[FILE] %s' % file_obj.filename
-
-                except Exception as e:
-
-                    _logger.error(
-                        'File upload failed for %s : %s',
-                        field,
-                        str(e)
-                    )
-
-            # ================================================================
-            # NO CHANGES
-            # ================================================================
-            if not changed and not file_changed_fields:
-
+            # ── No changes ────────────────────────────────────────
+            if not changed and not file_write_vals:
                 return request.make_json_response({
                     'success': True,
                     'reference': '',
                     'no_change': True,
-                    'message': (
-                        'No changes detected. '
-                        'Your profile is already up to date.'
-                    )
+                    'message': 'No changes detected. Your profile is already up to date.',
                 })
 
-            # ================================================================
-            # SAVE FILES DIRECTLY
-            # ================================================================
-            if file_changed_fields:
-                employee.sudo().write(file_changed_fields)
+            # ── Write files immediately ───────────────────────────
+            if file_write_vals:
+                employee.sudo().write(file_write_vals)
 
-            # ================================================================
-            # CREATE PROFILE CHANGE REQUEST
-            # ================================================================
+            # ── Create PCR ────────────────────────────────────────
             reference = ''
-
             if changed:
-
-                req = request.env[
-                    'hr.profile.change.request'
-                ].sudo().create({
-                    'employee_id': employee.id,
+                req = request.env['hr.profile.change.request'].sudo().create({
+                    'employee_id':    employee.id,
                     'submitted_data': json.dumps(changed),
-                    'state': 'draft',
+                    'state':          'draft',
                 })
-
-                # ------------------------------------------------------------
-                # SUBMIT
-                # ------------------------------------------------------------
-                if hasattr(req, 'action_submit'):
-                    req.action_submit()
-
-                # ------------------------------------------------------------
-                # FORCE REFERENCE IF EMPTY
-                # ------------------------------------------------------------
-                if not req.name or req.name == '/':
-                    sequence = request.env['ir.sequence'].sudo().next_by_code(
-                        'hr.profile.change.request'
-                    )
-
-                    if sequence:
-                        req.sudo().write({
-                            'name': sequence
-                        })
-
+                req.action_submit()
                 reference = req.name or ''
+                _logger.info('PCR %s created for %s — fields: %s',
+                             reference, employee.name, list(changed.keys()))
 
-                # ------------------------------------------------------------
-                # STORE LAST SUBMISSION
-                # ------------------------------------------------------------
-                employee.sudo().write({
-                    'last_portal_submission': json.dumps(changed),
-                    'last_submission_state': 'pending',
-                })
-
-                _logger.info(
-                    'PCR CREATED : %s for %s',
-                    reference,
-                    employee.name
-                )
-
-            # ================================================================
-            # SUCCESS RESPONSE
-            # ================================================================
             return request.make_json_response({
-                'success': True,
+                'success':   True,
                 'reference': reference,
                 'no_change': False,
-                'message': (
-                    'Your profile update request '
-                    'has been submitted successfully.'
-                )
+                'message':   'Your profile update request has been submitted successfully.',
             })
 
-        # ====================================================================
-        # ERROR
-        # ====================================================================
         except Exception as e:
-
-            _logger.exception(
-                'PROFILE UPDATE ERROR : %s',
-                str(e)
-            )
-
-            return request.make_json_response({
-                'success': False,
-                'error': str(e),
-            })
-
+            _logger.exception('PROFILE UPDATE ERROR: %s', str(e))
+            return request.make_json_response({'success': False, 'error': str(e)})
 
 
 
