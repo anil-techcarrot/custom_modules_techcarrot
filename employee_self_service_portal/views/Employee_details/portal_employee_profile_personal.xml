@@ -1817,11 +1817,21 @@
                                     <input type="file" name="other_documents" class="form-control file-upload-input"
                                            accept=".pdf,.jpg,.jpeg,.png" disabled="disabled"/>
                                 </div>
-                                <!--                                <div class="col-md-4">-->
-                                <!--                                    <label class="form-label fw-bold"><i class="fa fa-file text-muted me-1"></i>Work Permit</label>-->
-                                <!--                                    <t t-if="employee.has_work_permit"><div class="mb-2"><a t-att-href="'/web/content/hr.employee/%s/has_work_permit?download=true' % employee.id" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fa fa-download me-1"></i>Download File</a></div></t>-->
-                                <!--                                    <input type="file" name="has_work_permit" class="form-control file-upload-input" accept=".pdf,.jpg,.jpeg,.png" disabled="disabled"/>-->
-                                <!--                                </div>-->
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold"><i class="fa fa-file text-muted me-1"></i>Work
+                                        Permit
+                                    </label>
+                                    <t t-if="employee.has_work_permit">
+                                        <div class="mb-2">
+                                            <a t-att-href="'/web/content/hr.employee/%s/has_work_permit?download=true' % employee.id"
+                                               target="_blank" class="btn btn-sm btn-outline-primary"><i
+                                                    class="fa fa-download me-1"></i>Download File
+                                            </a>
+                                        </div>
+                                    </t>
+                                    <input type="file" name="has_work_permit" class="form-control file-upload-input"
+                                           accept=".pdf,.jpg,.jpeg,.png" disabled="disabled"/>
+                                </div>
                             </div>
                         </div>
                     </div>
