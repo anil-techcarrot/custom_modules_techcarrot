@@ -2047,10 +2047,15 @@ function enableEditMode() {
     if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
 
     document.querySelectorAll('#personalDetailsForm input[type="file"].file-upload-input').forEach(fileInput => {
-        fileInput.addEventListener('change', function() {
-            if (this.files && this.files.length === 0) this.value = '';
-        });
+    fileInput.addEventListener('change', function() {
+        if (this.files && this.files.length > 0) {
+            showFilePreview(this, this.files[0]);
+        } else {
+            this.value = '';
+            clearFilePreview(this);
+        }
     });
+});
 
     document.querySelectorAll('#personalDetailsForm input:not([type="file"]), #personalDetailsForm select').forEach(input => {
         input.removeEventListener('input', validateField);
