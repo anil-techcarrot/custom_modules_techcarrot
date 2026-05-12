@@ -387,27 +387,14 @@ class HrProfileChangeRequest(models.Model):
     # ── Approve ───────────────────────────────────────────────────
     def action_approve(self):
         """
-        ISSUE 21 FIX:
-        blood_group, sex, marital are Selection fields on hr.employee.
-        Their values from the portal form are the selection KEY strings
-        (e.g. 'b_pos', 'male', 'married') which are exactly what
-        hr.employee.write() expects.
-
-        The previous error was:
-          ValueError: Wrong value for hr.employee.blood_group: 'b_pos'
-
-        This was caused by the field being present in submitted_data
-        as 'b_pos' (string) but NOT being excluded from write_vals,
-        so write() received it. BUT the real cause was that blood_group
-        was NOT in the portal EDITABLE_FIELDS in the controller, so it
-        was submitted as a raw form value.
-
-        FIX: We validate Selection field values before writing.
-        If the value is not a valid selection key, we skip it.
+        Approve employee profile change request
         """
+
         self.ensure_one()
+
         if self.state != 'pending':
             raise UserError(_('Only pending requests can be approved.'))
+
         try:
             data = json.loads(self.submitted_data or '{}')
         except Exception:
@@ -416,80 +403,168 @@ class HrProfileChangeRequest(models.Model):
         write_vals = {}
 
         for k, v in data.items():
-            # Skip system/file fields
+
+            # ============================================================
+            # SKIP SYSTEM FIELDS
+            # ============================================================
             if k in SKIP_ON_APPROVE:
                 continue
-            # Skip file markers
+
+            # ============================================================
+            # SKIP FILE MARKERS
+            # ============================================================
             if v and str(v).startswith('[FILE:'):
                 continue
-            # Skip empty values
+
+            # ============================================================
+            # SKIP EMPTY VALUES
+            # ============================================================
             if v is None or v == '':
                 continue
 
-            # ── Selection field validation (ISSUE 21 FIX) ──────────
+            # ============================================================
+            # MANY2ONE COUNTRY FIELDS FIX
+            # ============================================================
+            if k in [
+                'country_id',
+                'nationality_at_birth_id',
+                'issue_countries_id',
+            ]:
+
+                try:
+                    write_vals[k] = int(v)
+
+                except Exception:
+
+                    _logger.warning(
+                        'PCR %s: Invalid Many2one value for %s: %s',
+                        self.name,
+                        k,
+                        v
+                    )
+
+                continue
+
+            # ============================================================
+            # SELECTION FIELD VALIDATION
+            # ============================================================
             if k in SELECTION_FIELDS:
-                # Get valid selection keys from the field definition
+
                 field_obj = self.employee_id._fields.get(k)
+
                 if field_obj and hasattr(field_obj, 'selection'):
+
                     sel = field_obj.selection
-                    # selection can be a list of (key, label) or a method
+
                     if callable(sel):
                         valid_keys = [s[0] for s in sel(self.employee_id)]
                     else:
                         valid_keys = [s[0] for s in sel]
+
                     if v not in valid_keys:
                         _logger.warning(
-                            'PCR %s: Skipping invalid selection value for %s: %r (valid: %s)',
-                            self.name, k, v, valid_keys
+                            'PCR %s: Skipping invalid selection value for %s: %r',
+                            self.name,
+                            k,
+                            v
                         )
+
                         continue
+
                 write_vals[k] = v
                 continue
 
+            # ============================================================
+            # INTEGER FIELDS
+            # ============================================================
+            if k in ['children']:
+
+                try:
+                    write_vals[k] = int(v)
+                except Exception:
+                    pass
+
+                continue
+
+            # ============================================================
+            # FLOAT FIELDS
+            # ============================================================
+            if k in ['last_salary_per_annum_amt']:
+
+                try:
+                    write_vals[k] = float(v)
+                except Exception:
+                    pass
+
+                continue
+
+            # ============================================================
+            # NORMAL FIELDS
+            # ============================================================
             write_vals[k] = v
 
-        # ── Integer coercions ──────────────────────────────────────
-        for f in ('children',):
-            if f in write_vals:
-                try:    write_vals[f] = int(write_vals[f])
-                except: write_vals.pop(f, None)
-
-        # ── Float coercions ────────────────────────────────────────
-        for f in ('last_salary_per_annum_amt',):
-            if f in write_vals:
-                try:    write_vals[f] = float(write_vals[f])
-                except: write_vals.pop(f, None)
-
-        # ── Write to employee ──────────────────────────────────────
+        # ================================================================
+        # WRITE VALUES TO EMPLOYEE
+        # ================================================================
         if write_vals:
+
             try:
+
                 self.employee_id.sudo().write(write_vals)
+
                 _logger.info(
                     'PCR %s approved — %d fields written to %s: %s',
-                    self.name, len(write_vals), self.employee_id.name,
+                    self.name,
+                    len(write_vals),
+                    self.employee_id.name,
                     list(write_vals.keys())
                 )
-            except Exception as e:
-                _logger.error('PCR %s: Error writing fields: %s', self.name, e)
-                raise UserError(_(
-                    'Error writing approved data to employee record: %s\n\n'
-                    'Fields attempted: %s'
-                ) % (str(e), ', '.join(write_vals.keys())))
 
+            except Exception as e:
+
+                _logger.error(
+                    'PCR %s: Error writing fields: %s',
+                    self.name,
+                    e
+                )
+
+                raise UserError(_(
+                    'Error writing approved data to employee record: %s'
+                ) % str(e))
+
+        # ================================================================
+        # UPDATE REQUEST STATUS
+        # ================================================================
         self.write({
             'state': 'approved',
             'reviewed_by': self.env.user.id,
             'review_date': fields.Datetime.now(),
         })
+
+        # ================================================================
+        # ADD AUDIT TRAIL
+        # ================================================================
         self._add_trail(
             action='approved',
-            note=f'Approved by {self.env.user.name}. {len(write_vals)} field(s) written.',
+            note=(
+                f'Approved by {self.env.user.name}. '
+                f'{len(write_vals)} field(s) written.'
+            ),
         )
+
+        # ================================================================
+        # SEND MAIL
+        # ================================================================
         self._send_mail_to_employee('approved')
+
+        # ================================================================
+        # CLEAR PENDING DATA
+        # ================================================================
         self.employee_id.sudo().write({
             'last_portal_submission': False,
-            'last_submission_state':  'approved',
+            'last_submission_state': 'approved',
         })
+
         return True
 
     # ── Reject ────────────────────────────────────────────────────
