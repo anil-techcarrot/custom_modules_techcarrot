@@ -323,8 +323,49 @@
                                 <!-- Payslip Language — keep readonly (system field) -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Payslip Language</label>
-                                    <input class="form-control" t-att-value="employee.lang or ''"
-                                           data-always-readonly="1" readonly="readonly"/>
+                                    <select name="lang" class="form-select" disabled="disabled">
+                                        <option value="">-- Select Language --</option>
+                                        <option value="en_US"
+                                                t-att-selected="'selected' if (employee.lang or '') == 'en_US' else None">
+                                            English
+                                        </option>
+                                        <option value="ar_001"
+                                                t-att-selected="'selected' if (employee.lang or '') == 'ar_001' else None">
+                                            Arabic
+                                        </option>
+                                        <option value="fr_FR"
+                                                t-att-selected="'selected' if (employee.lang or '') == 'fr_FR' else None">
+                                            French
+                                        </option>
+                                        <option value="de_DE"
+                                                t-att-selected="'selected' if (employee.lang or '') == 'de_DE' else None">
+                                            German
+                                        </option>
+                                        <option value="es_ES"
+                                                t-att-selected="'selected' if (employee.lang or '') == 'es_ES' else None">
+                                            Spanish
+                                        </option>
+                                        <option value="hi_IN"
+                                                t-att-selected="'selected' if (employee.lang or '') == 'hi_IN' else None">
+                                            Hindi
+                                        </option>
+                                        <option value="ur_PK"
+                                                t-att-selected="'selected' if (employee.lang or '') == 'ur_PK' else None">
+                                            Urdu
+                                        </option>
+                                        <option value="ml_IN"
+                                                t-att-selected="'selected' if (employee.lang or '') == 'ml_IN' else None">
+                                            Malayalam
+                                        </option>
+                                        <option value="ta_IN"
+                                                t-att-selected="'selected' if (employee.lang or '') == 'ta_IN' else None">
+                                            Tamil
+                                        </option>
+                                        <option value="tl_PH"
+                                                t-att-selected="'selected' if (employee.lang or '') == 'tl_PH' else None">
+                                            Filipino
+                                        </option>
+                                    </select>
                                 </div>
 
                                 <!-- ══ BLOOD GROUP FIX: values match DB keys (a+, b+, etc.) ══ -->

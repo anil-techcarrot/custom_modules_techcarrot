@@ -31,6 +31,7 @@ EDITABLE_FIELDS = [
     # Basic Info — Personal
     'blood_group',
     'gender', 'birthday',
+    'lang',
 
     # Basic Info — Identity
     'issue_date', 'expiry_date',
