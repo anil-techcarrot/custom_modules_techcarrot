@@ -2236,6 +2236,151 @@ function clearValidationStates(tabKey) {
     updateTabErrorBadges();
 }
 
+
+
+
+
+
+function clearFilePreview(inputEl) {
+    const existing = inputEl.parentNode.querySelector('.file-preview-box');
+    if (existing) {
+        if (existing._objectURL) URL.revokeObjectURL(existing._objectURL);
+        existing.remove();
+    }
+}
+function viewUploadedFile(objectURL, fileType, fileName) {
+    if (fileType.startsWith('image/')) {
+        // ── lightbox overlay for images ──
+        const overlay = document.createElement('div');
+        overlay.style.cssText = [
+            'position:fixed', 'inset:0', 'z-index:9999',
+            'background:rgba(0,0,0,0.75)',
+            'display:flex', 'flex-direction:column',
+            'align-items:center', 'justify-content:center', 'gap:12px'
+        ].join(';');
+
+        overlay.innerHTML =
+            `<div style="position:relative;max-width:90vw;max-height:85vh;">
+                <img src="${objectURL}" alt="${escapeHtml(fileName)}"
+                     style="max-width:90vw;max-height:85vh;border-radius:8px;
+                            display:block;box-shadow:0 8px 32px rgba(0,0,0,0.4);"/>
+             </div>
+             <div style="display:flex;gap:12px;align-items:center;">
+                <span style="color:#fff;font-size:0.85rem;opacity:0.8;">${escapeHtml(fileName)}</span>
+                <button onclick="this.closest('div[style*=fixed]').remove()"
+                        style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.4);
+                               color:#fff;border-radius:6px;padding:5px 16px;cursor:pointer;font-size:0.85rem;">
+                    <i class="fa fa-times me-1"></i>Close
+                </button>
+             </div>`;
+
+        // click backdrop to close
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) overlay.remove();
+        });
+        // ESC to close
+        const escHandler = function(e) {
+            if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', escHandler); }
+        };
+        document.addEventListener('keydown', escHandler);
+        document.body.appendChild(overlay);
+
+    } else {
+        // PDFs and other files — open in new tab
+        window.open(objectURL, '_blank');
+    }
+}
+
+// ── updated cancelFileUpload — revokes the object URL ──
+function cancelFileUpload(removeBtn) {
+    const preview = removeBtn.closest('.file-preview-box');
+    if (!preview) return;
+    const inputEl = preview.previousElementSibling;
+    if (inputEl && inputEl.type === 'file') {
+        inputEl.value = '';
+    }
+    // revoke blob URL to free memory
+    if (preview._objectURL) {
+        URL.revokeObjectURL(preview._objectURL);
+    }
+    preview.remove();
+}
+
+function showFilePreview(inputEl, file) {
+    clearFilePreview(inputEl);
+    const sizeKB = (file.size / 1024).toFixed(1);
+    const sizeTxt = file.size > 1024 * 1024
+        ? (file.size / (1024 * 1024)).toFixed(1) + ' MB'
+        : sizeKB + ' KB';
+
+    const isImage = file.type.startsWith('image/');
+    const isPDF   = file.type === 'application/pdf';
+    const objectURL = URL.createObjectURL(file);
+
+    const preview = document.createElement('div');
+    preview.className = 'file-preview-box';
+
+    // ── thumbnail for images ──
+    let thumbHtml = '';
+    if (isImage) {
+        thumbHtml = `<img src="${objectURL}" alt="preview"
+            style="width:40px;height:40px;object-fit:cover;border-radius:4px;
+                   border:0.5px solid #dee2e6;flex-shrink:0;"
+            onerror="this.style.display='none'"/>`;
+    } else if (isPDF) {
+        thumbHtml = `<span style="width:40px;height:40px;display:flex;align-items:center;
+                          justify-content:center;background:#fff3f3;border-radius:4px;
+                          border:0.5px solid #f5c6cb;flex-shrink:0;">
+                       <i class="fa fa-file-pdf-o" style="color:#dc3545;font-size:1.3rem;"></i>
+                     </span>`;
+    } else {
+        thumbHtml = `<span style="width:40px;height:40px;display:flex;align-items:center;
+                          justify-content:center;background:#f8f9fa;border-radius:4px;
+                          border:0.5px solid #dee2e6;flex-shrink:0;">
+                       <i class="fa fa-file" style="color:#6c757d;font-size:1.3rem;"></i>
+                     </span>`;
+    }
+
+    preview.style.cssText = [
+        'display:flex', 'align-items:center', 'gap:10px',
+        'margin-top:8px', 'padding:8px 12px',
+        'border:1px solid #198754', 'border-radius:6px',
+        'background:#f0fdf4', 'font-size:0.85rem'
+    ].join(';');
+
+    preview.innerHTML =
+        thumbHtml +
+        `<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#155724;">
+            <strong>${escapeHtml(file.name)}</strong>
+            <span style="margin-left:8px;color:#6c757d;font-size:0.78rem;">${sizeTxt}</span>
+         </span>
+         <button type="button"
+                 title="View file"
+                 onclick="viewUploadedFile('${objectURL}', '${escapeHtml(file.type)}', '${escapeHtml(file.name)}')"
+                 style="background:none;border:1px solid #0d6efd;color:#0d6efd;border-radius:5px;
+                        padding:3px 8px;font-size:0.78rem;cursor:pointer;white-space:nowrap;">
+             <i class="fa fa-eye me-1"></i>View
+         </button>
+         <button type="button"
+                 title="Remove file"
+                 class="btn btn-sm btn-outline-danger py-0 px-2"
+                 style="font-size:0.78rem;line-height:1.6;white-space:nowrap;"
+                 onclick="cancelFileUpload(this)">
+             <i class="fa fa-times me-1"></i>Remove
+         </button>`;
+
+    // store objectURL on the element so we can revoke it on remove
+    preview._objectURL = objectURL;
+    inputEl.parentNode.insertBefore(preview, inputEl.nextSibling);
+}
+
+
+
+
+
+
+
+
 function showTabMessage(tabKey, text, type) {
     document.querySelectorAll('.tab-message-box').forEach(el => el.remove());
     const firstCard = document.querySelector(`.profile-tab-section[data-tab-group="${tabKey}"]`);
