@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 import json
 import logging
+# -*- coding: utf-8 -*-
+import json
+import logging
 import re
 import base64
 
@@ -9,32 +12,35 @@ from odoo.http import request
 
 _logger = logging.getLogger(__name__)
 
-# ── MANY2ONE FIELDS ───────────────────────────────────────────────────────────
-# These are submitted as integer IDs from <select> dropdowns.
-# We store them as "ID::Name" so display is human-readable but
-# action_approve can write the integer ID.
-MANY2ONE_COUNTRY_FIELDS = {
-    'country_id':             'res.country',
-    'nationality_at_birth_id': 'res.country',
-    'issue_countries_id':     'res.country',
+# ── Many2one fields — submitted as integer IDs from country dropdowns ─────────
+MANY2ONE_FIELDS = {
+    'nationality_at_birth_id',
+    'country_id',
+    'issue_countries_id',
 }
 
-# ── ALL editable text/select fields ──────────────────────────────────────────
+# ── ALL editable text/select fields ───────────────────────────────────────────
 EDITABLE_FIELDS = [
     # Basic Info — Contact
     'work_phone', 'private_email', 'private_phone',
     'private_street', 'private_street2', 'private_city', 'private_zip',
-    'private_state_id', 'whatsapp', 'linkedin', 'legal_name',
+    'private_state_id',
+    'whatsapp', 'linkedin', 'legal_name',
     'facebook_profile', 'insta_profile', 'twitter_profile',
-
-    # Basic Info — Country dropdowns (submitted as integer IDs)
-    'country_id', 'nationality_at_birth_id', 'issue_countries_id',
 
     # Basic Info — Personal
     'blood_group',
+    'gender', 'birthday',
 
     # Basic Info — Identity
     'issue_date', 'expiry_date',
+    'emirates_id_number', 'emirates_expiry_date',
+    'passport_id', 'identification_id', 'ssnid', 'visa_no', 'permit_no',
+
+    # Basic Info — Country dropdowns (Many2one — sent as int IDs)
+    'nationality_at_birth_id',
+    'country_id',
+    'issue_countries_id',
 
     # Basic Info — Emergency
     'l10n_in_relationship', 'emergency_phone', 'e_private_city',
@@ -65,8 +71,10 @@ EDITABLE_FIELDS = [
     'dependent_child_aadhar_no_1',
 
     # Family
-    'father_name', 'father_dob', 'mother_name', 'mother_dob',
+    'father_name', 'father_dob',
+    'mother_name', 'mother_dob',
     'children', 'career_break_detail',
+    'marital',
 
     # Professional — Nominee
     'employee_nominee_name', 'employee_nominee_contact_no',
@@ -94,14 +102,16 @@ EDITABLE_FIELDS = [
     'last_report_manager_mail',
 
     # Professional — Industry Details
-    'previous_company_name', 'designation',
-    'period_in_company', 'reason_of_leaving',
+    'previous_company_name', 'designation', 'period_in_company',
+    'reason_of_leaving',
 ]
 
-# ── FILE FIELDS ───────────────────────────────────────────────────────────────
+# File upload fields
 FILE_FIELDS = [
-    'emirates_id_file', 'passport_file',
-    'other_documents', 'has_work_permit',
+    'emirates_id_file',
+    'passport_file',
+    'other_documents',
+    'has_work_permit',
 ]
 
 EMAIL_PATTERN = re.compile(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
@@ -120,7 +130,6 @@ class EmployeePortalProfileSubmit(http.Controller):
         methods=['GET', 'POST'], csrf=False,
     )
     def portal_employee_personal(self, **post):
-
         employee = request.env['hr.employee'].sudo().search(
             [('user_id', '=', request.env.user.id)], limit=1
         )
@@ -130,7 +139,7 @@ class EmployeePortalProfileSubmit(http.Controller):
         if request.httprequest.method == 'POST':
             return self._handle_post(employee, post)
 
-        # ── GET ──────────────────────────────────────────────────
+        # portal_overlay: only for pending/rejected
         portal_overlay = {}
         if (employee.last_portal_submission
                 and employee.last_submission_state in ('pending', 'rejected')):
@@ -148,12 +157,11 @@ class EmployeePortalProfileSubmit(http.Controller):
                 ('state', '=', 'approved'),
             ], order='review_date desc', limit=1)
             notification = {
-                'type': 'success',
-                'message': 'Your profile has been updated successfully.',
-                'reason': False,
+                'type':         'success',
+                'message':      'Your profile has been updated by HR successfully.',
+                'reason':       False,
                 'request_name': approved_req.name if approved_req else '',
             }
-
         elif state == 'rejected':
             rejected_req = request.env['hr.profile.change.request'].sudo().search([
                 ('employee_id', '=', employee.id),
@@ -161,12 +169,11 @@ class EmployeePortalProfileSubmit(http.Controller):
             ], order='create_date desc', limit=1)
             if rejected_req:
                 notification = {
-                    'type': 'danger',
-                    'message': 'Your profile update request was rejected.',
-                    'reason': rejected_req.rejection_reason or 'No reason provided.',
+                    'type':         'danger',
+                    'message':      'Your profile update request was rejected by HR.',
+                    'reason':       rejected_req.rejection_reason or 'No reason provided.',
                     'request_name': rejected_req.name,
                 }
-
         elif state == 'pending':
             pending_req = request.env['hr.profile.change.request'].sudo().search([
                 ('employee_id', '=', employee.id),
@@ -174,9 +181,9 @@ class EmployeePortalProfileSubmit(http.Controller):
             ], order='create_date desc', limit=1)
             if pending_req:
                 notification = {
-                    'type': 'warning',
-                    'message': 'Your profile update request is pending HR review.',
-                    'reason': False,
+                    'type':         'warning',
+                    'message':      'Your profile change request is awaiting HR review.',
+                    'reason':       False,
                     'request_name': pending_req.name,
                 }
 
@@ -185,126 +192,106 @@ class EmployeePortalProfileSubmit(http.Controller):
         return request.render(
             'employee_self_service_portal.portal_employee_profile_personal',
             {
-                'employee': employee,
-                'countries': countries,
-                'all_countries': countries,
-                'notification': notification,
+                'employee':       employee,
+                'countries':      countries,
+                'notification':   notification,
                 'portal_overlay': portal_overlay,
             },
         )
 
-    # =========================================================================
-    # _handle_post — THE KEY FIX IS HERE
-    # For Many2one country fields we store "ID::CountryName" in submitted_data
-    # so that:
-    #   - action_approve can extract the integer ID and write it to employee
-    #   - The display table can show the human-readable name
-    # =========================================================================
     def _handle_post(self, employee, post):
         try:
-            # ── Block if pending ──────────────────────────────────
-            pending_req = request.env['hr.profile.change.request'].sudo().search([
-                ('employee_id', '=', employee.id),
-                ('state', '=', 'pending'),
-            ], limit=1)
-            if pending_req:
-                return request.make_json_response({
-                    'success': False,
-                    'error': 'Your previous request is still pending HR approval.',
-                })
-
             # ── Email validation ──────────────────────────────────
             for field in ['private_email', 'industry_ref_email', 'last_report_manager_mail']:
                 val = post.get(field, '').strip()
                 if val and not EMAIL_PATTERN.match(val):
                     return request.make_json_response({
                         'success': False,
-                        'error': f'Invalid email format for field: {field}',
+                        'error': f'Invalid email format: {field}'
                     })
 
-            # ── ISD code validation ───────────────────────────────
+            # ── ISD validation ────────────────────────────────────
             isd_val = post.get('phone_code_1', '').strip()
             if isd_val and not ISD_PATTERN.match(isd_val):
                 return request.make_json_response({
                     'success': False,
-                    'error': 'ISD code must start with + followed by 1-3 digits. Example: +91, +971, +1',
+                    'error': 'ISD code must start with + followed by 1-3 digits (e.g. +91, +971)'
                 })
 
-            # ── Compare and collect changed fields ────────────────
+            # ── Collect text/select fields ────────────────────────
+            submitted = {}
+            for field in EDITABLE_FIELDS:
+                val = post.get(field)
+                if val is not None:
+                    submitted[field] = str(val).strip()
+
+            # ── File fields ───────────────────────────────────────
+            files_submitted = {}
+            for field in FILE_FIELDS:
+                file_obj = request.httprequest.files.get(field)
+                if file_obj and file_obj.filename:
+                    files_submitted[field] = file_obj
+
+            if not submitted and not files_submitted:
+                return request.make_json_response({
+                    'success': False,
+                    'error': 'No data submitted.'
+                })
+
+            # ── Compare submitted vs current ──────────────────────
             changed = {}
 
-            # ── Many2one country fields ───────────────────────────
-            for field, model_name in MANY2ONE_COUNTRY_FIELDS.items():
-                raw_val = post.get(field, '').strip()
-                if not raw_val:
+            for field, new_val in submitted.items():
+                # ── Many2one fields (country dropdowns) ────────────
+                if field in MANY2ONE_FIELDS:
+                    try:
+                        new_id = int(new_val) if new_val else 0
+                        current_rec = getattr(employee, field, False)
+                        current_id = current_rec.id if current_rec else 0
+                        if new_id and new_id != current_id:
+                            changed[field] = new_id   # store as int
+                    except (ValueError, TypeError):
+                        pass
                     continue
+
+                # ── Regular string fields ──────────────────────────
                 try:
-                    new_id = int(raw_val)
-                except (ValueError, TypeError):
-                    continue
-
-                current_rec = getattr(employee, field, False)
-                current_id  = current_rec.id if current_rec else 0
-
-                if new_id != current_id:
-                    # Look up the name so we can display it in the diff table
-                    country_rec = request.env[model_name].sudo().browse(new_id)
-                    country_name = country_rec.name if country_rec else str(new_id)
-                    # Store as "ID::Name" — approve reads the ID, display reads the name
-                    changed[field] = f'M2O_ID::{new_id}::{country_name}'
-
-            # ── Regular text/select fields ────────────────────────
-            for field in EDITABLE_FIELDS:
-                if field in MANY2ONE_COUNTRY_FIELDS:
-                    continue  # already handled above
-                val = post.get(field)
-                if val is None:
-                    continue
-                new_val = str(val).strip()
-
-                try:
-                    current = getattr(employee, field, False)
+                    current = getattr(employee, field, None)
                     if hasattr(current, 'name'):
-                        current_val = str(current.name or '').strip()
-                    elif current in [False, None]:
-                        current_val = ''
+                        current_str = current.name or ''
+                    elif current in (False, None):
+                        current_str = ''
                     else:
-                        current_val = str(current).strip()
-
-                    if new_val != current_val:
+                        current_str = str(current)
+                    if new_val.strip() != current_str.strip():
                         changed[field] = new_val
-
                 except Exception:
                     if new_val:
                         changed[field] = new_val
 
-            # ── File fields ───────────────────────────────────────
-            file_write_vals = {}
-            for field in FILE_FIELDS:
-                file_obj = request.httprequest.files.get(field)
-                if file_obj and file_obj.filename:
-                    try:
-                        file_data = base64.b64encode(file_obj.read()).decode('utf-8')
-                        file_write_vals[field] = file_data
-                        changed[field] = f'[FILE:{file_obj.filename}]'
-                    except Exception as e:
-                        _logger.error('File upload failed for %s: %s', field, e)
+            # ── File uploads ──────────────────────────────────────
+            file_changed_fields = {}
+            for field, file_obj in files_submitted.items():
+                try:
+                    file_data = base64.b64encode(file_obj.read()).decode('utf-8')
+                    file_changed_fields[field] = file_data
+                    changed[field] = f'[FILE:{file_obj.filename}]'
+                except Exception as e:
+                    _logger.warning('File upload failed for %s: %s', field, e)
 
-            # ── No changes ────────────────────────────────────────
-            if not changed and not file_write_vals:
+            if not changed and not file_changed_fields:
                 return request.make_json_response({
-                    'success': True,
-                    'reference': '',
+                    'success': True, 'reference': '',
                     'no_change': True,
                     'message': 'No changes detected. Your profile is already up to date.',
                 })
 
-            # ── Write files immediately ───────────────────────────
-            if file_write_vals:
-                employee.sudo().write(file_write_vals)
+            # ── Write files directly to employee ──────────────────
+            if file_changed_fields:
+                employee.sudo().write(file_changed_fields)
 
             # ── Create PCR ────────────────────────────────────────
-            reference = ''
+            ref = ''
             if changed:
                 req = request.env['hr.profile.change.request'].sudo().create({
                     'employee_id':    employee.id,
@@ -312,21 +299,24 @@ class EmployeePortalProfileSubmit(http.Controller):
                     'state':          'draft',
                 })
                 req.action_submit()
-                reference = req.name or ''
-                _logger.info('PCR %s created for %s — fields: %s',
-                             reference, employee.name, list(changed.keys()))
+                ref = req.name
+                _logger.info('PCR %s created for %s — %d fields changed',
+                             ref, employee.name, len(changed))
 
             return request.make_json_response({
                 'success':   True,
-                'reference': reference,
+                'reference': ref,
                 'no_change': False,
-                'message':   'Your profile update request has been submitted successfully.',
+                'message':   (
+                    'Your changes have been submitted. HR will review and notify you.'
+                    if ref else
+                    'Your documents have been uploaded successfully.'
+                ),
             })
 
         except Exception as e:
-            _logger.exception('PROFILE UPDATE ERROR: %s', str(e))
+            _logger.error('Profile change error for %s: %s', employee.name, str(e))
             return request.make_json_response({'success': False, 'error': str(e)})
-
 
 
 

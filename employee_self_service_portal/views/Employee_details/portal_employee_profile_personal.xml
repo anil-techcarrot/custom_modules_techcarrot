@@ -220,7 +220,7 @@
                                     <label class="form-label fw-bold">Nationality At Birth</label>
                                     <select name="nationality_at_birth_id" class="form-select" disabled="disabled">
                                         <option value="">-- Select Country --</option>
-                                        <t t-foreach="all_countries" t-as="country">
+                                        <t t-foreach="countries" t-as="country">
                                             <option t-att-value="country.id"
                                                     t-att-selected="'selected' if country.id == employee.nationality_at_birth_id.id else None">
                                                 <t t-esc="country.name"/>
@@ -255,8 +255,8 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Nationality</label>
                                     <select name="country_id" class="form-select" disabled="disabled">
-                                        <option value="">-- Select Nationality --</option>
-                                        <t t-foreach="all_countries" t-as="country">
+                                        <option value="">-- Select Country --</option>
+                                        <t t-foreach="countries" t-as="country">
                                             <option t-att-value="country.id"
                                                     t-att-selected="'selected' if country.id == employee.country_id.id else None">
                                                 <t t-esc="country.name"/>
@@ -454,41 +454,17 @@
                                 <!--                                </div>-->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
-                                        <i class="fa fa-globe text-muted me-1"></i>
-                                        Passport Issuing Country
+                                        <i class="fa fa-globe text-muted me-1"></i>Passport Issuing Country
                                     </label>
-
-                                    <select name="issue_countries_id"
-                                            class="form-select"
-                                            disabled="disabled">
-
+                                    <select name="issue_countries_id" class="form-select" disabled="disabled">
                                         <option value="">-- Select Country --</option>
-
-                                        <t t-foreach="all_countries" t-as="country">
-
+                                        <t t-foreach="countries" t-as="country">
                                             <option t-att-value="country.id"
-                                                    t-att-selected="
-                        'selected'
-                        if (
-                            str(country.id)
-                            ==
-                            str(
-                                portal_overlay.get('issue_countries_id')
-                                or employee.issue_countries_id.id
-                                or ''
-                            )
-                        )
-                        else None
-                    ">
-
+                                                    t-att-selected="'selected' if country.id == employee.issue_countries_id.id else None">
                                                 <t t-esc="country.name"/>
-
                                             </option>
-
                                         </t>
-
                                     </select>
-
                                     <div class="invalid-feedback"></div>
                                 </div>
                                 <!-- Passport Issue Date — editable -->
@@ -1213,7 +1189,8 @@
                         <div class="card-body">
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label class="form-label fw-bold"><i class="fa fa-phone text-muted me-1"></i>
+                                    <label class="form-label fw-bold">
+                                        <i class="fa fa-phone text-muted me-1"></i>
                                         Emergency Contact Phone
                                     </label>
                                     <input type="tel" name="emergency_phone" class="form-control"
@@ -1745,7 +1722,8 @@
                         <div class="card-body">
                             <div class="row g-3">
                                 <div class="col-md-4">
-                                    <label class="form-label fw-bold"><i class="fa fa-id-card text-muted me-1"></i>
+                                    <label class="form-label fw-bold">
+                                        <i class="fa fa-id-card text-muted me-1"></i>
                                         Emirates ID Copy
                                     </label>
                                     <t t-if="employee.emirates_id_file">
@@ -1760,7 +1738,8 @@
                                            accept=".pdf,.jpg,.jpeg,.png" disabled="disabled"/>
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label fw-bold"><i class="fa fa-passport text-muted me-1"></i>
+                                    <label class="form-label fw-bold">
+                                        <i class="fa fa-passport text-muted me-1"></i>
                                         Passport Copy
                                     </label>
                                     <t t-if="employee.passport_file">
@@ -1775,7 +1754,8 @@
                                            accept=".pdf,.jpg,.jpeg,.png" disabled="disabled"/>
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label fw-bold"><i class="fa fa-file-text text-muted me-1"></i>
+                                    <label class="form-label fw-bold">
+                                        <i class="fa fa-file-text text-muted me-1"></i>
                                         Other Documents
                                     </label>
                                     <t t-if="employee.other_documents">
