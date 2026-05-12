@@ -9,6 +9,14 @@ from odoo.http import request
 
 _logger = logging.getLogger(__name__)
 
+# ── MANY2ONE COUNTRY FIELDS ───────────────────────────────────────────────────
+MANY2ONE_FIELDS = [
+    'country_id',
+    'nationality_at_birth_id',
+    'issue_countries_id',
+    'private_state_id',
+]
+
 # ── ALL editable fields including ALL tabs ────────────────────────────────────
 EDITABLE_FIELDS = [
 
@@ -28,7 +36,7 @@ EDITABLE_FIELDS = [
     'insta_profile',
     'twitter_profile',
 
-    # ── COUNTRY FIELDS FIX ───────────────────────────────────────────────────
+    # ── COUNTRY FIELDS ───────────────────────────────────────────────────────
     'country_id',
     'nationality_at_birth_id',
     'issue_countries_id',
@@ -398,15 +406,26 @@ class EmployeePortalProfileSubmit(http.Controller):
                     current = getattr(employee, field, False)
 
                     # ========================================================
-                    # MANY2ONE FIX
+                    # MANY2ONE FIELDS
                     # ========================================================
-                    if hasattr(current, 'id'):
+                    if field in MANY2ONE_FIELDS:
 
                         current_id = str(current.id or '').strip()
                         new_id = str(new_val or '').strip()
 
                         if current_id != new_id:
-                            changed[field] = new_val
+
+                            # SHOW COUNTRY NAME IN REQUEST
+                            if new_id:
+
+                                rec = request.env[
+                                    current._name
+                                ].sudo().browse(int(new_id))
+
+                                changed[field] = rec.name
+
+                            else:
+                                changed[field] = ''
 
                     # ========================================================
                     # NORMAL FIELDS
