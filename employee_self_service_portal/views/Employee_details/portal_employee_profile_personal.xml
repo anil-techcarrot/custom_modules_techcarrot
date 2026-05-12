@@ -419,7 +419,7 @@
                                            t-att-value="portal_overlay.get('emirates_id_number') or employee.emirates_id_number or ''"
                                            readonly="readonly" data-validation="emirates-id"/>
                                     <div class="invalid-feedback"></div>
-                                    <small class="text-muted">Format: 784-1234-1234567-1</small>
+                                    <small class="text-muted">Enter your unique 15-digit UAE Emirates ID number</small>
                                 </div>
                                 <!-- Emirates ID Expiry — editable -->
                                 <div class="col-md-6">
@@ -1351,7 +1351,7 @@
                                            t-att-value="portal_overlay.get('spouse_emirates_id_no') or employee.spouse_emirates_id_no or ''"
                                            readonly="readonly" data-validation="emirates-id"/>
                                     <div class="invalid-feedback"></div>
-                                    <small class="text-muted">Format: 784-1234-1234567-1</small>
+                                    <small class="text-muted">Enter your unique 15-digit UAE Emirates ID number</small>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Emirates Issue Date</label>
@@ -1475,7 +1475,7 @@
                                            t-att-value="portal_overlay.get('dependent_child_emirates_id_no_1') or employee.dependent_child_emirates_id_no_1 or ''"
                                            readonly="readonly" data-validation="emirates-id"/>
                                     <div class="invalid-feedback"></div>
-                                    <small class="text-muted">Format: 784-1234-1234567-1</small>
+                                    <small class="text-muted">Enter your unique 15-digit UAE Emirates ID number</small>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Child 1 Emirates ID Issue Date</label>
@@ -2140,7 +2140,13 @@ function validateField(event) {
         case 'isd-code': if (!/^\+[1-9][0-9]{0,2}$/.test(val.replace(/\s/g, ''))) { isValid = false; errorMessage = 'ISD code must start with + followed by 1-3 digits (e.g. +91, +971).'; } break;
         case 'digits-only': if (!/^[0-9]+$/.test(val)) { isValid = false; errorMessage = 'This field must contain digits only.'; } break;
         case 'alphanumeric': if (!/^[A-Za-z0-9]+$/.test(val)) { isValid = false; errorMessage = 'Letters and digits only (no spaces or special characters).'; } break;
-        case 'emirates-id': if (!/^[0-9]{3}-[0-9]{4}-[0-9]{7}-[0-9]{1}$/.test(val)) { isValid = false; errorMessage = 'Emirates ID must be in format: 784-1234-1234567-1'; } break;
+        case 'emirates-id':
+    var eidClean = val.replace(/-/g, '');
+    if (!/^[0-9]{15}$/.test(eidClean)) {
+        isValid = false;
+        errorMessage = 'Please enter your unique 15-digit UAE Emirates ID number.';
+    }
+    break;
         case 'aadhar': if (!/^[0-9]{12}$/.test(val)) { isValid = false; errorMessage = 'Aadhar number must be exactly 12 digits.'; } break;
         case 'pan': if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(val.toUpperCase())) { isValid = false; errorMessage = 'PAN must be in format: ABCDE1234F'; } break;
         case 'past-date': const pd = new Date(val); const td1 = new Date(); td1.setHours(0,0,0,0); if (isNaN(pd.getTime())) { isValid = false; errorMessage = 'Please enter a valid date.'; } else if (pd > td1) { isValid = false; errorMessage = 'This date cannot be in the future.'; } break;
