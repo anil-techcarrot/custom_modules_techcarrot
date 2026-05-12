@@ -251,10 +251,7 @@ class EmployeePortalProfileSubmit(http.Controller):
                             # Get country name
                             country = request.env['res.country'].sudo().browse(new_id)
 
-                            changed[field] = {
-                                'id': new_id,
-                                'name': country.name or ''
-                            }
+                            changed[field] = country.name or ''
 
                     except (ValueError, TypeError):
                         pass
