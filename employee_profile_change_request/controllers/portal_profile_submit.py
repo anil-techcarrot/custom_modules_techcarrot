@@ -87,7 +87,7 @@ EDITABLE_FIELDS = [
 
     # Professional — Work Location
     'u_private_city', 'current_address', 'phone_code_1',
-    'house_no', 'area_name', 'city', 'zip_code',
+    'house_no', 'area_name', 'city', 'zip_code', 'countries_id',
 
     # Professional — General
     'experience', 'current_role', 'industry_start_date',
