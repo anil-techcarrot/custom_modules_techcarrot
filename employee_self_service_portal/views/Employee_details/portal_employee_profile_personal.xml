@@ -218,7 +218,7 @@
                                 <!-- ══ NATIONALITY AT BIRTH — dropdown (editable) ══ -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Nationality At Birth</label>
-                                    <select name="nationality_at_birth_id" class="form-select" disabled="disabled">
+                                    <select name="nationality_at_birth_id" class="form-select" >
                                         <option value="">-- Select Country --</option>
                                         <t t-foreach="all_countries" t-as="country">
                                             <option t-att-value="country.id"
@@ -254,7 +254,7 @@
                                 <!-- ══ NATIONALITY — dropdown (editable) ══ -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Nationality</label>
-                                    <select name="country_id" class="form-select" disabled="disabled">
+                                    <select name="country_id" class="form-select">
                                         <option value="">-- Select Nationality --</option>
                                         <t t-foreach="all_countries" t-as="country">
                                             <option t-att-value="country.id"
@@ -460,7 +460,7 @@
 
                                     <select name="issue_countries_id"
                                             class="form-select"
-                                            disabled="disabled">
+                                            >
 
                                         <option value="">-- Select Country --</option>
 
