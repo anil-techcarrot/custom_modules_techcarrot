@@ -430,7 +430,7 @@
                                            onchange="toggleNonResidentSections(this)"
                                            disabled="disabled"/>
                                     <label class="form-check-label fw-bold" for="is_non_resident">
-                                        Non Resident
+                                         Resident
                                     </label>
                                 </div>
                                 <small class="text-muted">
