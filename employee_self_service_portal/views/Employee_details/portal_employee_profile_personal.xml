@@ -876,7 +876,7 @@
                                         </t>
                                     </select>
                                     <small class="text-muted">
-                                        Select Country of Residency first to load states
+                                        Select Country first to load states
                                     </small>
                                 </div>
                                 <div class="col-md-6">
