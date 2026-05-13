@@ -1992,6 +1992,11 @@ function syncAndToggleEditMode(sourceCheckbox) {
     sourceCheckbox.checked ? enableEditMode() : disableEditMode();
 }
 
+
+function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 function enableEditMode() {
     if (PENDING_LOCKED) {
         alert('Editing is disabled while your profile update is pending HR review.');
