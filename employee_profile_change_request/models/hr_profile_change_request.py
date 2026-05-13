@@ -86,6 +86,9 @@ FIELD_LABELS = {
     'passport_file': 'Passport Copy',
     'other_documents': 'Other Documents',
     'has_work_permit': 'Work Permit File',
+    'religion': 'Religion',
+    'country_residences_id': 'Country of Residency',
+    'states_id': 'State',
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -99,11 +102,23 @@ MANY2ONE_FIELDS = {
     'country_id',
     'issue_countries_id',
     'countries_id',
+    'country_residences_id',
+    'states_id',
+}
+
+MANY2ONE_MODEL_MAP = {
+    'nationality_at_birth_id': 'res.country',
+    'country_id':              'res.country',
+    'issue_countries_id':      'res.country',
+    'countries_id':            'res.country',
+    'country_residences_id':   'res.country',
+    'states_id':               'res.country.state',
 }
 
 # Selection fields — value is the stored key string
 SELECTION_FIELDS = {
-    'blood_group', 'sex', 'marital', 'dependent_child_gender_1',
+    'blood_group', 'sex', 'marital', 'dependent_child_gender_1', 'religion',
+
 }
 
 # Skip these during approval write
@@ -114,6 +129,21 @@ SKIP_ON_APPROVE = {
 
 # Human-readable labels for selection coded values
 CODED_VALUE_LABELS = {
+    'religion': {
+        'christianity': 'Christianity',
+        'islam': 'Islam',
+        'hinduism': 'Hinduism',
+        'buddhism': 'Buddhism',
+        'sikhism': 'Sikhism',
+        'judaism': 'Judaism',
+        'bahai': "Baha'i",
+        'jainism': 'Jainism',
+        'shinto': 'Shinto',
+        'taoism': 'Taoism',
+        'confucianism': 'Confucianism',
+        'zoroastrianism': 'Zoroastrianism',
+    },
+
     'blood_group': {
         'a+': 'A+', 'a-': 'A-', 'b+': 'B+', 'b-': 'B-',
         'ab+': 'AB+', 'ab-': 'AB-', 'o+': 'O+', 'o-': 'O-',
@@ -325,6 +355,7 @@ class HrProfileChangeRequest(models.Model):
                         is_changed = True
 
                     # ── Many2one country fields (stored as int ID) ─
+                        # ── Many2one fields (stored as int ID) ─
                     elif key in MANY2ONE_FIELDS:
                         try:
                             current_rec = getattr(rec.employee_id, key, False)
@@ -332,13 +363,12 @@ class HrProfileChangeRequest(models.Model):
                         except Exception:
                             current_display = '—'
                         try:
-                            # new_val is stored as integer string e.g. "105"
-                            country = rec.env['res.country'].sudo().browse(int(str(new_val)))
-                            new_val_display = country.name if country.exists() else str(new_val)
+                            model_name = MANY2ONE_MODEL_MAP.get(key, 'res.country')
+                            linked_rec = rec.env[model_name].sudo().browse(int(str(new_val)))
+                            new_val_display = linked_rec.name if linked_rec.exists() else str(new_val)
                         except Exception:
                             new_val_display = str(new_val)
                         is_changed = (new_val_display != current_display)
-
                     # ── Selection / coded fields ───────────────────
                     else:
                         try:
@@ -430,13 +460,22 @@ class HrProfileChangeRequest(models.Model):
             # ─────────────────────────────────────────────────────
             if k in MANY2ONE_FIELDS:
                 try:
-                    write_vals[k] = int(str(v))
-                    _logger.info('PCR %s: Many2one %s = %s', self.name, k, write_vals[k])
+                    int_val = int(str(v))
+                    model_name = MANY2ONE_MODEL_MAP.get(k, 'res.country')
+                    linked_rec = self.env[model_name].sudo().browse(int_val)
+                    if linked_rec.exists():
+                        write_vals[k] = int_val
+                        _logger.info('PCR %s: Many2one %s = %s (%s)',
+                                     self.name, k, int_val, linked_rec.name)
+                    else:
+                        _logger.warning('PCR %s: Many2one %s id %s not found in %s',
+                                        self.name, k, int_val, model_name)
                 except (ValueError, TypeError):
-                    _logger.warning('PCR %s: Cannot convert Many2one %s value: %r', self.name, k, v)
+                    _logger.warning('PCR %s: Cannot convert Many2one %s value: %r',
+                                    self.name, k, v)
                 continue
 
-            # ── Selection field validation ────────────────────────
+            #  ── Selection field validation ────────────────────────
             if k in SELECTION_FIELDS:
                 field_obj = self.employee_id._fields.get(k)
                 if field_obj and hasattr(field_obj, 'selection'):

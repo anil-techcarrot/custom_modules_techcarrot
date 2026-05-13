@@ -17,6 +17,8 @@ MANY2ONE_FIELDS = {
     'country_id',
     'issue_countries_id',
     'countries_id',
+    'country_residences_id',
+    'states_id',
 }
 
 # ── ALL editable text/select fields ───────────────────────────────────────────
@@ -41,6 +43,7 @@ EDITABLE_FIELDS = [
     'country_id',
     'issue_countries_id',
     'countries_id',
+    'religion',
 
     # Basic Info — Emergency
     'l10n_in_relationship', 'emergency_phone', 'e_private_city',
@@ -90,6 +93,7 @@ EDITABLE_FIELDS = [
     # Professional — Work Location
     'u_private_city', 'current_address', 'phone_code_1',
     'house_no', 'area_name', 'city', 'zip_code',
+    'country_residences_id', 'states_id',
 
     # Professional — General
     'experience', 'current_role', 'industry_start_date',
@@ -123,6 +127,18 @@ class EmployeePortalProfileSubmit(http.Controller):
     @http.route('/my/employee', type='http', auth='user', website=True, methods=['GET'])
     def portal_employee_home(self, **kwargs):
         return request.redirect('/my/employee/personal')
+
+    @http.route('/portal/get_states', type='json', auth='user', website=True)
+    def get_states_by_country(self, country_id=0, **kwargs):
+        try:
+            states = request.env['res.country.state'].sudo().search(
+                [('country_id', '=', int(country_id))], order='name'
+            )
+            return [{'id': s.id, 'name': s.name} for s in states]
+        except Exception:
+            return []
+
+
 
     @http.route(
         '/my/employee/personal',
