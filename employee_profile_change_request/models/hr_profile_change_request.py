@@ -319,17 +319,34 @@ class HrProfileChangeRequest(models.Model):
                         new_val_str = str(new_val)
                         is_changed = True
                     else:
+                        # ── Current value from employee record ────
                         try:
-                            current = getattr(rec.employee_id, key, '') or ''
-                            if hasattr(current, 'name'):
-                                current = current.name or ''
-                            current = str(current)
+                            current_raw = getattr(rec.employee_id, key, '') or ''
+                            if hasattr(current_raw, 'name'):
+                                current = current_raw.name or ''
+                            else:
+                                current = str(current_raw)
                         except Exception:
                             current = '—'
-                        # Resolve coded values to human-readable labels
-                        coded_map = CODED_VALUE_LABELS.get(key, {})
-                        new_val_str = coded_map.get(str(new_val), str(new_val)) if new_val else '—'
-                        current = coded_map.get(str(current), str(current)) if current else current
+
+                        # ── Resolve new_val for Many2one int IDs ──
+                        MANY2ONE_DISPLAY_FIELDS = {
+                            'nationality_at_birth_id', 'country_id',
+                            'issue_countries_id', 'countries_id',
+                            'private_state_id',
+                        }
+                        if key in MANY2ONE_DISPLAY_FIELDS and new_val:
+                            try:
+                                rec_obj = rec.env['res.country'].sudo().browse(int(new_val))
+                                new_val_str = rec_obj.name if rec_obj.exists() else str(new_val)
+                            except Exception:
+                                new_val_str = str(new_val)
+                        else:
+                            # Resolve coded values (lang, blood_group, etc.)
+                            coded_map = CODED_VALUE_LABELS.get(key, {})
+                            new_val_str = coded_map.get(str(new_val), str(new_val)) if new_val else '—'
+                            current = coded_map.get(str(current), str(current)) if current else current
+
                         is_changed = new_val_str != current
                     row_style = 'background:#fffde7;' if is_changed else ''
                     badge = (
@@ -395,11 +412,25 @@ class HrProfileChangeRequest(models.Model):
                 continue
             write_vals[k] = v
 
-        # Type coercions
+        # ── Many2one fields — stored as int IDs, must write as int ──
+        MANY2ONE_FIELDS = {
+            'nationality_at_birth_id', 'country_id', 'issue_countries_id',
+            'countries_id', 'private_state_id',
+        }
+        for f in MANY2ONE_FIELDS:
+            if f in write_vals:
+                try:
+                    write_vals[f] = int(write_vals[f])
+                except (ValueError, TypeError):
+                    write_vals.pop(f, None)
+
+        # ── Integer coercions ──────────────────────────────────────
         for f in {'children'}:
             if f in write_vals:
                 try:    write_vals[f] = int(write_vals[f])
                 except: write_vals.pop(f, None)
+
+        # ── Float coercions ────────────────────────────────────────
         for f in {'last_salary_per_annum_amt'}:
             if f in write_vals:
                 try:    write_vals[f] = float(write_vals[f])
@@ -577,6 +608,3 @@ class HrProfileChangeRequest(models.Model):
             _logger.info('PCR %s: Employee notification (%s) sent to %s', self.name, status, emp_email)
         except Exception as e:
             _logger.warning('PCR %s: Failed to send employee notification: %s', self.name, e)
-
-
-
