@@ -477,12 +477,12 @@
                                            t-att-checked="'checked' if employee.is_non_resident else None"
                                            disabled="disabled"/>
                                     <label class="form-check-label fw-bold" for="is_non_resident">
-                                        Resident
+                                        Non Resident
                                     </label>
                                 </div>
                                 <small class="text-muted">
                                     <i class="fa fa-info-circle me-1"></i>
-                                    Check this to show Identity Documents and Visa &amp; Work Permit sections
+
                                 </small>
                             </div>
                         </div>
@@ -812,12 +812,12 @@
                                            t-att-value="employee.work_location_id.name or ''" data-always-readonly="1"
                                            readonly="readonly"/>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Current Work Address</label>
-                                    <input type="text" name="current_address" class="form-control"
-                                           t-att-value="portal_overlay.get('current_address') or employee.current_address or ''"
-                                           readonly="readonly"/>
-                                </div>
+<!--                                <div class="col-md-6">-->
+<!--                                    <label class="form-label fw-bold">Current Work Address</label>-->
+<!--                                    <input type="text" name="current_address" class="form-control"-->
+<!--                                           t-att-value="portal_overlay.get('current_address') or employee.current_address or ''"-->
+<!--                                           readonly="readonly"/>-->
+<!--                                </div>-->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">House Number and Building Name</label>
                                     <input type="text" name="house_no" class="form-control"
@@ -939,17 +939,17 @@
                                            t-att-value="portal_overlay.get('current_role') or employee.current_role or ''"
                                            readonly="readonly"/>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Payroll</label>
-                                    <input type="text" class="form-control" t-att-value="employee.payroll or ''"
-                                           data-always-readonly="1" readonly="readonly"/>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Mentor Name</label>
-                                    <input type="text" class="form-control"
-                                           t-att-value="employee.mentor_names_id.name or ''" data-always-readonly="1"
-                                           readonly="readonly"/>
-                                </div>
+<!--                                <div class="col-md-6">-->
+<!--                                    <label class="form-label fw-bold">Payroll</label>-->
+<!--                                    <input type="text" class="form-control" t-att-value="employee.payroll or ''"-->
+<!--                                           data-always-readonly="1" readonly="readonly"/>-->
+<!--                                </div>-->
+<!--                                <div class="col-md-6">-->
+<!--                                    <label class="form-label fw-bold">Mentor Name</label>-->
+<!--                                    <input type="text" class="form-control"-->
+<!--                                           t-att-value="employee.mentor_names_id.name or ''" data-always-readonly="1"-->
+<!--                                           readonly="readonly"/>-->
+<!--                                </div>-->
                             </div>
                         </div>
                     </div>
@@ -1153,16 +1153,16 @@
                                     <div class="invalid-feedback"></div>
                                     <small class="text-muted">Letters and digits only</small>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Customer / Account Name</label>
-                                    <input type="text" class="form-control"
-                                           t-att-value="employee.customer_acc_name or ''" readonly="readonly"/>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Candidate Source</label>
-                                    <input type="text" class="form-control"
-                                           t-att-value="employee.candidate_source or ''" readonly="readonly"/>
-                                </div>
+<!--                                <div class="col-md-6">-->
+<!--                                    <label class="form-label fw-bold">Customer / Account Name</label>-->
+<!--                                    <input type="text" class="form-control"-->
+<!--                                           t-att-value="employee.customer_acc_name or ''" readonly="readonly"/>-->
+<!--                                </div>-->
+<!--                                <div class="col-md-6">-->
+<!--                                    <label class="form-label fw-bold">Candidate Source</label>-->
+<!--                                    <input type="text" class="form-control"-->
+<!--                                           t-att-value="employee.candidate_source or ''" readonly="readonly"/>-->
+<!--                                </div>-->
                             </div>
                         </div>
                     </div>
