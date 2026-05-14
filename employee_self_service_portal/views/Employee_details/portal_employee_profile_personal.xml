@@ -409,60 +409,18 @@
 
                                 <!-- ══ RELIGION FIX: was employee.religion.name — religion is a Selection field,
                                      not Many2one. Use employee.religion or '' directly. ══ -->
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Religion</label>
-                                    <select name="religion" class="form-select" disabled="disabled">
-                                        <option value="">-- Select Religion --</option>
-                                        <option value="christianity"
-                                                t-att-selected="'selected' if employee.religion == 'christianity' else None">
-                                            Christianity
-                                        </option>
-                                        <option value="islam"
-                                                t-att-selected="'selected' if employee.religion == 'islam' else None">
-                                            Islam
-                                        </option>
-                                        <option value="hinduism"
-                                                t-att-selected="'selected' if employee.religion == 'hinduism' else None">
-                                            Hinduism
-                                        </option>
-                                        <option value="buddhism"
-                                                t-att-selected="'selected' if employee.religion == 'buddhism' else None">
-                                            Buddhism
-                                        </option>
-                                        <option value="sikhism"
-                                                t-att-selected="'selected' if employee.religion == 'sikhism' else None">
-                                            Sikhism
-                                        </option>
-                                        <option value="judaism"
-                                                t-att-selected="'selected' if employee.religion == 'judaism' else None">
-                                            Judaism
-                                        </option>
-                                        <option value="bahai"
-                                                t-att-selected="'selected' if employee.religion == 'bahai' else None">
-                                            Baha'i
-                                        </option>
-                                        <option value="jainism"
-                                                t-att-selected="'selected' if employee.religion == 'jainism' else None">
-                                            Jainism
-                                        </option>
-                                        <option value="shinto"
-                                                t-att-selected="'selected' if employee.religion == 'shinto' else None">
-                                            Shinto
-                                        </option>
-                                        <option value="taoism"
-                                                t-att-selected="'selected' if employee.religion == 'taoism' else None">
-                                            Taoism
-                                        </option>
-                                        <option value="confucianism"
-                                                t-att-selected="'selected' if employee.religion == 'confucianism' else None">
-                                            Confucianism
-                                        </option>
-                                        <option value="zoroastrianism"
-                                                t-att-selected="'selected' if employee.religion == 'zoroastrianism' else None">
-                                            Zoroastrianism
-                                        </option>
-                                    </select>
-                                </div>
+                               <div class="col-md-6">
+    <label class="form-label fw-bold">Religion</label>
+    <select name="religion" class="form-select" disabled="disabled">
+        <option value="">-- Select Religion --</option>
+        <t t-foreach="religions" t-as="rel">
+            <option t-att-value="rel.id"
+                    t-att-selected="'selected' if rel.id == employee.religion.id else None">
+                <t t-esc="rel.name"/>
+            </option>
+        </t>
+    </select>
+</div>
                             </div>
                         </div>
                     </div>

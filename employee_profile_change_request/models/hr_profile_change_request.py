@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 import json
 import logging
+import re
+import base64
+
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
@@ -93,9 +96,7 @@ FIELD_LABELS = {
 
 # ─────────────────────────────────────────────────────────────────────────────
 # MANY2ONE_FIELDS — stored as integer IDs in submitted_data
-# The controller stores the raw integer ID (e.g. "105")
-# action_approve must write int(v) for these fields
-# _compute_changed_fields_display must resolve int → country name for display
+# religion is now Many2one('tec.religion') — moved here from SELECTION_FIELDS
 # ─────────────────────────────────────────────────────────────────────────────
 MANY2ONE_FIELDS = {
     'nationality_at_birth_id',
@@ -104,6 +105,7 @@ MANY2ONE_FIELDS = {
     'countries_id',
     'country_residences_id',
     'states_id',
+    'religion',  # ← FIXED: Many2one('tec.religion'), not Selection anymore
 }
 
 MANY2ONE_MODEL_MAP = {
@@ -113,12 +115,12 @@ MANY2ONE_MODEL_MAP = {
     'countries_id':            'res.country',
     'country_residences_id':   'res.country',
     'states_id':               'res.country.state',
+    'religion':                'tec.religion',  # ← FIXED: points to tec.religion model
 }
 
-# Selection fields — value is the stored key string
+# Selection fields — religion REMOVED from here since it's now Many2one
 SELECTION_FIELDS = {
-    'blood_group', 'sex', 'marital', 'dependent_child_gender_1', 'religion',
-
+    'blood_group', 'sex', 'marital', 'dependent_child_gender_1',
 }
 
 # Skip these during approval write
@@ -128,22 +130,8 @@ SKIP_ON_APPROVE = {
 }
 
 # Human-readable labels for selection coded values
+# religion block REMOVED — now resolved via Many2one name lookup
 CODED_VALUE_LABELS = {
-    'religion': {
-        'christianity': 'Christianity',
-        'islam': 'Islam',
-        'hinduism': 'Hinduism',
-        'buddhism': 'Buddhism',
-        'sikhism': 'Sikhism',
-        'judaism': 'Judaism',
-        'bahai': "Baha'i",
-        'jainism': 'Jainism',
-        'shinto': 'Shinto',
-        'taoism': 'Taoism',
-        'confucianism': 'Confucianism',
-        'zoroastrianism': 'Zoroastrianism',
-    },
-
     'blood_group': {
         'a+': 'A+', 'a-': 'A-', 'b+': 'B+', 'b-': 'B-',
         'ab+': 'AB+', 'ab-': 'AB-', 'o+': 'O+', 'o-': 'O-',
@@ -354,8 +342,7 @@ class HrProfileChangeRequest(models.Model):
                         new_val_display = str(new_val)
                         is_changed = True
 
-                    # ── Many2one country fields (stored as int ID) ─
-                        # ── Many2one fields (stored as int ID) ─
+                    # ── Many2one fields (stored as int ID) ─────────
                     elif key in MANY2ONE_FIELDS:
                         try:
                             current_rec = getattr(rec.employee_id, key, False)
@@ -369,6 +356,7 @@ class HrProfileChangeRequest(models.Model):
                         except Exception:
                             new_val_display = str(new_val)
                         is_changed = (new_val_display != current_display)
+
                     # ── Selection / coded fields ───────────────────
                     else:
                         try:
@@ -428,13 +416,8 @@ class HrProfileChangeRequest(models.Model):
     # ── Approve ───────────────────────────────────────────────────
     def action_approve(self):
         """
-        KEY FIX for country/nationality fields:
-        The controller now stores integer IDs (e.g. "105") for
-        Many2one country fields in submitted_data.
-        We call int(v) here to write them correctly as Many2one.
-
-        Previously the controller stored country NAMES (e.g. "India")
-        which caused int("India") to fail → 0 fields written.
+        religion is now Many2one('tec.religion') — handled same as country fields.
+        Stored as integer ID in submitted_data, written as int() here.
         """
         self.ensure_one()
         if self.state != 'pending':
@@ -455,7 +438,8 @@ class HrProfileChangeRequest(models.Model):
                 continue
 
             # ─────────────────────────────────────────────────────
-            # MANY2ONE FIX: value is stored as integer string "105"
+            # MANY2ONE FIX: religion + country fields
+            # value stored as integer string e.g. "12"
             # Must write as int so Odoo accepts it as Many2one
             # ─────────────────────────────────────────────────────
             if k in MANY2ONE_FIELDS:
@@ -475,7 +459,7 @@ class HrProfileChangeRequest(models.Model):
                                     self.name, k, v)
                 continue
 
-            #  ── Selection field validation ────────────────────────
+            # ── Selection field validation ────────────────────────
             if k in SELECTION_FIELDS:
                 field_obj = self.employee_id._fields.get(k)
                 if field_obj and hasattr(field_obj, 'selection'):

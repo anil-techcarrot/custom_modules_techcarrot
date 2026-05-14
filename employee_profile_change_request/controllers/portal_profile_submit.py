@@ -9,9 +9,8 @@ from odoo.http import request
 
 _logger = logging.getLogger(__name__)
 
-# ── Many2one fields — submitted as integer IDs from country dropdowns ─────────
-# Store the integer ID directly in submitted_data so action_approve can write
-# the correct Many2one value without any name-to-id lookup.
+# ── Many2one fields — submitted as integer IDs from dropdowns ────────────────
+# religion is now Many2one('tec.religion') — added here
 MANY2ONE_FIELDS = {
     'nationality_at_birth_id',
     'country_id',
@@ -19,6 +18,7 @@ MANY2ONE_FIELDS = {
     'countries_id',
     'country_residences_id',
     'states_id',
+    'religion',  # ← FIXED: Many2one('tec.religion')
 }
 
 # ── ALL editable text/select fields ───────────────────────────────────────────
@@ -38,12 +38,12 @@ EDITABLE_FIELDS = [
     'emirates_id_number', 'emirates_expiry_date',
     'passport_id', 'identification_id', 'ssnid', 'visa_no', 'permit_no',
 
-    # Basic Info — Country dropdowns (Many2one — sent as int IDs)
+    # Basic Info — Country/Many2one dropdowns (sent as int IDs)
     'nationality_at_birth_id',
     'country_id',
     'issue_countries_id',
     'countries_id',
-    'religion',
+    'religion',  # ← FIXED: now treated as Many2one integer ID
 
     # Basic Info — Emergency
     'l10n_in_relationship', 'emergency_phone', 'e_private_city',
@@ -138,8 +138,6 @@ class EmployeePortalProfileSubmit(http.Controller):
         except Exception:
             return []
 
-
-
     @http.route(
         '/my/employee/personal',
         type='http', auth='user', website=True,
@@ -204,6 +202,7 @@ class EmployeePortalProfileSubmit(http.Controller):
                 }
 
         countries = request.env['res.country'].sudo().search([], order='name')
+        religions = request.env['tec.religion'].sudo().search([], order='name')  # ← FIXED
 
         return request.render(
             'employee_self_service_portal.portal_employee_profile_personal',
@@ -213,6 +212,7 @@ class EmployeePortalProfileSubmit(http.Controller):
                 'all_countries':  countries,
                 'notification':   notification,
                 'portal_overlay': portal_overlay,
+                'religions':      religions,  # ← FIXED: pass to template
             },
         )
 
@@ -256,7 +256,8 @@ class EmployeePortalProfileSubmit(http.Controller):
                 new_val = str(val).strip()
 
                 # ──────────────────────────────────────────────────
-                # MANY2ONE FIX: store integer ID in submitted_data
+                # MANY2ONE FIX: religion + country fields
+                # store integer ID in submitted_data
                 # action_approve will write it as Many2one integer
                 # ──────────────────────────────────────────────────
                 if field in MANY2ONE_FIELDS:
@@ -269,7 +270,6 @@ class EmployeePortalProfileSubmit(http.Controller):
                     current_id  = current_rec.id if current_rec else 0
 
                     if new_id and new_id != current_id:
-                        # Store as integer string — action_approve does int() on it
                         changed[field] = str(new_id)
                     continue
 
