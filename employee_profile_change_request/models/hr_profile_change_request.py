@@ -677,3 +677,43 @@ class HrProfileChangeRequest(models.Model):
                          self.name, status, emp_email)
         except Exception as e:
             _logger.warning('PCR %s: Failed to send employee notification: %s', self.name, e)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# POST INIT HOOK — Auto-creates religion records on install/upgrade
+# Add this to __manifest__.py: 'post_init_hook': 'post_init_hook'
+# ─────────────────────────────────────────────────────────────────────────────
+RELIGIONS = [
+    'Christianity',
+    'Islam',
+    'Hinduism',
+    'Buddhism',
+    'Sikhism',
+    'Judaism',
+    "Baha'i",
+    'Jainism',
+    'Shinto',
+    'Taoism',
+    'Confucianism',
+    'Zoroastrianism',
+]
+
+
+def post_init_hook(cr, registry):
+    """
+    Auto-creates tec.religion records after module install/upgrade.
+    Safe to run multiple times — skips already existing records.
+    """
+    from odoo import api, SUPERUSER_ID
+    env = api.Environment(cr, SUPERUSER_ID, {})
+    Religion = env['tec.religion']
+    existing_names = Religion.search([]).mapped('name')
+    created = []
+    for name in RELIGIONS:
+        if name not in existing_names:
+            Religion.create({'name': name})
+            created.append(name)
+    if created:
+        _logger.info('[post_init_hook] ✅ Created %d religion(s): %s', len(created), created)
+    else:
+        _logger.info('[post_init_hook] ✅ All religions already exist — nothing to create.')
