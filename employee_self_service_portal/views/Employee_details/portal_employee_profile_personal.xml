@@ -429,20 +429,20 @@
                     <div class="card mb-2 shadow-sm profile-tab-section" data-tab-group="basic">
                         <div class="card-body py-2">
                             <div class="d-flex align-items-center">
-<!--                                <div class="form-check me-3">-->
-<!--                                    <input type="checkbox" class="form-check-input" name="is_non_resident"-->
-<!--                                           id="is_non_resident"-->
-<!--                                           t-att-checked="'checked' if employee.is_non_resident else None"-->
-<!--                                           disabled="disabled"/>-->
-<!--                                    <label class="form-check-label fw-bold" for="is_non_resident">-->
-<!--                                        Non Resident-->
-<!--                                    </label>-->
-<!--                                </div>-->
-<!--                                <small class="text-muted">-->
-<!--                                    <i class="fa fa-info-circle me-1"></i>-->
+                                <div class="form-check me-3">
+                                    <input type="checkbox" class="form-check-input" name="is_non_resident"
+                                           id="is_non_resident"
+                                           t-att-checked="'checked' if employee.is_non_resident else None"
+                                           disabled="disabled"/>
+                                    <label class="form-check-label fw-bold" for="is_non_resident">
+                                        Non Resident
+                                    </label>
+                                </div>
+                                <small class="text-muted">
+                                    <i class="fa fa-info-circle me-1"></i>
 
-<!--                                </small>-->
-<!--                            </div>-->
+                                </small>
+                            </div>
                         </div>
                     </div>
 
