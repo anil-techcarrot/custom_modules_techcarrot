@@ -475,7 +475,6 @@
                                     <input type="checkbox" class="form-check-input" name="is_non_resident"
                                            id="is_non_resident"
                                            t-att-checked="'checked' if employee.is_non_resident else None"
-                                           onchange="toggleNonResidentSections(this)"
                                            disabled="disabled"/>
                                     <label class="form-check-label fw-bold" for="is_non_resident">
                                         Resident
