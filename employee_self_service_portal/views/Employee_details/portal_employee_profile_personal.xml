@@ -1910,13 +1910,15 @@ function switchProfileTab(tabKey) {
     }
     document.querySelectorAll('#personalDetailsForm .profile-tab-section').forEach(card => {
         if (card.getAttribute('data-tab-group') === tabKey) {
-            var sectionId = card.id;
-            if (sectionId === 'identityDocsSection' || sectionId === 'visaWorkPermitSection') {
-                var nr = document.getElementById('is_non_resident');
-                card.style.display = (nr && nr.checked) ? '' : 'none';
-            } else {
-                card.style.display = '';
-            }
+<!--            var sectionId = card.id;-->
+<!--            if (sectionId === 'identityDocsSection' || sectionId === 'visaWorkPermitSection') {-->
+<!--                var nr = document.getElementById('is_non_resident');-->
+<!--                card.style.display = (nr && nr.checked) ? '' : 'none';-->
+<!--            } else {-->
+<!--                card.style.display = '';-->
+<!--            }-->
+
+       card.style.display = '';
         } else {
             card.style.display = 'none';
         }
@@ -2394,10 +2396,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('viewActions').style.display = 'block';
     isEditMode = false;
 
-    var nonResidentCheckbox = document.getElementById('is_non_resident');
-    if (nonResidentCheckbox) {
-        toggleNonResidentSections(nonResidentCheckbox);
-    }
+<!--    var nonResidentCheckbox = document.getElementById('is_non_resident');-->
+<!--    if (nonResidentCheckbox) {-->
+<!--        toggleNonResidentSections(nonResidentCheckbox);-->
+<!--    }-->
 
     document.querySelectorAll('#personalDetailsForm input[type="file"].file-upload-input').forEach(fi => {
         fi.setAttribute('disabled', 'disabled');
