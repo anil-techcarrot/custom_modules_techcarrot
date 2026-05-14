@@ -80,20 +80,7 @@ class HrEmployeeInherit(models.Model):
     linkedin = fields.Char('LinkedIn', copy=False)
     industry_start_date = fields.Date('Industry Start Date', copy=False)
     experience = fields.Char('Experience', copy=False)
-    religion = fields.Selection([
-        ('christianity', 'Christianity'),
-        ('islam', 'Islam'),
-        ('hinduism', 'Hinduism'),
-        ('buddhism', 'Buddhism'),
-        ('sikhism', 'Sikhism'),
-        ('judaism', 'Judaism'),
-        ('bahai', "Baha'i"),
-        ('jainism', 'Jainism'),
-        ('shinto', 'Shinto'),
-        ('taoism', 'Taoism'),
-        ('confucianism', 'Confucianism'),
-        ('zoroastrianism', 'Zoroastrianism'),
-    ], string='Religion', copy=False)
+    religion = fields.Many2one('tec.religion', string='Religion', copy=False)
     emp_code = fields.Char('Emp Code', copy=False)
     issue_date = fields.Date('Passport Issue Date', copy=False)
     expiry_date = fields.Date('Passport Expiry Date', copy=False)
