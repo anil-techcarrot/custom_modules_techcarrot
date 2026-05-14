@@ -1141,6 +1141,20 @@
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
+
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold">Country Code</label>
+                                    <select name="phone_code_1" class="form-select" disabled="disabled">
+                                        <option value="">-- Select --</option>
+                                        <t t-foreach="isd_codes" t-as="isd">
+                                            <option t-att-value="isd[0]"
+                                                    t-att-selected="'selected' if (portal_overlay.get('phone_code_1') or employee.phone_code_1 or '') == isd[0] else None">
+                                                <t t-esc="isd[1]"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                    <small class="text-muted">Select country dial code</small>
+                                </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-phone text-muted me-1"></i>
@@ -1158,19 +1172,19 @@
                                            t-att-value="portal_overlay.get('e_private_city') or employee.e_private_city or ''"
                                            readonly="readonly"/>
                                 </div>
-                                <div class="col-md-3">
-                                    <label class="form-label fw-bold">Country Code</label>
-                                    <select name="phone_code_1" class="form-select" disabled="disabled">
-                                        <option value="">-- Select --</option>
-                                        <t t-foreach="isd_codes" t-as="isd">
-                                            <option t-att-value="isd[0]"
-                                                    t-att-selected="'selected' if (portal_overlay.get('phone_code_1') or employee.phone_code_1 or '') == isd[0] else None">
-                                                <t t-esc="isd[1]"/>
-                                            </option>
-                                        </t>
-                                    </select>
-                                    <small class="text-muted">Select country dial code</small>
-                                </div>
+<!--                                <div class="col-md-3">-->
+<!--                                    <label class="form-label fw-bold">Country Code</label>-->
+<!--                                    <select name="phone_code_1" class="form-select" disabled="disabled">-->
+<!--                                        <option value="">&#45;&#45; Select &#45;&#45;</option>-->
+<!--                                        <t t-foreach="isd_codes" t-as="isd">-->
+<!--                                            <option t-att-value="isd[0]"-->
+<!--                                                    t-att-selected="'selected' if (portal_overlay.get('phone_code_1') or employee.phone_code_1 or '') == isd[0] else None">-->
+<!--                                                <t t-esc="isd[1]"/>-->
+<!--                                            </option>-->
+<!--                                        </t>-->
+<!--                                    </select>-->
+<!--                                    <small class="text-muted">Select country dial code</small>-->
+<!--                                </div>-->
                             </div>
                         </div>
                     </div>
