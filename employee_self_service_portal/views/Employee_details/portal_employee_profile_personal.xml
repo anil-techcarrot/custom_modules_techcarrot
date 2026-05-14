@@ -1832,8 +1832,8 @@
 
                 </form>
 
-                <!-- ===== JAVASCRIPT ===== -->
-               <script type="text/javascript">
+         <!-- ===== JAVASCRIPT ===== -->
+<script type="text/javascript">
 <![CDATA[
 
 var PENDING_LOCKED = (function () {
@@ -1851,54 +1851,27 @@ let activeProfileTab = 'basic';
 (function fixLastUpdatedTimezone() {
     var el = document.getElementById('profileLastUpdated');
     if (!el) return;
-
     var raw = el.textContent.trim();
     if (!raw || raw === 'Never') return;
-
     try {
         raw = raw.replace(/\u00a0/g, ' ').trim();
-
         var dt = new Date(raw);
-
         if (isNaN(dt.getTime())) {
             var m = raw.match(/(\d{1,2})\s+(\w+),?\s+(\d{4})\s+at\s+(\d{1,2}):(\d{2})\s*(AM|PM)/i);
-
             if (m) {
-                var months = {
-                    jan:0,feb:1,mar:2,apr:3,may:4,jun:5,
-                    jul:6,aug:7,sep:8,oct:9,nov:10,dec:11
-                };
-
+                var months = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
                 var monIdx = months[m[2].toLowerCase().substring(0,3)];
                 var hr = parseInt(m[4],10);
                 var isPM = m[6].toUpperCase() === 'PM';
-
                 if (isPM && hr < 12) hr += 12;
                 if (!isPM && hr === 12) hr = 0;
-
-                dt = new Date(Date.UTC(
-                    parseInt(m[3],10),
-                    monIdx,
-                    parseInt(m[1],10),
-                    hr,
-                    parseInt(m[5],10)
-                ));
+                dt = new Date(Date.UTC(parseInt(m[3],10), monIdx, parseInt(m[1],10), hr, parseInt(m[5],10)));
             }
         }
-
         if (!isNaN(dt.getTime())) {
-            var opts = {
-                day:'2-digit',
-                month:'short',
-                year:'numeric',
-                hour:'2-digit',
-                minute:'2-digit',
-                hour12:true
-            };
-
+            var opts = {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit', hour12:true};
             el.textContent = dt.toLocaleString(undefined, opts);
         }
-
     } catch(e) {}
 })();
 
@@ -1906,48 +1879,30 @@ let activeProfileTab = 'basic';
    SHOW / HIDE NON RESIDENT SECTIONS
 ========================================================= */
 function toggleNonResidentSections(checkbox) {
-
     var show = checkbox ? checkbox.checked : false;
-
     var identitySection = document.getElementById('identityDocsSection');
     var visaSection = document.getElementById('visaWorkPermitSection');
-
-    if (identitySection) {
-        identitySection.style.display = show ? '' : 'none';
-    }
-
-    if (visaSection) {
-        visaSection.style.display = show ? '' : 'none';
-    }
+    if (identitySection) identitySection.style.display = show ? '' : 'none';
+    if (visaSection) visaSection.style.display = show ? '' : 'none';
 }
 
 /* =========================================================
    AUTOSAVE DRAFT
 ========================================================= */
 function autosaveDraftNow() {
-
     if (!isEditMode) return;
-
     try {
-
         const draftData = {};
-
-        document.querySelectorAll(
-            '#personalDetailsForm input, #personalDetailsForm select'
-        ).forEach(function(input){
-
+        document.querySelectorAll('#personalDetailsForm input, #personalDetailsForm select').forEach(function(input) {
             if (input.type === 'hidden' || input.type === 'file') return;
             if (!input.name) return;
-
             if (input.type === 'checkbox') {
                 draftData[input.name] = input.checked ? 'on' : '';
             } else {
                 draftData[input.name] = input.value;
             }
         });
-
         localStorage.setItem('profileDraft', JSON.stringify(draftData));
-
     } catch(e) {
         console.error('autosave error', e);
     }
@@ -1957,38 +1912,22 @@ function autosaveDraftNow() {
    SWITCH TAB
 ========================================================= */
 function switchProfileTab(tabKey) {
-
     const previousTab = activeProfileTab;
     activeProfileTab = tabKey;
-
     if (!isEditMode && previousTab && previousTab !== tabKey) {
         clearValidationStates(previousTab);
     }
-
-    document.querySelectorAll(
-        '#personalDetailsForm .profile-tab-section'
-    ).forEach(function(card){
-
+    document.querySelectorAll('#personalDetailsForm .profile-tab-section').forEach(function(card) {
         if (card.getAttribute('data-tab-group') === tabKey) {
             card.style.display = '';
         } else {
             card.style.display = 'none';
         }
     });
-
-    document.querySelectorAll(
-        '#personalDetailsForm .profile-tab-button'
-    ).forEach(function(btn){
-
-        const active =
-            btn.getAttribute('data-tab-target') === tabKey;
-
+    document.querySelectorAll('#personalDetailsForm .profile-tab-button').forEach(function(btn) {
+        const active = btn.getAttribute('data-tab-target') === tabKey;
         btn.classList.toggle('active', active);
-
-        btn.setAttribute(
-            'aria-selected',
-            active ? 'true' : 'false'
-        );
+        btn.setAttribute('aria-selected', active ? 'true' : 'false');
     });
 }
 
@@ -1996,23 +1935,14 @@ function switchProfileTab(tabKey) {
    EDIT MODE TOGGLE
 ========================================================= */
 function syncAndToggleEditMode(sourceCheckbox) {
-
     if (PENDING_LOCKED) {
-
         sourceCheckbox.checked = false;
-
-        alert(
-            'Editing is disabled while your profile update is pending HR review.'
-        );
-
+        alert('Editing is disabled while your profile update is pending HR review.');
         return;
     }
-
-    document.querySelectorAll('.edit-mode-toggle')
-        .forEach(function(t){
-            t.checked = sourceCheckbox.checked;
-        });
-
+    document.querySelectorAll('.edit-mode-toggle').forEach(function(t) {
+        t.checked = sourceCheckbox.checked;
+    });
     if (sourceCheckbox.checked) {
         enableEditMode();
     } else {
@@ -2024,7 +1954,6 @@ function syncAndToggleEditMode(sourceCheckbox) {
    ESCAPE HTML
 ========================================================= */
 function escapeHtml(str) {
-
     return str
         .replace(/&/g,'&amp;')
         .replace(/</g,'&lt;')
@@ -2036,78 +1965,41 @@ function escapeHtml(str) {
    ENABLE EDIT MODE
 ========================================================= */
 function enableEditMode() {
-
     if (PENDING_LOCKED) {
-
-        alert(
-            'Editing is disabled while your profile update is pending HR review.'
-        );
-
+        alert('Editing is disabled while your profile update is pending HR review.');
         return;
     }
-
     isEditMode = true;
-
-    document.querySelectorAll('.edit-mode-toggle')
-        .forEach(function(t){
-            t.checked = true;
-        });
-
+    document.querySelectorAll('.edit-mode-toggle').forEach(function(t) { t.checked = true; });
     storeOriginalFormData();
 
     var editBtn = document.getElementById('editProfileBtn');
-
     if (editBtn) {
-
         editBtn.classList.remove('btn-outline-primary');
-
-        editBtn.classList.add(
-            'btn-primary',
-            'edit-active'
-        );
-
-        editBtn.innerHTML =
-            '<i class="fa fa-pencil me-1"></i>Editing Mode ON';
+        editBtn.classList.add('btn-primary', 'edit-active');
+        editBtn.innerHTML = '<i class="fa fa-pencil me-1"></i>Editing Mode ON';
     }
 
-    document.querySelectorAll(
-        '#personalDetailsForm input, #personalDetailsForm select'
-    ).forEach(function(input){
-
+    document.querySelectorAll('#personalDetailsForm input, #personalDetailsForm select').forEach(function(input) {
         if (input.type === 'hidden') return;
-
         if (input.classList.contains('edit-mode-toggle')) return;
-
         if (input.hasAttribute('data-always-readonly')) {
-
             input.setAttribute('readonly', 'readonly');
-
-            if (
-                input.tagName === 'SELECT' ||
-                input.type === 'checkbox'
-            ) {
-                input.setAttribute('disabled', 'disabled');
-            }
-
+            if (input.tagName === 'SELECT' || input.type === 'checkbox') input.setAttribute('disabled', 'disabled');
             input.style.setProperty('pointer-events', 'none');
             input.style.setProperty('background-color', '#e9ecef');
-
             return;
         }
-
         if (input.type === 'file') {
             input.removeAttribute('disabled');
             return;
         }
-
         if (input.id === 'is_non_resident') {
             input.removeAttribute('disabled');
             return;
         }
-
         input.removeAttribute('readonly');
         input.removeAttribute('disabled');
-
         input.style.removeProperty('pointer-events');
         input.style.removeProperty('background-color');
     });
@@ -2116,94 +2008,73 @@ function enableEditMode() {
     document.getElementById('viewActions').style.display = 'none';
 
     const disc = document.getElementById('personalDisclaimer');
-
     if (disc) disc.checked = false;
 
     const btn = document.getElementById('personalSaveBtn');
+    if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
 
-    if (btn) {
-        btn.disabled = true;
-        btn.style.opacity = '0.6';
-    }
+    document.querySelectorAll('#personalDetailsForm input[type="file"].file-upload-input').forEach(function(fileInput) {
+        fileInput.addEventListener('change', function() {
+            if (this.files && this.files.length > 0) {
+                showFilePreview(this, this.files[0]);
+            } else {
+                this.value = '';
+                clearFilePreview(this);
+            }
+        });
+    });
+
+    document.querySelectorAll('#personalDetailsForm input:not([type="file"]), #personalDetailsForm select').forEach(function(input) {
+        input.removeEventListener('input', validateField);
+        input.removeEventListener('blur', validateField);
+        input.removeEventListener('change', autosaveDraftNow);
+        input.removeEventListener('input', autosaveDraftNow);
+        input.addEventListener('input', validateField);
+        input.addEventListener('blur', validateField);
+        input.addEventListener('input', autosaveDraftNow);
+        input.addEventListener('change', autosaveDraftNow);
+    });
 }
 
 /* =========================================================
    DISABLE EDIT MODE
 ========================================================= */
 function disableEditMode() {
-
     isEditMode = false;
-
     localStorage.removeItem('profileEditActive');
     localStorage.removeItem('profileDraft');
 
-    document.querySelectorAll('.edit-mode-toggle')
-        .forEach(function(t){
-            t.checked = false;
-        });
+    document.querySelectorAll('.edit-mode-toggle').forEach(function(t) { t.checked = false; });
 
     var editBtn = document.getElementById('editProfileBtn');
-
     if (editBtn) {
-
-        editBtn.classList.remove(
-            'btn-primary',
-            'edit-active'
-        );
-
+        editBtn.classList.remove('btn-primary', 'edit-active');
         editBtn.classList.add('btn-outline-primary');
-
-        editBtn.innerHTML =
-            '<i class="fa fa-edit me-1"></i>Edit Profile';
+        editBtn.innerHTML = '<i class="fa fa-edit me-1"></i>Edit Profile';
     }
 
-    document.querySelectorAll(
-        '#personalDetailsForm input, #personalDetailsForm select'
-    ).forEach(function(input){
-
+    document.querySelectorAll('#personalDetailsForm input, #personalDetailsForm select').forEach(function(input) {
         if (input.type === 'hidden') return;
-
         if (input.classList.contains('edit-mode-toggle')) return;
-
         if (input.hasAttribute('data-always-readonly')) {
-
             input.setAttribute('readonly', 'readonly');
-
-            if (
-                input.tagName === 'SELECT' ||
-                input.type === 'checkbox'
-            ) {
-                input.setAttribute('disabled', 'disabled');
-            }
-
+            if (input.tagName === 'SELECT' || input.type === 'checkbox') input.setAttribute('disabled', 'disabled');
             input.style.setProperty('pointer-events', 'none');
             input.style.setProperty('background-color', '#e9ecef');
-
             return;
         }
-
         if (input.type === 'file') {
             input.setAttribute('disabled', 'disabled');
             input.value = '';
             return;
         }
-
         if (input.id === 'is_non_resident') {
             input.setAttribute('disabled', 'disabled');
             return;
         }
-
         input.setAttribute('readonly', 'readonly');
-
-        if (
-            input.tagName === 'SELECT' ||
-            input.type === 'checkbox'
-        ) {
-            input.setAttribute('disabled', 'disabled');
-        }
-
+        if (input.tagName === 'SELECT' || input.type === 'checkbox') input.setAttribute('disabled', 'disabled');
         input.classList.remove('is-valid', 'is-invalid');
-
         input.style.removeProperty('pointer-events');
         input.style.removeProperty('background-color');
     });
@@ -2211,27 +2082,37 @@ function disableEditMode() {
     document.getElementById('formActions').style.display = 'none';
     document.getElementById('viewActions').style.display = 'block';
 
+    ['basic', 'professional', 'family', 'education', 'documents'].forEach(function(t) {
+        clearValidationStates(t);
+    });
+
+    const disc = document.getElementById('personalDisclaimer');
+    if (disc) disc.checked = false;
+
+    const btn = document.getElementById('personalSaveBtn');
+    if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
+
     hideSaveError();
 }
 
 /* =========================================================
-   STORE ORIGINAL FORM DATA
+   TOGGLE SAVE BUTTON
+========================================================= */
+function toggleSaveBtn(checkboxId, btnId) {
+    const checked = document.getElementById(checkboxId).checked;
+    const btn = document.getElementById(btnId);
+    btn.disabled = !checked;
+    btn.style.opacity = checked ? '1' : '0.6';
+}
+
+/* =========================================================
+   STORE / CANCEL FORM DATA
 ========================================================= */
 function storeOriginalFormData() {
-
     originalFormData = {};
-
-    document.querySelectorAll(
-        '#personalDetailsForm input, #personalDetailsForm select'
-    ).forEach(function(input){
-
-        if (
-            input.type === 'hidden' ||
-            input.type === 'file'
-        ) return;
-
+    document.querySelectorAll('#personalDetailsForm input, #personalDetailsForm select').forEach(function(input) {
+        if (input.type === 'hidden' || input.type === 'file') return;
         if (!input.name) return;
-
         if (input.type === 'checkbox') {
             originalFormData[input.name] = input.checked;
         } else {
@@ -2240,198 +2121,484 @@ function storeOriginalFormData() {
     });
 }
 
-/* =========================================================
-   CANCEL EDIT
-========================================================= */
 function cancelEdit() {
-
-    Object.entries(originalFormData)
-        .forEach(function(entry){
-
-            const key = entry[0];
-            const value = entry[1];
-
-            const input = document.querySelector(
-                '[name="' + key + '"]'
-            );
-
-            if (
-                !input ||
-                input.type === 'hidden' ||
-                input.type === 'file'
-            ) return;
-
-            if (input.type === 'checkbox') {
-
-                input.checked = value;
-
-                toggleNonResidentSections(input);
-
-            } else {
-                input.value = value;
-            }
-        });
-
+    Object.entries(originalFormData).forEach(function(entry) {
+        const key = entry[0];
+        const value = entry[1];
+        const input = document.querySelector('[name="' + key + '"]');
+        if (!input || input.type === 'hidden' || input.type === 'file') return;
+        if (input.type === 'checkbox') {
+            input.checked = value;
+            toggleNonResidentSections(input);
+        } else {
+            input.value = value;
+        }
+    });
     localStorage.removeItem('profileDraft');
     localStorage.removeItem('profileEditActive');
-
     disableEditMode();
+    showTabMessage(activeProfileTab, 'Changes cancelled.', 'info');
+}
 
-    showTabMessage(
-        activeProfileTab,
-        'Changes cancelled.',
-        'info'
-    );
+function saveAsDraft() {
+    autosaveDraftNow();
+    showTabMessage(activeProfileTab, 'Profile saved as draft.', 'info');
+}
+
+/* =========================================================
+   SAVE ERROR BOX
+========================================================= */
+function showSaveError(html) {
+    let box = document.getElementById('saveErrorBox');
+    if (!box) {
+        box = document.createElement('div');
+        box.id = 'saveErrorBox';
+        box.className = 'alert alert-danger';
+        box.style.cssText = 'margin-bottom:12px;border-left:4px solid #dc3545;';
+        const saveBtn = document.getElementById('personalSaveBtn');
+        if (saveBtn) saveBtn.parentNode.insertBefore(box, saveBtn);
+        else document.getElementById('formActions').appendChild(box);
+    }
+    box.innerHTML = html;
+    box.style.display = 'block';
+    setTimeout(function() { box.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 80);
+}
+
+function hideSaveError() {
+    const box = document.getElementById('saveErrorBox');
+    if (box) box.style.display = 'none';
+}
+
+/* =========================================================
+   VALIDATE FIELD
+========================================================= */
+function validateField(event) {
+    if (!isEditMode) return true;
+    const field = event.target;
+    const parentSection = field.closest('.profile-tab-section');
+    const isUserEvent = event.type === 'input' || event.type === 'blur' || event.type === 'change';
+    if (isUserEvent && parentSection && parentSection.getAttribute('data-tab-group') !== activeProfileTab) return true;
+    const validationType = field.getAttribute('data-validation');
+    if (!validationType) return true;
+    let isValid = true, errorMessage = '';
+    field.classList.remove('is-valid', 'is-invalid');
+    const existingDynamic = field.parentNode.querySelector('.invalid-feedback.dynamic-error');
+    if (existingDynamic) existingDynamic.remove();
+    const feedback = field.parentNode.querySelector('.invalid-feedback:not(.dynamic-error)');
+    if (feedback) { feedback.textContent = ''; feedback.style.display = 'none'; }
+    const val = field.value ? field.value.trim() : '';
+    if (!val) { updateTabErrorBadges(); return true; }
+    switch (validationType) {
+        case 'email':
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) { isValid = false; errorMessage = 'Please enter a valid email address.'; }
+            break;
+        case 'phone':
+            const pc = val.replace(/\s/g, '');
+            if (!/^\+?[0-9]+$/.test(pc)) { isValid = false; errorMessage = 'Phone number must contain digits only. A leading + is allowed.'; }
+            else { const d = pc.replace('+', ''); if (d.length < 7 || d.length > 15) { isValid = false; errorMessage = 'Phone number must be between 7 and 15 digits.'; } }
+            break;
+        case 'isd-code':
+            if (!/^\+[1-9][0-9]{0,2}$/.test(val.replace(/\s/g, ''))) { isValid = false; errorMessage = 'ISD code must start with + followed by 1-3 digits (e.g. +91, +971).'; }
+            break;
+        case 'digits-only':
+            if (!/^[0-9]+$/.test(val)) { isValid = false; errorMessage = 'This field must contain digits only.'; }
+            break;
+        case 'alphanumeric':
+            if (!/^[A-Za-z0-9]+$/.test(val)) { isValid = false; errorMessage = 'Letters and digits only (no spaces or special characters).'; }
+            break;
+        case 'emirates-id':
+            var eidClean = val.replace(/-/g, '');
+            if (!/^[0-9]{15}$/.test(eidClean)) { isValid = false; errorMessage = 'Please enter your unique 15-digit UAE Emirates ID number.'; }
+            break;
+        case 'aadhar':
+            if (!/^[0-9]{12}$/.test(val)) { isValid = false; errorMessage = 'Aadhar number must be exactly 12 digits.'; }
+            break;
+        case 'pan':
+            if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(val.toUpperCase())) { isValid = false; errorMessage = 'PAN must be in format: ABCDE1234F'; }
+            break;
+        case 'past-date':
+            const pd = new Date(val); const td1 = new Date(); td1.setHours(0,0,0,0);
+            if (isNaN(pd.getTime())) { isValid = false; errorMessage = 'Please enter a valid date.'; }
+            else if (pd > td1) { isValid = false; errorMessage = 'This date cannot be in the future.'; }
+            break;
+        case 'future-date':
+            const fd = new Date(val); const td2 = new Date(); td2.setHours(0,0,0,0);
+            if (isNaN(fd.getTime())) { isValid = false; errorMessage = 'Please enter a valid date.'; }
+            else if (fd <= td2) { isValid = false; errorMessage = 'Expiry date must be a future date.'; }
+            break;
+    }
+    if (isValid) {
+        if (isEditMode) field.classList.add('is-valid');
+    } else {
+        field.classList.add('is-invalid');
+        if (feedback) { feedback.textContent = errorMessage; feedback.style.display = 'block'; }
+        else {
+            const errDiv = document.createElement('div');
+            errDiv.className = 'invalid-feedback dynamic-error';
+            errDiv.style.cssText = 'display:block;color:#dc3545;font-size:0.8rem;margin-top:3px;';
+            errDiv.textContent = errorMessage;
+            field.insertAdjacentElement('afterend', errDiv);
+        }
+    }
+    updateTabErrorBadges();
+    return isValid;
+}
+
+/* =========================================================
+   TAB ERROR BADGES
+========================================================= */
+function updateTabErrorBadges() {
+    ['basic', 'professional', 'family', 'education', 'documents'].forEach(function(tabKey) {
+        const tabBtn = document.querySelector('.profile-tab-button[data-tab-target="' + tabKey + '"]');
+        if (!tabBtn) return;
+        const existing = tabBtn.querySelector('.tab-error-badge');
+        if (existing) existing.remove();
+        const count = document.querySelectorAll('.profile-tab-section[data-tab-group="' + tabKey + '"] .is-invalid').length;
+        if (count > 0) {
+            const badge = document.createElement('span');
+            badge.className = 'tab-error-badge badge bg-danger ms-1';
+            badge.textContent = count;
+            tabBtn.appendChild(badge);
+        }
+    });
+}
+
+function clearValidationStates(tabKey) {
+    const sections = document.querySelectorAll('.profile-tab-section[data-tab-group="' + tabKey + '"]');
+    sections.forEach(function(section) {
+        section.querySelectorAll('input, select').forEach(function(el) { el.classList.remove('is-valid', 'is-invalid'); });
+        section.querySelectorAll('.invalid-feedback').forEach(function(el) { el.textContent = ''; el.style.display = 'none'; });
+        section.querySelectorAll('.tab-message-box, .dynamic-error').forEach(function(el) { el.remove(); });
+    });
+    updateTabErrorBadges();
 }
 
 /* =========================================================
    SHOW TAB MESSAGE
 ========================================================= */
 function showTabMessage(tabKey, text, type) {
-
-    document.querySelectorAll('.tab-message-box')
-        .forEach(function(el){
-            el.remove();
-        });
-
-    const firstCard = document.querySelector(
-        '.profile-tab-section[data-tab-group="' + tabKey + '"]'
-    );
-
+    document.querySelectorAll('.tab-message-box').forEach(function(el) { el.remove(); });
+    const firstCard = document.querySelector('.profile-tab-section[data-tab-group="' + tabKey + '"]');
     if (!firstCard) return;
-
-    const alertClass =
-        type === 'success'
-            ? 'alert-success'
-            : type === 'info'
-                ? 'alert-info'
-                : 'alert-danger';
-
+    const alertClass = type === 'success' ? 'alert-success' : type === 'info' ? 'alert-info' : 'alert-danger';
+    const icon = type === 'success' ? 'fa-check-circle' : type === 'info' ? 'fa-info-circle' : 'fa-exclamation-triangle';
     const msgDiv = document.createElement('div');
-
-    msgDiv.className =
-        'tab-message-box alert ' +
-        alertClass +
-        ' mb-3';
-
-    msgDiv.innerHTML = text;
-
-    firstCard.parentNode.insertBefore(
-        msgDiv,
-        firstCard
-    );
-
-    setTimeout(function(){
-
-        if (msgDiv.parentNode) {
-            msgDiv.remove();
-        }
-
-    }, 5000);
+    msgDiv.className = 'tab-message-box alert ' + alertClass + ' alert-dismissible fade show mb-3';
+    msgDiv.innerHTML = '<i class="fa ' + icon + ' me-2"></i><span>' + text + '</span><button type="button" class="btn-close" onclick="this.parentNode.remove()"></button>';
+    firstCard.parentNode.insertBefore(msgDiv, firstCard);
+    msgDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(function() { if (msgDiv.parentNode) msgDiv.remove(); }, 5000);
 }
+
+/* =========================================================
+   FILE PREVIEW
+========================================================= */
+function clearFilePreview(inputEl) {
+    const existing = inputEl.parentNode.querySelector('.file-preview-box');
+    if (existing) {
+        if (existing._objectURL) URL.revokeObjectURL(existing._objectURL);
+        existing.remove();
+    }
+}
+
+function viewUploadedFile(objectURL, fileType, fileName) {
+    if (fileType.startsWith('image/')) {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.75);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;';
+        overlay.innerHTML =
+            '<div style="position:relative;max-width:90vw;max-height:85vh;">' +
+            '<img src="' + objectURL + '" alt="' + escapeHtml(fileName) + '" style="max-width:90vw;max-height:85vh;border-radius:8px;display:block;box-shadow:0 8px 32px rgba(0,0,0,0.4);"/>' +
+            '</div>' +
+            '<div style="display:flex;gap:12px;align-items:center;">' +
+            '<span style="color:#fff;font-size:0.85rem;opacity:0.8;">' + escapeHtml(fileName) + '</span>' +
+            '<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.4);color:#fff;border-radius:6px;padding:5px 16px;cursor:pointer;font-size:0.85rem;"><i class="fa fa-times me-1"></i>Close</button>' +
+            '</div>';
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+        const escHandler = function(e) { if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', escHandler); } };
+        document.addEventListener('keydown', escHandler);
+        document.body.appendChild(overlay);
+    } else {
+        window.open(objectURL, '_blank');
+    }
+}
+
+function cancelFileUpload(removeBtn) {
+    const preview = removeBtn.closest('.file-preview-box');
+    if (!preview) return;
+    const inputEl = preview.previousElementSibling;
+    if (inputEl && inputEl.type === 'file') inputEl.value = '';
+    if (preview._objectURL) URL.revokeObjectURL(preview._objectURL);
+    preview.remove();
+}
+
+function showFilePreview(inputEl, file) {
+    clearFilePreview(inputEl);
+    const sizeTxt = file.size > 1024 * 1024 ? (file.size / (1024 * 1024)).toFixed(1) + ' MB' : (file.size / 1024).toFixed(1) + ' KB';
+    const isImage = file.type.startsWith('image/');
+    const isPDF = file.type === 'application/pdf';
+    const objectURL = URL.createObjectURL(file);
+    const preview = document.createElement('div');
+    preview.className = 'file-preview-box';
+    let thumbHtml = '';
+    if (isImage) {
+        thumbHtml = '<img src="' + objectURL + '" alt="preview" style="width:40px;height:40px;object-fit:cover;border-radius:4px;border:0.5px solid #dee2e6;flex-shrink:0;" onerror="this.style.display=\'none\'"/>';
+    } else if (isPDF) {
+        thumbHtml = '<span style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:#fff3f3;border-radius:4px;border:0.5px solid #f5c6cb;flex-shrink:0;"><i class="fa fa-file-pdf-o" style="color:#dc3545;font-size:1.3rem;"></i></span>';
+    } else {
+        thumbHtml = '<span style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:#f8f9fa;border-radius:4px;border:0.5px solid #dee2e6;flex-shrink:0;"><i class="fa fa-file" style="color:#6c757d;font-size:1.3rem;"></i></span>';
+    }
+    preview.style.cssText = 'display:flex;align-items:center;gap:10px;margin-top:8px;padding:8px 12px;border:1px solid #198754;border-radius:6px;background:#f0fdf4;font-size:0.85rem;';
+    preview.innerHTML = thumbHtml +
+        '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#155724;"><strong>' + escapeHtml(file.name) + '</strong><span style="margin-left:8px;color:#6c757d;font-size:0.78rem;">' + sizeTxt + '</span></span>' +
+        '<button type="button" title="View file" onclick="viewUploadedFile(\'' + objectURL + '\', \'' + escapeHtml(file.type) + '\', \'' + escapeHtml(file.name) + '\')" style="background:none;border:1px solid #0d6efd;color:#0d6efd;border-radius:5px;padding:3px 8px;font-size:0.78rem;cursor:pointer;white-space:nowrap;"><i class="fa fa-eye me-1"></i>View</button>' +
+        '<button type="button" title="Remove file" class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size:0.78rem;line-height:1.6;white-space:nowrap;" onclick="cancelFileUpload(this)"><i class="fa fa-times me-1"></i>Remove</button>';
+    preview._objectURL = objectURL;
+    inputEl.parentNode.insertBefore(preview, inputEl.nextSibling);
+}
+
+/* =========================================================
+   FORM SUBMIT
+========================================================= */
+document.getElementById('personalDetailsForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (PENDING_LOCKED) { showSaveError('<i class="fa fa-lock me-2"></i>Editing is locked while your submission is pending HR review.'); return; }
+    const disc = document.getElementById('personalDisclaimer');
+    if (disc && !disc.checked) { showSaveError('<i class="fa fa-exclamation-triangle me-2"></i>Please read and accept the Employee Disclaimer before saving.'); return; }
+
+    const allTabs = ['basic', 'professional', 'family', 'education', 'documents'];
+    const tabNames = {'basic': 'Basic Info', 'professional': 'Professional', 'family': 'Family', 'education': 'Education', 'documents': 'Documents'};
+    const tabsWithErrors = [];
+    allTabs.forEach(function(tabKey) {
+        document.querySelectorAll('.profile-tab-section[data-tab-group="' + tabKey + '"] input[data-validation], .profile-tab-section[data-tab-group="' + tabKey + '"] select[data-validation]').forEach(function(input) {
+            if (!validateField({ target: input, type: 'submit' })) {
+                if (!tabsWithErrors.includes(tabKey)) tabsWithErrors.push(tabKey);
+            }
+        });
+    });
+    updateTabErrorBadges();
+    if (tabsWithErrors.length > 0) {
+        const tabLabels = tabsWithErrors.map(function(t) { return '<strong style="color:#721c24;">' + (tabNames[t] || t) + '</strong>'; }).join(', ');
+        showSaveError('<i class="fa fa-exclamation-triangle me-2"></i>Please fix errors in the following tab(s) before saving: ' + tabLabels);
+        return;
+    }
+    hideSaveError();
+
+    const toReenable = [];
+    document.querySelectorAll('#personalDetailsForm select[disabled], #personalDetailsForm input[type="checkbox"][disabled]').forEach(function(el) {
+        if (!el.hasAttribute('data-always-readonly') && el.type !== 'file') { el.removeAttribute('disabled'); toReenable.push(el); }
+    });
+    const formData = new FormData(this);
+    const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+    toReenable.forEach(function(el) { el.setAttribute('disabled', 'disabled'); });
+
+    fetch('/my/employee/personal', { method: 'POST', body: formData, headers: { 'X-CSRFToken': csrfToken } })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.success) {
+            disableEditMode();
+            localStorage.removeItem('profileDraft');
+            localStorage.removeItem('profileEditActive');
+            if (data.no_change) {
+                showTabMessage(activeProfileTab, 'No changes were detected. Your profile data is already up to date.', 'info');
+            } else {
+                const ref = data.reference || '';
+                showTabMessage(activeProfileTab,
+                    'Your changes have been submitted to HR for review and approval.' +
+                    (ref ? ' Reference: <strong>' + ref + '</strong>' : '') +
+                    ' You will receive an email once HR approves or rejects your request.', 'success');
+            }
+        } else {
+            showTabMessage(activeProfileTab, 'Error: ' + (data.error || 'Unknown error'), 'error');
+        }
+    })
+    .catch(function(err) { console.error('Error:', err); showTabMessage(activeProfileTab, 'Network error. Please try again.', 'error'); });
+});
 
 /* =========================================================
    DOM CONTENT LOADED
 ========================================================= */
 document.addEventListener('DOMContentLoaded', function () {
 
-    document.querySelectorAll(
-        '#personalDetailsForm .profile-tab-button'
-    ).forEach(function(button){
-
-        button.addEventListener('click', function(){
-
-            switchProfileTab(
-                this.getAttribute('data-tab-target')
-            );
-        });
+    document.querySelectorAll('#personalDetailsForm .profile-tab-button').forEach(function(button) {
+        button.addEventListener('click', function() { switchProfileTab(this.getAttribute('data-tab-target')); });
     });
 
     switchProfileTab(activeProfileTab);
 
-    document.querySelectorAll('.edit-mode-toggle')
-        .forEach(function(t){
-            t.checked = false;
-        });
-
+    document.querySelectorAll('.edit-mode-toggle').forEach(function(t) { t.checked = false; });
     document.getElementById('formActions').style.display = 'none';
     document.getElementById('viewActions').style.display = 'block';
-
     isEditMode = false;
 
-    var nonResidentCheckbox =
-        document.getElementById('is_non_resident');
-
-    if (nonResidentCheckbox) {
-        toggleNonResidentSections(nonResidentCheckbox);
-    }
-
-    document.querySelectorAll(
-        '#personalDetailsForm input[type="file"].file-upload-input'
-    ).forEach(function(fi){
+    document.querySelectorAll('#personalDetailsForm input[type="file"].file-upload-input').forEach(function(fi) {
         fi.setAttribute('disabled', 'disabled');
     });
+
+    const draftRaw = localStorage.getItem('profileDraft');
+    const wasEditing = localStorage.getItem('profileEditActive') === '1';
+    localStorage.removeItem('profileEditActive');
+
+    window.addEventListener('beforeunload', function() {
+        if (isEditMode) {
+            const draftData = {};
+            document.querySelectorAll('#personalDetailsForm input, #personalDetailsForm select').forEach(function(input) {
+                if (input.type === 'hidden' || input.type === 'file') return;
+                if (!input.name) return;
+                draftData[input.name] = input.type === 'checkbox' ? (input.checked ? 'on' : '') : input.value;
+            });
+            try { localStorage.setItem('profileDraft', JSON.stringify(draftData)); localStorage.setItem('profileEditActive', '1'); } catch(e) {}
+        }
+    });
+
+    if (draftRaw && wasEditing && !PENDING_LOCKED) {
+        try {
+            const draft = JSON.parse(draftRaw);
+            enableEditMode();
+            Object.entries(draft).forEach(function(entry) {
+                const key = entry[0]; const value = entry[1];
+                const input = document.querySelector('[name="' + key + '"]');
+                if (!input || input.type === 'hidden' || input.type === 'file') return;
+                if (input.type === 'checkbox') {
+                    input.checked = value === 'on';
+                    if (input.id === 'is_non_resident') toggleNonResidentSections(input);
+                } else {
+                    input.value = value;
+                }
+            });
+            showTabMessage(activeProfileTab, 'Your unsaved changes have been restored. Please review and click Save Changes.', 'info');
+        } catch (ex) { console.error('Error loading draft:', ex); localStorage.removeItem('profileDraft'); }
+    }
+
+    if (PENDING_LOCKED) {
+        document.querySelectorAll('.edit-mode-toggle').forEach(function(t) {
+            t.closest('.form-check.form-switch') && (t.closest('.form-check.form-switch').style.display = 'none');
+        });
+        var editBtn = document.getElementById('editProfileBtn');
+        if (editBtn) { editBtn.disabled = true; editBtn.title = 'Editing locked — pending HR review'; }
+    }
+
+    /* ── Initialize Work Location state dropdown on page load ── */
+    var countrySelect = document.querySelector('select[name="countries_id"]');
+    if (countrySelect && countrySelect.value) {
+        var currentStateVal = '<t t-esc="employee.states_id.id if employee.states_id else 0"/>';
+        loadStatesByCountryAndSelect(countrySelect.value, currentStateVal);
+    }
+
+    /* ── Initialize Contact Information state dropdown on page load ── */
+    var contactCountrySelect = document.querySelector('select[name="country_residences_id"]');
+    if (contactCountrySelect && contactCountrySelect.value) {
+        var currentContactStateVal = '<t t-esc="employee.private_state_id.id if employee.private_state_id else 0"/>';
+        loadContactStatesByCountryAndSelect(contactCountrySelect.value, currentContactStateVal);
+    }
 });
 
 /* =========================================================
-   LOAD STATES
+   LOAD STATES — Work Location (countries_id → statesDropdown)
 ========================================================= */
 function loadStatesByCountry(countryId) {
-
-    var stateSelect =
-        document.getElementById('statesDropdown');
-
+    var stateSelect = document.getElementById('statesDropdown');
     if (!stateSelect) return;
-
     if (!countryId) {
-
-        stateSelect.innerHTML =
-            '<option value="">-- Select Country first --</option>';
-
+        stateSelect.innerHTML = '<option value="">-- Select Country first --</option>';
         return;
     }
-
-    stateSelect.innerHTML =
-        '<option value="">-- Loading... --</option>';
-
+    stateSelect.innerHTML = '<option value="">-- Loading... --</option>';
     fetch('/portal/get_states', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            jsonrpc: '2.0',
-            id: 1,
-            method: 'call',
-            params: {
-                country_id: parseInt(countryId)
-            }
-        })
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({jsonrpc: '2.0', id: 1, method: 'call', params: {country_id: parseInt(countryId)}})
     })
-    .then(function(r){
-        return r.json();
-    })
-    .then(function(data){
-
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
         var states = data.result || [];
-
-        stateSelect.innerHTML =
-            '<option value="">-- Select State --</option>';
-
-        states.forEach(function(state){
-
+        stateSelect.innerHTML = '<option value="">-- Select State --</option>';
+        states.forEach(function(state) {
             var opt = document.createElement('option');
-
             opt.value = state.id;
             opt.textContent = state.name;
-
             stateSelect.appendChild(opt);
         });
     })
-    .catch(function(){
+    .catch(function() {
+        stateSelect.innerHTML = '<option value="">-- Error loading states --</option>';
+    });
+}
 
-        stateSelect.innerHTML =
-            '<option value="">-- Error loading states --</option>';
+function loadStatesByCountryAndSelect(countryId, selectedId) {
+    var stateSelect = document.getElementById('statesDropdown');
+    if (!stateSelect || !countryId) return;
+    fetch('/portal/get_states', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({jsonrpc: '2.0', id: 1, method: 'call', params: {country_id: parseInt(countryId)}})
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        var states = data.result || [];
+        stateSelect.innerHTML = '<option value="">-- Select State --</option>';
+        states.forEach(function(state) {
+            var opt = document.createElement('option');
+            opt.value = state.id;
+            opt.textContent = state.name;
+            if (selectedId && state.id == parseInt(selectedId)) opt.selected = true;
+            stateSelect.appendChild(opt);
+        });
+    });
+}
+
+/* =========================================================
+   LOAD STATES — Contact Info (country_residences_id → contactStateDropdown)
+   NOTE: This function is at GLOBAL scope — do NOT nest it inside
+   any other function or it will not be accessible from HTML onchange
+========================================================= */
+function loadContactStates(countryId) {
+    var stateSelect = document.getElementById('contactStateDropdown');
+    if (!stateSelect) return;
+    if (!countryId) {
+        stateSelect.innerHTML = '<option value="">-- Select Country first --</option>';
+        return;
+    }
+    stateSelect.innerHTML = '<option value="">-- Loading... --</option>';
+    fetch('/portal/get_states', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({jsonrpc: '2.0', id: 1, method: 'call', params: {country_id: parseInt(countryId)}})
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        var states = data.result || [];
+        stateSelect.innerHTML = '<option value="">-- Select State --</option>';
+        states.forEach(function(state) {
+            var opt = document.createElement('option');
+            opt.value = state.id;
+            opt.textContent = state.name;
+            stateSelect.appendChild(opt);
+        });
+    })
+    .catch(function() {
+        stateSelect.innerHTML = '<option value="">-- Error loading states --</option>';
+    });
+}
+
+function loadContactStatesByCountryAndSelect(countryId, selectedId) {
+    var stateSelect = document.getElementById('contactStateDropdown');
+    if (!stateSelect || !countryId) return;
+    fetch('/portal/get_states', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({jsonrpc: '2.0', id: 1, method: 'call', params: {country_id: parseInt(countryId)}})
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        var states = data.result || [];
+        stateSelect.innerHTML = '<option value="">-- Select State --</option>';
+        states.forEach(function(state) {
+            var opt = document.createElement('option');
+            opt.value = state.id;
+            opt.textContent = state.name;
+            if (selectedId && state.id == parseInt(selectedId)) opt.selected = true;
+            stateSelect.appendChild(opt);
+        });
     });
 }
 
