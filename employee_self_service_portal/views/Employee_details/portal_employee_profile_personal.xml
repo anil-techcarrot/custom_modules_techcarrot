@@ -186,12 +186,12 @@
                                            t-att-value="employee.employee_name_english or ''" data-always-readonly="1"
                                            readonly="readonly"/>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Employee Name (Arabic)</label>
-                                    <input type="text" class="form-control"
-                                           t-att-value="employee.employee_name_arabic or ''" data-always-readonly="1"
-                                           readonly="readonly"/>
-                                </div>
+<!--                                <div class="col-md-6">-->
+<!--                                    <label class="form-label fw-bold">Employee Name (Arabic)</label>-->
+<!--                                    <input type="text" class="form-control"-->
+<!--                                           t-att-value="employee.employee_name_arabic or ''" data-always-readonly="1"-->
+<!--                                           readonly="readonly"/>-->
+<!--                                </div>-->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Employment Type</label>
                                     <input type="text" class="form-control" t-att-value="employee.employment_type or ''"
@@ -266,12 +266,12 @@
                                     </select>
                                 </div>
 
-                                <!-- GENDER — editable -->
+
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">
                                         <i class="fa fa-venus-mars text-muted me-1"></i>Gender
                                     </label>
-                                    <select name="sex" class="form-select" disabled="disabled">
+                                    <select name="sex" class="form-select" data-always-readonly="1" disabled="disabled">
                                         <option value="">Select Gender</option>
                                         <option value="male"
                                                 t-att-selected="'selected' if employee.sex == 'male' else None">Male
@@ -472,11 +472,11 @@
                         <div class="card-body py-2">
                             <div class="d-flex align-items-center">
                                 <div class="form-check me-3">
-                                    <input type="checkbox" class="form-check-input" name="is_non_resident"
-                                           id="is_non_resident"
-                                           t-att-checked="'checked' if employee.is_non_resident else None"
-                                           onchange="toggleNonResidentSections(this)"
-                                           disabled="disabled"/>
+<!--                                    <input type="checkbox" class="form-check-input" name="is_non_resident"-->
+<!--                                           id="is_non_resident"-->
+<!--                                           t-att-checked="'checked' if employee.is_non_resident else None"-->
+<!--                                           onchange="toggleNonResidentSections(this)"-->
+<!--                                           disabled="disabled"/>-->
                                     <label class="form-check-label fw-bold" for="is_non_resident">
                                         Resident
                                     </label>
