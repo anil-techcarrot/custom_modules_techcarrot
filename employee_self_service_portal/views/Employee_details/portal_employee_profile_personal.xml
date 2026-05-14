@@ -645,7 +645,8 @@
 
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Country of Residency</label>
-                                    <select name="country_residences_id" class="form-select" disabled="disabled">
+                                    <select name="country_residences_id" class="form-select" disabled="disabled"
+                                            onchange="loadContactStates(this.value)">
                                         <option value="">-- Select Country --</option>
                                         <t t-foreach="countries" t-as="country">
                                             <option t-att-value="country.id"
@@ -658,9 +659,17 @@
 
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">State/Province</label>
-                                    <input type="text" name="private_state_id" class="form-control"
-                                           t-att-value="portal_overlay.get('private_state_id') or employee.private_state_id.name or ''"
-                                           readonly="readonly"/>
+                                    <select name="private_state_id" id="contactStateDropdown"
+                                            class="form-select" disabled="disabled">
+                                        <option value="">-- Select State --</option>
+                                        <t t-if="employee.private_state_id">
+                                            <option t-att-value="employee.private_state_id.id"
+                                                    selected="selected">
+                                                <t t-esc="employee.private_state_id.name"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                    <small class="text-muted">Select Country of Residency first</small>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">ZIP/Postal Code</label>
@@ -2445,6 +2454,31 @@ if (countrySelect && countrySelect.value) {
 }
 });
 
+// Initialize contact state dropdown on page load
+    var contactCountrySelect = document.querySelector('select[name="country_residences_id"]');
+    if (contactCountrySelect && contactCountrySelect.value) {
+        var currentContactState = '<t t-esc="employee.private_state_id.id if employee.private_state_id else 0"/>';
+        fetch('/portal/get_states', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({jsonrpc:'2.0',id:1,method:'call',
+                params:{country_id: parseInt(contactCountrySelect.value)}})
+        })
+        .then(function(r){return r.json();})
+        .then(function(data){
+            var states = data.result || [];
+            var sel = document.getElementById('contactStateDropdown');
+            if (!sel) return;
+            sel.innerHTML = '<option value="">-- Select State --</option>';
+            states.forEach(function(s){
+                var o = document.createElement('option');
+                o.value = s.id; o.textContent = s.name;
+                if (currentContactState && s.id == parseInt(currentContactState)) o.selected = true;
+                sel.appendChild(o);
+            });
+        });
+    }
+
 function loadStatesByCountry(countryId) {
     var stateSelect = document.getElementById('statesDropdown');
     if (!stateSelect) return;
@@ -2500,6 +2534,38 @@ function loadStatesByCountryAndSelect(countryId, selectedId) {
             stateSelect.appendChild(opt);
         });
     });
+
+    function loadContactStates(countryId) {
+    var stateSelect = document.getElementById('contactStateDropdown');
+    if (!stateSelect) return;
+    if (!countryId) {
+        stateSelect.innerHTML = '<option value="">-- Select Country first --</option>';
+        return;
+    }
+    stateSelect.innerHTML = '<option value="">-- Loading... --</option>';
+    fetch('/portal/get_states', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            jsonrpc: '2.0', id: 1, method: 'call',
+            params: {country_id: parseInt(countryId)}
+        })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        var states = data.result || [];
+        stateSelect.innerHTML = '<option value="">-- Select State --</option>';
+        states.forEach(function(state) {
+            var opt = document.createElement('option');
+            opt.value = state.id;
+            opt.textContent = state.name;
+            stateSelect.appendChild(opt);
+        });
+    })
+    .catch(function() {
+        stateSelect.innerHTML = '<option value="">-- Error loading states --</option>';
+    });
+}
 }
                     ]]>
                 </script>
