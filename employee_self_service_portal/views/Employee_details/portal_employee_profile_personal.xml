@@ -186,12 +186,12 @@
                                            t-att-value="employee.employee_name_english or ''" data-always-readonly="1"
                                            readonly="readonly"/>
                                 </div>
-<!--                                <div class="col-md-6">-->
-<!--                                    <label class="form-label fw-bold">Employee Name (Arabic)</label>-->
-<!--                                    <input type="text" class="form-control"-->
-<!--                                           t-att-value="employee.employee_name_arabic or ''" data-always-readonly="1"-->
-<!--                                           readonly="readonly"/>-->
-<!--                                </div>-->
+                                <!--                                <div class="col-md-6">-->
+                                <!--                                    <label class="form-label fw-bold">Employee Name (Arabic)</label>-->
+                                <!--                                    <input type="text" class="form-control"-->
+                                <!--                                           t-att-value="employee.employee_name_arabic or ''" data-always-readonly="1"-->
+                                <!--                                           readonly="readonly"/>-->
+                                <!--                                </div>-->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Employment Type</label>
                                     <input type="text" class="form-control" t-att-value="employee.employment_type or ''"
@@ -472,11 +472,11 @@
                         <div class="card-body py-2">
                             <div class="d-flex align-items-center">
                                 <div class="form-check me-3">
-<!--                                    <input type="checkbox" class="form-check-input" name="is_non_resident"-->
-<!--                                           id="is_non_resident"-->
-<!--                                           t-att-checked="'checked' if employee.is_non_resident else None"-->
-<!--                                           onchange="toggleNonResidentSections(this)"-->
-<!--                                           disabled="disabled"/>-->
+                                    <input type="checkbox" class="form-check-input" name="is_non_resident"
+                                           id="is_non_resident"
+                                           t-att-checked="'checked' if employee.is_non_resident else None"
+                                           onchange="toggleNonResidentSections(this)"
+                                           disabled="disabled"/>
                                     <label class="form-check-label fw-bold" for="is_non_resident">
                                         Resident
                                     </label>
@@ -491,8 +491,8 @@
 
                     <!-- Identity Documents — SHOWN/HIDDEN by Non Resident checkbox -->
                     <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="basic"
-                         id="identityDocsSection"
-                         t-att-style="'display:none;' if not employee.is_non_resident else ''">
+                         id="identityDocsSection">
+
                         <div class="card-header bg-light">
                             <h5 class="mb-0"><i class="fa fa-id-card text-primary me-2"></i>Identity Documents
                             </h5>
@@ -581,8 +581,7 @@
 
                     <!-- Visa and Work Permit — SHOWN/HIDDEN by Non Resident checkbox -->
                     <div class="card mb-4 shadow-sm profile-tab-section" data-tab-group="basic"
-                         id="visaWorkPermitSection"
-                         t-att-style="'display:none;' if not employee.is_non_resident else ''">
+                         id="visaWorkPermitSection">
                         <div class="card-header bg-light">
                             <h5 class="mb-0"><i class="fa fa-file-text text-primary me-2"></i>Visa &amp; Work Permit
                             </h5>
